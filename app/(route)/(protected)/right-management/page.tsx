@@ -22,23 +22,9 @@ export default async function RightManagementPage() {
   // Check access permission
   const hasAccess = await checkRightManagementAccess(user.id);
   
-  if (!hasAccess) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <Card className="w-full max-w-md mx-auto">
-          <CardHeader>
-            <CardTitle className="text-red-500">Access Denied</CardTitle>
-            <CardDescription>
-              You don't have permission to access the rights management page
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p>Please contact an administrator to request access.</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+
+
+  
 
   return (
     <div className="space-y-4">

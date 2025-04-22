@@ -86,13 +86,13 @@ export function RegisterForm() {
             <CheckCircle className="h-5 w-5 text-green-500" />
             <AlertTitle>Please confirm your email</AlertTitle>
             <AlertDescription>
-              We've sent a confirmation email to <strong>{registeredEmail}</strong>. 
+              We&apos;ve sent a confirmation email to <strong>{registeredEmail}</strong>. 
               Please check your inbox and click the confirmation link to complete the registration process.
             </AlertDescription>
           </Alert>
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-500 mb-4">
-              Didn't receive the email? Check your spam folder or try again in a few minutes.
+              Didn&apos;t receive the email? Check your spam folder or try again in a few minutes.
             </p>
             <Button asChild variant="outline">
               <Link href="/login">Go to login page</Link>

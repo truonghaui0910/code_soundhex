@@ -10,41 +10,6 @@ import { Menu } from "lucide-react";
 
 const items = [
   {
-    title: "Dashboard",
-    href: "/dashboard",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="h-5 w-5"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-      >
-        <rect x="3" y="3" width="7" height="7" />
-        <rect x="14" y="3" width="7" height="7" />
-        <rect x="14" y="14" width="7" height="7" />
-        <rect x="3" y="14" width="7" height="7" />
-      </svg>
-    ),
-  },
-  {
-    title: "Right Management",
-    href: "/right-management",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="h-5 w-5"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-      >
-        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-      </svg>
-    ),
-  }, 
-  {
     title: "Music",
     href: "/music",
     icon: (
@@ -62,11 +27,41 @@ const items = [
       </svg>
     ),
   },
+  // {
+  //   title: "License",
+  //   href: "/license",
+  //   icon: (
+  //     <svg
+  //       xmlns="http://www.w3.org/2000/svg"
+  //       className="h-5 w-5"
+  //       viewBox="0 0 24 24"
+  //       fill="none"
+  //       stroke="currentColor"
+  //       strokeWidth="2"
+  //     >
+  //       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+  //       <path d="M14 2v6h6" />
+  //       <path d="M16 13H8" />
+  //       <path d="M16 17H8" />
+  //       <path d="M10 9H8" />
+  //     </svg>
+  //   ),
+  // },
   {
-    title: "License",
-    href: "/license",
+    title: "Agreements",
+    href: "/agreements",
     icon: (
-      <svg
+      // <svg
+      //   xmlns="http://www.w3.org/2000/svg"
+      //   className="h-5 w-5"
+      //   viewBox="0 0 24 24"
+      //   fill="none"
+      //   stroke="currentColor"
+      //   strokeWidth="2"
+      // >
+      //   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+      // </svg>
+            <svg
         xmlns="http://www.w3.org/2000/svg"
         className="h-5 w-5"
         viewBox="0 0 24 24"

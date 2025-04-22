@@ -1,8 +1,9 @@
+import { Suspense } from "react";
 import { LoginForm } from "@/components/auth/login-form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CheckCircle } from "lucide-react";
 
-export default async function LoginPage({
+function LoginPageContent({
   searchParams = {},
 }: {
   readonly searchParams: { readonly [key: string]: string | string[] | undefined };
@@ -24,5 +25,17 @@ export default async function LoginPage({
       )}
       <LoginForm />
     </div>
+  );
+}
+
+export default function LoginPage({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | string[] | undefined };
+}) {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
+      <LoginPageContent searchParams={searchParams} />
+    </Suspense>
   );
 }

@@ -641,7 +641,7 @@ export default function Home() {
                   key={index} 
                   className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300 hover:border-rose-300 group"
                 >
-                  <p className="text-gray-600 italic mb-4">"{testimonial.quote}"</p>
+                  <p className="text-gray-600 italic mb-4">{testimonial.quote}</p>
                   <div>
                     <p className="font-bold text-gray-900 group-hover:text-rose-600 transition-colors duration-300">{testimonial.name}</p>
                     <p className="text-gray-500">{testimonial.role}</p>

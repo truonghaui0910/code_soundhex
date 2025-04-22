@@ -4,11 +4,9 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/ui/spinner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ReloadIcon, ChevronLeftIcon } from "@radix-ui/react-icons";
 import { format } from "date-fns";
-import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -27,6 +25,7 @@ interface LicenseDetail {
     status: string;
     completed_at: string | null;
     role: string;
+    slug?: string;
   }>;
   template: {
     name: string;
@@ -167,13 +166,19 @@ export default function LicenseDetailPage() {
                 </div>
                 <div>
                   <Label className="text-sm font-medium">Completed At</Label>
-                  <div className="mt-1 text-sm">{formatDate(license.completed_at)}</div>
+                    {license.completed_at && (
+                      <div className="mt-1 text-sm">{formatDate(license.completed_at)}</div>
+                    )}
                 </div>
                 {license.audit_log_url && license.status.toLowerCase() === "completed" && (
                   <div className="col-span-1 md:col-span-2">
                     <Button 
                       variant="outline" 
-                      onClick={() => window.open(license.audit_log_url, '_blank')}
+                      onClick={() => {
+                        if (license.audit_log_url) {
+                          window.open(license.audit_log_url, '_blank');
+                        }
+                      }}
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -228,14 +233,16 @@ export default function LicenseDetailPage() {
                       </div>
                       <div>
                         <Label className="text-sm font-medium">Completed At</Label>
-                        <div className="mt-1 text-sm">{formatDate(submitter.completed_at)}</div>
+                        {submitter.completed_at && (
+                          <div className="mt-1 text-sm">{formatDate(submitter.completed_at)}</div>
+                        )}
                       </div>
                       {submitter.status.toLowerCase() === "pending" && (
                         <div className="md:text-right md:self-end">
                           <Button 
                             variant="default"
                             size="sm"
-                            onClick={() => window.open(`https://docs.360digital.fm/s/${submitter.slug || license.slug}`, '_blank')}
+                            onClick={() => window.open(`https://docs.360digital.fm/s/${submitter?.slug ?? license?.slug}`, '_blank')}
                           >
                             Sign Now
                           </Button>

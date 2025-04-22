@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { Metadata } from "next";
 import { TracksList } from "./tracks-list";
 import { TracksController } from "@/lib/controllers/tracks";
