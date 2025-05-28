@@ -53,8 +53,12 @@ export function LoginForm() {
         return;
       }
 
-      router.push("/dashboard");
+      // Refresh the router to update session state
       router.refresh();
+      // Small delay to ensure session is updated
+      setTimeout(() => {
+        router.push("/dashboard");
+      }, 100);
     } catch (error) {
       setError("An error occurred during login");
     } finally {
