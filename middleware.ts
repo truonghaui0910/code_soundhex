@@ -14,7 +14,7 @@ export async function middleware(req: NextRequest) {
   if (!session 
     && (req.nextUrl.pathname.startsWith("/dashboard")
     || req.nextUrl.pathname.startsWith("/license")  
-    || req.nextUrl.pathname.startsWith("/right-management"))) {
+    || req.nextUrl.pathname.startsWith("/agreements"))) {
     const redirectUrl = new URL("/login", req.url);
     return NextResponse.redirect(redirectUrl);
   }
@@ -23,5 +23,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/right-management/:path*"],
+  matcher: ["/dashboard/:path*", "/agreements/:path*"],
 };

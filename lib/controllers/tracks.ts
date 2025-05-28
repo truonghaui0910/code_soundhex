@@ -90,15 +90,9 @@ export class TracksController {
    */
   static async getTracksByAlbum(albumId: number): Promise<Track[]> {
     const supabase = createServerComponentClient<Database>({ cookies });
-    
     const { data, error } = await supabase
       .from("tracks")
-      .select(`
-        *,
-        artist:artist_id(id, name),
-        album:album_id(id, name, cover_url),
-        genre:genre_id(id, name)
-      `)
+      .select(`id, title, description, duration, file_url, created_at, album_id, artist_id, genre_id`)
       .eq("album_id", albumId)
       .order("created_at", { ascending: false });
 
@@ -107,7 +101,48 @@ export class TracksController {
       throw new Error(`Failed to fetch tracks: ${error.message}`);
     }
 
-    return data as unknown as Track[];
+    // Lấy thông tin artist, album, genre cho từng track
+    const artistIds = Array.from(new Set((data ?? []).map((track: any) => track.artist_id)));
+    const albumIds = Array.from(new Set((data ?? []).map((track: any) => track.album_id)));
+    const genreIds = Array.from(new Set((data ?? []).map((track: any) => track.genre_id).filter(Boolean)));
+
+    let artistsMap: Record<number, { id: number; name: string }> = {};
+    let albumsMap: Record<number, { id: number; title: string; cover_image_url: string | null }> = {};
+    let genresMap: Record<number, { id: number; name: string }> = {};
+
+    if (artistIds.length > 0) {
+      const { data: artistsData } = await supabase.from("artists").select("id, name").in("id", artistIds);
+      if (artistsData) {
+        for (const artist of artistsData) {
+          artistsMap[artist.id] = { id: artist.id, name: artist.name };
+        }
+      }
+    }
+    if (albumIds.length > 0) {
+      const { data: albumsData } = await supabase.from("albums").select("id, title, cover_image_url").in("id", albumIds);
+      if (albumsData) {
+        for (const album of albumsData) {
+          albumsMap[album.id] = { id: album.id, title: album.title, cover_image_url: album.cover_image_url };
+        }
+      }
+    }
+    if (genreIds.length > 0) {
+      const { data: genresData } = await supabase.from("genres").select("id, name").in("id", genreIds);
+      if (genresData) {
+        for (const genre of genresData) {
+          genresMap[genre.id] = { id: genre.id, name: genre.name };
+        }
+      }
+    }
+
+    // Gán thông tin phụ cho từng track
+    const tracksWithInfo = (data ?? []).map((track: any) => ({
+      ...track,
+      artist: artistsMap[track.artist_id] || { id: track.artist_id, name: "Unknown Artist" },
+      album: albumsMap[track.album_id] || { id: track.album_id, title: "Unknown Album", cover_image_url: null },
+      genre: track.genre_id ? (genresMap[track.genre_id] || { id: track.genre_id, name: "Unknown Genre" }) : null,
+    }));
+    return tracksWithInfo;
   }
 
   /**
