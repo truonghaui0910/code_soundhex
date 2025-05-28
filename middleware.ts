@@ -6,9 +6,15 @@ export async function middleware(req: NextRequest) {
   const res = NextResponse.next();
   const supabase = createMiddlewareClient({ req, res });
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  // Try to get session and refresh if needed
+  let { data: { session } } = await supabase.auth.getSession();
+  
+  // If no session, try to refresh
+  if (!session) {
+    await supabase.auth.refreshSession();
+    const refreshedData = await supabase.auth.getSession();
+    session = refreshedData.data.session;
+  }
 
   // Nếu user không đăng nhập và cố truy cập vào route được bảo vệ
   if (!session 
@@ -23,5 +29,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/agreements/:path*"],
+  matcher: ["/dashboard/:path*", "/agreements/:path*", "/license/:path*"],
 };
