@@ -43,7 +43,7 @@ export function LoginForm() {
     setError(null);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: values.email,
         password: values.password,
       });
@@ -53,12 +53,13 @@ export function LoginForm() {
         return;
       }
 
-      // Refresh the router to update session state
-      router.refresh();
-      // Small delay to ensure session is updated
-      setTimeout(() => {
-        router.push("/dashboard");
-      }, 100);
+      if (data.session) {
+        // Wait a moment for session to be properly set
+        await new Promise(resolve => setTimeout(resolve, 200));
+        
+        // Force a hard navigation to dashboard
+        window.location.href = "/dashboard";
+      }
     } catch (error) {
       setError("An error occurred during login");
     } finally {
