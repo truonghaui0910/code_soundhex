@@ -103,16 +103,16 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20">
             {/* Hero Section */}
-            <div className="relative overflow-hidden bg-gray-900 dark:bg-gray-800 text-white">
-                <div className="absolute inset-0 bg-gradient-to-r from-gray-900/90 to-gray-800/90"></div>
-                <div className="relative container mx-auto px-6 py-16">
+            <div className="relative overflow-hidden bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 text-white">
+                <div className="absolute inset-0 bg-black/20"></div>
+                <div className="relative container mx-auto px-6 py-20">
                     <div className="text-center max-w-4xl mx-auto">
-                        <h1 className="text-4xl md:text-6xl font-bold mb-6 text-white">
+                        <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
                             Discover Music
                         </h1>
-                        <p className="text-lg md:text-xl mb-8 text-gray-300">
+                        <p className="text-xl md:text-2xl mb-8 text-purple-100">
                             Stream unlimited music for free • Upload your tracks • Connect with artists
                         </p>
 
@@ -159,7 +159,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
             </div>
 
             {/* Filters */}
-            <div className="bg-white dark:bg-gray-800 border-b">
+            <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-b">
                 <div className="container mx-auto px-6 py-4">
                     <div className="flex flex-wrap gap-4 items-center justify-between">
                         <div className="flex items-center gap-4">
@@ -192,93 +192,101 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
             <div className="container mx-auto px-6 pb-32">
                 {currentView === "featured" && (
                     <div className="space-y-16 pt-12">
-                        {/* Albums Section */}
+                        {/* Featured Tracks Grid */}
                         <section>
                             <div className="flex items-center justify-between mb-8">
                                 <h2 className="text-3xl font-bold flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
-                                        <Music className="h-5 w-5 text-white" />
+                                    <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                                        <TrendingUp className="h-5 w-5 text-white" />
                                     </div>
-                                    Featured Albums
+                                    Featured Today
                                 </h2>
                                 <Button variant="outline" onClick={() => setCurrentView("library")}>
                                     View All
                                 </Button>
                             </div>
 
-                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6">
-                                {Array.from(new Map(tracks.map(track => [track.album.id, track.album])).values()).slice(0, 6).map((album) => (
-                                    <Card key={album.id} className="group hover:shadow-xl transition-all duration-300 cursor-pointer bg-white dark:bg-gray-800">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                                {featuredTracks.map((track) => (
+                                    <Card key={track.id} className="group hover:shadow-2xl transition-all duration-500 cursor-pointer overflow-hidden border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
                                         <div className="relative aspect-square">
-                                            {album.cover_image_url ? (
+                                            {track.album.cover_image_url ? (
                                                 <Image
-                                                    src={album.cover_image_url}
-                                                    alt={album.title}
+                                                    src={track.album.cover_image_url}
+                                                    alt={track.album.title}
                                                     fill
-                                                    sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 16vw"
-                                                    className="object-cover rounded-t-lg group-hover:scale-105 transition-transform duration-300"
+                                                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                                                    className="object-cover group-hover:scale-110 transition-transform duration-500"
                                                 />
                                             ) : (
-                                                <div className="w-full h-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center rounded-t-lg">
-                                                    <Music className="h-12 w-12 text-gray-500" />
+                                                <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
+                                                    <Music className="h-16 w-16 text-white" />
+                                                </div>
+                                            )}
+
+                                            {/* Play overlay */}
+                                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/60 transition-all duration-500 flex items-center justify-center">
+                                                <Button
+                                                    size="lg"
+                                                    onClick={() => playTrack(track)}
+                                                    className="opacity-0 group-hover:opacity-100 transition-all duration-500 rounded-full bg-white text-purple-600 hover:bg-white/90 transform group-hover:scale-110"
+                                                >
+                                                    {currentTrack?.id === track.id && isPlaying ? (
+                                                        <Pause className="h-6 w-6" />
+                                                    ) : (
+                                                        <Play className="h-6 w-6" />
+                                                    )}
+                                                </Button>
+                                            </div>
+
+                                            {/* Currently playing indicator */}
+                                            {currentTrack?.id === track.id && isPlaying && (
+                                                <div className="absolute top-3 right-3">
+                                                    <div className="w-8 h-8 bg-rose-500 rounded-full flex items-center justify-center">
+                                                        <div className="flex items-end space-x-0.5 h-4">
+                                                            <div className="w-0.5 bg-white animate-equalize-1" style={{ height: '30%' }}></div>
+                                                            <div className="w-0.5 bg-white animate-equalize-2" style={{ height: '100%' }}></div>
+                                                            <div className="w-0.5 bg-white animate-equalize-3" style={{ height: '60%' }}></div>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             )}
                                         </div>
-                                        <CardContent className="p-3">
-                                            <h3 className="font-semibold text-sm mb-1 truncate">{album.title}</h3>
-                                            <p className="text-xs text-gray-600 dark:text-gray-400 truncate">Album</p>
-                                        </CardContent>
-                                    </Card>
-                                ))}
-                            </div>
-                        </section>
 
-                        {/* Artists Section */}
-                        <section>
-                            <div className="flex items-center justify-between mb-8">
-                                <h2 className="text-3xl font-bold flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center">
-                                        <Headphones className="h-5 w-5 text-white" />
-                                    </div>
-                                    Popular Artists
-                                </h2>
-                            </div>
-
-                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6">
-                                {Array.from(new Map(tracks.map(track => [track.artist.id, track.artist])).values()).slice(0, 6).map((artist) => (
-                                    <Card key={artist.id} className="group hover:shadow-xl transition-all duration-300 cursor-pointer bg-white dark:bg-gray-800">
-                                        <CardContent className="p-4 text-center">
-                                            <div className="relative w-20 h-20 mx-auto mb-3">
-                                                <div className="w-full h-full bg-gradient-to-br from-blue-400 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-xl">
-                                                    {artist.name.charAt(0)}
+                                        <CardContent className="p-4">
+                                            <h3 className="font-semibold text-lg mb-1 truncate">{track.title}</h3>
+                                            <p className="text-gray-600 dark:text-gray-400 truncate text-sm">{track.artist.name}</p>
+                                            <div className="flex items-center justify-between mt-3">
+                                                <Badge variant="secondary" className="text-xs">{track.genre?.name || "Unknown"}</Badge>
+                                                <div className="flex items-center gap-1 text-xs text-gray-500">
+                                                    <Clock className="h-3 w-3" />
+                                                    <span>{formatDuration(track.duration)}</span>
                                                 </div>
                                             </div>
-                                            <h3 className="font-semibold text-sm mb-1 truncate">{artist.name}</h3>
-                                            <p className="text-xs text-gray-600 dark:text-gray-400">Artist</p>
                                         </CardContent>
                                     </Card>
                                 ))}
                             </div>
                         </section>
 
-                        {/* Featured Tracks */}
+                        {/* Trending Section */}
                         <section>
                             <div className="flex items-center justify-between mb-8">
                                 <h2 className="text-3xl font-bold flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center">
+                                    <div className="w-10 h-10 bg-gradient-to-r from-pink-500 to-rose-500 rounded-full flex items-center justify-center">
                                         <TrendingUp className="h-5 w-5 text-white" />
                                     </div>
-                                    Featured Tracks
+                                    Trending Now
                                 </h2>
                             </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                {featuredTracks.map((track, index) => (
-                                    <Card key={track.id} className="hover:shadow-lg transition-all duration-300 cursor-pointer bg-white dark:bg-gray-800">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                                {trendingTracks.map((track, index) => (
+                                    <Card key={track.id} className="hover:shadow-lg transition-all duration-300 cursor-pointer border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
                                         <CardContent className="p-4">
                                             <div className="flex items-center gap-3">
                                                 <div className="flex-shrink-0">
-                                                    <div className="text-xl font-bold text-gray-500 dark:text-gray-400 w-6">
+                                                    <div className="text-2xl font-bold text-transparent bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text">
                                                         #{index + 1}
                                                     </div>
                                                 </div>
@@ -293,8 +301,8 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                             className="rounded-lg object-cover"
                                                         />
                                                     ) : (
-                                                        <div className="w-12 h-12 bg-gray-300 dark:bg-gray-600 rounded-lg flex items-center justify-center">
-                                                            <Music className="h-6 w-6 text-gray-500" />
+                                                        <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-pink-400 rounded-lg flex items-center justify-center">
+                                                            <Music className="h-6 w-6 text-white" />
                                                         </div>
                                                     )}
                                                 </div>
@@ -346,45 +354,45 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                             </div>
                         </div>
 
-                        {/* Grid view for library - 5 tracks per row */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                        {/* Grid view for library */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                             {filteredTracks.map((track) => (
-                                <Card key={track.id} className="group hover:shadow-xl transition-all duration-300 cursor-pointer bg-white dark:bg-gray-800">
+                                <Card key={track.id} className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
                                     <div className="relative aspect-square">
                                         {track.album.cover_image_url ? (
                                             <Image
                                                 src={track.album.cover_image_url}
                                                 alt={track.album.title}
                                                 fill
-                                                sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"
+                                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                                                 className="object-cover rounded-t-lg group-hover:scale-105 transition-transform duration-300"
                                             />
                                         ) : (
-                                            <div className="w-full h-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center rounded-t-lg">
-                                                <Music className="h-12 w-12 text-gray-500" />
+                                            <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center rounded-t-lg">
+                                                <Music className="h-16 w-16 text-white" />
                                             </div>
                                         )}
 
                                         {/* Play button overlay */}
                                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center rounded-t-lg">
                                             <Button
-                                                size="sm"
+                                                size="lg"
                                                 onClick={() => playTrack(track)}
-                                                className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full bg-white text-gray-900 hover:bg-white/90"
+                                                className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full bg-white text-purple-600 hover:bg-white/90"
                                             >
                                                 {currentTrack?.id === track.id && isPlaying ? (
-                                                    <Pause className="h-4 w-4" />
+                                                    <Pause className="h-6 w-6" />
                                                 ) : (
-                                                    <Play className="h-4 w-4" />
+                                                    <Play className="h-6 w-6" />
                                                 )}
                                             </Button>
                                         </div>
 
                                         {/* Currently playing indicator */}
                                         {currentTrack?.id === track.id && isPlaying && (
-                                            <div className="absolute top-2 right-2">
-                                                <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
-                                                    <div className="flex items-end space-x-0.5 h-3">
+                                            <div className="absolute top-3 right-3">
+                                                <div className="w-8 h-8 bg-rose-500 rounded-full flex items-center justify-center">
+                                                    <div className="flex items-end space-x-0.5 h-4">
                                                         <div className="w-0.5 bg-white animate-equalize-1" style={{ height: '30%' }}></div>
                                                         <div className="w-0.5 bg-white animate-equalize-2" style={{ height: '100%' }}></div>
                                                         <div className="w-0.5 bg-white animate-equalize-3" style={{ height: '60%' }}></div>
@@ -394,16 +402,26 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                         )}
                                     </div>
 
-                                    <CardContent className="p-3">
-                                        <h3 className="font-semibold text-sm mb-1 truncate">{track.title}</h3>
-                                        <p className="text-gray-600 dark:text-gray-400 truncate text-xs mb-2">{track.artist.name}</p>
+                                    <CardContent className="p-4">
+                                        <h3 className="font-semibold text-base mb-1 truncate">{track.title}</h3>
+                                        <p className="text-gray-600 dark:text-gray-400 truncate text-sm mb-2">{track.artist.name}</p>
+                                        <p className="text-gray-500 dark:text-gray-500 truncate text-xs mb-3">{track.album.title}</p>
                                         
                                         <div className="flex items-center justify-between">
                                             <Badge variant="outline" className="text-xs">{track.genre?.name || "Unknown"}</Badge>
                                             <div className="flex items-center gap-1 text-xs text-gray-500">
-                                                <Clock className="h-2 w-2" />
+                                                <Clock className="h-3 w-3" />
                                                 <span>{formatDuration(track.duration)}</span>
                                             </div>
+                                        </div>
+
+                                        <div className="flex items-center justify-between mt-3 pt-3 border-t">
+                                            <Button size="sm" variant="ghost" className="p-2">
+                                                <Heart className="h-4 w-4" />
+                                            </Button>
+                                            <Button size="sm" variant="ghost" className="p-2">
+                                                <Share className="h-4 w-4" />
+                                            </Button>
                                         </div>
                                     </CardContent>
                                 </Card>
@@ -426,17 +444,17 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                             </p>
                         </div>
 
-                        <Card className="p-8 bg-white dark:bg-gray-800">
+                        <Card className="p-8 border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
                             <div className="text-center space-y-6">
-                                <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-12 hover:border-gray-400 transition-colors bg-gray-50 dark:bg-gray-700/50">
-                                    <div className="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                                <div className="border-2 border-dashed border-purple-300 dark:border-purple-600 rounded-xl p-12 hover:border-purple-400 transition-colors bg-purple-50/50 dark:bg-purple-900/20">
+                                    <div className="w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-6">
                                         <Upload className="h-10 w-10 text-white" />
                                     </div>
                                     <h3 className="text-xl font-semibold mb-2">Drag & Drop Your Music Files</h3>
                                     <p className="text-gray-600 dark:text-gray-400 mb-6">
                                         Support for MP3, WAV, FLAC, and more
                                     </p>
-                                    <Button onClick={handleUploadClick} size="lg" className="bg-blue-600 hover:bg-blue-700">
+                                    <Button onClick={handleUploadClick} size="lg" className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
                                         <Plus className="mr-2 h-5 w-5" />
                                         Choose Files
                                     </Button>
@@ -451,23 +469,23 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                 </div>
 
                                 <div className="grid md:grid-cols-3 gap-6 mt-8">
-                                    <div className="text-center p-6 rounded-xl bg-gray-50 dark:bg-gray-700">
-                                        <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-3">
-                                            <Music className="h-6 w-6 text-blue-600" />
+                                    <div className="text-center p-6 rounded-xl bg-purple-50 dark:bg-purple-900/20">
+                                        <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center mx-auto mb-3">
+                                            <Music className="h-6 w-6 text-purple-600" />
                                         </div>
                                         <h4 className="font-semibold mb-2">High Quality</h4>
                                         <p className="text-sm text-gray-600 dark:text-gray-400">Upload in lossless quality for the best listening experience</p>
                                     </div>
-                                    <div className="text-center p-6 rounded-xl bg-gray-50 dark:bg-gray-700">
+                                    <div className="text-center p-6 rounded-xl bg-green-50 dark:bg-green-900/20">
                                         <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-3">
                                             <Share className="h-6 w-6 text-green-600" />
                                         </div>
                                         <h4 className="font-semibold mb-2">Easy Sharing</h4>
                                         <p className="text-sm text-gray-600 dark:text-gray-400">Share your music instantly with built-in social features</p>
                                     </div>
-                                    <div className="text-center p-6 rounded-xl bg-gray-50 dark:bg-gray-700">
-                                        <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center mx-auto mb-3">
-                                            <TrendingUp className="h-6 w-6 text-purple-600" />
+                                    <div className="text-center p-6 rounded-xl bg-blue-50 dark:bg-blue-900/20">
+                                        <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-3">
+                                            <TrendingUp className="h-6 w-6 text-blue-600" />
                                         </div>
                                         <h4 className="font-semibold mb-2">Analytics</h4>
                                         <p className="text-sm text-gray-600 dark:text-gray-400">Track plays, likes, and audience engagement</p>
