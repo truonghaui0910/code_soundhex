@@ -57,37 +57,7 @@ export function MusicPlayer() {
   return (
     <>
       {/* Music player control bar (fixed at bottom) */}
-      <div className="fixed bottom-0 left-0 right-0 glass-effect border-t border-border p-4 z-50 shadow-2xl">
-        {/* Time display above progress bar */}
-        {currentTrack && (
-          <div className="flex justify-between text-xs text-gray-400 mb-1 px-1">
-            <span>{formatTime(currentTime)}</span>
-            <span>{formatDuration(currentTrack.duration)}</span>
-          </div>
-        )}
-
-        {/* Progress bar and thumb */}
-        <div className="relative w-full mb-4 cursor-pointer group" onClick={handleProgressClick} ref={progressRef}>
-          {/* Background track */}
-          <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-            {/* Colored progress */}
-            <div
-              className="h-full bg-gradient-to-r from-primary to-accent rounded-full transition-all duration-300 ease-out"
-              style={{ width: `${duration ? (currentTime / duration) * 100 : 0}%` }}
-            />
-          </div>
-
-          {/* Thumb/handle - positioned at the end of progress with higher z-index */}
-          {currentTrack && (
-            <div 
-              className="absolute top-1/2 h-5 w-5 bg-primary rounded-full border-2 border-white shadow-lg opacity-100 transform -translate-y-1/2 z-10 transition-all duration-200 hover:scale-110"
-              style={{ 
-                left: `calc(${duration ? (currentTime / duration) * 100 : 0}% - 2.5px)`,
-              }}
-            />
-          )}
-        </div>
-
+      <div className="fixed bottom-0 left-0 right-0 glass-effect border-t border-border p-3 z-50 shadow-2xl">
         <div className="flex items-center gap-4">
           {/* Track info & image */}
           <div className="hidden sm:flex items-center gap-3 min-w-0 w-1/4">
@@ -167,6 +137,40 @@ export function MusicPlayer() {
             </div>
           </div>
         </div>
+        
+        {/* Progress bar section - moved closer to controls */}
+        {currentTrack && (
+          <div className="mt-2">
+            {/* Progress bar with time display on same line */}
+            <div className="flex items-center gap-3">
+              {/* Current time */}
+              <span className="text-xs text-gray-400 min-w-[35px]">{formatTime(currentTime)}</span>
+              
+              {/* Progress bar container */}
+              <div className="relative flex-1 cursor-pointer group" onClick={handleProgressClick} ref={progressRef}>
+                {/* Background track */}
+                <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
+                  {/* Colored progress */}
+                  <div
+                    className="h-full bg-gradient-to-r from-primary to-accent rounded-full transition-all duration-300 ease-out"
+                    style={{ width: `${duration ? (currentTime / duration) * 100 : 0}%` }}
+                  />
+                </div>
+
+                {/* Thumb/handle - positioned at the end of progress with higher z-index */}
+                <div 
+                  className="absolute top-1/2 h-5 w-5 bg-primary rounded-full border-2 border-white shadow-lg opacity-100 transform -translate-y-1/2 z-10 transition-all duration-200 hover:scale-110"
+                  style={{ 
+                    left: `calc(${duration ? (currentTime / duration) * 100 : 0}% - 2.5px)`,
+                  }}
+                />
+              </div>
+              
+              {/* Total duration */}
+              <span className="text-xs text-gray-400 min-w-[35px]">{formatDuration(currentTrack.duration)}</span>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );

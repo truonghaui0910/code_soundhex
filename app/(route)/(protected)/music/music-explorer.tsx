@@ -318,8 +318,13 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                             >
                                                 <TableCell className="text-center">
                                                     {currentTrack?.id === track.id && isPlaying ? (
-                                                        <div className="flex items-center justify-center">
-                                                            <div className="w-4 h-4 border-2 border-purple-600 border-t-transparent rounded-full animate-spin"></div>
+                                                        <div className="w-5 h-5 flex items-center justify-center">
+                                                            <div className="flex items-end space-x-0.5 h-4">
+                                                                <div className="w-0.5 bg-rose-600 animate-equalize-1" style={{ height: '30%' }}></div>
+                                                                <div className="w-0.5 bg-rose-600 animate-equalize-2" style={{ height: '100%' }}></div>
+                                                                <div className="w-0.5 bg-rose-600 animate-equalize-3" style={{ height: '60%' }}></div>
+                                                                <div className="w-0.5 bg-rose-600 animate-equalize-4" style={{ height: '80%' }}></div>
+                                                            </div>
                                                         </div>
                                                     ) : (
                                                         index + 1
