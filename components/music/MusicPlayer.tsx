@@ -57,7 +57,7 @@ export function MusicPlayer() {
   return (
     <>
       {/* Music player control bar (fixed at bottom) */}
-      <div className="fixed bottom-0 left-0 right-0 glass-effect border-t border-border p-4 z-50 shadow-2xl">
+      <div className="fixed bottom-0 left-0 right-0 glass-effect border-t border-border p-3 z-50 shadow-2xl">
         <div className="flex items-center gap-4">
           {/* Track info & image */}
           <div className="hidden sm:flex items-center gap-3 min-w-0 w-1/4">
@@ -65,43 +65,15 @@ export function MusicPlayer() {
               <>
                 <div className="relative h-14 w-14 rounded-md overflow-hidden shadow-md flex-shrink-0">
                   {currentTrack.album?.cover_image_url ? (
-                    <div className="relative">
-                      <Image
-                        src={currentTrack.album.cover_image_url}
-                        alt={`Album ${currentTrack.album.title}`}
-                        fill
-                        className="object-cover"
-                      />
-                      {/* Equalizer overlay khi đang phát */}
-                      {isPlaying && (
-                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                          <div className="flex items-center space-x-1">
-                            {[1, 2, 3, 4].map((num, idx) => (
-                              <div
-                                key={idx}
-                                className={`w-1 bg-rose-500 rounded-full animate-equalize-${num}`}
-                                style={{ animationDelay: `${idx * 0.1}s` }}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
+                    <Image
+                      src={currentTrack.album.cover_image_url}
+                      alt={`Album ${currentTrack.album.title}`}
+                      fill
+                      className="object-cover"
+                    />
                   ) : (
                     <div className="w-full h-full bg-gray-800 flex items-center justify-center">
-                      {isPlaying ? (
-                        <div className="flex items-center space-x-1">
-                          {[1, 2, 3, 4].map((num, idx) => (
-                            <div
-                              key={idx}
-                              className={`w-1 bg-rose-500 rounded-full animate-equalize-${num}`}
-                              style={{ animationDelay: `${idx * 0.1}s` }}
-                            />
-                          ))}
-                        </div>
-                      ) : (
-                        <Music className="h-6 w-6 text-rose-500" />
-                      )}
+                      <Music className="h-6 w-6 text-rose-500" />
                     </div>
                   )}
                 </div>
@@ -165,16 +137,18 @@ export function MusicPlayer() {
             </div>
           </div>
         </div>
-         {/* Time display above progress bar */}
-         {currentTrack && (
-          <div className="flex justify-between text-xs text-gray-400 mb-1 px-1">
-            <span>{formatTime(currentTime)}</span>
-            <span>{formatDuration(currentTrack.duration)}</span>
-          </div>
-        )}
+        
+        {/* Progress bar section - moved closer to controls */}
+        {currentTrack && (
+          <div className="mt-2">
+            {/* Time display above progress bar */}
+            <div className="flex justify-between text-xs text-gray-400 mb-1 px-1">
+              <span>{formatTime(currentTime)}</span>
+              <span>{formatDuration(currentTrack.duration)}</span>
+            </div>
 
-        {/* Progress bar and thumb */}
-        <div className="relative w-full mb-4 cursor-pointer group" onClick={handleProgressClick} ref={progressRef}>
+            {/* Progress bar and thumb - reduced width */}
+            <div className="relative w-3/4 mx-auto cursor-pointer group" onClick={handleProgressClick} ref={progressRef}>
           {/* Background track */}
           <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
             {/* Colored progress */}
@@ -193,7 +167,9 @@ export function MusicPlayer() {
               }}
             />
           )}
-        </div>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );
