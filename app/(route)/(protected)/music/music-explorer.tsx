@@ -17,7 +17,8 @@ import {
     Plus,
     Shuffle,
     SkipForward,
-    Pause
+    Pause,
+    Users
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -105,8 +106,8 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20">
             {/* Hero Section */}
-            <div className="relative overflow-hidden bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 text-white">
-                <div className="absolute inset-0 bg-black/20"></div>
+            <div className="relative overflow-hidden bg-gradient-to-r from-slate-800 via-purple-900 to-slate-900 text-white">
+                <div className="absolute inset-0 bg-black/10"></div>
                 <div className="relative container mx-auto px-6 py-20">
                     <div className="text-center max-w-4xl mx-auto">
                         <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
@@ -192,22 +193,122 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
             <div className="container mx-auto px-6 pb-32">
                 {currentView === "featured" && (
                     <div className="space-y-16 pt-12">
-                        {/* Featured Tracks Grid */}
+                        {/* Albums Section */}
                         <section>
                             <div className="flex items-center justify-between mb-8">
                                 <h2 className="text-3xl font-bold flex items-center gap-3">
                                     <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                                        <TrendingUp className="h-5 w-5 text-white" />
+                                        <Music className="h-5 w-5 text-white" />
                                     </div>
-                                    Featured Today
+                                    Featured Albums
                                 </h2>
                                 <Button variant="outline" onClick={() => setCurrentView("library")}>
                                     View All
                                 </Button>
                             </div>
 
+                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
+                                {Array.from(new Set(featuredTracks.map(track => track.album.id)))
+                                    .slice(0, 10)
+                                    .map(albumId => {
+                                        const track = featuredTracks.find(t => t.album.id === albumId);
+                                        if (!track) return null;
+                                        
+                                        return (
+                                            <Card key={track.album.id} className="group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
+                                                <div className="relative aspect-square">
+                                                    {track.album.cover_image_url ? (
+                                                        <Image
+                                                            src={track.album.cover_image_url}
+                                                            alt={track.album.title}
+                                                            fill
+                                                            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
+                                                            className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                                        />
+                                                    ) : (
+                                                        <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
+                                                            <Music className="h-12 w-12 text-white" />
+                                                        </div>
+                                                    )}
+                                                    
+                                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center">
+                                                        <Button
+                                                            size="lg"
+                                                            onClick={() => playTrack(track)}
+                                                            className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full bg-white text-purple-600 hover:bg-white/90"
+                                                        >
+                                                            <Play className="h-5 w-5" />
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                                <CardContent className="p-3">
+                                                    <h3 className="font-semibold text-sm mb-1 truncate">{track.album.title}</h3>
+                                                    <p className="text-gray-600 dark:text-gray-400 truncate text-xs">{track.artist.name}</p>
+                                                </CardContent>
+                                            </Card>
+                                        );
+                                    })}
+                            </div>
+                        </section>
+
+                        {/* Artists Section */}
+                        <section>
+                            <div className="flex items-center justify-between mb-8">
+                                <h2 className="text-3xl font-bold flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-gradient-to-r from-pink-500 to-rose-500 rounded-full flex items-center justify-center">
+                                        <Users className="h-5 w-5 text-white" />
+                                    </div>
+                                    Popular Artists
+                                </h2>
+                            </div>
+
+                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6">
+                                {Array.from(new Set(featuredTracks.map(track => track.artist.id)))
+                                    .slice(0, 12)
+                                    .map(artistId => {
+                                        const track = featuredTracks.find(t => t.artist.id === artistId);
+                                        if (!track) return null;
+                                        
+                                        return (
+                                            <Card key={track.artist.id} className="group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
+                                                <CardContent className="p-4 text-center">
+                                                    <div className="w-20 h-20 mx-auto mb-3 rounded-full overflow-hidden bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
+                                                        {track.artist.profile_image_url ? (
+                                                            <Image
+                                                                src={track.artist.profile_image_url}
+                                                                alt={track.artist.name}
+                                                                width={80}
+                                                                height={80}
+                                                                className="object-cover w-full h-full"
+                                                            />
+                                                        ) : (
+                                                            <Users className="h-8 w-8 text-white" />
+                                                        )}
+                                                    </div>
+                                                    <h3 className="font-semibold text-sm mb-1 truncate">{track.artist.name}</h3>
+                                                    <p className="text-gray-600 dark:text-gray-400 text-xs">
+                                                        {filteredTracks.filter(t => t.artist.id === track.artist.id).length} songs
+                                                    </p>
+                                                </CardContent>
+                                            </Card>
+                                        );
+                                    })}
+                            </div>
+                        </section>
+
+                        {/* Featured Tracks */}
+                        <section>
+                            <div className="flex items-center justify-between mb-8">
+                                <h2 className="text-3xl font-bold flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full flex items-center justify-center">
+                                        <TrendingUp className="h-5 w-5 text-white" />
+                                    </div>
+                                    Featured Tracks
+                                </h2>
+                            </div>
+
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                                {featuredTracks.map((track) => (
+                                {featuredTracks.slice(0, 8).map((track) => (
                                     <Card key={track.id} className="group hover:shadow-2xl transition-all duration-500 cursor-pointer overflow-hidden border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
                                         <div className="relative aspect-square">
                                             {track.album.cover_image_url ? (
@@ -268,68 +369,6 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                 ))}
                             </div>
                         </section>
-
-                        {/* Trending Section */}
-                        <section>
-                            <div className="flex items-center justify-between mb-8">
-                                <h2 className="text-3xl font-bold flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-gradient-to-r from-pink-500 to-rose-500 rounded-full flex items-center justify-center">
-                                        <TrendingUp className="h-5 w-5 text-white" />
-                                    </div>
-                                    Trending Now
-                                </h2>
-                            </div>
-
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                                {trendingTracks.map((track, index) => (
-                                    <Card key={track.id} className="hover:shadow-lg transition-all duration-300 cursor-pointer border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
-                                        <CardContent className="p-4">
-                                            <div className="flex items-center gap-3">
-                                                <div className="flex-shrink-0">
-                                                    <div className="text-2xl font-bold text-transparent bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text">
-                                                        #{index + 1}
-                                                    </div>
-                                                </div>
-                                                
-                                                <div className="flex-shrink-0">
-                                                    {track.album.cover_image_url ? (
-                                                        <Image
-                                                            src={track.album.cover_image_url}
-                                                            alt={track.album.title}
-                                                            width={48}
-                                                            height={48}
-                                                            className="rounded-lg object-cover"
-                                                        />
-                                                    ) : (
-                                                        <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-pink-400 rounded-lg flex items-center justify-center">
-                                                            <Music className="h-6 w-6 text-white" />
-                                                        </div>
-                                                    )}
-                                                </div>
-
-                                                <div className="min-w-0 flex-1">
-                                                    <p className="font-medium truncate text-sm">{track.title}</p>
-                                                    <p className="text-xs text-gray-600 dark:text-gray-400 truncate">{track.artist.name}</p>
-                                                </div>
-
-                                                <Button
-                                                    size="sm"
-                                                    variant="ghost"
-                                                    onClick={() => playTrack(track)}
-                                                    className="flex-shrink-0"
-                                                >
-                                                    {currentTrack?.id === track.id && isPlaying ? (
-                                                        <Pause className="h-4 w-4" />
-                                                    ) : (
-                                                        <Play className="h-4 w-4" />
-                                                    )}
-                                                </Button>
-                                            </div>
-                                        </CardContent>
-                                    </Card>
-                                ))}
-                            </div>
-                        </section>
                     </div>
                 )}
 
@@ -355,7 +394,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                         </div>
 
                         {/* Grid view for library */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                             {filteredTracks.map((track) => (
                                 <Card key={track.id} className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
                                     <div className="relative aspect-square">
