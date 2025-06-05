@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef } from "react";
@@ -33,7 +32,7 @@ import {
 } from "@/components/ui/table";
 import { Track } from "@/lib/definitions/Track";
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
-import { MusicPlayer } from "@/components/music/MusicPlayer";
+
 
 // Helper function to format time
 const formatDuration = (seconds: number | null) => {
@@ -53,13 +52,13 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
     const [selectedGenre, setSelectedGenre] = useState<string>("all");
     const [selectedMood, setSelectedMood] = useState<string>("all");
     const [currentView, setCurrentView] = useState<"featured" | "library" | "upload">("featured");
-    
+
     const { currentTrack, isPlaying, playTrack } = useAudioPlayer();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Get unique genres from tracks
     const genres = Array.from(new Set(tracks.map(track => track.genre?.name).filter(Boolean)));
-    
+
     // Mock moods data
     const moods = ["Chill", "Energetic", "Romantic", "Focus", "Party", "Sad", "Happy"];
 
@@ -69,15 +68,15 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
             track.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
             track.artist.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             track.album.title.toLowerCase().includes(searchQuery.toLowerCase());
-        
+
         const matchesGenre = selectedGenre === "all" || track.genre?.name === selectedGenre;
-        
+
         return matchesSearch && matchesGenre;
     });
 
     // Get featured tracks (first 6)
     const featuredTracks = filteredTracks.slice(0, 6);
-    
+
     // Get trending tracks (random selection)
     const trendingTracks = [...filteredTracks].sort(() => 0.5 - Math.random()).slice(0, 8);
 
@@ -107,7 +106,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                         <p className="text-xl md:text-2xl mb-8 text-purple-100">
                             Stream unlimited music for free • Upload your tracks • Connect with artists
                         </p>
-                        
+
                         {/* Search Bar */}
                         <div className="relative max-w-2xl mx-auto mb-8">
                             <Search className="absolute left-4 top-4 h-5 w-5 text-gray-400" />
@@ -157,7 +156,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                         <Filter className="h-4 w-4" />
                         <span className="font-medium">Filters:</span>
                     </div>
-                    
+
                     {/* Genre Filter */}
                     <select 
                         value={selectedGenre}
@@ -199,7 +198,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                     View All
                                 </Button>
                             </div>
-                            
+
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {featuredTracks.map((track) => (
                                     <Card key={track.id} className="group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden">
@@ -216,7 +215,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                     <Music className="h-16 w-16 text-white" />
                                                 </div>
                                             )}
-                                            
+
                                             {/* Play overlay */}
                                             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center">
                                                 <Button
@@ -228,7 +227,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                 </Button>
                                             </div>
                                         </div>
-                                        
+
                                         <CardContent className="p-4">
                                             <h3 className="font-semibold text-lg mb-1 truncate">{track.title}</h3>
                                             <p className="text-gray-600 dark:text-gray-400 truncate">{track.artist.name}</p>
@@ -253,7 +252,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                     Trending Now
                                 </h2>
                             </div>
-                            
+
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                 {trendingTracks.map((track, index) => (
                                     <Card key={track.id} className="hover:shadow-lg transition-shadow cursor-pointer">
@@ -429,7 +428,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
             </div>
 
             {/* Music Player */}
-            <MusicPlayer />
+
         </div>
     );
 }

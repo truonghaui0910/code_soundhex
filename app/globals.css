@@ -159,6 +159,43 @@
   animation: equalize-4 1.4s ease-in-out infinite;
 }
 
+/* Equalize animation */
+@keyframes equalize-1 {
+  0%, 100% { height: 4px; }
+  50% { height: 16px; }
+}
+
+@keyframes equalize-2 {
+  0%, 100% { height: 8px; }
+  50% { height: 12px; }
+}
+
+@keyframes equalize-3 {
+  0%, 100% { height: 16px; }
+  50% { height: 4px; }
+}
+
+@keyframes equalize-4 {
+  0%, 100% { height: 12px; }
+  50% { height: 8px; }
+}
+
+.animate-equalize-1 {
+  animation: equalize-1 1s ease-in-out infinite;
+}
+
+.animate-equalize-2 {
+  animation: equalize-2 1.2s ease-in-out infinite;
+}
+
+.animate-equalize-3 {
+  animation: equalize-3 0.8s ease-in-out infinite;
+}
+
+.animate-equalize-4 {
+  animation: equalize-4 1.4s ease-in-out infinite;
+}
+
 /* Professional music interface styles */
 .glass-effect {
   background: rgba(255, 255, 255, 0.05);
