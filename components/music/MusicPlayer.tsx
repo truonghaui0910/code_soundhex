@@ -54,6 +54,11 @@ export function MusicPlayer() {
     console.log('MusicPlayer: isPlaying =', isPlaying);
   }, [currentTrack, isPlaying]);
 
+  // Don't render if no track is selected
+  if (!currentTrack) {
+    return null;
+  }
+
   return (
     <>
       {/* Music player control bar (fixed at bottom) */}

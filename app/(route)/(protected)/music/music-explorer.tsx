@@ -111,7 +111,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                 <div className="relative container mx-auto px-6 py-20">
                     <div className="text-center max-w-4xl mx-auto">
                         <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
-                            Discover Music
+                            Music Platform
                         </h1>
                         <p className="text-xl md:text-2xl mb-8 text-purple-100">
                             Stream unlimited music for free • Upload your tracks • Connect with artists
@@ -196,7 +196,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                         {/* Albums Section */}
                         <section>
                             <div className="flex items-center justify-between mb-8">
-                                <h2 className="text-3xl font-bold flex items-center gap-3">
+                                <h2 className="text-xl font-bold flex items-center gap-3">
                                     <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
                                         <Music className="h-5 w-5 text-white" />
                                     </div>
@@ -254,7 +254,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                         {/* Artists Section */}
                         <section>
                             <div className="flex items-center justify-between mb-8">
-                                <h2 className="text-3xl font-bold flex items-center gap-3">
+                                <h2 className="text-xl font-bold flex items-center gap-3">
                                     <div className="w-10 h-10 bg-gradient-to-r from-pink-500 to-rose-500 rounded-full flex items-center justify-center">
                                         <Users className="h-5 w-5 text-white" />
                                     </div>
@@ -272,14 +272,13 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                         return (
                                             <Card key={track.artist.id} className="group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
                                                 <CardContent className="p-4 text-center">
-                                                    <div className="w-20 h-20 mx-auto mb-3 rounded-full overflow-hidden bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
+                                                    <div className="w-20 h-20 mx-auto mb-3 rounded-full overflow-hidden bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center relative">
                                                         {track.artist.profile_image_url ? (
                                                             <Image
                                                                 src={track.artist.profile_image_url}
                                                                 alt={track.artist.name}
-                                                                width={80}
-                                                                height={80}
-                                                                className="object-cover w-full h-full"
+                                                                fill
+                                                                className="object-cover"
                                                             />
                                                         ) : (
                                                             <Users className="h-8 w-8 text-white" />
@@ -299,7 +298,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                         {/* Featured Tracks */}
                         <section>
                             <div className="flex items-center justify-between mb-8">
-                                <h2 className="text-3xl font-bold flex items-center gap-3">
+                                <h2 className="text-xl font-bold flex items-center gap-3">
                                     <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full flex items-center justify-center">
                                         <TrendingUp className="h-5 w-5 text-white" />
                                     </div>
@@ -375,7 +374,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                 {currentView === "library" && (
                     <div className="space-y-6 pt-12">
                         <div className="flex items-center justify-between">
-                            <h2 className="text-3xl font-bold flex items-center gap-3">
+                            <h2 className="text-xl font-bold flex items-center gap-3">
                                 <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full flex items-center justify-center">
                                     <Headphones className="h-5 w-5 text-white" />
                                 </div>
@@ -472,7 +471,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                 {currentView === "upload" && (
                     <div className="max-w-4xl mx-auto space-y-8 pt-12">
                         <div className="text-center">
-                            <h2 className="text-3xl font-bold mb-4 flex items-center justify-center gap-3">
+                            <h2 className="text-xl font-bold mb-4 flex items-center justify-center gap-3">
                                 <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
                                     <Upload className="h-5 w-5 text-white" />
                                 </div>
