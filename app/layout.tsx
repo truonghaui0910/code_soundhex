@@ -19,7 +19,7 @@ export default function RootLayout({
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
       </head>
-      <body className={inter.className}>
+      <body className={`${inter.className} dark:bg-background dark:text-foreground bg-background text-foreground`} style={{backgroundColor: 'hsl(10 10% 5%)', color: 'hsl(0 0% 95%)'}}>
         {children}
         <Toaster position="top-right" richColors />
       </body>
