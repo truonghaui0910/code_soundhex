@@ -110,9 +110,6 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                 <div className="absolute inset-0 bg-black/10"></div>
                 <div className="relative container mx-auto px-6 py-20">
                     <div className="text-center max-w-4xl mx-auto">
-                        <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
-                            Music Platform
-                        </h1>
                         <p className="text-xl md:text-2xl mb-8 text-purple-100">
                             Stream unlimited music for free • Upload your tracks • Connect with artists
                         </p>
@@ -231,7 +228,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                         </div>
                                                     )}
                                                     
-                                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center">
+                                                    <div className="absolute inset-0 flex items-center justify-center">
                                                         <Button
                                                             size="lg"
                                                             onClick={() => playTrack(track)}
@@ -325,7 +322,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                             )}
 
                                             {/* Play overlay */}
-                                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/60 transition-all duration-500 flex items-center justify-center">
+                                            <div className="absolute inset-0 flex items-center justify-center">
                                                 <Button
                                                     size="lg"
                                                     onClick={() => playTrack(track)}
@@ -412,7 +409,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                         )}
 
                                         {/* Play button overlay */}
-                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center rounded-t-lg">
+                                        <div className="absolute inset-0 flex items-center justify-center rounded-t-lg">
                                             <Button
                                                 size="lg"
                                                 onClick={() => playTrack(track)}
