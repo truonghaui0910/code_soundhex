@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import {
     Music,
@@ -52,7 +52,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
     const [selectedGenre, setSelectedGenre] = useState<string>("all");
     const [selectedMood, setSelectedMood] = useState<string>("all");
     const [currentView, setCurrentView] = useState<"featured" | "library" | "upload">("featured");
-
+    const [isClient, setIsClient] = useState(false); // Track if component is mounted on client
     const { currentTrack, isPlaying, playTrack } = useAudioPlayer();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -74,6 +74,9 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
         return matchesSearch && matchesGenre;
     });
 
+    const sortedTracks = [...filteredTracks].sort((a, b) => a.title.localeCompare(b.title));
+
+
     // Get featured tracks (first 6)
     const featuredTracks = filteredTracks.slice(0, 6);
 
@@ -92,6 +95,10 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
             alert("Upload functionality will be implemented soon!");
         }
     };
+
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20">
@@ -310,7 +317,26 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {filteredTracks.map((track, index) => (
+                                {!isClient ? (
+                                    // Loading skeleton for table
+                                    Array.from({ length: 10 }).map((_, index) => (
+                                        <TableRow key={index}>
+                                            <TableCell>
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-12 h-12 bg-gray-700 rounded animate-pulse"></div>
+                                                    <div className="space-y-1">
+                                                        <div className="h-4 bg-gray-700 rounded w-32 animate-pulse"></div>
+                                                        <div className="h-3 bg-gray-700 rounded w-20 animate-pulse"></div>
+                                                    </div>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell><div className="h-3 bg-gray-700 rounded w-16 animate-pulse"></div></TableCell>
+                                            <TableCell><div className="h-3 bg-gray-700 rounded w-12 animate-pulse"></div></TableCell>
+                                            <TableCell><div className="h-3 bg-gray-700 rounded w-10 animate-pulse"></div></TableCell>
+                                        </TableRow>
+                                    ))
+                                ) : (
+                                    sortedTracks.map((track) => (
                                             <TableRow 
                                                 key={track.id} 
                                                 className={`cursor-pointer hover:bg-muted/50 ${currentTrack?.id === track.id ? 'bg-purple-50 dark:bg-purple-900/20' : ''}`}
@@ -364,8 +390,9 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                     </Button>
                                                 </TableCell>
                                             </TableRow>
-                                        ))}
-                                    </TableBody>
+                                    ))
+                                )}
+                            </TableBody>
                                 </Table>
                             </CardContent>
                         </Card>
