@@ -2,9 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { Music, Play, Users, TrendingUp, Headphones } from 'lucide-react';
+import { useCurrentUser } from '@/hooks/use-current-user';
+import { UserNav } from '@/components/layout/user-nav';
 
 export default function Home() {
   const [visible, setVisible] = useState(false);
+  const { user, loading } = useCurrentUser();
 
   useEffect(() => {
     setVisible(true);
@@ -28,12 +31,27 @@ export default function Home() {
               <a href="#about" className="text-foreground hover:text-primary transition-colors">About</a>
             </div>
             <div className="flex space-x-4">
-              <button className="px-4 py-2 text-foreground hover:text-primary transition-colors">
-                Sign In
-              </button>
-              <button className="btn-primary px-6 py-2 rounded-lg text-white font-medium">
-                Get Started
-              </button>
+              {!loading && (
+                <>
+                  {user ? (
+                    <div className="flex items-center space-x-4">
+                      <a href="/dashboard" className="px-4 py-2 text-foreground hover:text-primary transition-colors">
+                        Dashboard
+                      </a>
+                      <UserNav user={user} />
+                    </div>
+                  ) : (
+                    <>
+                      <a href="/login" className="px-4 py-2 text-foreground hover:text-primary transition-colors">
+                        Sign In
+                      </a>
+                      <a href="/register" className="btn-primary px-6 py-2 rounded-lg text-white font-medium">
+                        Get Started
+                      </a>
+                    </>
+                  )}
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -57,9 +75,9 @@ export default function Home() {
 
             <div className={`transform transition-all duration-1000 delay-300 ${visible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
               <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-                <button className="btn-primary px-8 py-4 rounded-lg text-white font-semibold text-lg animate-pulse-glow">
+                <a href="/register" className="btn-primary px-8 py-4 rounded-lg text-white font-semibold text-lg animate-pulse-glow text-center">
                   Start Distributing
-                </button>
+                </a>
                 <button className="px-8 py-4 rounded-lg border border-border text-foreground hover:bg-card transition-all">
                   Watch Demo
                 </button>
@@ -152,9 +170,9 @@ export default function Home() {
               Join thousands of artists who trust SoundHex with their music distribution
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="btn-primary px-8 py-4 rounded-lg text-white font-semibold text-lg">
+              <a href="/register" className="btn-primary px-8 py-4 rounded-lg text-white font-semibold text-lg text-center">
                 Sign Up Now
-              </button>
+              </a>
               <button className="px-8 py-4 rounded-lg border border-border text-foreground hover:bg-card transition-all">
                 Learn More
               </button>
