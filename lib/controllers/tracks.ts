@@ -17,7 +17,7 @@ export class TracksController {
       .from("tracks")
       .select(`
         *,
-        artist:artist_id(id, name),
+        artist:artist_id(id, name, profile_image_url),
         album:album_id(id, title, cover_image_url),
         genre:genre_id(id, name)
       `)
@@ -41,7 +41,7 @@ export class TracksController {
       .from("tracks")
       .select(`
         *,
-        artist:artist_id(id, name),
+        artist:artist_id(id, name, profile_image_url),
         album:album_id(id, title, cover_image_url),
         genre:genre_id(id, name)
       `)
@@ -70,7 +70,7 @@ export class TracksController {
       .from("tracks")
       .select(`
         *,
-        artist:artist_id(id, name),
+        artist:artist_id(id, name, profile_image_url),
         album:album_id(id, title, cover_image_url),
         genre:genre_id(id, name)
       `)
@@ -111,10 +111,10 @@ export class TracksController {
     let genresMap: Record<number, { id: number; name: string }> = {};
 
     if (artistIds.length > 0) {
-      const { data: artistsData } = await supabase.from("artists").select("id, name").in("id", artistIds);
+      const { data: artistsData } = await supabase.from("artists").select("id, name, profile_image_url").in("id", artistIds);
       if (artistsData) {
         for (const artist of artistsData) {
-          artistsMap[artist.id] = { id: artist.id, name: artist.name };
+          artistsMap[artist.id] = { id: artist.id, name: artist.name, profile_image_url: artist.profile_image_url };
         }
       }
     }
@@ -138,7 +138,7 @@ export class TracksController {
     // Gán thông tin phụ cho từng track
     const tracksWithInfo = (data ?? []).map((track: any) => ({
       ...track,
-      artist: artistsMap[track.artist_id] || { id: track.artist_id, name: "Unknown Artist" },
+      artist: artistsMap[track.artist_id] || { id: track.artist_id, name: "Unknown Artist", profile_image_url: null },
       album: albumsMap[track.album_id] || { id: track.album_id, title: "Unknown Album", cover_image_url: null },
       genre: track.genre_id ? (genresMap[track.genre_id] || { id: track.genre_id, name: "Unknown Genre" }) : null,
     }));
