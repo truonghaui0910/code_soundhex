@@ -95,15 +95,43 @@ export function MusicPlayer() {
               <>
                 <div className="relative h-14 w-14 rounded-md overflow-hidden shadow-md flex-shrink-0">
                   {currentTrack.album?.cover_image_url ? (
-                    <Image
-                      src={currentTrack.album.cover_image_url}
-                      alt={`Album ${currentTrack.album.title}`}
-                      fill
-                      className="object-cover"
-                    />
+                    <div className="relative">
+                      <Image
+                        src={currentTrack.album.cover_image_url}
+                        alt={`Album ${currentTrack.album.title}`}
+                        fill
+                        className="object-cover"
+                      />
+                      {/* Equalizer overlay khi đang phát */}
+                      {isPlaying && (
+                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                          <div className="flex items-center space-x-1">
+                            {[1, 2, 3, 4].map((num, idx) => (
+                              <div
+                                key={idx}
+                                className={`w-1 bg-rose-500 rounded-full animate-equalize-${num}`}
+                                style={{ animationDelay: `${idx * 0.1}s` }}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   ) : (
                     <div className="w-full h-full bg-gray-800 flex items-center justify-center">
-                      <Music className="h-6 w-6 text-rose-500" />
+                      {isPlaying ? (
+                        <div className="flex items-center space-x-1">
+                          {[1, 2, 3, 4].map((num, idx) => (
+                            <div
+                              key={idx}
+                              className={`w-1 bg-rose-500 rounded-full animate-equalize-${num}`}
+                              style={{ animationDelay: `${idx * 0.1}s` }}
+                            />
+                          ))}
+                        </div>
+                      ) : (
+                        <Music className="h-6 w-6 text-rose-500" />
+                      )}
                     </div>
                   )}
                 </div>
