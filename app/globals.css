@@ -16,13 +16,13 @@
   }
 
   html.dark {
-    background-color: hsl(10 10% 5%) !important;
-    color: hsl(0 0% 95%) !important;
+    background-color: hsl(220 15% 12%) !important;
+    color: hsl(0 0% 85%) !important;
   }
 
   html.dark body {
-    background-color: hsl(10 10% 5%) !important;
-    color: hsl(0 0% 95%) !important;
+    background-color: hsl(220 15% 12%) !important;
+    color: hsl(0 0% 85%) !important;
   }
 }
 
@@ -50,25 +50,25 @@
 }
 
 .dark {
-  --background: 10 10% 5%; /* Very dark background */
-  --foreground: 0 0% 95%; /* Light text */
-  --card: 350 20% 8%; /* Dark card with purple tint */
-  --card-foreground: 0 0% 95%;
-  --popover: 350 20% 8%;
-  --popover-foreground: 0 0% 95%;
-  --primary: 348 83% 47%; /* Deep red */
-  --primary-foreground: 0 0% 98%;
-  --secondary: 261 53% 18%; /* Dark purple */
-  --secondary-foreground: 0 0% 95%;
-  --muted: 350 20% 12%;
-  --muted-foreground: 0 0% 65%;
-  --accent: 283 69% 44%; /* Vibrant purple */
-  --accent-foreground: 0 0% 98%;
-  --destructive: 0 84% 60%;
-  --destructive-foreground: 0 0% 98%;
-  --border: 350 20% 15%;
-  --input: 350 20% 15%;
-  --ring: 348 83% 47%;
+  --background: 220 15% 12%; /* Softer dark blue-gray background */
+  --foreground: 0 0% 85%; /* Slightly less bright text */
+  --card: 220 15% 15%; /* Card slightly lighter than background */
+  --card-foreground: 0 0% 85%;
+  --popover: 220 15% 15%;
+  --popover-foreground: 0 0% 85%;
+  --primary: 348 70% 55%; /* Softer red */
+  --primary-foreground: 0 0% 95%;
+  --secondary: 220 15% 20%; /* Muted secondary */
+  --secondary-foreground: 0 0% 85%;
+  --muted: 220 15% 18%;
+  --muted-foreground: 0 0% 60%; /* Less bright muted text */
+  --accent: 283 60% 50%; /* Softer purple accent */
+  --accent-foreground: 0 0% 95%;
+  --destructive: 0 70% 55%;
+  --destructive-foreground: 0 0% 95%;
+  --border: 220 15% 25%;
+  --input: 220 15% 18%;
+  --ring: 348 70% 55%;
   --radius: 0.75rem;
 }
 
