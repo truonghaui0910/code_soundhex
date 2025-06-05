@@ -9,16 +9,16 @@ export default async function ProtectedLayout({
 }) {
   return (
     <AudioPlayerProvider>
-      <div className="flex flex-col min-h-screen bg-white">
+      <div className="flex flex-col min-h-screen bg-card">
         <Navbar />
         <div className="flex flex-1">
           {/* Sidebar */}
           <Sidebar />
-          
+
           {/* Main content area with dynamic margin-top and left margin for desktop */}
-          <main 
+          <main
             className="flex-1 w-full overflow-y-auto p-4 pb-24 md:ml-64"
-            style={{ marginTop: 'var(--navbar-height, 64px)' }}
+            style={{ marginTop: "var(--navbar-height, 64px)" }}
           >
             {children}
           </main>
