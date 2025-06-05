@@ -58,7 +58,7 @@ export function Navbar() {
             SoundHex
           </Link>
         </div>
-        
+
         <div className="ml-auto flex items-center space-x-2 sm:space-x-4">
           {/* Desktop Search */}
           <div className="relative hidden sm:block w-full max-w-sm">
@@ -82,7 +82,7 @@ export function Navbar() {
               />
             </svg>
           </div>
-          
+
           {/* Mobile Search Toggle */}
           <Button 
             variant="ghost" 
@@ -92,26 +92,15 @@ export function Navbar() {
           >
             <Search className="h-5 w-5" />
           </Button>
-          
+
           {!loading && (
-            <>
-              {user ? (
-                <UserNav user={user} />
-              ) : (
-                <div className="flex gap-2">
-                  <Button asChild variant="outline" size="sm" className="hidden sm:inline-flex">
-                    <Link href="/login">Login</Link>
-                  </Button>
-                  <Button asChild size="sm">
-                    <Link href="/register">Register</Link>
-                  </Button>
-                </div>
-              )}
-            </>
+            
+            <UserNav user={user} />
+            
           )}
         </div>
       </div>
-      
+
       {/* Mobile Search Bar - Expandable */}
       {showSearch && (
         <div className="px-4 pb-3 sm:hidden">
