@@ -1,6 +1,7 @@
 import { Navbar } from "@/components/layout/navbar";
 import { Sidebar } from "@/components/layout/sidebar";
 import { AudioPlayerProvider } from "@/contexts/AudioPlayerContext";
+import { MusicPlayer } from "@/components/music/MusicPlayer";
 
 export default async function ProtectedLayout({
   children,
@@ -23,6 +24,9 @@ export default async function ProtectedLayout({
             {children}
           </main>
         </div>
+        
+        {/* Music Player - hiển thị trên tất cả trang */}
+        <MusicPlayer />
       </div>
     </AudioPlayerProvider>
   );
