@@ -30,10 +30,13 @@ export function useCurrentUser() {
 
         if (session?.user) {
           setUser(session.user as User);
+        } else {
+          setUser(null);
         }
       } catch (err) {
         console.error("Error fetching user:", err);
         setError(err as Error);
+        setUser(null);
       } finally {
         setLoading(false);
       }
@@ -41,8 +44,22 @@ export function useCurrentUser() {
 
     fetchUser();
 
-    const { data: authListener } = supabase.auth.onAuthStateChange((_, session) => {
-      setUser(session?.user as User || null);
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Auth state changed:', event, session?.user?.email);
+      
+      if (event === 'SIGNED_IN' && session?.user) {
+        setUser(session.user as User);
+        setLoading(false);
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null);
+        setLoading(false);
+      } else if (event === 'TOKEN_REFRESHED' && session?.user) {
+        setUser(session.user as User);
+        setLoading(false);
+      } else {
+        setUser(session?.user as User || null);
+        setLoading(false);
+      }
     });
 
     return () => {

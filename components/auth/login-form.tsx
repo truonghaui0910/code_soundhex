@@ -55,9 +55,9 @@ export function LoginForm() {
 
       if (data.session) {
         // Wait a moment for session to be properly set
-        await new Promise(resolve => setTimeout(resolve, 200));
+        await new Promise(resolve => setTimeout(resolve, 500));
         
-        // Force a hard navigation to dashboard
+        // Force a full page reload to ensure auth state is updated
         window.location.href = "/dashboard";
       }
     } catch (error) {

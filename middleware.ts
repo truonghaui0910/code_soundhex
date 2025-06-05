@@ -22,6 +22,8 @@ export async function middleware(req: NextRequest) {
     const { data: refreshData } = await supabase.auth.refreshSession();
     session = refreshData.session;
   }
+  
+  console.log('Middleware session check:', !!session, req.nextUrl.pathname);
 
   // Protected routes
   const protectedPaths = ["/dashboard", "/license", "/agreements", "/album", "/music", "/right-management"];

@@ -11,6 +11,7 @@ export default function Home() {
 
   useEffect(() => {
     setVisible(true);
+    console.log('Home page - User:', user, 'Loading:', loading);
   }, []);
 
   return (
