@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -13,7 +12,16 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MusicPlayer } from "@/components/music/MusicPlayer";
-import { Play, Clock, Music, Heart, Share, Users, Album, Pause } from "lucide-react";
+import {
+  Play,
+  Clock,
+  Music,
+  Heart,
+  Share,
+  Users,
+  Album,
+  Pause,
+} from "lucide-react";
 import Link from "next/link";
 
 // Helper function to format time
@@ -21,7 +29,7 @@ const formatDuration = (seconds: number | null) => {
   if (!seconds) return "--:--";
   const mins = Math.floor(seconds / 60);
   const secs = Math.floor(seconds % 60);
-  return `${mins}:${secs.toString().padStart(2, '0')}`;
+  return `${mins}:${secs.toString().padStart(2, "0")}`;
 };
 
 interface Artist {
@@ -40,7 +48,11 @@ interface Album {
   artist?: Artist;
 }
 
-export default function ArtistDetailPage({ params }: { params: { id: string } }) {
+export default function ArtistDetailPage({
+  params,
+}: {
+  params: { id: string };
+}) {
   const [artist, setArtist] = useState<Artist | null>(null);
   const [tracks, setTracks] = useState<Track[]>([]);
   const [albums, setAlbums] = useState<Album[]>([]);
@@ -61,7 +73,7 @@ export default function ArtistDetailPage({ params }: { params: { id: string } })
 
       try {
         setLoading(true);
-        
+
         // Load artist data
         const artistResponse = await fetch(`/api/artists/${artistId}`);
         if (!artistResponse.ok) {
@@ -81,10 +93,11 @@ export default function ArtistDetailPage({ params }: { params: { id: string } })
         const albumsResponse = await fetch(`/api/albums`);
         if (albumsResponse.ok) {
           const albumsData = await albumsResponse.json();
-          const artistAlbums = albumsData.filter((album: Album) => album.artist?.id === artistId);
+          const artistAlbums = albumsData.filter(
+            (album: Album) => album.artist?.id === artistId,
+          );
           setAlbums(artistAlbums);
         }
-
       } catch (err) {
         console.error("Error loading data:", err);
         setError("Cannot load artist information.");
@@ -146,12 +159,12 @@ export default function ArtistDetailPage({ params }: { params: { id: string } })
           <div className="flex flex-col md:flex-row gap-8 items-center md:items-end">
             <div className="w-48 h-48 md:w-64 md:h-64 rounded-full overflow-hidden bg-white/10 backdrop-blur-sm flex items-center justify-center shadow-2xl">
               {artist.profile_image_url ? (
-                <Image 
-                  src={artist.profile_image_url} 
-                  alt={artist.name} 
-                  width={256} 
-                  height={256} 
-                  className="object-cover w-full h-full" 
+                <Image
+                  src={artist.profile_image_url}
+                  alt={artist.name}
+                  width={256}
+                  height={256}
+                  className="object-cover w-full h-full"
                 />
               ) : (
                 <Users className="h-20 w-20 text-white/60" />
@@ -161,14 +174,20 @@ export default function ArtistDetailPage({ params }: { params: { id: string } })
               <Badge className="bg-white/20 text-white border-white/30 w-fit mx-auto md:mx-0">
                 Artist
               </Badge>
-              <h1 className="text-4xl md:text-6xl font-bold leading-tight">{artist.name}</h1>
+              <h1 className="text-4xl md:text-6xl font-bold leading-tight">
+                {artist.name}
+              </h1>
               {artist.bio && (
-                <p className="text-lg text-purple-100 max-w-2xl">{artist.bio}</p>
+                <p className="text-lg text-purple-100 max-w-2xl">
+                  {artist.bio}
+                </p>
               )}
               <div className="flex items-center gap-3 text-lg text-purple-100 justify-center md:justify-start">
                 {albums && albums.length > 0 && (
                   <>
-                    <span>{albums.length} album{albums.length > 1 ? 's' : ''}</span>
+                    <span>
+                      {albums.length} album{albums.length > 1 ? "s" : ""}
+                    </span>
                     <span>•</span>
                   </>
                 )}
@@ -177,8 +196,8 @@ export default function ArtistDetailPage({ params }: { params: { id: string } })
                 )}
               </div>
               <div className="flex gap-4 justify-center md:justify-start mt-4">
-                <Button 
-                  size="lg" 
+                <Button
+                  size="lg"
                   className="bg-white text-purple-600 hover:bg-white/90"
                   onClick={handlePlayAllTracks}
                   disabled={!tracks || tracks.length === 0}
@@ -186,11 +205,19 @@ export default function ArtistDetailPage({ params }: { params: { id: string } })
                   <Play className="mr-2 h-5 w-5" />
                   Play All
                 </Button>
-                <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-white/30 text-white hover:bg-white/10"
+                >
                   <Heart className="mr-2 h-5 w-5" />
                   Follow
                 </Button>
-                <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-white/30 text-white hover:bg-white/10"
+                >
                   <Share className="mr-2 h-5 w-5" />
                   Share
                 </Button>
@@ -262,7 +289,7 @@ export default function ArtistDetailPage({ params }: { params: { id: string } })
                   Popular Tracks
                 </h2>
               </div>
-              
+
               <div className="space-y-1">
                 {tracks.slice(0, 10).map((track, idx) => (
                   <div
@@ -274,10 +301,22 @@ export default function ArtistDetailPage({ params }: { params: { id: string } })
                       {currentTrack?.id === track.id && isPlaying ? (
                         <div className="flex items-center justify-center">
                           <div className="flex items-end space-x-0.5 h-4">
-                            <div className="w-0.5 bg-rose-600 animate-equalize-1" style={{ height: '30%' }}></div>
-                            <div className="w-0.5 bg-rose-600 animate-equalize-2" style={{ height: '100%' }}></div>
-                            <div className="w-0.5 bg-rose-600 animate-equalize-3" style={{ height: '60%' }}></div>
-                            <div className="w-0.5 bg-rose-600 animate-equalize-1" style={{ height: '40%' }}></div>
+                            <div
+                              className="w-0.5 bg-rose-600 animate-equalize-1"
+                              style={{ height: "30%" }}
+                            ></div>
+                            <div
+                              className="w-0.5 bg-rose-600 animate-equalize-2"
+                              style={{ height: "100%" }}
+                            ></div>
+                            <div
+                              className="w-0.5 bg-rose-600 animate-equalize-3"
+                              style={{ height: "60%" }}
+                            ></div>
+                            <div
+                              className="w-0.5 bg-rose-600 animate-equalize-1"
+                              style={{ height: "40%" }}
+                            ></div>
                           </div>
                         </div>
                       ) : (
@@ -299,7 +338,7 @@ export default function ArtistDetailPage({ params }: { params: { id: string } })
                         <Play className="h-4 w-4" />
                       )}
                     </Button>
-                    
+
                     <div className="w-12 h-12 rounded-lg overflow-hidden bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0">
                       {track.album?.cover_image_url ? (
                         <Image
@@ -354,8 +393,6 @@ export default function ArtistDetailPage({ params }: { params: { id: string } })
             </CardContent>
           </Card>
         )}
-      </div>
-
       </div>
 
       {/* Music Player - Fixed at bottom */}
