@@ -1,4 +1,3 @@
-
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { Database } from "@/types/supabase";
@@ -6,15 +5,30 @@ import { Database } from "@/types/supabase";
 export interface Artist {
   id: number;
   name: string;
-  bio?: string | null;
-  profile_image_url?: string | null;
+  profile_image_url: string | null;
+  bio: string | null;
   created_at: string;
 }
 
 export class ArtistsController {
+  static async getArtistById(id: number): Promise<Artist | null> {
+    const supabase = createServerComponentClient<Database>({ cookies });
+    const { data, error } = await supabase
+      .from("artists")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (error) {
+      console.error("Error fetching artist:", error);
+      return null;
+    }
+
+    return data as Artist;
+  }
+
   static async getAllArtists(): Promise<Artist[]> {
     const supabase = createServerComponentClient<Database>({ cookies });
-    
     const { data, error } = await supabase
       .from("artists")
       .select("*")
@@ -25,26 +39,6 @@ export class ArtistsController {
       throw new Error(`Failed to fetch artists: ${error.message}`);
     }
 
-    return data || [];
-  }
-
-  static async getArtistById(id: number): Promise<Artist | null> {
-    const supabase = createServerComponentClient<Database>({ cookies });
-    
-    const { data, error } = await supabase
-      .from("artists")
-      .select("*")
-      .eq("id", id)
-      .single();
-
-    if (error) {
-      if (error.code === "PGRST116") {
-        return null; // Artist not found
-      }
-      console.error(`Error fetching artist ${id}:`, error);
-      throw new Error(`Failed to fetch artist: ${error.message}`);
-    }
-
-    return data;
+    return data as Artist[];
   }
 }
