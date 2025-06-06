@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { MusicPlayer } from "@/components/music/MusicPlayer";
 import { Play, Pause, Clock, Music, Heart, Share, Download, Plus } from "lucide-react";
 import Link from "next/link";
-import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
+import { useAudioPlayer, AudioPlayerContext } from "@/contexts/AudioPlayerContext";
 import { Track } from "@/lib/definitions/Track";
 import { useDownload } from "@/hooks/use-download";
 import { useContext } from "react";
@@ -26,10 +26,8 @@ interface AlbumDetailClientProps {
 }
 
 export function AlbumDetailClient({ album, tracks }: AlbumDetailClientProps) {
-  const { currentTrack, isPlaying, playTrack } = useAudioPlayer();
+  const { currentTrack, isPlaying, playTrack, setTrackList } = useAudioPlayer();
   const { downloadTrack, downloadMultipleTracks, isDownloading, isTrackDownloading } = useDownload();
-  const audioContext = useContext(AudioPlayerContext);
-  const setTrackList = audioContext?.setTrackList;
 
   const handlePlayAlbum = () => {
     if (tracks && tracks.length > 0) {
