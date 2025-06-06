@@ -551,9 +551,11 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                         <Users className="h-12 w-12 text-white" />
                                                     )}
                                                 </div>
-                                                <h3 className="font-semibold text-sm mb-1 truncate text-gray-900 dark:text-white hover:underline cursor-pointer">
-                                                    {track.artist.name}
-                                                </h3>
+                                                <Link href={`/artist/${track.artist.id}`}>
+                                                    <h3 className="font-semibold text-sm mb-1 truncate text-gray-900 dark:text-white hover:underline cursor-pointer">
+                                                        {track.artist.name}
+                                                    </h3>
+                                                </Link>
                                                 <p className="text-gray-600 dark:text-gray-400 text-xs">
                                                     {artistTracks.length} bài
                                                     hát
@@ -782,7 +784,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                             {track.album.title}
                                         </p>
 
-                                        <div className="flex items-center justify-between">
+                                        <div className="flex items-center justify-between"><previous_generation>
                                             <Badge
                                                 variant="outline"
                                                 className="text-xs"                                            >
