@@ -23,17 +23,19 @@ const formatDuration = (seconds: number | null) => {
 };
 
 export function MusicPlayer() {
-  // Use hook to manage audio playback state
   const {
     currentTrack,
+    trackList,
     isPlaying,
     volume,
     currentTime,
     duration,
     togglePlayPause,
+    playNext,
+    playPrevious,
     changeVolume,
     seekTo,
-    formatTime
+    formatTime,
   } = useAudioPlayer();
 
   // Reference to progress bar
@@ -102,6 +104,8 @@ export function MusicPlayer() {
               size="icon"
               variant="ghost"
               className="h-8 w-8 text-gray-400 hover:text-rose-500 transition-colors"
+              onClick={playPrevious}
+              disabled={!currentTrack || !trackList || trackList.length <= 1}
             >
               <SkipBack className="h-4 w-4" />
             </Button>
@@ -124,6 +128,8 @@ export function MusicPlayer() {
               size="icon"
               variant="ghost"
               className="h-8 w-8 text-gray-400 hover:text-rose-500 transition-colors"
+              onClick={playNext}
+              disabled={!currentTrack || !trackList || trackList.length <= 1}
             >
               <SkipForward className="h-4 w-4" />
             </Button>
@@ -142,7 +148,7 @@ export function MusicPlayer() {
             </div>
           </div>
         </div>
-        
+
         {/* Progress bar section - moved closer to controls */}
         {currentTrack && (
           <div className="mt-2">
@@ -150,7 +156,7 @@ export function MusicPlayer() {
             <div className="flex items-center gap-3">
               {/* Current time */}
               <span className="text-xs text-gray-400 min-w-[35px]">{formatTime(currentTime)}</span>
-              
+
               {/* Progress bar container */}
               <div className="relative flex-1 cursor-pointer group" onClick={handleProgressClick} ref={progressRef}>
                 {/* Background track */}
@@ -170,7 +176,7 @@ export function MusicPlayer() {
                   }}
                 />
               </div>
-              
+
               {/* Total duration */}
               <span className="text-xs text-gray-400 min-w-[35px]">{formatDuration(currentTrack.duration)}</span>
             </div>

@@ -8,6 +8,8 @@ import { Track } from '@/lib/definitions/Track';
 // Định nghĩa interface cho context
 interface AudioPlayerContextType {
   currentTrack: Track | null;
+  trackList: Track[];
+  currentIndex: number;
   isPlaying: boolean;
   volume: number;
   currentTime: number;
@@ -15,6 +17,8 @@ interface AudioPlayerContextType {
   error: string | null;
   playTrack: (track: Track) => void;
   setTrackList: (tracks: Track[]) => void;
+  playNext: () => void;
+  playPrevious: () => void;
   togglePlayPause: () => void;
   changeVolume: (volume: number) => void;
   seekTo: (time: number) => void;
