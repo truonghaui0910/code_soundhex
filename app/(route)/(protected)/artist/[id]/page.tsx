@@ -1,14 +1,19 @@
 
+"use client";
+
+import { useState, useEffect } from "react";
 import { notFound } from "next/navigation";
 import { TracksController } from "@/lib/controllers/tracks";
 import { ArtistsController } from "@/lib/controllers/artists";
 import { AlbumsController } from "@/lib/controllers/albums";
+import { useAudioPlayer } from "@/hooks/use-audio-player";
+import { Track } from "@/lib/definitions/Track";
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MusicPlayer } from "@/components/music/MusicPlayer";
-import { Play, Clock, Music, Heart, Share, Users, Album } from "lucide-react";
+import { Play, Clock, Music, Heart, Share, Users, Album, Pause } from "lucide-react";
 import Link from "next/link";
 
 // Helper function to format time
@@ -19,29 +24,118 @@ const formatDuration = (seconds: number | null) => {
   return `${mins}:${secs.toString().padStart(2, '0')}`;
 };
 
-export default async function ArtistDetailPage({ params }: { params: { id: string } }) {
+interface Artist {
+  id: number;
+  name: string;
+  profile_image_url: string | null;
+  bio: string | null;
+  created_at: string;
+}
+
+interface Album {
+  id: number;
+  title: string;
+  cover_image_url: string | null;
+  release_date: string | null;
+  artist?: Artist;
+}
+
+export default function ArtistDetailPage({ params }: { params: { id: string } }) {
+  const [artist, setArtist] = useState<Artist | null>(null);
+  const [tracks, setTracks] = useState<Track[]>([]);
+  const [albums, setAlbums] = useState<Album[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const { setTrackList, playTrack, currentTrack, isPlaying } = useAudioPlayer();
+
   const artistId = Number(params.id);
+
+  useEffect(() => {
+    async function loadData() {
+      if (!artistId) {
+        setError("Invalid artist ID");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        
+        // Load artist data
+        const artistResponse = await fetch(`/api/artists/${artistId}`);
+        if (!artistResponse.ok) {
+          throw new Error("Failed to fetch artist");
+        }
+        const artistData = await artistResponse.json();
+        setArtist(artistData);
+
+        // Load tracks
+        const tracksResponse = await fetch(`/api/tracks?artist=${artistId}`);
+        if (tracksResponse.ok) {
+          const tracksData = await tracksResponse.json();
+          setTracks(tracksData);
+        }
+
+        // Load albums
+        const albumsResponse = await fetch(`/api/albums`);
+        if (albumsResponse.ok) {
+          const albumsData = await albumsResponse.json();
+          const artistAlbums = albumsData.filter((album: Album) => album.artist?.id === artistId);
+          setAlbums(artistAlbums);
+        }
+
+      } catch (err) {
+        console.error("Error loading data:", err);
+        setError("Cannot load artist information.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadData();
+  }, [artistId]);
+
+  const handlePlayAllTracks = () => {
+    if (tracks && tracks.length > 0) {
+      setTrackList(tracks);
+      setTimeout(() => {
+        playTrack(tracks[0]);
+      }, 50);
+    }
+  };
+
+  const handlePlayTrack = (track: Track) => {
+    setTrackList(tracks);
+    setTimeout(() => {
+      playTrack(track);
+    }, 50);
+  };
+
   if (!artistId) return notFound();
 
-  // Lấy thông tin artist
-  let artist, tracks, albums;
-  try {
-    artist = await ArtistsController.getArtistById(artistId);
-    tracks = await TracksController.getTracksByArtist(artistId);
-    const allAlbums = await AlbumsController.getAllAlbums();
-    albums = allAlbums.filter(album => album.artist?.id === artistId);
-  } catch (error) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20">
         <div className="container mx-auto py-10">
-          <h1 className="text-3xl font-bold mb-4">Artist</h1>
-          <p className="text-red-500">Cannot load artist information.</p>
+          <div className="flex items-center justify-center">
+            <div className="text-lg">Loading...</div>
+          </div>
         </div>
       </div>
     );
   }
 
-  if (!artist) return notFound();
+  if (error || !artist) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20">
+        <div className="container mx-auto py-10">
+          <h1 className="text-3xl font-bold mb-4">Artist</h1>
+          <p className="text-red-500">{error || "Artist not found"}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20">
@@ -83,7 +177,12 @@ export default async function ArtistDetailPage({ params }: { params: { id: strin
                 )}
               </div>
               <div className="flex gap-4 justify-center md:justify-start mt-4">
-                <Button size="lg" className="bg-white text-purple-600 hover:bg-white/90">
+                <Button 
+                  size="lg" 
+                  className="bg-white text-purple-600 hover:bg-white/90"
+                  onClick={handlePlayAllTracks}
+                  disabled={!tracks || tracks.length === 0}
+                >
                   <Play className="mr-2 h-5 w-5" />
                   Play All
                 </Button>
@@ -169,16 +268,36 @@ export default async function ArtistDetailPage({ params }: { params: { id: strin
                   <div
                     key={track.id}
                     className="group flex items-center gap-4 p-4 hover:bg-white/50 dark:hover:bg-gray-700/30 transition-colors cursor-pointer border-b border-gray-100/50 dark:border-gray-700/30 last:border-b-0"
+                    onClick={() => handlePlayTrack(track)}
                   >
                     <div className="w-8 text-center text-sm text-gray-500 dark:text-gray-400 group-hover:hidden">
-                      {idx + 1}
+                      {currentTrack?.id === track.id && isPlaying ? (
+                        <div className="flex items-center justify-center">
+                          <div className="flex items-end space-x-0.5 h-4">
+                            <div className="w-0.5 bg-rose-600 animate-equalize-1" style={{ height: '30%' }}></div>
+                            <div className="w-0.5 bg-rose-600 animate-equalize-2" style={{ height: '100%' }}></div>
+                            <div className="w-0.5 bg-rose-600 animate-equalize-3" style={{ height: '60%' }}></div>
+                            <div className="w-0.5 bg-rose-600 animate-equalize-1" style={{ height: '40%' }}></div>
+                          </div>
+                        </div>
+                      ) : (
+                        idx + 1
+                      )}
                     </div>
                     <Button
                       size="sm"
                       variant="ghost"
                       className="w-8 h-8 p-0 hidden group-hover:flex rounded-full"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handlePlayTrack(track);
+                      }}
                     >
-                      <Play className="h-4 w-4" />
+                      {currentTrack?.id === track.id && isPlaying ? (
+                        <Pause className="h-4 w-4" />
+                      ) : (
+                        <Play className="h-4 w-4" />
+                      )}
                     </Button>
                     
                     <div className="w-12 h-12 rounded-lg overflow-hidden bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0">
