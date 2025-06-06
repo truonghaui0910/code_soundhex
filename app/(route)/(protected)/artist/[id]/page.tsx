@@ -13,23 +13,23 @@ import Link from "next/link";
 
 // Helper function to format time
 const formatDuration = (seconds: number | null) => {
-    if (!seconds) return "--:--";
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  if (!seconds) return "--:--";
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
 };
 
-export default async function ArtistDetailPage({ params }: Readonly<{ params: { id: string } }>) {
+export default async function ArtistDetailPage({ params }: { params: { id: string } }) {
   const artistId = Number(params.id);
   if (!artistId) return notFound();
 
-  // Lấy thông tin artist, danh sách bài hát và albums
+  // Lấy thông tin artist
   let artist, tracks, albums;
   try {
     artist = await ArtistsController.getArtistById(artistId);
     tracks = await TracksController.getTracksByArtist(artistId);
     const allAlbums = await AlbumsController.getAllAlbums();
-    albums = allAlbums.filter(album => album.artist.id === artistId);
+    albums = allAlbums.filter(album => album.artist?.id === artistId);
   } catch (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20">
@@ -40,12 +40,13 @@ export default async function ArtistDetailPage({ params }: Readonly<{ params: { 
       </div>
     );
   }
+
   if (!artist) return notFound();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20">
       {/* Header Section */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-blue-800 via-purple-900 to-pink-800 text-white">
+      <div className="relative overflow-hidden bg-gradient-to-r from-slate-800 via-purple-900 to-slate-900 text-white">
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="relative container mx-auto px-6 py-16">
           <div className="flex flex-col md:flex-row gap-8 items-center md:items-end">
@@ -67,22 +68,20 @@ export default async function ArtistDetailPage({ params }: Readonly<{ params: { 
                 Artist
               </Badge>
               <h1 className="text-4xl md:text-6xl font-bold leading-tight">{artist.name}</h1>
+              {artist.bio && (
+                <p className="text-lg text-purple-100 max-w-2xl">{artist.bio}</p>
+              )}
               <div className="flex items-center gap-3 text-lg text-purple-100 justify-center md:justify-start">
-                {tracks && tracks.length > 0 && (
-                  <>
-                    <span>{tracks.length} bài hát</span>
-                  </>
-                )}
                 {albums && albums.length > 0 && (
                   <>
+                    <span>{albums.length} album{albums.length > 1 ? 's' : ''}</span>
                     <span>•</span>
-                    <span>{albums.length} album</span>
                   </>
                 )}
+                {tracks && tracks.length > 0 && (
+                  <span>{tracks.length} bài hát</span>
+                )}
               </div>
-              {artist.bio && (
-                <p className="text-purple-100 max-w-2xl text-center md:text-left">{artist.bio}</p>
-              )}
               <div className="flex gap-4 justify-center md:justify-start mt-4">
                 <Button size="lg" className="bg-white text-purple-600 hover:bg-white/90">
                   <Play className="mr-2 h-5 w-5" />
@@ -106,72 +105,67 @@ export default async function ArtistDetailPage({ params }: Readonly<{ params: { 
         {/* Albums Section */}
         {albums && albums.length > 0 && (
           <Card className="border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm shadow-xl">
-            <CardContent className="p-0">
-              <div className="p-6 border-b border-gray-200/50 dark:border-gray-700/50">
-                <h2 className="text-xl font-bold flex items-center gap-3">
-                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
-                    <Album className="h-4 w-4 text-white" />
-                  </div>
-                  Albums
-                </h2>
-              </div>
-              
-              <div className="p-6">
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-                  {albums.map((album) => (
-                    <Link key={album.id} href={`/album/${album.id}`}>
-                      <Card className="group cursor-pointer hover:scale-105 transition-transform">
-                        <CardContent className="p-0">
-                          <div className="aspect-square w-full overflow-hidden rounded-t-xl">
-                            {album.cover_image_url ? (
-                              <Image
-                                src={album.cover_image_url}
-                                alt={album.title}
-                                width={200}
-                                height={200}
-                                className="object-cover w-full h-full"
-                              />
-                            ) : (
-                              <div className="bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center w-full h-full">
-                                <Music className="h-12 w-12 text-white" />
-                              </div>
-                            )}
-                          </div>
-                          <div className="p-3">
-                            <div className="font-semibold truncate text-gray-900 dark:text-white group-hover:underline">
-                              {album.title}
-                            </div>
-                            {album.release_date && (
-                              <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                {new Date(album.release_date).getFullYear()}
-                              </div>
-                            )}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </Link>
-                  ))}
+            <CardContent className="p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                  <Album className="h-4 w-4 text-white" />
                 </div>
+                <h2 className="text-xl font-bold">Albums</h2>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                {albums.map((album) => (
+                  <Link key={album.id} href={`/album/${album.id}`}>
+                    <Card className="group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border-0 bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm">
+                      <CardContent className="p-0">
+                        <div className="aspect-square w-full overflow-hidden">
+                          {album.cover_image_url ? (
+                            <Image
+                              src={album.cover_image_url}
+                              alt={album.title}
+                              width={200}
+                              height={200}
+                              className="object-cover w-full h-full group-hover:scale-105 transition-transform"
+                            />
+                          ) : (
+                            <div className="bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center w-full h-full">
+                              <Music className="h-12 w-12 text-white" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="p-3">
+                          <div className="font-semibold truncate text-gray-900 dark:text-white group-hover:underline">
+                            {album.title}
+                          </div>
+                          {album.release_date && (
+                            <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                              {new Date(album.release_date).getFullYear()}
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ))}
               </div>
             </CardContent>
           </Card>
         )}
 
-        {/* Tracks Section */}
-        <Card className="border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm shadow-xl">
-          <CardContent className="p-0">
-            <div className="p-6 border-b border-gray-200/50 dark:border-gray-700/50">
-              <h2 className="text-xl font-bold flex items-center gap-3">
-                <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center">
-                  <Music className="h-4 w-4 text-white" />
-                </div>
-                Danh sách bài hát
-              </h2>
-            </div>
-            
-            {tracks && tracks.length > 0 ? (
+        {/* Popular Tracks Section */}
+        {tracks && tracks.length > 0 && (
+          <Card className="border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm shadow-xl">
+            <CardContent className="p-0">
+              <div className="p-6 border-b border-gray-200/50 dark:border-gray-700/50">
+                <h2 className="text-xl font-bold flex items-center gap-3">
+                  <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                    <Music className="h-4 w-4 text-white" />
+                  </div>
+                  Popular Tracks
+                </h2>
+              </div>
+              
               <div className="space-y-1">
-                {tracks.map((track, idx) => (
+                {tracks.slice(0, 10).map((track, idx) => (
                   <div
                     key={track.id}
                     className="group flex items-center gap-4 p-4 hover:bg-white/50 dark:hover:bg-gray-700/30 transition-colors cursor-pointer border-b border-gray-100/50 dark:border-gray-700/30 last:border-b-0"
@@ -202,16 +196,12 @@ export default async function ArtistDetailPage({ params }: Readonly<{ params: { 
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <div className="font-semibold text-gray-900 dark:text-white truncate hover:underline cursor-pointer">
+                      <div className="font-semibold text-gray-900 dark:text-white truncate">
                         {track.title}
                       </div>
-                      {track.album && (
-                        <Link href={`/album/${track.album.id}`}>
-                          <div className="text-sm text-gray-600 dark:text-gray-400 truncate hover:underline cursor-pointer">
-                            {track.album.title}
-                          </div>
-                        </Link>
-                      )}
+                      <div className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                        {track.album?.title}
+                      </div>
                     </div>
 
                     <div className="hidden md:block">
@@ -242,19 +232,9 @@ export default async function ArtistDetailPage({ params }: Readonly<{ params: { 
                   </div>
                 ))}
               </div>
-            ) : (
-              <div className="py-16 text-center">
-                <Music className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                  Không có bài hát
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Nghệ sĩ này hiện chưa có bài hát nào.
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Music Player */}
