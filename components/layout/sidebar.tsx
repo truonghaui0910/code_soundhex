@@ -179,7 +179,7 @@ export function Sidebar() {
           <span className="sr-only">Toggle menu</span>
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="w-64 p-0 bg-card">
+      <SheetContent side="left" className="w-64 p-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
         <SidebarContent />
       </SheetContent>
     </Sheet>
@@ -188,7 +188,7 @@ export function Sidebar() {
   // Desktop sidebar - Fixed position with dynamic top position
   const DesktopSidebar = () => (
     <div 
-      className="hidden md:block w-64 border-r bg-card fixed left-0 overflow-y-auto"
+      className="hidden md:block w-64 border-r bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm fixed left-0 overflow-y-auto"
       style={{ 
         top: `${navbarHeight}px`, 
         height: `calc(100vh - ${navbarHeight}px)` 
