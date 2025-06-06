@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
     Search,
     Music,
@@ -53,6 +54,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
     const { currentTrack, isPlaying, playTrack } = useAudioPlayer();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { downloadTrack, isTrackDownloading } = useDownload();
+    const searchParams = useSearchParams();
 
     // Get unique genres from tracks
     const genres = Array.from(
@@ -142,7 +144,13 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
 
     useEffect(() => {
         setMounted(true);
-    }, []);
+
+        // Check for the 'tab' parameter in the URL
+        const tab = searchParams.get("tab");
+        if (tab === "upload") {
+            setCurrentView("upload");
+        }
+    }, [searchParams]);
 
     if (!mounted) {
         return (
@@ -205,14 +213,15 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                 <Headphones className="mr-2 h-5 w-5" />
                                 Full Library
                             </Button>
-                            <Button
-                                size="lg"
-                                onClick={() => setCurrentView("upload")}
-                                className={`${currentView === "upload" ? "bg-white text-purple-600" : "bg-white/20 text-white hover:bg-white/30"}`}
-                            >
-                                <Upload className="mr-2 h-5 w-5" />
-                                Upload Music
-                            </Button>
+                            <Link href="/music?tab=upload">
+                                <Button
+                                    size="lg"
+                                    className="bg-white/20 text-white hover:bg-white/30"
+                                >
+                                    <Upload className="mr-2 h-5 w-5" />
+                                    Upload Music
+                                </Button>
+                            </Link>
                         </div>
                     </div>
                 </div>

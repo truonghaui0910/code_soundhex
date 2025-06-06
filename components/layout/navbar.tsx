@@ -58,7 +58,7 @@ export function Navbar() {
             variant="outline" 
             size="sm"
             className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0"
-            onClick={() => router.push('/music')}
+            onClick={() => router.push('/music?tab=upload')}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
