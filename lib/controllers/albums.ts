@@ -1,5 +1,6 @@
 
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
+import { cookies } from "next/headers";
 import { Database } from "@/types/supabase";
 
 export interface Album {
@@ -15,7 +16,7 @@ export interface Album {
 
 export class AlbumsController {
   static async getAllAlbums(): Promise<Album[]> {
-    const supabase = createClientComponentClient<Database>();
+    const supabase = createServerComponentClient<Database>({ cookies });
     const { data, error } = await supabase
       .from("albums")
       .select(`id, title, cover_image_url, release_date, created_at, artist_id`) 
