@@ -112,6 +112,25 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
         );
     }, [tracks]);
 
+    // Get trending tracks (memoized random selection)
+    const trendingTracks = useMemo(() => {
+        return [...filteredTracks]
+            .sort(() => 0.5 - Math.random())
+            .slice(0, 12);
+    }, [filteredTracks]);
+
+    const handleUploadClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const files = event.target.files;
+        if (files && files.length > 0) {
+            console.log("Files selected:", files);
+            alert("Upload functionality will be implemented soon!");
+        }
+    };
+
     useEffect(() => {
         setMounted(true);
     }, []);
