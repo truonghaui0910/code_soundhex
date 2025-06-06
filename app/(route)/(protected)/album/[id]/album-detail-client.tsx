@@ -25,12 +25,12 @@ interface AlbumDetailClientProps {
 }
 
 export function AlbumDetailClient({ album, tracks }: AlbumDetailClientProps) {
-  const { setTrackList, playTrack } = useAudioPlayer();
+  const audioPlayer = useAudioPlayer();
 
   const handlePlayAlbum = () => {
-    if (tracks && tracks.length > 0) {
-      setTrackList(tracks);
-      playTrack(tracks[0]); // Play the first track
+    if (tracks && tracks.length > 0 && audioPlayer?.setTrackList && audioPlayer?.playTrack) {
+      audioPlayer.setTrackList(tracks);
+      audioPlayer.playTrack(tracks[0]); // Play the first track
     }
   };
 
@@ -140,8 +140,10 @@ export function AlbumDetailClient({ album, tracks }: AlbumDetailClientProps) {
                       variant="ghost"
                       className="w-8 h-8 p-0 hidden group-hover:flex rounded-full"
                       onClick={() => {
-                        setTrackList(tracks);
-                        playTrack(track);
+                        if (audioPlayer?.setTrackList && audioPlayer?.playTrack) {
+                          audioPlayer.setTrackList(tracks);
+                          audioPlayer.playTrack(track);
+                        }
                       }}
                     >
                       <Play className="h-4 w-4" />
