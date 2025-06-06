@@ -26,7 +26,6 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Track } from "@/lib/definitions/Track";
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
-import Link from "next/link";
 
 // Helper function to format time
 const formatDuration = (seconds: number | null) => {
@@ -286,54 +285,53 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                         if (!track) return null;
 
                                         return (
-                                            <Link key={track.album.id} href={`/album/${track.album.id}`}>
-                                                <Card
-                                                    className="group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm"
-                                                >
-                                                    <div className="relative aspect-square">
-                                                        {track.album
-                                                            .cover_image_url ? (
-                                                            <Image
-                                                                src={
-                                                                    track.album
-                                                                        .cover_image_url
-                                                                }
-                                                                alt={
-                                                                    track.album
-                                                                        .title
-                                                                }
-                                                                fill
-                                                                sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
-                                                                className="object-cover group-hover:scale-105 transition-transform duration-300"
-                                                            />
-                                                        ) : (
-                                                            <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
-                                                                <Music className="h-12 w-12 text-white" />
-                                                            </div>
-                                                        )}
-
-                                                        <div className="absolute inset-0 flex items-center justify-center">
-                                                            <Button
-                                                                size="lg"
-                                                                onClick={() =>
-                                                                    playTrack(track)
-                                                                }
-                                                                className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full bg-white text-purple-600 hover:bg-white/90"
-                                                            >
-                                                                <Play className="h-5 w-5" />
-                                                            </Button>
+                                            <Card
+                                                key={track.album.id}
+                                                className="group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm"
+                                            >
+                                                <div className="relative aspect-square">
+                                                    {track.album
+                                                        .cover_image_url ? (
+                                                        <Image
+                                                            src={
+                                                                track.album
+                                                                    .cover_image_url
+                                                            }
+                                                            alt={
+                                                                track.album
+                                                                    .title
+                                                            }
+                                                            fill
+                                                            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
+                                                            className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                                        />
+                                                    ) : (
+                                                        <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
+                                                            <Music className="h-12 w-12 text-white" />
                                                         </div>
+                                                    )}
+
+                                                    <div className="absolute inset-0 flex items-center justify-center">
+                                                        <Button
+                                                            size="lg"
+                                                            onClick={() =>
+                                                                playTrack(track)
+                                                            }
+                                                            className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full bg-white text-purple-600 hover:bg-white/90"
+                                                        >
+                                                            <Play className="h-5 w-5" />
+                                                        </Button>
                                                     </div>
-                                                    <CardContent className="p-3">
-                                                        <h3 className="font-semibold text-sm mb-1 truncate">
-                                                            {track.album.title}
-                                                        </h3>
-                                                        <p className="text-gray-600 dark:text-gray-400 truncate text-xs">
-                                                            {track.artist.name}
-                                                        </p>
-                                                    </CardContent>
-                                                </Card>
-                                            </Link>
+                                                </div>
+                                                <CardContent className="p-3">
+                                                    <h3 className="font-semibold text-sm mb-1 truncate">
+                                                        {track.album.title}
+                                                    </h3>
+                                                    <p className="text-gray-600 dark:text-gray-400 truncate text-xs">
+                                                        {track.artist.name}
+                                                    </p>
+                                                </CardContent>
+                                            </Card>
                                         );
                                     })}
                             </div>
@@ -384,7 +382,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                             alt={
                                                                 track.artist
                                                                     .name
-                                                            }
+                                                                                         }
                                                             fill
                                                             sizes="128px"
                                                             className="object-cover"
@@ -433,54 +431,53 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                         if (!track) return null;
 
                                         return (
-                                            <Link key={track.album.id} href={`/album/${track.album.id}`}>
-                                                <Card
-                                                    className="group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm"
-                                                >
-                                                    <div className="relative aspect-square">
-                                                        {track.album
-                                                            .cover_image_url ? (
-                                                            <Image
-                                                                src={
-                                                                    track.album
-                                                                        .cover_image_url
-                                                                }
-                                                                alt={
-                                                                    track.album
-                                                                        .title
-                                                                }
-                                                                fill
-                                                                sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
-                                                                className="object-cover group-hover:scale-105 transition-transform duration-300"
-                                                            />
-                                                        ) : (
-                                                            <div className="w-full h-full bg-gradient-to-br from-green-400 to-teal-400 flex items-center justify-center">
-                                                                <Music className="h-12 w-12 text-white" />
-                                                            </div>
-                                                        )}
-
-                                                        <div className="absolute inset-0 flex items-center justify-center">
-                                                            <Button
-                                                                size="lg"
-                                                                onClick={() =>
-                                                                    playTrack(track)
-                                                                }
-                                                                className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full bg-white text-purple-600 hover:bg-white/90"
-                                                            >
-                                                                <Play className="h-5 w-5" />
-                                                            </Button>
+                                            <Card
+                                                key={track.album.id}
+                                                className="group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm"
+                                            >
+                                                <div className="relative aspect-square">
+                                                    {track.album
+                                                        .cover_image_url ? (
+                                                        <Image
+                                                            src={
+                                                                track.album
+                                                                    .cover_image_url
+                                                            }
+                                                            alt={
+                                                                track.album
+                                                                    .title
+                                                            }
+                                                            fill
+                                                            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
+                                                            className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                                        />
+                                                    ) : (
+                                                        <div className="w-full h-full bg-gradient-to-br from-green-400 to-teal-400 flex items-center justify-center">
+                                                            <Music className="h-12 w-12 text-white" />
                                                         </div>
+                                                    )}
+
+                                                    <div className="absolute inset-0 flex items-center justify-center">
+                                                        <Button
+                                                            size="lg"
+                                                            onClick={() =>
+                                                                playTrack(track)
+                                                            }
+                                                            className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full bg-white text-purple-600 hover:bg-white/90"
+                                                        >
+                                                            <Play className="h-5 w-5" />
+                                                        </Button>
                                                     </div>
-                                                    <CardContent className="p-3">
-                                                        <h3 className="font-semibold text-sm mb-1 truncate">
-                                                            {track.album.title}
-                                                        </h3>
-                                                        <p className="text-gray-600 dark:text-gray-400 truncate text-xs">
-                                                            {track.artist.name}
-                                                        </p>
-                                                    </CardContent>
-                                                </Card>
-                                            </Link>
+                                                </div>
+                                                <CardContent className="p-3">
+                                                    <h3 className="font-semibold text-sm mb-1 truncate">
+                                                        {track.album.title}
+                                                    </h3>
+                                                    <p className="text-gray-600 dark:text-gray-400 truncate text-xs">
+                                                        {track.artist.name}
+                                                    </p>
+                                                </CardContent>
+                                            </Card>
                                         );
                                     })}
                             </div>
@@ -671,798 +668,8 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                         )}
                                                     </span>
                                                 </div>
-                                            </CardContent>
-                                    </Card>
-                                ))}
-                            </div>
-                        </section>
-                    </div>
-                )}
-
-                {currentView === "library" && (
-                    <div className="space-y-6 pt-12">
-                        <div className="flex items-center justify-between">
-                            <h2 className="text-xl font-bold flex items-center gap-3">
-                                <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full flex items-center justify-center">
-                                    <Headphones className="h-5 w-5 text-white" />
-                                </div>
-                                Music Library
-                            </h2>
-                            <div className="flex gap-2">
-                                <Button variant="outline">
-                                    <Shuffle className="mr-2 h-4 w-4" />
-                                    Shuffle All
-                                </Button>
-                                <Button>
-                                    <Play className="mr-2 h-4 w-4" />
-                                    Play All
-                                </Button>
-                            </div>
-                        </div>
-
-                        {/* Grid view for library */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                            {filteredTracks.map((track) => (
-                                <Card
-                                    key={track.id}
-                                    className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm"
-                                >
-                                    <div className="relative aspect-square">
-                                        {track.album.cover_image_url ? (
-                                            <Image
-                                                src={
-                                                    track.album.cover_image_url
-                                                }
-                                                alt={track.album.title}
-                                                fill
-                                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-                                                className="object-cover rounded-t-lg group-hover:scale-105 transition-transform duration-300"
-                                            />
-                                        ) : (
-                                            <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center rounded-t-lg">
-                                                <Music className="h-16 w-16 text-white" />
                                             </div>
-                                        )}
-
-                                        {/* Play button overlay */}
-                                        <div className="absolute inset-0 flex items-center justify-center rounded-t-lg">
-                                            <Button
-                                                size="lg"
-                                                onClick={() => playTrack(track)}
-                                                className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full bg-white text-purple-600 hover:bg-white/90"
-                                            >
-                                                {currentTrack?.id ===
-                                                    track.id && isPlaying ? (
-                                                    <Pause className="h-6 w-6" />
-                                                ) : (
-                                                    <Play className="h-6 w-6" />
-                                                )}
-                                            </Button>
-                                        </div>
-
-                                        {/* Currently playing indicator */}
-                                        {currentTrack?.id === track.id &&
-                                            isPlaying && (
-                                                <div className="absolute top-3 right-3">
-                                                    <div className="w-8 h-8 bg-rose-500 rounded-full flex items-center justify-center">
-                                                        <div className="flex items-end space-x-0.5 h-4">
-                                                            <div
-                                                                className="w-0.5 bg-white animate-equalize-1"
-                                                                style={{
-                                                                    height: "30%",
-                                                                }}
-                                                            ></div>
-                                                            <div
-                                                                className="w-0.5 bg-white animate-equalize-2"
-                                                                style={{
-                                                                    height: "100%",
-                                                                }}
-                                                            ></div>
-                                                            <div
-                                                                className="w-0.5 bg-white animate-equalize-3"
-                                                                style={{
-                                                                    height: "60%",
-                                                                }}
-                                                            ></div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            )}
-                                    </div>
-
-                                    <CardContent className="p-4">
-                                        <h3 className="font-semibold text-base mb-1 truncate">
-                                            {track.title}
-                                        </h3>
-                                        <p className="text-gray-600 dark:text-gray-400 truncate text-sm mb-2">
-                                            {track.artist.name}
-                                        </p>
-                                        <p className="text-gray-500 dark:text-gray-500 truncate text-xs mb-3">
-                                            {track.album.title}
-                                        </p>
-
-                                        <div className="flex items-center justify-between">
-                                            <Badge
-                                                variant="outline"
-                                                className="text-xs"
-                                            >
-                                                {track.genre?.name || "Unknown"}
-                                            </Badge>
-                                            <div className="flex items-center gap-1 text-xs text```python
-"use client";
-
-import { useState, useRef, useEffect, useMemo } from "react";
-import Image from "next/image";
-import {
-    Music,
-    Search,
-    Upload,
-    Play,
-    Heart,
-    Share,
-    TrendingUp,
-    Clock,
-    Headphones,
-    Filter,
-    Plus,
-    Shuffle,
-    SkipForward,
-    Pause,
-    Users,
-} from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Track } from "@/lib/definitions/Track";
-import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
-import Link from "next/link";
-
-// Helper function to format time
-const formatDuration = (seconds: number | null) => {
-    if (!seconds) return "--:--";
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
-};
-
-interface MusicExplorerProps {
-    initialTracks: Track[];
-}
-
-export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
-    const [tracks] = useState<Track[]>(initialTracks);
-    const [searchQuery, setSearchQuery] = useState("");
-    const [selectedGenre, setSelectedGenre] = useState<string>("all");
-    const [currentView, setCurrentView] = useState<
-        "featured" | "library" | "upload"
-    >("featured");
-    const [mounted, setMounted] = useState(false);
-    const { currentTrack, isPlaying, playTrack } = useAudioPlayer();
-    const fileInputRef = useRef<HTMLInputElement>(null);
-
-    // Get unique genres from tracks
-    const genres = Array.from(
-        new Set(tracks.map((track) => track.genre?.name).filter(Boolean)),
-    );
-
-    // Filter tracks based on search and filters
-    const filteredTracks = tracks.filter((track) => {
-        const matchesSearch =
-            !searchQuery ||
-            track.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            track.artist.name
-                .toLowerCase()
-                .includes(searchQuery.toLowerCase()) ||
-            track.album.title.toLowerCase().includes(searchQuery.toLowerCase());
-
-        const matchesGenre =
-            selectedGenre === "all" || track.genre?.name === selectedGenre;
-
-        return matchesSearch && matchesGenre;
-    });
-
-    // Get featured tracks (first 8)
-    const featuredTracks = filteredTracks.slice(0, 8);
-
-    // Memoize unique albums and artists to prevent re-renders
-    const uniqueAlbums = useMemo(() => {
-        return Array.from(
-            new Map(
-                tracks.map((track) => [
-                    track.album.id,
-                    {
-                        id: track.album.id,
-                        title: track.album.title,
-                        cover_image_url: track.album.cover_image_url,
-                        artist: track.artist,
-                        tracksCount: tracks.filter(
-                            (t) => t.album.id === track.album.id,
-                        ).length,
-                    },
-                ]),
-            ).values(),
-        );
-    }, [tracks]);
-
-    const uniqueArtists = useMemo(() => {
-        return Array.from(
-            new Map(
-                tracks.map((track) => [
-                    track.artist.id,
-                    {
-                        id: track.artist.id,
-                        name: track.artist.name,
-                        profile_image_url: track.artist.profile_image_url,
-                        tracksCount: tracks.filter(
-                            (t) => t.artist.id === track.artist.id,
-                        ).length,
-                    },
-                ]),
-            ).values(),
-        );
-    }, [tracks]);
-
-    // Get trending tracks (memoized stable random selection)
-    const trendingTracks = useMemo(() => {
-        // Create a stable random order based on track IDs
-        const shuffled = [...filteredTracks].sort((a, b) => {
-            // Use track IDs to create a stable sort
-            const seedA = a.id * 9301 + 49297;
-            const seedB = b.id * 9301 + 49297;
-            return (seedA % 233280) - (seedB % 233280);
-        });
-        return shuffled.slice(0, 12);
-    }, [filteredTracks]);
-
-    const handleUploadClick = () => {
-        fileInputRef.current?.click();
-    };
-
-    const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const files = event.target.files;
-        if (files && files.length > 0) {
-            console.log("Files selected:", files);
-            alert("Upload functionality will be implemented soon!");
-        }
-    };
-
-    useEffect(() => {
-        setMounted(true);
-    }, []);
-
-    if (!mounted) {
-        return (
-            <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20">
-                <div className="animate-pulse">
-                    <div className="h-96 bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600"></div>
-                    <div className="container mx-auto px-6 py-12">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                            {[...Array(8)].map((_, i) => (
-                                <div
-                                    key={i}
-                                    className="bg-gray-200 dark:bg-gray-700 rounded-lg h-64"
-                                ></div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
-    return (
-        <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20">
-            {/* Hero Section */}
-            <div className="relative overflow-hidden bg-gradient-to-r from-slate-800 via-purple-900 to-slate-900 text-white">
-                <div className="absolute inset-0 bg-black/10"></div>
-                <div className="relative container mx-auto px-6 py-20">
-                    <div className="text-center max-w-4xl mx-auto">
-                        <p className="text-xl md:text-2xl mb-8 text-purple-100">
-                            Stream unlimited music for free • Upload your tracks
-                            • Connect with artists
-                        </p>
-
-                        {/* Search Bar */}
-                        <div className="relative max-w-2xl mx-auto mb-8">
-                            <Search className="absolute left-4 top-4 h-5 w-5 text-gray-400 " />
-                            <Input
-                                placeholder="Search songs, artists, albums..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="pl-12 h-14 text-lg bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder-white/60"
-                            />
-                        </div>
-
-                        {/* Action Buttons */}
-                        <div className="flex flex-wrap gap-4 justify-center">
-                            <Button
-                                size="lg"
-                                onClick={() => setCurrentView("featured")}
-                                className={`${currentView === "featured" ? "bg-white text-purple-600" : "bg-white/20 text-white hover:bg-white/30"}`}
-                            >
-                                <Music className="mr-2 h-5 w-5" />
-                                Explore Music
-                            </Button>
-                            <Button
-                                size="lg"
-                                onClick={() => setCurrentView("library")}
-                                className={`${currentView === "library" ? "bg-white text-purple-600" : "bg-white/20 text-white hover:bg-white/30"}`}
-                            >
-                                <Headphones className="mr-2 h-5 w-5" />
-                                Full Library
-                            </Button>
-                            <Button
-                                size="lg"
-                                onClick={() => setCurrentView("upload")}
-                                className={`${currentView === "upload" ? "bg-white text-purple-600" : "bg-white/20 text-white hover:bg-white/30"}`}
-                            >
-                                <Upload className="mr-2 h-5 w-5" />
-                                Upload Music
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Filters */}
-            <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-b">
-                <div className="container mx-auto px-6 py-4">
-                    <div className="flex flex-wrap gap-4 items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-2">
-                                <Filter className="h-4 w-4" />
-                                <span className="font-medium">Filters:</span>
-                            </div>
-
-                            {/* Genre Filter */}
-                            <select
-                                value={selectedGenre}
-                                onChange={(e) =>
-                                    setSelectedGenre(e.target.value)
-                                }
-                                className="px-4 py-2 rounded-full border bg-white dark:bg-gray-800 text-sm font-medium"
-                            >
-                                <option value="all">All Genres</option>
-                                {genres.map((genre) => (
-                                    <option key={genre} value={genre}>
-                                        {genre}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div className="text-sm text-gray-600 dark:text-gray-400">
-                            {filteredTracks.length} tracks found
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Main Content */}
-            <div className="container mx-auto px-6 pb-32">
-                {currentView === "featured" && (
-                    <div className="space-y-16 pt-12">
-                        {/* Albums Section */}
-                        <section>
-                            <div className="flex items-center justify-between mb-8">
-                                <h2 className="text-xl font-bold flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                                        <Music className="h-5 w-5 text-white" />
-                                    </div>
-                                    Featured Albums
-                                </h2>
-                                <Button
-                                    variant="outline"
-                                    onClick={() => setCurrentView("library")}
-                                >
-                                    View All
-                                </Button>
-                            </div>
-
-                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                                {Array.from(
-                                    new Set(
-                                        featuredTracks.map(
-                                            (track) => track.album.id,
-                                        ),
-                                    ),
-                                )
-                                    .slice(0, 25)
-                                    .map((albumId) => {
-                                        const track = featuredTracks.find(
-                                            (t) => t.album.id === albumId,
-                                        );
-                                        if (!track) return null;
-
-                                        return (
-                                            <Link key={track.album.id} href={`/album/${track.album.id}`}>
-                                                <Card
-                                                    className="group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm"
-                                                >
-                                                    <div className="relative aspect-square">
-                                                        {track.album
-                                                            .cover_image_url ? (
-                                                            <Image
-                                                                src={
-                                                                    track.album
-                                                                        .cover_image_url
-                                                                }
-                                                                alt={
-                                                                    track.album
-                                                                        .title
-                                                                }
-                                                                fill
-                                                                sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
-                                                                className="object-cover group-hover:scale-105 transition-transform duration-300"
-                                                            />
-                                                        ) : (
-                                                            <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
-                                                                <Music className="h-12 w-12 text-white" />
-                                                            </div>
-                                                        )}
-
-                                                        <div className="absolute inset-0 flex items-center justify-center">
-                                                            <Button
-                                                                size="lg"
-                                                                onClick={() =>
-                                                                    playTrack(track)
-                                                                }
-                                                                className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full bg-white text-purple-600 hover:bg-white/90"
-                                                            >
-                                                                <Play className="h-5 w-5" />
-                                                            </Button>
-                                                        </div>
-                                                    </div>
-                                                    <CardContent className="p-3">
-                                                        <h3 className="font-semibold text-sm mb-1 truncate">
-                                                            {track.album.title}
-                                                        </h3>
-                                                        <p className="text-gray-600 dark:text-gray-400 truncate text-xs">
-                                                            {track.artist.name}
-                                                        </p>
-                                                    </CardContent>
-                                                </Card>
-                                            </Link>
-                                        );
-                                    })}
-                            </div>
-                        </section>
-
-                        {/* Artists Section */}
-                        <section>
-                            <div className="flex items-center justify-between mb-8">
-                                <h2 className="text-xl font-bold flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-gradient-to-r from-pink-500 to-rose-500 rounded-full flex items-center justify-center">
-                                        <Users className="h-5 w-5 text-white" />
-                                    </div>
-                                    Popular Artists
-                                </h2>
-                            </div>
-
-                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                                {Array.from(
-                                    new Set(
-                                        featuredTracks.map(
-                                            (track) => track.artist.id,
-                                        ),
-                                    ),
-                                )
-                                    .slice(0, 25)
-                                    .map((artistId) => {
-                                        const track = featuredTracks.find(
-                                            (t) => t.artist.id === artistId,
-                                        );
-                                        const artistTracks = tracks.filter(
-                                            (t) => t.artist.id === artistId,
-                                        );
-                                        if (!track) return null;
-
-                                        return (
-                                            <div
-                                                key={track.artist.id}
-                                                className="group cursor-pointer text-center"
-                                            >
-                                                <div className="w-32 h-32 mx-auto mb-3 rounded-full overflow-hidden bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center relative group-hover:scale-105 transition-transform duration-300">
-                                                    {track.artist
-                                                        .profile_image_url ? (
-                                                        <Image
-                                                            src={
-                                                                track.artist
-                                                                    .profile_image_url
-                                                            }
-                                                            alt={
-                                                                track.artist
-                                                                    .name
-                                                            }
-                                                            fill
-                                                            sizes="128px"
-                                                            className="object-cover"
-                                                        />
-                                                    ) : (
-                                                        <Users className="h-12 w-12 text-white" />
-                                                    )}
-                                                </div>
-                                                <h3 className="font-semibold text-sm mb-1 truncate text-gray-900 dark:text-white">
-                                                    {track.artist.name}
-                                                </h3>
-                                                <p className="text-gray-600 dark:text-gray-400 text-xs">
-                                                    {artistTracks.length} bài
-                                                    hát
-                                                </p>
-                                            </div>
-                                        );
-                                    })}
-                            </div>
-                        </section>
-
-                        {/* More Albums Section */}
-                        <section>
-                            <div className="flex items-center justify-between mb-8">
-                                <h2 className="text-xl font-bold flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-teal-500 rounded-full flex items-center justify-center">
-                                        <Music className="h-5 w-5 text-white" />
-                                    </div>
-                                    More Albums
-                                </h2>
-                            </div>
-
-                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                                {Array.from(
-                                    new Set(
-                                        trendingTracks.map(
-                                            (track) => track.album.id,
-                                        ),
-                                    ),
-                                )
-                                    .slice(0, 25)
-                                    .map((albumId) => {
-                                        const track = trendingTracks.find(
-                                            (t) => t.album.id === albumId,
-                                        );
-                                        if (!track) return null;
-
-                                        return (
-                                            <Link key={track.album.id} href={`/album/${track.album.id}`}>
-                                                <Card
-                                                    className="group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm"
-                                                >
-                                                    <div className="relative aspect-square">
-                                                        {track.album
-                                                            .cover_image_url ? (
-                                                            <Image
-                                                                src={
-                                                                    track.album
-                                                                        .cover_image_url
-                                                                }
-                                                                alt={
-                                                                    track.album
-                                                                        .title
-                                                                }
-                                                                fill
-                                                                sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
-                                                                className="object-cover group-hover:scale-105 transition-transform duration-300"
-                                                            />
-                                                        ) : (
-                                                            <div className="w-full h-full bg-gradient-to-br from-green-400 to-teal-400 flex items-center justify-center">
-                                                                <Music className="h-12 w-12 text-white" />
-                                                            </div>
-                                                        )}
-
-                                                        <div className="absolute inset-0 flex items-center justify-center">
-                                                            <Button
-                                                                size="lg"
-                                                                onClick={() =>
-                                                                    playTrack(track)
-                                                                }
-                                                                className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full bg-white text-purple-600 hover:bg-white/90"
-                                                            >
-                                                                <Play className="h-5 w-5" />
-                                                            </Button>
-                                                        </div>
-                                                    </div>
-                                                    <CardContent className="p-3">
-                                                        <h3 className="font-semibold text-sm mb-1 truncate">
-                                                            {track.album.title}
-                                                        </h3>
-                                                        <p className="text-gray-600 dark:text-gray-400 truncate text-xs">
-                                                            {track.artist.name}
-                                                        </p>
-                                                    </CardContent>
-                                                </Card>
-                                            </Link>
-                                        );
-                                    })}
-                            </div>
-                        </section>
-
-                        {/* More Artists Section */}
-                        <section>
-                            <div className="flex items-center justify-between mb-8">
-                                <h2 className="text-xl font-bold flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center">
-                                        <Users className="h-5 w-5 text-white" />
-                                    </div>
-                                    More Artists
-                                </h2>
-                            </div>
-
-                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                                {Array.from(
-                                    new Set(
-                                        trendingTracks.map(
-                                            (track) => track.artist.id,
-                                        ),
-                                    ),
-                                )
-                                    .filter(
-                                        (artistId) =>
-                                            !Array.from(
-                                                new Set(
-                                                    featuredTracks.map(
-                                                        (track) =>
-                                                            track.artist.id,
-                                                    ),
-                                                ),
-                                            ).includes(artistId),
-                                    )
-                                    .slice(0, 25)
-                                    .map((artistId) => {
-                                        const track = trendingTracks.find(
-                                            (t) => t.artist.id === artistId,
-                                        );
-                                        const artistTracks = tracks.filter(
-                                            (t) => t.artist.id === artistId,
-                                        );
-                                        if (!track) return null;
-
-                                        return (
-                                            <div
-                                                key={track.artist.id}
-                                                className="group cursor-pointer text-center"
-                                            >
-                                                <div className="w-32 h-32 mx-auto mb-3 rounded-full overflow-hidden bg-gradient-to-br from-orange-400 to-red-400 flex items-center justify-center relative group-hover:scale-105 transition-transform duration-300">
-                                                    {track.artist
-                                                        .profile_image_url ? (
-                                                        <Image
-                                                            src={
-                                                                track.artist
-                                                                    .profile_image_url
-                                                            }
-                                                            alt={
-                                                                track.artist
-                                                                    .name
-                                                            }
-                                                            fill
-                                                            sizes="128px"
-                                                            className="object-cover"
-                                                        />
-                                                    ) : (
-                                                        <Users className="h-12 w-12 text-white" />
-                                                    )}
-                                                </div>
-                                                <h3 className="font-semibold text-sm mb-1 truncate text-gray-900 dark:text-white">
-                                                    {track.artist.name}
-                                                </h3>
-                                                <p className="text-gray-600 dark:text-gray-400 text-xs">
-                                                    {artistTracks.length} bài
-                                                    hát
-                                                </p>
-                                            </div>
-                                        );
-                                    })}
-                            </div>
-                        </section>
-
-                        {/* Featured Tracks */}
-                        <section>
-                            <div className="flex items-center justify-between mb-8">
-                                <h2 className="text-xl font-bold flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full flex items-center justify-center">
-                                        <TrendingUp className="h-5 w-5 text-white" />
-                                    </div>
-                                    Featured Tracks
-                                </h2>
-                            </div>
-
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                                {featuredTracks.slice(0, 8).map((track) => (
-                                    <Card
-                                        key={track.id}
-                                        className="group hover:shadow-2xl transition-all duration-500 cursor-pointer overflow-hidden border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm"
-                                    >
-                                        <div className="relative aspect-square">
-                                            {track.album.cover_image_url ? (
-                                                <Image
-                                                    src={
-                                                        track.album
-                                                            .cover_image_url
-                                                    }
-                                                    alt={track.album.title}
-                                                    fill
-                                                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-                                                    className="object-cover group-hover:scale-110 transition-transform duration-500"
-                                                />
-                                            ) : (
-                                                <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
-                                                    <Music className="h-16 w-16 text-white" />
-                                                </div>
-                                            )}
-
-                                            {/* Play overlay */}
-                                            <div className="absolute inset-0 flex items-center justify-center">
-                                                <Button
-                                                    size="lg"
-                                                    onClick={() =>
-                                                        playTrack(track)
-                                                    }
-                                                    className="opacity-0 group-hover:opacity-100 transition-all duration-500 rounded-full bg-white text-purple-600 hover:bg-white/90 transform group-hover:scale-110"
-                                                >
-                                                    {currentTrack?.id ===
-                                                        track.id &&
-                                                    isPlaying ? (
-                                                        <Pause className="h-6 w-6" />
-                                                    ) : (
-                                                        <Play className="h-6 w-6" />
-                                                    )}
-                                                </Button>
-                                            </div>
-
-                                            {/* Currently playing indicator */}
-                                            {currentTrack?.id === track.id &&
-                                                isPlaying && (
-                                                    <div className="absolute top-3 right-3">
-                                                        <div className="w-8 h-8 bg-rose-500 rounded-full flex items-center justify-center">
-                                                            <div className="flex items-end space-x-0.5 h-4">
-                                                                <div
-                                                                    className="w-0.5 bg-white animate-equalize-1"
-                                                                    style={{
-                                                                        height: "30%",
-                                                                    }}
-                                                                ></div>
-                                                                <div
-                                                                    className="w-0.5 bg-white animate-equalize-2"
-                                                                    style={{
-                                                                        height: "100%",
-                                                                    }}
-                                                                ></div>
-                                                                <div
-                                                                    className="w-0.5 bg-white animate-equalize-3"
-                                                                    style={{
-                                                                        height: "60%",
-                                                                    }}
-                                                                ></div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                )}
-                                        </div>
-
-                                        <CardContent className="p-4">
-                                            <h3 className="font-semibold text-lg mb-1 truncate">
-                                                {track.title}
-                                            </h3>
-                                            <p className="text-gray-600 dark:text-gray-400 truncate text-sm">
-                                                {track.artist.name}
-                                            </p>
-                                            <div className="flex items-center justify-between mt-3">
-                                                <Badge
-                                                    variant="secondary"
-                                                    className="text-xs"
-                                                >
-                                                    {track.genre?.name ||
-                                                        "Unknown"}
-                                                </Badge>
-                                                <div className="flex items-center gap-1 text-xs text-gray-500">
-                                                    <Clock className="h-3 w-3" />
-                                                    <span>
-                                                        {formatDuration(
-                                                            track.duration,
-                                                        )}
-                                                    </span>
-                                                </div>
-                                            </CardContent>
+                                        </CardContent>
                                     </Card>
                                 ))}
                             </div>
