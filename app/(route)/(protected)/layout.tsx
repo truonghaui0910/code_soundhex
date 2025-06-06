@@ -18,13 +18,13 @@ export default async function ProtectedLayout({
 
           {/* Main content area with dynamic margin-top and left margin for desktop */}
           <main
-            className="flex-1 w-full overflow-y-auto p-4 pb-24 md:ml-64"
+            className="flex-1 w-full overflow-y-auto pb-24 md:ml-64"
             style={{ marginTop: "var(--navbar-height, 64px)" }}
           >
             {children}
           </main>
         </div>
-        
+
         {/* Music Player - hiển thị trên tất cả trang */}
         <MusicPlayer />
       </div>

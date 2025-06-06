@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, useEffect } from "react";
@@ -18,7 +17,7 @@ import {
     Shuffle,
     SkipForward,
     Pause,
-    Users
+    Users,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -44,22 +43,30 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
     const [tracks] = useState<Track[]>(initialTracks);
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedGenre, setSelectedGenre] = useState<string>("all");
-    const [currentView, setCurrentView] = useState<"featured" | "library" | "upload">("featured");
+    const [currentView, setCurrentView] = useState<
+        "featured" | "library" | "upload"
+    >("featured");
     const [mounted, setMounted] = useState(false);
     const { currentTrack, isPlaying, playTrack } = useAudioPlayer();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Get unique genres from tracks
-    const genres = Array.from(new Set(tracks.map(track => track.genre?.name).filter(Boolean)));
+    const genres = Array.from(
+        new Set(tracks.map((track) => track.genre?.name).filter(Boolean)),
+    );
 
     // Filter tracks based on search and filters
     const filteredTracks = tracks.filter((track) => {
-        const matchesSearch = !searchQuery || 
+        const matchesSearch =
+            !searchQuery ||
             track.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            track.artist.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            track.artist.name
+                .toLowerCase()
+                .includes(searchQuery.toLowerCase()) ||
             track.album.title.toLowerCase().includes(searchQuery.toLowerCase());
 
-        const matchesGenre = selectedGenre === "all" || track.genre?.name === selectedGenre;
+        const matchesGenre =
+            selectedGenre === "all" || track.genre?.name === selectedGenre;
 
         return matchesSearch && matchesGenre;
     });
@@ -68,7 +75,9 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
     const featuredTracks = filteredTracks.slice(0, 8);
 
     // Get trending tracks (random selection)
-    const trendingTracks = [...filteredTracks].sort(() => 0.5 - Math.random()).slice(0, 12);
+    const trendingTracks = [...filteredTracks]
+        .sort(() => 0.5 - Math.random())
+        .slice(0, 12);
 
     const handleUploadClick = () => {
         fileInputRef.current?.click();
@@ -94,7 +103,10 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                     <div className="container mx-auto px-6 py-12">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                             {[...Array(8)].map((_, i) => (
-                                <div key={i} className="bg-gray-200 dark:bg-gray-700 rounded-lg h-64"></div>
+                                <div
+                                    key={i}
+                                    className="bg-gray-200 dark:bg-gray-700 rounded-lg h-64"
+                                ></div>
                             ))}
                         </div>
                     </div>
@@ -111,12 +123,13 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                 <div className="relative container mx-auto px-6 py-20">
                     <div className="text-center max-w-4xl mx-auto">
                         <p className="text-xl md:text-2xl mb-8 text-purple-100">
-                            Stream unlimited music for free • Upload your tracks • Connect with artists
+                            Stream unlimited music for free • Upload your tracks
+                            • Connect with artists
                         </p>
 
                         {/* Search Bar */}
                         <div className="relative max-w-2xl mx-auto mb-8">
-                            <Search className="absolute left-4 top-4 h-5 w-5 text-gray-400" />
+                            <Search className="absolute left-4 top-4 h-5 w-5 text-gray-400 " />
                             <Input
                                 placeholder="Search songs, artists, albums..."
                                 value={searchQuery}
@@ -127,24 +140,24 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
 
                         {/* Action Buttons */}
                         <div className="flex flex-wrap gap-4 justify-center">
-                            <Button 
-                                size="lg" 
+                            <Button
+                                size="lg"
                                 onClick={() => setCurrentView("featured")}
                                 className={`${currentView === "featured" ? "bg-white text-purple-600" : "bg-white/20 text-white hover:bg-white/30"}`}
                             >
                                 <Music className="mr-2 h-5 w-5" />
                                 Explore Music
                             </Button>
-                            <Button 
-                                size="lg" 
+                            <Button
+                                size="lg"
                                 onClick={() => setCurrentView("library")}
                                 className={`${currentView === "library" ? "bg-white text-purple-600" : "bg-white/20 text-white hover:bg-white/30"}`}
                             >
                                 <Headphones className="mr-2 h-5 w-5" />
                                 Full Library
                             </Button>
-                            <Button 
-                                size="lg" 
+                            <Button
+                                size="lg"
                                 onClick={() => setCurrentView("upload")}
                                 className={`${currentView === "upload" ? "bg-white text-purple-600" : "bg-white/20 text-white hover:bg-white/30"}`}
                             >
@@ -167,14 +180,18 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                             </div>
 
                             {/* Genre Filter */}
-                            <select 
+                            <select
                                 value={selectedGenre}
-                                onChange={(e) => setSelectedGenre(e.target.value)}
+                                onChange={(e) =>
+                                    setSelectedGenre(e.target.value)
+                                }
                                 className="px-4 py-2 rounded-full border bg-white dark:bg-gray-800 text-sm font-medium"
                             >
                                 <option value="all">All Genres</option>
-                                {genres.map(genre => (
-                                    <option key={genre} value={genre}>{genre}</option>
+                                {genres.map((genre) => (
+                                    <option key={genre} value={genre}>
+                                        {genre}
+                                    </option>
                                 ))}
                             </select>
                         </div>
@@ -199,25 +216,46 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                     </div>
                                     Featured Albums
                                 </h2>
-                                <Button variant="outline" onClick={() => setCurrentView("library")}>
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setCurrentView("library")}
+                                >
                                     View All
                                 </Button>
                             </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                                {Array.from(new Set(featuredTracks.map(track => track.album.id)))
+                                {Array.from(
+                                    new Set(
+                                        featuredTracks.map(
+                                            (track) => track.album.id,
+                                        ),
+                                    ),
+                                )
                                     .slice(0, 25)
-                                    .map(albumId => {
-                                        const track = featuredTracks.find(t => t.album.id === albumId);
+                                    .map((albumId) => {
+                                        const track = featuredTracks.find(
+                                            (t) => t.album.id === albumId,
+                                        );
                                         if (!track) return null;
-                                        
+
                                         return (
-                                            <Card key={track.album.id} className="group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
+                                            <Card
+                                                key={track.album.id}
+                                                className="group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm"
+                                            >
                                                 <div className="relative aspect-square">
-                                                    {track.album.cover_image_url ? (
+                                                    {track.album
+                                                        .cover_image_url ? (
                                                         <Image
-                                                            src={track.album.cover_image_url}
-                                                            alt={track.album.title}
+                                                            src={
+                                                                track.album
+                                                                    .cover_image_url
+                                                            }
+                                                            alt={
+                                                                track.album
+                                                                    .title
+                                                            }
                                                             fill
                                                             sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
                                                             className="object-cover group-hover:scale-105 transition-transform duration-300"
@@ -227,11 +265,13 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                             <Music className="h-12 w-12 text-white" />
                                                         </div>
                                                     )}
-                                                    
+
                                                     <div className="absolute inset-0 flex items-center justify-center">
                                                         <Button
                                                             size="lg"
-                                                            onClick={() => playTrack(track)}
+                                                            onClick={() =>
+                                                                playTrack(track)
+                                                            }
                                                             className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full bg-white text-purple-600 hover:bg-white/90"
                                                         >
                                                             <Play className="h-5 w-5" />
@@ -239,8 +279,12 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                     </div>
                                                 </div>
                                                 <CardContent className="p-3">
-                                                    <h3 className="font-semibold text-sm mb-1 truncate">{track.album.title}</h3>
-                                                    <p className="text-gray-600 dark:text-gray-400 truncate text-xs">{track.artist.name}</p>
+                                                    <h3 className="font-semibold text-sm mb-1 truncate">
+                                                        {track.album.title}
+                                                    </h3>
+                                                    <p className="text-gray-600 dark:text-gray-400 truncate text-xs">
+                                                        {track.artist.name}
+                                                    </p>
                                                 </CardContent>
                                             </Card>
                                         );
@@ -260,20 +304,40 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                             </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                                {Array.from(new Set(featuredTracks.map(track => track.artist.id)))
+                                {Array.from(
+                                    new Set(
+                                        featuredTracks.map(
+                                            (track) => track.artist.id,
+                                        ),
+                                    ),
+                                )
                                     .slice(0, 25)
-                                    .map(artistId => {
-                                        const track = featuredTracks.find(t => t.artist.id === artistId);
-                                        const artistTracks = tracks.filter(t => t.artist.id === artistId);
+                                    .map((artistId) => {
+                                        const track = featuredTracks.find(
+                                            (t) => t.artist.id === artistId,
+                                        );
+                                        const artistTracks = tracks.filter(
+                                            (t) => t.artist.id === artistId,
+                                        );
                                         if (!track) return null;
-                                        
+
                                         return (
-                                            <div key={track.artist.id} className="group cursor-pointer text-center">
+                                            <div
+                                                key={track.artist.id}
+                                                className="group cursor-pointer text-center"
+                                            >
                                                 <div className="w-32 h-32 mx-auto mb-3 rounded-full overflow-hidden bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center relative group-hover:scale-105 transition-transform duration-300">
-                                                    {track.artist.profile_image_url ? (
+                                                    {track.artist
+                                                        .profile_image_url ? (
                                                         <Image
-                                                            src={track.artist.profile_image_url}
-                                                            alt={track.artist.name}
+                                                            src={
+                                                                track.artist
+                                                                    .profile_image_url
+                                                            }
+                                                            alt={
+                                                                track.artist
+                                                                    .name
+                                                            }
                                                             fill
                                                             sizes="128px"
                                                             className="object-cover"
@@ -282,13 +346,17 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                         <Users className="h-12 w-12 text-white" />
                                                     )}
                                                 </div>
-                                                <h3 className="font-semibold text-sm mb-1 truncate text-gray-900 dark:text-white">{track.artist.name}</h3>
+                                                <h3 className="font-semibold text-sm mb-1 truncate text-gray-900 dark:text-white">
+                                                    {track.artist.name}
+                                                </h3>
                                                 <p className="text-gray-600 dark:text-gray-400 text-xs">
-                                                    {artistTracks.length} bài hát
+                                                    {artistTracks.length} bài
+                                                    hát
                                                 </p>
                                             </div>
                                         );
-                                    })}</div>
+                                    })}
+                            </div>
                         </section>
 
                         {/* More Albums Section */}
@@ -303,19 +371,37 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                             </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                                {Array.from(new Set(trendingTracks.map(track => track.album.id)))
+                                {Array.from(
+                                    new Set(
+                                        trendingTracks.map(
+                                            (track) => track.album.id,
+                                        ),
+                                    ),
+                                )
                                     .slice(0, 25)
-                                    .map(albumId => {
-                                        const track = trendingTracks.find(t => t.album.id === albumId);
+                                    .map((albumId) => {
+                                        const track = trendingTracks.find(
+                                            (t) => t.album.id === albumId,
+                                        );
                                         if (!track) return null;
-                                        
+
                                         return (
-                                            <Card key={track.album.id} className="group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
+                                            <Card
+                                                key={track.album.id}
+                                                className="group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm"
+                                            >
                                                 <div className="relative aspect-square">
-                                                    {track.album.cover_image_url ? (
+                                                    {track.album
+                                                        .cover_image_url ? (
                                                         <Image
-                                                            src={track.album.cover_image_url}
-                                                            alt={track.album.title}
+                                                            src={
+                                                                track.album
+                                                                    .cover_image_url
+                                                            }
+                                                            alt={
+                                                                track.album
+                                                                    .title
+                                                            }
                                                             fill
                                                             sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
                                                             className="object-cover group-hover:scale-105 transition-transform duration-300"
@@ -325,11 +411,13 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                             <Music className="h-12 w-12 text-white" />
                                                         </div>
                                                     )}
-                                                    
+
                                                     <div className="absolute inset-0 flex items-center justify-center">
                                                         <Button
                                                             size="lg"
-                                                            onClick={() => playTrack(track)}
+                                                            onClick={() =>
+                                                                playTrack(track)
+                                                            }
                                                             className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full bg-white text-purple-600 hover:bg-white/90"
                                                         >
                                                             <Play className="h-5 w-5" />
@@ -337,8 +425,12 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                     </div>
                                                 </div>
                                                 <CardContent className="p-3">
-                                                    <h3 className="font-semibold text-sm mb-1 truncate">{track.album.title}</h3>
-                                                    <p className="text-gray-600 dark:text-gray-400 truncate text-xs">{track.artist.name}</p>
+                                                    <h3 className="font-semibold text-sm mb-1 truncate">
+                                                        {track.album.title}
+                                                    </h3>
+                                                    <p className="text-gray-600 dark:text-gray-400 truncate text-xs">
+                                                        {track.artist.name}
+                                                    </p>
                                                 </CardContent>
                                             </Card>
                                         );
@@ -358,21 +450,51 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                             </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                                {Array.from(new Set(trendingTracks.map(track => track.artist.id)))
-                                    .filter(artistId => !Array.from(new Set(featuredTracks.map(track => track.artist.id))).includes(artistId))
+                                {Array.from(
+                                    new Set(
+                                        trendingTracks.map(
+                                            (track) => track.artist.id,
+                                        ),
+                                    ),
+                                )
+                                    .filter(
+                                        (artistId) =>
+                                            !Array.from(
+                                                new Set(
+                                                    featuredTracks.map(
+                                                        (track) =>
+                                                            track.artist.id,
+                                                    ),
+                                                ),
+                                            ).includes(artistId),
+                                    )
                                     .slice(0, 25)
-                                    .map(artistId => {
-                                        const track = trendingTracks.find(t => t.artist.id === artistId);
-                                        const artistTracks = tracks.filter(t => t.artist.id === artistId);
+                                    .map((artistId) => {
+                                        const track = trendingTracks.find(
+                                            (t) => t.artist.id === artistId,
+                                        );
+                                        const artistTracks = tracks.filter(
+                                            (t) => t.artist.id === artistId,
+                                        );
                                         if (!track) return null;
-                                        
+
                                         return (
-                                            <div key={track.artist.id} className="group cursor-pointer text-center">
+                                            <div
+                                                key={track.artist.id}
+                                                className="group cursor-pointer text-center"
+                                            >
                                                 <div className="w-32 h-32 mx-auto mb-3 rounded-full overflow-hidden bg-gradient-to-br from-orange-400 to-red-400 flex items-center justify-center relative group-hover:scale-105 transition-transform duration-300">
-                                                    {track.artist.profile_image_url ? (
+                                                    {track.artist
+                                                        .profile_image_url ? (
                                                         <Image
-                                                            src={track.artist.profile_image_url}
-                                                            alt={track.artist.name}
+                                                            src={
+                                                                track.artist
+                                                                    .profile_image_url
+                                                            }
+                                                            alt={
+                                                                track.artist
+                                                                    .name
+                                                            }
                                                             fill
                                                             sizes="128px"
                                                             className="object-cover"
@@ -381,9 +503,12 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                         <Users className="h-12 w-12 text-white" />
                                                     )}
                                                 </div>
-                                                <h3 className="font-semibold text-sm mb-1 truncate text-gray-900 dark:text-white">{track.artist.name}</h3>
+                                                <h3 className="font-semibold text-sm mb-1 truncate text-gray-900 dark:text-white">
+                                                    {track.artist.name}
+                                                </h3>
                                                 <p className="text-gray-600 dark:text-gray-400 text-xs">
-                                                    {artistTracks.length} bài hát
+                                                    {artistTracks.length} bài
+                                                    hát
                                                 </p>
                                             </div>
                                         );
@@ -404,11 +529,17 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                                 {featuredTracks.slice(0, 8).map((track) => (
-                                    <Card key={track.id} className="group hover:shadow-2xl transition-all duration-500 cursor-pointer overflow-hidden border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
+                                    <Card
+                                        key={track.id}
+                                        className="group hover:shadow-2xl transition-all duration-500 cursor-pointer overflow-hidden border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm"
+                                    >
                                         <div className="relative aspect-square">
                                             {track.album.cover_image_url ? (
                                                 <Image
-                                                    src={track.album.cover_image_url}
+                                                    src={
+                                                        track.album
+                                                            .cover_image_url
+                                                    }
                                                     alt={track.album.title}
                                                     fill
                                                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
@@ -424,10 +555,14 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                             <div className="absolute inset-0 flex items-center justify-center">
                                                 <Button
                                                     size="lg"
-                                                    onClick={() => playTrack(track)}
+                                                    onClick={() =>
+                                                        playTrack(track)
+                                                    }
                                                     className="opacity-0 group-hover:opacity-100 transition-all duration-500 rounded-full bg-white text-purple-600 hover:bg-white/90 transform group-hover:scale-110"
                                                 >
-                                                    {currentTrack?.id === track.id && isPlaying ? (
+                                                    {currentTrack?.id ===
+                                                        track.id &&
+                                                    isPlaying ? (
                                                         <Pause className="h-6 w-6" />
                                                     ) : (
                                                         <Play className="h-6 w-6" />
@@ -436,27 +571,57 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                             </div>
 
                                             {/* Currently playing indicator */}
-                                            {currentTrack?.id === track.id && isPlaying && (
-                                                <div className="absolute top-3 right-3">
-                                                    <div className="w-8 h-8 bg-rose-500 rounded-full flex items-center justify-center">
-                                                        <div className="flex items-end space-x-0.5 h-4">
-                                                            <div className="w-0.5 bg-white animate-equalize-1" style={{ height: '30%' }}></div>
-                                                            <div className="w-0.5 bg-white animate-equalize-2" style={{ height: '100%' }}></div>
-                                                            <div className="w-0.5 bg-white animate-equalize-3" style={{ height: '60%' }}></div>
+                                            {currentTrack?.id === track.id &&
+                                                isPlaying && (
+                                                    <div className="absolute top-3 right-3">
+                                                        <div className="w-8 h-8 bg-rose-500 rounded-full flex items-center justify-center">
+                                                            <div className="flex items-end space-x-0.5 h-4">
+                                                                <div
+                                                                    className="w-0.5 bg-white animate-equalize-1"
+                                                                    style={{
+                                                                        height: "30%",
+                                                                    }}
+                                                                ></div>
+                                                                <div
+                                                                    className="w-0.5 bg-white animate-equalize-2"
+                                                                    style={{
+                                                                        height: "100%",
+                                                                    }}
+                                                                ></div>
+                                                                <div
+                                                                    className="w-0.5 bg-white animate-equalize-3"
+                                                                    style={{
+                                                                        height: "60%",
+                                                                    }}
+                                                                ></div>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            )}
+                                                )}
                                         </div>
 
                                         <CardContent className="p-4">
-                                            <h3 className="font-semibold text-lg mb-1 truncate">{track.title}</h3>
-                                            <p className="text-gray-600 dark:text-gray-400 truncate text-sm">{track.artist.name}</p>
+                                            <h3 className="font-semibold text-lg mb-1 truncate">
+                                                {track.title}
+                                            </h3>
+                                            <p className="text-gray-600 dark:text-gray-400 truncate text-sm">
+                                                {track.artist.name}
+                                            </p>
                                             <div className="flex items-center justify-between mt-3">
-                                                <Badge variant="secondary" className="text-xs">{track.genre?.name || "Unknown"}</Badge>
+                                                <Badge
+                                                    variant="secondary"
+                                                    className="text-xs"
+                                                >
+                                                    {track.genre?.name ||
+                                                        "Unknown"}
+                                                </Badge>
                                                 <div className="flex items-center gap-1 text-xs text-gray-500">
                                                     <Clock className="h-3 w-3" />
-                                                    <span>{formatDuration(track.duration)}</span>
+                                                    <span>
+                                                        {formatDuration(
+                                                            track.duration,
+                                                        )}
+                                                    </span>
                                                 </div>
                                             </div>
                                         </CardContent>
@@ -491,11 +656,16 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                         {/* Grid view for library */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                             {filteredTracks.map((track) => (
-                                <Card key={track.id} className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
+                                <Card
+                                    key={track.id}
+                                    className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm"
+                                >
                                     <div className="relative aspect-square">
                                         {track.album.cover_image_url ? (
                                             <Image
-                                                src={track.album.cover_image_url}
+                                                src={
+                                                    track.album.cover_image_url
+                                                }
                                                 alt={track.album.title}
                                                 fill
                                                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
@@ -514,7 +684,8 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                 onClick={() => playTrack(track)}
                                                 className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full bg-white text-purple-600 hover:bg-white/90"
                                             >
-                                                {currentTrack?.id === track.id && isPlaying ? (
+                                                {currentTrack?.id ===
+                                                    track.id && isPlaying ? (
                                                     <Pause className="h-6 w-6" />
                                                 ) : (
                                                     <Play className="h-6 w-6" />
@@ -523,37 +694,76 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                         </div>
 
                                         {/* Currently playing indicator */}
-                                        {currentTrack?.id === track.id && isPlaying && (
-                                            <div className="absolute top-3 right-3">
-                                                <div className="w-8 h-8 bg-rose-500 rounded-full flex items-center justify-center">
-                                                    <div className="flex items-end space-x-0.5 h-4">
-                                                        <div className="w-0.5 bg-white animate-equalize-1" style={{ height: '30%' }}></div>
-                                                        <div className="w-0.5 bg-white animate-equalize-2" style={{ height: '100%' }}></div>
-                                                        <div className="w-0.5 bg-white animate-equalize-3" style={{ height: '60%' }}></div>
+                                        {currentTrack?.id === track.id &&
+                                            isPlaying && (
+                                                <div className="absolute top-3 right-3">
+                                                    <div className="w-8 h-8 bg-rose-500 rounded-full flex items-center justify-center">
+                                                        <div className="flex items-end space-x-0.5 h-4">
+                                                            <div
+                                                                className="w-0.5 bg-white animate-equalize-1"
+                                                                style={{
+                                                                    height: "30%",
+                                                                }}
+                                                            ></div>
+                                                            <div
+                                                                className="w-0.5 bg-white animate-equalize-2"
+                                                                style={{
+                                                                    height: "100%",
+                                                                }}
+                                                            ></div>
+                                                            <div
+                                                                className="w-0.5 bg-white animate-equalize-3"
+                                                                style={{
+                                                                    height: "60%",
+                                                                }}
+                                                            ></div>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        )}
+                                            )}
                                     </div>
 
                                     <CardContent className="p-4">
-                                        <h3 className="font-semibold text-base mb-1 truncate">{track.title}</h3>
-                                        <p className="text-gray-600 dark:text-gray-400 truncate text-sm mb-2">{track.artist.name}</p>
-                                        <p className="text-gray-500 dark:text-gray-500 truncate text-xs mb-3">{track.album.title}</p>
-                                        
+                                        <h3 className="font-semibold text-base mb-1 truncate">
+                                            {track.title}
+                                        </h3>
+                                        <p className="text-gray-600 dark:text-gray-400 truncate text-sm mb-2">
+                                            {track.artist.name}
+                                        </p>
+                                        <p className="text-gray-500 dark:text-gray-500 truncate text-xs mb-3">
+                                            {track.album.title}
+                                        </p>
+
                                         <div className="flex items-center justify-between">
-                                            <Badge variant="outline" className="text-xs">{track.genre?.name || "Unknown"}</Badge>
+                                            <Badge
+                                                variant="outline"
+                                                className="text-xs"
+                                            >
+                                                {track.genre?.name || "Unknown"}
+                                            </Badge>
                                             <div className="flex items-center gap-1 text-xs text-gray-500">
                                                 <Clock className="h-3 w-3" />
-                                                <span>{formatDuration(track.duration)}</span>
+                                                <span>
+                                                    {formatDuration(
+                                                        track.duration,
+                                                    )}
+                                                </span>
                                             </div>
                                         </div>
 
                                         <div className="flex items-center justify-between mt-3 pt-3 border-t">
-                                            <Button size="sm" variant="ghost" className="p-2">
+                                            <Button
+                                                size="sm"
+                                                variant="ghost"
+                                                className="p-2"
+                                            >
                                                 <Heart className="h-4 w-4" />
                                             </Button>
-                                            <Button size="sm" variant="ghost" className="p-2">
+                                            <Button
+                                                size="sm"
+                                                variant="ghost"
+                                                className="p-2"
+                                            >
                                                 <Share className="h-4 w-4" />
                                             </Button>
                                         </div>
@@ -574,7 +784,8 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                 Upload Your Music
                             </h2>
                             <p className="text-gray-600 dark:text-gray-400 text-lg">
-                                Share your creativity with the world. Upload your tracks and reach new audiences.
+                                Share your creativity with the world. Upload
+                                your tracks and reach new audiences.
                             </p>
                         </div>
 
@@ -584,11 +795,17 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                     <div className="w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-6">
                                         <Upload className="h-10 w-10 text-white" />
                                     </div>
-                                    <h3 className="text-xl font-semibold mb-2">Drag & Drop Your Music Files</h3>
+                                    <h3 className="text-xl font-semibold mb-2">
+                                        Drag & Drop Your Music Files
+                                    </h3>
                                     <p className="text-gray-600 dark:text-gray-400 mb-6">
                                         Support for MP3, WAV, FLAC, and more
                                     </p>
-                                    <Button onClick={handleUploadClick} size="lg" className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
+                                    <Button
+                                        onClick={handleUploadClick}
+                                        size="lg"
+                                        className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                                    >
                                         <Plus className="mr-2 h-5 w-5" />
                                         Choose Files
                                     </Button>
@@ -607,22 +824,37 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                         <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center mx-auto mb-3">
                                             <Music className="h-6 w-6 text-purple-600" />
                                         </div>
-                                        <h4 className="font-semibold mb-2">High Quality</h4>
-                                        <p className="text-sm text-gray-600 dark:text-gray-400">Upload in lossless quality for the best listening experience</p>
+                                        <h4 className="font-semibold mb-2">
+                                            High Quality
+                                        </h4>
+                                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                                            Upload in lossless quality for the
+                                            best listening experience
+                                        </p>
                                     </div>
                                     <div className="text-center p-6 rounded-xl bg-green-50 dark:bg-green-900/20">
                                         <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-3">
                                             <Share className="h-6 w-6 text-green-600" />
                                         </div>
-                                        <h4 className="font-semibold mb-2">Easy Sharing</h4>
-                                        <p className="text-sm text-gray-600 dark:text-gray-400">Share your music instantly with built-in social features</p>
+                                        <h4 className="font-semibold mb-2">
+                                            Easy Sharing
+                                        </h4>
+                                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                                            Share your music instantly with
+                                            built-in social features
+                                        </p>
                                     </div>
                                     <div className="text-center p-6 rounded-xl bg-blue-50 dark:bg-blue-900/20">
                                         <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-3">
                                             <TrendingUp className="h-6 w-6 text-blue-600" />
                                         </div>
-                                        <h4 className="font-semibold mb-2">Analytics</h4>
-                                        <p className="text-sm text-gray-600 dark:text-gray-400">Track plays, likes, and audience engagement</p>
+                                        <h4 className="font-semibold mb-2">
+                                            Analytics
+                                        </h4>
+                                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                                            Track plays, likes, and audience
+                                            engagement
+                                        </p>
                                     </div>
                                 </div>
                             </div>
