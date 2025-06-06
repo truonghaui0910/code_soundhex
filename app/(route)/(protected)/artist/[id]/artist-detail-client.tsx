@@ -54,7 +54,7 @@ interface ArtistDetailClientProps {
 }
 
 export function ArtistDetailClient({ artist, tracks, albums }: ArtistDetailClientProps) {
-  const { currentTrack, isPlaying, playTrack } = useAudioPlayer();
+  const { currentTrack, isPlaying, playTrack, setTrackList } = useAudioPlayer();
   const { downloadTrack, downloadMultipleTracks, isDownloading, isTrackDownloading } = useDownload();
 
   const handlePlayAllTracks = () => {
