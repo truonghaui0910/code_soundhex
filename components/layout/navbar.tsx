@@ -44,7 +44,7 @@ export function Navbar() {
   }, []);
 
   return (
-    <div className="border-b fixed top-0 left-0 right-0 bg-card z-50">
+    <div className="border-b fixed top-0 left-0 right-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm z-50">
       <div className="flex h-16 items-center px-4">
         <div className="flex items-center">
         <Link href="/" className="flex items-center font-bold text-xl text-rose-600 mr-2 sm:mr-6">

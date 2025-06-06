@@ -204,9 +204,9 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                 </Button>
                             </div>
 
-                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                                 {Array.from(new Set(featuredTracks.map(track => track.album.id)))
-                                    .slice(0, 10)
+                                    .slice(0, 25)
                                     .map(albumId => {
                                         const track = featuredTracks.find(t => t.album.id === albumId);
                                         if (!track) return null;
@@ -259,34 +259,133 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                 </h2>
                             </div>
 
-                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                                 {Array.from(new Set(featuredTracks.map(track => track.artist.id)))
-                                    .slice(0, 12)
+                                    .slice(0, 25)
                                     .map(artistId => {
                                         const track = featuredTracks.find(t => t.artist.id === artistId);
+                                        const artistTracks = tracks.filter(t => t.artist.id === artistId);
                                         if (!track) return null;
                                         
                                         return (
-                                            <Card key={track.artist.id} className="group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
-                                                <CardContent className="p-4 text-center">
-                                                    <div className="w-20 h-20 mx-auto mb-3 rounded-full overflow-hidden bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center relative">
-                                                        {track.artist.profile_image_url ? (
-                                                            <Image
-                                                                src={track.artist.profile_image_url}
-                                                                alt={track.artist.name}
-                                                                fill
-                                                                className="object-cover"
-                                                            />
-                                                        ) : (
-                                                            <Users className="h-8 w-8 text-white" />
-                                                        )}
+                                            <div key={track.artist.id} className="group cursor-pointer text-center">
+                                                <div className="w-32 h-32 mx-auto mb-3 rounded-full overflow-hidden bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center relative group-hover:scale-105 transition-transform duration-300">
+                                                    {track.artist.profile_image_url ? (
+                                                        <Image
+                                                            src={track.artist.profile_image_url}
+                                                            alt={track.artist.name}
+                                                            fill
+                                                            sizes="128px"
+                                                            className="object-cover"
+                                                        />
+                                                    ) : (
+                                                        <Users className="h-12 w-12 text-white" />
+                                                    )}
+                                                </div>
+                                                <h3 className="font-semibold text-sm mb-1 truncate text-gray-900 dark:text-white">{track.artist.name}</h3>
+                                                <p className="text-gray-600 dark:text-gray-400 text-xs">
+                                                    {artistTracks.length} bài hát
+                                                </p>
+                                            </div>
+                                        );
+                                    })}</div>
+                        </section>
+
+                        {/* More Albums Section */}
+                        <section>
+                            <div className="flex items-center justify-between mb-8">
+                                <h2 className="text-xl font-bold flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-teal-500 rounded-full flex items-center justify-center">
+                                        <Music className="h-5 w-5 text-white" />
+                                    </div>
+                                    More Albums
+                                </h2>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                                {Array.from(new Set(trendingTracks.map(track => track.album.id)))
+                                    .slice(0, 25)
+                                    .map(albumId => {
+                                        const track = trendingTracks.find(t => t.album.id === albumId);
+                                        if (!track) return null;
+                                        
+                                        return (
+                                            <Card key={track.album.id} className="group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
+                                                <div className="relative aspect-square">
+                                                    {track.album.cover_image_url ? (
+                                                        <Image
+                                                            src={track.album.cover_image_url}
+                                                            alt={track.album.title}
+                                                            fill
+                                                            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
+                                                            className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                                        />
+                                                    ) : (
+                                                        <div className="w-full h-full bg-gradient-to-br from-green-400 to-teal-400 flex items-center justify-center">
+                                                            <Music className="h-12 w-12 text-white" />
+                                                        </div>
+                                                    )}
+                                                    
+                                                    <div className="absolute inset-0 flex items-center justify-center">
+                                                        <Button
+                                                            size="lg"
+                                                            onClick={() => playTrack(track)}
+                                                            className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full bg-white text-purple-600 hover:bg-white/90"
+                                                        >
+                                                            <Play className="h-5 w-5" />
+                                                        </Button>
                                                     </div>
-                                                    <h3 className="font-semibold text-sm mb-1 truncate">{track.artist.name}</h3>
-                                                    <p className="text-gray-600 dark:text-gray-400 text-xs">
-                                                        {filteredTracks.filter(t => t.artist.id === track.artist.id).length} songs
-                                                    </p>
+                                                </div>
+                                                <CardContent className="p-3">
+                                                    <h3 className="font-semibold text-sm mb-1 truncate">{track.album.title}</h3>
+                                                    <p className="text-gray-600 dark:text-gray-400 truncate text-xs">{track.artist.name}</p>
                                                 </CardContent>
                                             </Card>
+                                        );
+                                    })}
+                            </div>
+                        </section>
+
+                        {/* More Artists Section */}
+                        <section>
+                            <div className="flex items-center justify-between mb-8">
+                                <h2 className="text-xl font-bold flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center">
+                                        <Users className="h-5 w-5 text-white" />
+                                    </div>
+                                    More Artists
+                                </h2>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                                {Array.from(new Set(trendingTracks.map(track => track.artist.id)))
+                                    .filter(artistId => !Array.from(new Set(featuredTracks.map(track => track.artist.id))).includes(artistId))
+                                    .slice(0, 25)
+                                    .map(artistId => {
+                                        const track = trendingTracks.find(t => t.artist.id === artistId);
+                                        const artistTracks = tracks.filter(t => t.artist.id === artistId);
+                                        if (!track) return null;
+                                        
+                                        return (
+                                            <div key={track.artist.id} className="group cursor-pointer text-center">
+                                                <div className="w-32 h-32 mx-auto mb-3 rounded-full overflow-hidden bg-gradient-to-br from-orange-400 to-red-400 flex items-center justify-center relative group-hover:scale-105 transition-transform duration-300">
+                                                    {track.artist.profile_image_url ? (
+                                                        <Image
+                                                            src={track.artist.profile_image_url}
+                                                            alt={track.artist.name}
+                                                            fill
+                                                            sizes="128px"
+                                                            className="object-cover"
+                                                        />
+                                                    ) : (
+                                                        <Users className="h-12 w-12 text-white" />
+                                                    )}
+                                                </div>
+                                                <h3 className="font-semibold text-sm mb-1 truncate text-gray-900 dark:text-white">{track.artist.name}</h3>
+                                                <p className="text-gray-600 dark:text-gray-400 text-xs">
+                                                    {artistTracks.length} bài hát
+                                                </p>
+                                            </div>
                                         );
                                     })}
                             </div>
