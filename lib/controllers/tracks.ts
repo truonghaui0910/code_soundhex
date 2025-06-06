@@ -2,6 +2,7 @@ import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { Track } from "@/lib/definitions/Track";
 import { Database } from "@/types/supabase";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
 /**
  * Controller để xử lý các tác vụ liên quan đến tracks
@@ -12,7 +13,7 @@ export class TracksController {
    */
   static async getAllTracks(): Promise<Track[]> {
     const supabase = createServerComponentClient<Database>({ cookies });
-    
+
     const { data, error } = await supabase
       .from("tracks")
       .select(`
@@ -36,7 +37,7 @@ export class TracksController {
    */
   static async getTrackById(id: number): Promise<Track | null> {
     const supabase = createServerComponentClient<Database>({ cookies });
-    
+
     const { data, error } = await supabase
       .from("tracks")
       .select(`
@@ -64,8 +65,8 @@ export class TracksController {
    * Lấy danh sách bài hát theo nghệ sĩ
    */
   static async getTracksByArtist(artistId: number): Promise<Track[]> {
-    const supabase = createServerComponentClient<Database>({ cookies });
-    
+    const supabase = createClientComponentClient<Database>();
+
     const { data, error } = await supabase
       .from("tracks")
       .select(`
@@ -149,8 +150,8 @@ export class TracksController {
    * Lấy danh sách bài hát theo nghệ sĩ
    */
   static async getTracksByArtist(artistId: number): Promise<Track[]> {
-    const supabase = createServerComponentClient<Database>({ cookies });
-    
+    const supabase = createClientComponentClient<Database>();
+
     const { data, error } = await supabase
       .from("tracks")
       .select(`
@@ -192,7 +193,7 @@ export class TracksController {
    */
   static async getTracksByGenre(genreId: number): Promise<Track[]> {
     const supabase = createServerComponentClient<Database>({ cookies });
-    
+
     const { data, error } = await supabase
       .from("tracks")
       .select(`
@@ -217,10 +218,10 @@ export class TracksController {
    */
   static async searchTracks(query: string): Promise<Track[]> {
     const supabase = createServerComponentClient<Database>({ cookies });
-    
+
     // Convert query to lowercase for case-insensitive search
     const searchTerm = query.toLowerCase();
-    
+
     const { data, error } = await supabase
       .from("tracks")
       .select(`
