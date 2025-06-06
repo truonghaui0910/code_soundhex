@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useMemo } from "react";
 import Image from "next/image";
-import Link from 'next/link';
+import Link from "next/link";
 import {
     Music,
     Search,
@@ -286,10 +286,11 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                         if (!track) return null;
 
                                         return (
-                                            <Link key={track.album.id} href={`/album/${track.album.id}`}>
-                                                <Card
-                                                    className="group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm"
-                                                >
+                                            <Link
+                                                key={track.album.id}
+                                                href={`/album/${track.album.id}`}
+                                            >
+                                                <Card className="group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
                                                     <div className="relative aspect-square">
                                                         {track.album
                                                             .cover_image_url ? (
@@ -316,7 +317,9 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                             <Button
                                                                 size="lg"
                                                                 onClick={() =>
-                                                                    playTrack(track)
+                                                                    playTrack(
+                                                                        track,
+                                                                    )
                                                                 }
                                                                 className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full bg-white text-purple-600 hover:bg-white/90"
                                                             >
@@ -384,7 +387,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                             alt={
                                                                 track.artist
                                                                     .name
-                                                                                         }
+                                                            }
                                                             fill
                                                             sizes="128px"
                                                             className="object-cover"
@@ -394,7 +397,11 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                     )}
                                                 </div>
                                                 <h3 className="font-semibold text-sm mb-1 truncate text-gray-900 dark:text-white hover:underline cursor-pointer">
-                                                    {track.artist.name}
+                                                    <Link
+                                                        href={`/artist/${track.artist.id}`}
+                                                    >
+                                                        {track.artist.name}
+                                                    </Link>
                                                 </h3>
                                                 <p className="text-gray-600 dark:text-gray-400 text-xs">
                                                     {artistTracks.length} songs
@@ -432,10 +439,11 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                         if (!track) return null;
 
                                         return (
-                                            <Link key={track.album.id} href={`/album/${track.album.id}`}>
-                                                <Card
-                                                    className="group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm"
-                                                >
+                                            <Link
+                                                key={track.album.id}
+                                                href={`/album/${track.album.id}`}
+                                            >
+                                                <Card className="group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
                                                     <div className="relative aspect-square">
                                                         {track.album
                                                             .cover_image_url ? (
@@ -462,7 +470,9 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                             <Button
                                                                 size="lg"
                                                                 onClick={() =>
-                                                                    playTrack(track)
+                                                                    playTrack(
+                                                                        track,
+                                                                    )
                                                                 }
                                                                 className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full bg-white text-purple-600 hover:bg-white/90"
                                                             >
@@ -550,7 +560,9 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                         <Users className="h-12 w-12 text-white" />
                                                     )}
                                                 </div>
-                                                <Link href={`/artist/${track.artist.id}`}>
+                                                <Link
+                                                    href={`/artist/${track.artist.id}`}
+                                                >
                                                     <h3 className="font-semibold text-sm mb-1 truncate text-gray-900 dark:text-white hover:underline cursor-pointer">
                                                         {track.artist.name}
                                                     </h3>
@@ -785,7 +797,8 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                         <div className="flex items-center justify-between">
                                             <Badge
                                                 variant="outline"
-                                                className="text-xs"                                            >
+                                                className="text-xs"
+                                            >
                                                 {track.genre?.name || "Unknown"}
                                             </Badge>
                                             <div className="flex items-center gap-1 text-xs text-gray-500">
