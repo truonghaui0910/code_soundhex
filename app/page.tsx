@@ -86,12 +86,15 @@ export default function Home() {
             </div>
 
             {/* Equalizer Animation */}
-            <div className={`flex justify-center space-x-2 mb-12 transform transition-all duration-1000 delay-500 ${visible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
+            <div className={`flex justify-center items-center space-x-2 mb-12 h-16 transform transition-all duration-1000 delay-500 ${visible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
               {[1, 2, 3, 4, 1, 2, 3, 4].map((num, idx) => (
                 <div
                   key={idx}
-                  className={`w-1 bg-music-gradient rounded-full animate-equalize-${num}`}
-                  style={{ animationDelay: `${idx * 0.1}s` }}
+                  className={`w-1 h-12 bg-music-gradient rounded-full animate-equalize-${num}`}
+                  style={{ 
+                    animationDelay: `${idx * 0.1}s`,
+                    transformOrigin: 'center'
+                  }}
                 />
               ))}
             </div>
