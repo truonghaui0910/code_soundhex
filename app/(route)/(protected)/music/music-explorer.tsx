@@ -826,12 +826,20 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                         <Button
                                                             size="sm"
                                                             variant="ghost"
-                                                            className="p-2"
+                                                            className={`p-2 relative overflow-hidden ${isTrackDownloading(track.id) ? 'bg-blue-50 dark:bg-blue-900/20' : ''}`}
                                                             title="Download"
                                                             onClick={() => downloadTrack(track)}
                                                             disabled={isTrackDownloading(track.id)}
                                                         >
-                                                            <Download className={`h-4 w-4 ${isTrackDownloading(track.id) ? 'animate-spin' : ''}`} />
+                                                            {isTrackDownloading(track.id) ? (
+                                                              <>
+                                                                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-blue-600/20 animate-pulse"></div>
+                                                                <div className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-blue-500 to-blue-600 animate-loading-bar"></div>
+                                                                <Download className="h-4 w-4 text-blue-600 animate-bounce" />
+                                                              </>
+                                                            ) : (
+                                                              <Download className="h-4 w-4" />
+                                                            )}} />
                                                         </Button>
                                                         <Button
                                                             size="sm"
