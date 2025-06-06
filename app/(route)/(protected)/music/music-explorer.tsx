@@ -112,11 +112,16 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
         );
     }, [tracks]);
 
-    // Get trending tracks (memoized random selection)
+    // Get trending tracks (memoized stable random selection)
     const trendingTracks = useMemo(() => {
-        return [...filteredTracks]
-            .sort(() => 0.5 - Math.random())
-            .slice(0, 12);
+        // Create a stable random order based on track IDs
+        const shuffled = [...filteredTracks].sort((a, b) => {
+            // Use track IDs to create a stable sort
+            const seedA = a.id * 9301 + 49297;
+            const seedB = b.id * 9301 + 49297;
+            return (seedA % 233280) - (seedB % 233280);
+        });
+        return shuffled.slice(0, 12);
     }, [filteredTracks]);
 
     const handleUploadClick = () => {
