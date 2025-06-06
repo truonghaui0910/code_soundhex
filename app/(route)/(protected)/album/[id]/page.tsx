@@ -1,4 +1,3 @@
-
 import { notFound } from "next/navigation";
 import { TracksController } from "@/lib/controllers/tracks";
 import { AlbumsController } from "@/lib/controllers/albums";
@@ -11,13 +10,15 @@ import { Play, Clock, Music, Heart, Share } from "lucide-react";
 
 // Helper function to format time
 const formatDuration = (seconds: number | null) => {
-    if (!seconds) return "--:--";
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  if (!seconds) return "--:--";
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs.toString().padStart(2, "0")}`;
 };
 
-export default async function AlbumDetailPage({ params }: Readonly<{ params: { id: string } }>) {
+export default async function AlbumDetailPage({
+  params,
+}: Readonly<{ params: { id: string } }>) {
   const albumId = Number(params.id);
   if (!albumId) return notFound();
 
@@ -48,12 +49,12 @@ export default async function AlbumDetailPage({ params }: Readonly<{ params: { i
           <div className="flex flex-col md:flex-row gap-8 items-center md:items-end">
             <div className="w-48 h-48 md:w-64 md:h-64 rounded-xl overflow-hidden bg-white/10 backdrop-blur-sm flex items-center justify-center shadow-2xl">
               {album.cover_image_url ? (
-                <Image 
-                  src={album.cover_image_url} 
-                  alt={album.title} 
-                  width={256} 
-                  height={256} 
-                  className="object-cover w-full h-full" 
+                <Image
+                  src={album.cover_image_url}
+                  alt={album.title}
+                  width={256}
+                  height={256}
+                  className="object-cover w-full h-full"
                 />
               ) : (
                 <Music className="h-20 w-20 text-white/60" />
@@ -63,9 +64,13 @@ export default async function AlbumDetailPage({ params }: Readonly<{ params: { i
               <Badge className="bg-white/20 text-white border-white/30 w-fit mx-auto md:mx-0">
                 Album
               </Badge>
-              <h1 className="text-4xl md:text-6xl font-bold leading-tight">{album.title}</h1>
+              <h1 className="text-4xl md:text-6xl font-bold leading-tight">
+                {album.title}
+              </h1>
               <div className="flex items-center gap-3 text-lg text-purple-100 justify-center md:justify-start">
-                <span className="font-medium">{album.artist?.name || "Unknown Artist"}</span>
+                <span className="font-medium">
+                  {album.artist?.name || "Unknown Artist"}
+                </span>
                 {album.release_date && (
                   <>
                     <span>•</span>
@@ -80,15 +85,26 @@ export default async function AlbumDetailPage({ params }: Readonly<{ params: { i
                 )}
               </div>
               <div className="flex gap-4 justify-center md:justify-start mt-4">
-                <Button size="lg" className="bg-white text-purple-600 hover:bg-white/90">
+                <Button
+                  size="lg"
+                  className="bg-white text-purple-600 hover:bg-white/90"
+                >
                   <Play className="mr-2 h-5 w-5" />
                   Play Album
                 </Button>
-                <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-white/30 text-white hover:bg-white/10"
+                >
                   <Heart className="mr-2 h-5 w-5" />
                   Save
                 </Button>
-                <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-white/30 text-white hover:bg-white/10"
+                >
                   <Share className="mr-2 h-5 w-5" />
                   Share
                 </Button>
@@ -107,10 +123,10 @@ export default async function AlbumDetailPage({ params }: Readonly<{ params: { i
                 <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
                   <Music className="h-4 w-4 text-white" />
                 </div>
-                Danh sách bài hát
+                Song list
               </h2>
             </div>
-            
+
             {tracks && tracks.length > 0 ? (
               <div className="space-y-1">
                 {tracks.map((track, idx) => (
@@ -128,7 +144,7 @@ export default async function AlbumDetailPage({ params }: Readonly<{ params: { i
                     >
                       <Play className="h-4 w-4" />
                     </Button>
-                    
+
                     <div className="w-12 h-12 rounded-lg overflow-hidden bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0">
                       {track.album?.cover_image_url ? (
                         <Image
