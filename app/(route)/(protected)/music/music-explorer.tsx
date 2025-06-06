@@ -397,8 +397,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                     {track.artist.name}
                                                 </h3>
                                                 <p className="text-gray-600 dark:text-gray-400 text-xs">
-                                                    {artistTracks.length} bài
-                                                    hát
+                                                    {artistTracks.length} songs
                                                 </p>
                                             </div>
                                         );
@@ -557,8 +556,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                     </h3>
                                                 </Link>
                                                 <p className="text-gray-600 dark:text-gray-400 text-xs">
-                                                    {artistTracks.length} bài
-                                                    hát
+                                                    {artistTracks.length} songs
                                                 </p>
                                             </div>
                                         );
@@ -784,7 +782,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                             {track.album.title}
                                         </p>
 
-                                        <div className="flex items-center justify-between"><previous_generation>
+                                        <div className="flex items-center justify-between">
                                             <Badge
                                                 variant="outline"
                                                 className="text-xs"                                            >

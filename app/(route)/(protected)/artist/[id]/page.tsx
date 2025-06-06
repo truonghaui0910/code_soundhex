@@ -35,7 +35,7 @@ export default async function ArtistDetailPage({ params }: { params: { id: strin
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20">
         <div className="container mx-auto py-10">
           <h1 className="text-3xl font-bold mb-4">Artist</h1>
-          <p className="text-red-500">Không thể tải thông tin nghệ sĩ.</p>
+          <p className="text-red-500">Cannot load artist information.</p>
         </div>
       </div>
     );
@@ -79,7 +79,7 @@ export default async function ArtistDetailPage({ params }: { params: { id: strin
                   </>
                 )}
                 {tracks && tracks.length > 0 && (
-                  <span>{tracks.length} bài hát</span>
+                  <span>{tracks.length} songs</span>
                 )}
               </div>
               <div className="flex gap-4 justify-center md:justify-start mt-4">

@@ -1,3 +1,6 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import { notFound } from "next/navigation";
 import { TracksController } from "@/lib/controllers/tracks";
 import { AlbumsController } from "@/lib/controllers/albums";
@@ -8,6 +11,8 @@ import { Button } from "@/components/ui/button";
 import { MusicPlayer } from "@/components/music/MusicPlayer";
 import { Play, Clock, Music, Heart, Share } from "lucide-react";
 import Link from "next/link";
+import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
+import { Track } from "@/lib/definitions/Track";
 
 // Helper function to format time
 const formatDuration = (seconds: number | null) => {
@@ -17,29 +22,66 @@ const formatDuration = (seconds: number | null) => {
   return `${mins}:${secs.toString().padStart(2, "0")}`;
 };
 
-export default async function AlbumDetailPage({
+export default function AlbumDetailPage({
   params,
 }: Readonly<{ params: { id: string } }>) {
   const albumId = Number(params.id);
-  if (!albumId) return notFound();
+  const { setTrackList, playTrack } = useAudioPlayer();
+  const [album, setAlbum] = useState(null);
+  const [tracks, setTracks] = useState<Track[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Lấy thông tin album và danh sách bài hát
-  let album, tracks;
-  try {
-    const albums = await AlbumsController.getAllAlbums();
-    album = albums.find((a) => a.id === albumId);
-    tracks = await TracksController.getTracksByAlbum(albumId);
-  } catch (error) {
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!albumId) return notFound();
+
+      try {
+        const albums = await AlbumsController.getAllAlbums();
+        const foundAlbum = albums.find((a) => a.id === albumId);
+        if (!foundAlbum) return notFound();
+        setAlbum(foundAlbum);
+
+        const tracksData = await TracksController.getTracksByAlbum(albumId);
+        setTracks(tracksData);
+      } catch (error) {
+        console.error("Error loading album:", error);
+        // Consider setting an error state to display an error message to the user
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [albumId]);
+
+  if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20">
         <div className="container mx-auto py-10">
           <h1 className="text-3xl font-bold mb-4">Album</h1>
-          <p className="text-red-500">Cant not load album.</p>
+          <p className="text-gray-500">Loading album...</p>
         </div>
       </div>
     );
   }
-  if (!album) return notFound();
+
+  if (!album) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20">
+        <div className="container mx-auto py-10">
+          <h1 className="text-3xl font-bold mb-4">Album</h1>
+          <p className="text-red-500">Album not found.</p>
+        </div>
+      </div>
+    );
+  }
+
+  const handlePlayAlbum = () => {
+    if (tracks && tracks.length > 0) {
+      setTrackList(tracks);
+      playTrack(tracks[0]); // Play the first track
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20">
@@ -84,7 +126,7 @@ export default async function AlbumDetailPage({
                 {tracks && tracks.length > 0 && (
                   <>
                     <span>•</span>
-                    <span>{tracks.length} bài hát</span>
+                    <span>{tracks.length} songs</span>
                   </>
                 )}
               </div>
@@ -92,6 +134,7 @@ export default async function AlbumDetailPage({
                 <Button
                   size="lg"
                   className="bg-white text-purple-600 hover:bg-white/90"
+                  onClick={handlePlayAlbum}
                 >
                   <Play className="mr-2 h-5 w-5" />
                   Play Album
@@ -127,7 +170,7 @@ export default async function AlbumDetailPage({
                 <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
                   <Music className="h-4 w-4 text-white" />
                 </div>
-                Song list
+                Track List
               </h2>
             </div>
 
@@ -145,6 +188,10 @@ export default async function AlbumDetailPage({
                       size="sm"
                       variant="ghost"
                       className="w-8 h-8 p-0 hidden group-hover:flex rounded-full"
+                      onClick={() => {
+                        setTrackList(tracks);
+                        playTrack(track);
+                      }}
                     >
                       <Play className="h-4 w-4" />
                     </Button>
@@ -204,10 +251,10 @@ export default async function AlbumDetailPage({
               <div className="py-16 text-center">
                 <Music className="h-16 w-16 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                  No Song
+                  No Songs
                 </h3>
                 <p className="text-gray-600 dark:text-gray-400">
-                  Album này hiện chưa có bài hát nào.
+                  This album currently has no songs.
                 </p>
               </div>
             )}
