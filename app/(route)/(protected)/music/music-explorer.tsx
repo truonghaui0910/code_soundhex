@@ -148,11 +148,11 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                     <div className="h-96 bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600"></div>
                     <div className="container mx-auto px-6 py-12">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                            {[...Array(8)].map((_, i) => (
+                            {Array.from({ length: 8 }, (_, i) => (
                                 <div
                                     key={i}
                                     className="bg-gray-200 dark:bg-gray-700 rounded-lg h-64"
-                                ></div>
+                                />
                             ))}
                         </div>
                     </div>
