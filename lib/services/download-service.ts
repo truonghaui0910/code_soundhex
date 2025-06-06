@@ -7,8 +7,16 @@ export class DownloadService {
    */
   static async downloadTrack(track: Track): Promise<void> {
     try {
-      // Fetch the audio file
-      const response = await fetch(track.file_url);
+      let response: Response;
+      
+      try {
+        // Try direct fetch first
+        response = await fetch(track.file_url);
+      } catch (corsError) {
+        // If CORS blocked, use proxy
+        const proxyUrl = `/api/proxy-audio?url=${encodeURIComponent(track.file_url)}`;
+        response = await fetch(proxyUrl);
+      }
       
       if (!response.ok) {
         throw new Error(`Failed to fetch track: ${response.statusText}`);
@@ -40,6 +48,13 @@ export class DownloadService {
       
     } catch (error) {
       console.error('Download failed:', error);
+      
+      // Fallback: open in new tab if CORS blocked
+      if (error instanceof TypeError && error.message.includes('CORS')) {
+        window.open(track.file_url, '_blank');
+        return;
+      }
+      
       throw new Error('Failed to download track. Please try again.');
     }
   }
