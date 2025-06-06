@@ -1,3 +1,5 @@
+"use client";
+
 import { notFound } from "next/navigation";
 import { TracksController } from "@/lib/controllers/tracks";
 import { AlbumsController } from "@/lib/controllers/albums";
@@ -6,7 +8,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MusicPlayer } from "@/components/music/MusicPlayer";
-import { Play, Clock, Music, Heart, Share } from "lucide-react";
+import { Play, Clock, Music, Heart, Share, Pause } from "lucide-react";
+import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
+import { useEffect, useState } from "react";
 
 // Helper function to format time
 const formatDuration = (seconds: number | null) => {
@@ -16,29 +20,66 @@ const formatDuration = (seconds: number | null) => {
   return `${mins}:${secs.toString().padStart(2, "0")}`;
 };
 
-export default async function AlbumDetailPage({
+export default function AlbumDetailPage({
   params,
 }: Readonly<{ params: { id: string } }>) {
   const albumId = Number(params.id);
-  if (!albumId) return notFound();
+  const [album, setAlbum] = useState<any>(null);
+  const [tracks, setTracks] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  // Audio player context
+  const { currentTrack, isPlaying, playTrack } = useAudioPlayer();
 
-  // Lấy thông tin album và danh sách bài hát
-  let album, tracks;
-  try {
-    const albums = await AlbumsController.getAllAlbums();
-    album = albums.find((a) => a.id === albumId);
-    tracks = await TracksController.getTracksByAlbum(albumId);
-  } catch (error) {
+  useEffect(() => {
+    if (!albumId) return;
+
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        const albums = await AlbumsController.getAllAlbums();
+        const foundAlbum = albums.find((a) => a.id === albumId);
+        const albumTracks = await TracksController.getTracksByAlbum(albumId);
+        
+        if (!foundAlbum) {
+          setError("Album not found");
+          return;
+        }
+        
+        setAlbum(foundAlbum);
+        setTracks(albumTracks);
+      } catch (err) {
+        setError("Không thể tải thông tin album.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, [albumId]);
+
+  if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20">
         <div className="container mx-auto py-10">
           <h1 className="text-3xl font-bold mb-4">Album</h1>
-          <p className="text-red-500">Không thể tải thông tin album.</p>
+          <p>Đang tải...</p>
         </div>
       </div>
     );
   }
-  if (!album) return notFound();
+
+  if (error || !album) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20">
+        <div className="container mx-auto py-10">
+          <h1 className="text-3xl font-bold mb-4">Album</h1>
+          <p className="text-red-500">{error || "Album not found"}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20">
@@ -88,6 +129,12 @@ export default async function AlbumDetailPage({
                 <Button
                   size="lg"
                   className="bg-white text-purple-600 hover:bg-white/90"
+                  onClick={() => {
+                    if (tracks && tracks.length > 0) {
+                      playTrack(tracks[0]);
+                    }
+                  }}
+                  disabled={!tracks || tracks.length === 0}
                 >
                   <Play className="mr-2 h-5 w-5" />
                   Play Album
@@ -141,8 +188,16 @@ export default async function AlbumDetailPage({
                       size="sm"
                       variant="ghost"
                       className="w-8 h-8 p-0 hidden group-hover:flex rounded-full"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        playTrack(track);
+                      }}
                     >
-                      <Play className="h-4 w-4" />
+                      {currentTrack?.id === track.id && isPlaying ? (
+                        <Pause className="h-4 w-4" />
+                      ) : (
+                        <Play className="h-4 w-4" />
+                      )}
                     </Button>
 
                     <div className="w-12 h-12 rounded-lg overflow-hidden bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0">
