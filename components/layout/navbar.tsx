@@ -8,13 +8,13 @@ import { Button } from "@/components/ui/button";
 import { UserNav } from "./user-nav";
 import { SoundHexLogo } from "@/components/ui/soundhex-logo";
 import { supabase } from "@/lib/supabase/client";
-import { Search } from "lucide-react";
+
 
 export function Navbar() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [showSearch, setShowSearch] = useState(false);
+  
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -53,16 +53,16 @@ export function Navbar() {
         </div>
 
         <div className="ml-auto flex items-center space-x-2 sm:space-x-4">
-          {/* Desktop Search */}
-          <div className="relative hidden sm:block w-full max-w-sm">
-            <Input
-              type="search"
-              placeholder="Search..."
-              className="pl-8 rounded-md"
-            />
+          {/* Upload Button */}
+          <Button 
+            variant="outline" 
+            size="sm"
+            className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0"
+            onClick={() => router.push('/music')}
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500 z-10"
+              className="mr-2 h-4 w-4"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -71,19 +71,10 @@ export function Navbar() {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
               />
             </svg>
-          </div>
-
-          {/* Mobile Search Toggle */}
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="sm:hidden"
-            onClick={() => setShowSearch(!showSearch)}
-          >
-            <Search className="h-5 w-5" />
+            Upload
           </Button>
 
           {!loading && (
@@ -94,16 +85,7 @@ export function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Search Bar - Expandable */}
-      {showSearch && (
-        <div className="px-4 pb-3 sm:hidden">
-          <Input
-            type="search"
-            placeholder="Search..."
-            className="w-full"
-          />
-        </div>
-      )}
+      
     </div>
   );
 }
