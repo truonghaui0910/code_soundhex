@@ -149,6 +149,8 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
         const tab = searchParams.get("tab");
         if (tab === "upload") {
             setCurrentView("upload");
+            // Clear the URL parameter after setting the state
+            window.history.replaceState({}, '', '/music');
         }
     }, [searchParams]);
 
@@ -213,15 +215,14 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                 <Headphones className="mr-2 h-5 w-5" />
                                 Full Library
                             </Button>
-                            <Link href="/music?tab=upload">
-                                <Button
-                                    size="lg"
-                                    className="bg-white/20 text-white hover:bg-white/30"
-                                >
-                                    <Upload className="mr-2 h-5 w-5" />
-                                    Upload Music
-                                </Button>
-                            </Link>
+                            <Button
+                                size="lg"
+                                onClick={() => setCurrentView("upload")}
+                                className={`${currentView === "upload" ? "bg-white text-purple-600" : "bg-white/20 text-white hover:bg-white/30"}`}
+                            >
+                                <Upload className="mr-2 h-5 w-5" />
+                                Upload Music
+                            </Button>
                         </div>
                     </div>
                 </div>
