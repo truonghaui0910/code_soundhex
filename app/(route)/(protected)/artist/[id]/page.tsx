@@ -1,10 +1,8 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
 import { notFound } from "next/navigation";
-import { TracksController } from "@/lib/controllers/tracks";
-import { ArtistsController } from "@/lib/controllers/artists";
-import { AlbumsController } from "@/lib/controllers/albums";
 import { useAudioPlayer } from "@/hooks/use-audio-player";
 import { Track } from "@/lib/definitions/Track";
 import Image from "next/image";
@@ -151,7 +149,7 @@ export default function ArtistDetailPage({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20 pb-32">
       {/* Header Section */}
       <div className="relative overflow-hidden bg-gradient-to-r from-slate-800 via-purple-900 to-slate-900 text-white">
         <div className="absolute inset-0 bg-black/10"></div>
