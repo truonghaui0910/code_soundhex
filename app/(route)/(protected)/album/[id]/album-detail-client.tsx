@@ -10,6 +10,7 @@ import Link from "next/link";
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 import { Track } from "@/lib/definitions/Track";
 import { useDownload } from "@/hooks/use-download";
+import { useContext } from "react";
 
 // Helper function to format time
 const formatDuration = (seconds: number | null) => {
@@ -27,6 +28,8 @@ interface AlbumDetailClientProps {
 export function AlbumDetailClient({ album, tracks }: AlbumDetailClientProps) {
   const { currentTrack, isPlaying, playTrack } = useAudioPlayer();
   const { downloadTrack, downloadMultipleTracks, isDownloading, isTrackDownloading } = useDownload();
+  const audioContext = useContext(AudioPlayerContext);
+  const setTrackList = audioContext?.setTrackList;
 
   const handlePlayAlbum = () => {
     if (tracks && tracks.length > 0) {
