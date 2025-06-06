@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -22,6 +21,7 @@ import {
 import Link from "next/link";
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 import { Track } from "@/lib/definitions/Track";
+import { useDownload } from "@/hooks/use-download";
 
 // Helper function to format time
 const formatDuration = (seconds: number | null) => {
@@ -54,7 +54,8 @@ interface ArtistDetailClientProps {
 }
 
 export function ArtistDetailClient({ artist, tracks, albums }: ArtistDetailClientProps) {
-  const { setTrackList, playTrack, currentTrack, isPlaying } = useAudioPlayer();
+  const { currentTrack, isPlaying, playTrack } = useAudioPlayer();
+  const { downloadTrack, downloadMultipleTracks, isDownloading, isTrackDownloading } = useDownload();
 
   const handlePlayAllTracks = () => {
     if (tracks && tracks.length > 0) {

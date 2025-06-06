@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -16,6 +16,10 @@ import {
     Filter,
     Download,
     Plus,
+    Headphones,
+    Upload,
+    Share,
+    Shuffle,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -24,6 +28,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Track } from "@/lib/definitions/Track";
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
+import { useDownload } from "@/hooks/use-download";
 
 // Helper function to format time
 const formatDuration = (seconds: number | null) => {
@@ -47,6 +52,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
     const [mounted, setMounted] = useState(false);
     const { currentTrack, isPlaying, playTrack } = useAudioPlayer();
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const { downloadTrack, isTrackDownloading } = useDownload();
 
     // Get unique genres from tracks
     const genres = Array.from(
@@ -822,8 +828,10 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                             variant="ghost"
                                                             className="p-2"
                                                             title="Download"
+                                                            onClick={() => downloadTrack(track)}
+                                                            disabled={isTrackDownloading(track.id)}
                                                         >
-                                                            <Download className="h-4 w-4" />
+                                                            <Download className={`h-4 w-4 ${isTrackDownloading(track.id) ? 'animate-spin' : ''}`} />
                                                         </Button>
                                                         <Button
                                                             size="sm"

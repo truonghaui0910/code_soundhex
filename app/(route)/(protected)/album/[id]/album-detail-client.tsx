@@ -1,4 +1,3 @@
-
 "use client";
 
 import Image from "next/image";
@@ -10,6 +9,7 @@ import { Play, Pause, Clock, Music, Heart, Share, Download, Plus } from "lucide-
 import Link from "next/link";
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 import { Track } from "@/lib/definitions/Track";
+import { useDownload } from "@/hooks/use-download";
 
 // Helper function to format time
 const formatDuration = (seconds: number | null) => {
@@ -25,7 +25,8 @@ interface AlbumDetailClientProps {
 }
 
 export function AlbumDetailClient({ album, tracks }: AlbumDetailClientProps) {
-  const { setTrackList, playTrack, currentTrack, isPlaying } = useAudioPlayer();
+  const { currentTrack, isPlaying, playTrack } = useAudioPlayer();
+  const { downloadTrack, downloadMultipleTracks, isDownloading, isTrackDownloading } = useDownload();
 
   const handlePlayAlbum = () => {
     if (tracks && tracks.length > 0) {
@@ -213,8 +214,15 @@ export function AlbumDetailClient({ album, tracks }: AlbumDetailClientProps) {
                       <Button size="sm" variant="ghost" className="p-2" title="Add to playlist">
                         <Plus className="h-4 w-4" />
                       </Button>
-                      <Button size="sm" variant="ghost" className="p-2" title="Download">
-                        <Download className="h-4 w-4" />
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="p-2"
+                        title="Download"
+                        onClick={() => downloadTrack(track)}
+                        disabled={isTrackDownloading(track.id)}
+                      >
+                        <Download className={`h-4 w-4 ${isTrackDownloading(track.id) ? 'animate-spin' : ''}`} />
                       </Button>
                       <Button size="sm" variant="ghost" className="p-2" title="Like">
                         <Heart className="h-4 w-4" />
