@@ -26,6 +26,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Track } from "@/lib/definitions/Track";
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
+import Link from "next/link";
 
 // Helper function to format time
 const formatDuration = (seconds: number | null) => {
@@ -111,6 +112,30 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
             ).values(),
         );
     }, [tracks]);
+
+    // Get trending tracks (memoized stable random selection)
+    const trendingTracks = useMemo(() => {
+        // Create a stable random order based on track IDs
+        const shuffled = [...filteredTracks].sort((a, b) => {
+            // Use track IDs to create a stable sort
+            const seedA = a.id * 9301 + 49297;
+            const seedB = b.id * 9301 + 49297;
+            return (seedA % 233280) - (seedB % 233280);
+        });
+        return shuffled.slice(0, 12);
+    }, [filteredTracks]);
+
+    const handleUploadClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const files = event.target.files;
+        if (files && files.length > 0) {
+            console.log("Files selected:", files);
+            alert("Upload functionality will be implemented soon!");
+        }
+    };
 
     useEffect(() => {
         setMounted(true);
@@ -261,53 +286,54 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                         if (!track) return null;
 
                                         return (
-                                            <Card
-                                                key={track.album.id}
-                                                className="group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm"
-                                            >
-                                                <div className="relative aspect-square">
-                                                    {track.album
-                                                        .cover_image_url ? (
-                                                        <Image
-                                                            src={
-                                                                track.album
-                                                                    .cover_image_url
-                                                            }
-                                                            alt={
-                                                                track.album
-                                                                    .title
-                                                            }
-                                                            fill
-                                                            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
-                                                            className="object-cover group-hover:scale-105 transition-transform duration-300"
-                                                        />
-                                                    ) : (
-                                                        <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
-                                                            <Music className="h-12 w-12 text-white" />
-                                                        </div>
-                                                    )}
+                                            <Link key={track.album.id} href={`/album/${track.album.id}`}>
+                                                <Card
+                                                    className="group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm"
+                                                >
+                                                    <div className="relative aspect-square">
+                                                        {track.album
+                                                            .cover_image_url ? (
+                                                            <Image
+                                                                src={
+                                                                    track.album
+                                                                        .cover_image_url
+                                                                }
+                                                                alt={
+                                                                    track.album
+                                                                        .title
+                                                                }
+                                                                fill
+                                                                sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
+                                                                className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                                            />
+                                                        ) : (
+                                                            <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
+                                                                <Music className="h-12 w-12 text-white" />
+                                                            </div>
+                                                        )}
 
-                                                    <div className="absolute inset-0 flex items-center justify-center">
-                                                        <Button
-                                                            size="lg"
-                                                            onClick={() =>
-                                                                playTrack(track)
-                                                            }
-                                                            className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full bg-white text-purple-600 hover:bg-white/90"
-                                                        >
-                                                            <Play className="h-5 w-5" />
-                                                        </Button>
+                                                        <div className="absolute inset-0 flex items-center justify-center">
+                                                            <Button
+                                                                size="lg"
+                                                                onClick={() =>
+                                                                    playTrack(track)
+                                                                }
+                                                                className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full bg-white text-purple-600 hover:bg-white/90"
+                                                            >
+                                                                <Play className="h-5 w-5" />
+                                                            </Button>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <CardContent className="p-3">
-                                                    <h3 className="font-semibold text-sm mb-1 truncate">
-                                                        {track.album.title}
-                                                    </h3>
-                                                    <p className="text-gray-600 dark:text-gray-400 truncate text-xs">
-                                                        {track.artist.name}
-                                                    </p>
-                                                </CardContent>
-                                            </Card>
+                                                    <CardContent className="p-3">
+                                                        <h3 className="font-semibold text-sm mb-1 truncate">
+                                                            {track.album.title}
+                                                        </h3>
+                                                        <p className="text-gray-600 dark:text-gray-400 truncate text-xs">
+                                                            {track.artist.name}
+                                                        </p>
+                                                    </CardContent>
+                                                </Card>
+                                            </Link>
                                         );
                                     })}
                             </div>
@@ -358,7 +384,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                             alt={
                                                                 track.artist
                                                                     .name
-                                                                                         }
+                                                            }
                                                             fill
                                                             sizes="128px"
                                                             className="object-cover"
@@ -407,53 +433,54 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                         if (!track) return null;
 
                                         return (
-                                            <Card
-                                                key={track.album.id}
-                                                className="group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm"
-                                            >
-                                                <div className="relative aspect-square">
-                                                    {track.album
-                                                        .cover_image_url ? (
-                                                        <Image
-                                                            src={
-                                                                track.album
-                                                                    .cover_image_url
-                                                            }
-                                                            alt={
-                                                                track.album
-                                                                    .title
-                                                            }
-                                                            fill
-                                                            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
-                                                            className="object-cover group-hover:scale-105 transition-transform duration-300"
-                                                        />
-                                                    ) : (
-                                                        <div className="w-full h-full bg-gradient-to-br from-green-400 to-teal-400 flex items-center justify-center">
-                                                            <Music className="h-12 w-12 text-white" />
-                                                        </div>
-                                                    )}
+                                            <Link key={track.album.id} href={`/album/${track.album.id}`}>
+                                                <Card
+                                                    className="group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm"
+                                                >
+                                                    <div className="relative aspect-square">
+                                                        {track.album
+                                                            .cover_image_url ? (
+                                                            <Image
+                                                                src={
+                                                                    track.album
+                                                                        .cover_image_url
+                                                                }
+                                                                alt={
+                                                                    track.album
+                                                                        .title
+                                                                }
+                                                                fill
+                                                                sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
+                                                                className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                                            />
+                                                        ) : (
+                                                            <div className="w-full h-full bg-gradient-to-br from-green-400 to-teal-400 flex items-center justify-center">
+                                                                <Music className="h-12 w-12 text-white" />
+                                                            </div>
+                                                        )}
 
-                                                    <div className="absolute inset-0 flex items-center justify-center">
-                                                        <Button
-                                                            size="lg"
-                                                            onClick={() =>
-                                                                playTrack(track)
-                                                            }
-                                                            className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full bg-white text-purple-600 hover:bg-white/90"
-                                                        >
-                                                            <Play className="h-5 w-5" />
-                                                        </Button>
+                                                        <div className="absolute inset-0 flex items-center justify-center">
+                                                            <Button
+                                                                size="lg"
+                                                                onClick={() =>
+                                                                    playTrack(track)
+                                                                }
+                                                                className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full bg-white text-purple-600 hover:bg-white/90"
+                                                            >
+                                                                <Play className="h-5 w-5" />
+                                                            </Button>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <CardContent className="p-3">
-                                                    <h3 className="font-semibold text-sm mb-1 truncate">
-                                                        {track.album.title}
-                                                    </h3>
-                                                    <p className="text-gray-600 dark:text-gray-400 truncate text-xs">
-                                                        {track.artist.name}
-                                                    </p>
-                                                </CardContent>
-                                            </Card>
+                                                    <CardContent className="p-3">
+                                                        <h3 className="font-semibold text-sm mb-1 truncate">
+                                                            {track.album.title}
+                                                        </h3>
+                                                        <p className="text-gray-600 dark:text-gray-400 truncate text-xs">
+                                                            {track.artist.name}
+                                                        </p>
+                                                    </CardContent>
+                                                </Card>
+                                            </Link>
                                         );
                                     })}
                             </div>
@@ -644,8 +671,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                         )}
                                                     </span>
                                                 </div>
-                                            </div>
-                                        </CardContent>
+                                            </CardContent>
                                     </Card>
                                 ))}
                             </div>
@@ -762,7 +788,8 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                             >
                                                 {track.genre?.name || "Unknown"}
                                             </Badge>
-                                            <div className="flex items-center gap-1 text-xs text-gray-500">
+                                            <div className="flex items-center gap-1 text-xs text-gray```python
+-500">
                                                 <Clock className="h-3 w-3" />
                                                 <span>
                                                     {formatDuration(
