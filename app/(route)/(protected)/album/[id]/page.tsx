@@ -34,7 +34,7 @@ export default async function AlbumDetailPage({
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20">
         <div className="container mx-auto py-10">
           <h1 className="text-3xl font-bold mb-4">Album</h1>
-          <p className="text-red-500">Cant not load album.</p>
+          <p className="text-red-500">Cannot load album.</p>
         </div>
       </div>
     );
@@ -84,7 +84,7 @@ export default async function AlbumDetailPage({
                 {tracks && tracks.length > 0 && (
                   <>
                     <span>•</span>
-                    <span>{tracks.length} bài hát</span>
+                    <span>{tracks.length} songs</span>
                   </>
                 )}
               </div>
@@ -127,7 +127,7 @@ export default async function AlbumDetailPage({
                 <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
                   <Music className="h-4 w-4 text-white" />
                 </div>
-                Song list
+                Track List
               </h2>
             </div>
 
@@ -204,10 +204,10 @@ export default async function AlbumDetailPage({
               <div className="py-16 text-center">
                 <Music className="h-16 w-16 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                  No Song
+                  No Songs
                 </h3>
                 <p className="text-gray-600 dark:text-gray-400">
-                  Album này hiện chưa có bài hát nào.
+                  This album currently has no songs.
                 </p>
               </div>
             )}
