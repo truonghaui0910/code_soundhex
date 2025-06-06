@@ -356,10 +356,10 @@ export default function ArtistDetailPage({ params }: { params: { id: string } })
         )}
       </div>
 
-      {/* Music Player */}
-      <div className="pb-32">
-        <MusicPlayer />
       </div>
+
+      {/* Music Player - Fixed at bottom */}
+      <MusicPlayer />
     </div>
   );
 }
