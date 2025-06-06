@@ -14,6 +14,7 @@ interface AudioPlayerContextType {
   duration: number;
   error: string | null;
   playTrack: (track: Track) => void;
+  setTrackList: (tracks: Track[]) => void;
   togglePlayPause: () => void;
   changeVolume: (volume: number) => void;
   seekTo: (time: number) => void;

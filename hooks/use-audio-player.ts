@@ -114,6 +114,12 @@ export function useAudioPlayer() {
     setVolume(newVolume);
   }, [getAudioService]);
 
+  // Thiết lập danh sách track
+  const setTrackList = useCallback((tracks: Track[]) => {
+    // Tạm thời lưu danh sách tracks, có thể mở rộng sau
+    console.log('Setting track list:', tracks);
+  }, []);
+
   // Di chuyển đến vị trí cụ thể
   const seekTo = useCallback((time: number) => {
     const audioService = getAudioService();
@@ -140,6 +146,7 @@ export function useAudioPlayer() {
     duration,
     error,
     playTrack,
+    setTrackList,
     togglePlayPause,
     changeVolume,
     seekTo,
