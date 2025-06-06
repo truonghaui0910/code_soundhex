@@ -7,6 +7,8 @@ import { Track } from '@/lib/definitions/Track';
  */
 export function useAudioPlayer() {
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
+  const [trackList, setTrackListState] = useState<Track[]>([]);
+  const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [volume, setVolume] = useState<number>(80);
   const [currentTime, setCurrentTime] = useState<number>(0);
@@ -55,6 +57,19 @@ export function useAudioPlayer() {
         case 'ended':
           setIsPlaying(false);
           setCurrentTime(0);
+          // Tự động chuyển đến bài tiếp theo khi kết thúc
+          if (trackList.length > 1) {
+            const nextIndex = (currentIndex + 1) % trackList.length;
+            const nextTrack = trackList[nextIndex];
+            if (nextTrack) {
+              setTimeout(() => {
+                setCurrentIndex(nextIndex);
+                setCurrentTrack(nextTrack);
+                setIsPlaying(true);
+                audioService.playTrack(nextTrack);
+              }, 500);
+            }
+          }
           break;
         case 'timeupdate':
           if (event.detail) {
@@ -88,6 +103,12 @@ export function useAudioPlayer() {
     const audioService = getAudioService();
     if (!audioService) return;
 
+    // Tìm index của track trong playlist
+    const trackIndex = trackList.findIndex(t => t.id === track.id);
+    if (trackIndex !== -1) {
+      setCurrentIndex(trackIndex);
+    }
+
     // Cập nhật state ngay lập tức - điều này đảm bảo UI được cập nhật ngay
     setCurrentTrack(track);
     setIsPlaying(true);
@@ -95,7 +116,7 @@ export function useAudioPlayer() {
     
     // Gọi service để phát bài hát
     audioService.playTrack(track);
-  }, [getAudioService]);
+  }, [getAudioService, trackList]);
 
   // Chuyển đổi giữa phát/tạm dừng
   const togglePlayPause = useCallback(() => {
@@ -113,6 +134,38 @@ export function useAudioPlayer() {
     audioService.setVolume(newVolume);
     setVolume(newVolume);
   }, [getAudioService]);
+
+  // Thiết lập danh sách track
+  const setTrackList = useCallback((tracks: Track[]) => {
+    setTrackListState(tracks);
+    setCurrentIndex(0);
+  }, []);
+
+  // Chuyển đến bài hát tiếp theo
+  const playNext = useCallback(() => {
+    if (trackList.length === 0) return;
+    
+    const nextIndex = (currentIndex + 1) % trackList.length;
+    const nextTrack = trackList[nextIndex];
+    
+    if (nextTrack) {
+      setCurrentIndex(nextIndex);
+      playTrack(nextTrack);
+    }
+  }, [trackList, currentIndex, playTrack]);
+
+  // Chuyển đến bài hát trước đó
+  const playPrevious = useCallback(() => {
+    if (trackList.length === 0) return;
+    
+    const prevIndex = currentIndex === 0 ? trackList.length - 1 : currentIndex - 1;
+    const prevTrack = trackList[prevIndex];
+    
+    if (prevTrack) {
+      setCurrentIndex(prevIndex);
+      playTrack(prevTrack);
+    }
+  }, [trackList, currentIndex, playTrack]);
 
   // Di chuyển đến vị trí cụ thể
   const seekTo = useCallback((time: number) => {
@@ -134,12 +187,17 @@ export function useAudioPlayer() {
   // Trả về các trạng thái và phương thức điều khiển
   return {
     currentTrack,
+    trackList,
+    currentIndex,
     isPlaying,
     volume,
     currentTime,
     duration,
     error,
     playTrack,
+    setTrackList,
+    playNext,
+    playPrevious,
     togglePlayPause,
     changeVolume,
     seekTo,

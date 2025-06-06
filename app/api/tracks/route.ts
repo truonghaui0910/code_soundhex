@@ -1,8 +1,8 @@
-
 import { NextResponse } from "next/server";
 import { TracksController } from "@/lib/controllers/tracks";
+import { NextRequest } from "next/server";
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const albumId = searchParams.get("albumId");

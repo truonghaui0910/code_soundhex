@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MusicPlayer } from "@/components/music/MusicPlayer";
-import { Play, Clock, Music, Heart, Share } from "lucide-react";
+import { Play, Pause, Clock, Music, Heart, Share } from "lucide-react";
 import Link from "next/link";
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 import { Track } from "@/lib/definitions/Track";
@@ -25,12 +25,16 @@ interface AlbumDetailClientProps {
 }
 
 export function AlbumDetailClient({ album, tracks }: AlbumDetailClientProps) {
-  const { setTrackList, playTrack } = useAudioPlayer();
+  const { setTrackList, playTrack, currentTrack, isPlaying } = useAudioPlayer();
 
   const handlePlayAlbum = () => {
     if (tracks && tracks.length > 0) {
+      // Always update trackList when playing a new album
       setTrackList(tracks);
-      playTrack(tracks[0]); // Play the first track
+      // Small delay to ensure trackList is updated before playing
+      setTimeout(() => {
+        playTrack(tracks[0]); // Play the first track
+      }, 50);
     }
   };
 
@@ -133,18 +137,36 @@ export function AlbumDetailClient({ album, tracks }: AlbumDetailClientProps) {
                     className="group flex items-center gap-4 p-4 hover:bg-white/50 dark:hover:bg-gray-700/30 transition-colors cursor-pointer border-b border-gray-100/50 dark:border-gray-700/30 last:border-b-0"
                   >
                     <div className="w-8 text-center text-sm text-gray-500 dark:text-gray-400 group-hover:hidden">
-                      {idx + 1}
+                      {currentTrack?.id === track.id && isPlaying ? (
+                        <div className="flex items-center justify-center">
+                          <div className="flex items-end space-x-0.5 h-4">
+                            <div className="w-0.5 bg-rose-600 animate-equalize-1" style={{ height: '30%' }}></div>
+                            <div className="w-0.5 bg-rose-600 animate-equalize-2" style={{ height: '100%' }}></div>
+                            <div className="w-0.5 bg-rose-600 animate-equalize-3" style={{ height: '60%' }}></div>
+                          </div>
+                        </div>
+                      ) : (
+                        idx + 1
+                      )}
                     </div>
                     <Button
                       size="sm"
                       variant="ghost"
                       className="w-8 h-8 p-0 hidden group-hover:flex rounded-full"
                       onClick={() => {
+                        // Always update trackList first
                         setTrackList(tracks);
-                        playTrack(track);
+                        // Small delay to ensure trackList is updated
+                        setTimeout(() => {
+                          playTrack(track);
+                        }, 50);
                       }}
                     >
-                      <Play className="h-4 w-4" />
+                      {currentTrack?.id === track.id && isPlaying ? (
+                        <Pause className="h-4 w-4" />
+                      ) : (
+                        <Play className="h-4 w-4" />
+                      )}
                     </Button>
 
                     <div className="w-12 h-12 rounded-lg overflow-hidden bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0">
