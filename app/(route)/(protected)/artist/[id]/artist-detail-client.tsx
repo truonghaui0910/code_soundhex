@@ -306,8 +306,18 @@ export function ArtistDetailClient({ artist, tracks, albums }: ArtistDetailClien
                       <Button size="sm" variant="ghost" className="p-2" title="Add to playlist">
                         <Plus className="h-4 w-4" />
                       </Button>
-                      <Button size="sm" variant="ghost" className="p-2" title="Download">
-                        <Download className="h-4 w-4" />
+                      <Button 
+                        size="sm" 
+                        variant="ghost" 
+                        className="p-2" 
+                        title="Download"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          downloadTrack(track);
+                        }}
+                        disabled={isTrackDownloading(track.id)}
+                      >
+                        <Download className={`h-4 w-4 ${isTrackDownloading(track.id) ? 'animate-spin' : ''}`} />
                       </Button>
                       <Button size="sm" variant="ghost" className="p-2" title="Like">
                         <Heart className="h-4 w-4" />
