@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import Image from "next/image";
 import {
     Music,
@@ -74,22 +74,43 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
     // Get featured tracks (first 8)
     const featuredTracks = filteredTracks.slice(0, 8);
 
-    // Get trending tracks (random selection)
-    const trendingTracks = [...filteredTracks]
-        .sort(() => 0.5 - Math.random())
-        .slice(0, 12);
+    // Memoize unique albums and artists to prevent re-renders
+    const uniqueAlbums = useMemo(() => {
+        return Array.from(
+            new Map(
+                tracks.map((track) => [
+                    track.album.id,
+                    {
+                        id: track.album.id,
+                        title: track.album.title,
+                        cover_image_url: track.album.cover_image_url,
+                        artist: track.artist,
+                        tracksCount: tracks.filter(
+                            (t) => t.album.id === track.album.id,
+                        ).length,
+                    },
+                ]),
+            ).values(),
+        );
+    }, [tracks]);
 
-    const handleUploadClick = () => {
-        fileInputRef.current?.click();
-    };
-
-    const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const files = event.target.files;
-        if (files && files.length > 0) {
-            console.log("Files selected:", files);
-            alert("Upload functionality will be implemented soon!");
-        }
-    };
+    const uniqueArtists = useMemo(() => {
+        return Array.from(
+            new Map(
+                tracks.map((track) => [
+                    track.artist.id,
+                    {
+                        id: track.artist.id,
+                        name: track.artist.name,
+                        profile_image_url: track.artist.profile_image_url,
+                        tracksCount: tracks.filter(
+                            (t) => t.artist.id === track.artist.id,
+                        ).length,
+                    },
+                ]),
+            ).values(),
+        );
+    }, [tracks]);
 
     useEffect(() => {
         setMounted(true);
@@ -337,7 +358,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                             alt={
                                                                 track.artist
                                                                     .name
-                                                            }
+                                                                                         }
                                                             fill
                                                             sizes="128px"
                                                             className="object-cover"
