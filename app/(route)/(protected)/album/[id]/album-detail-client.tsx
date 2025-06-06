@@ -29,8 +29,12 @@ export function AlbumDetailClient({ album, tracks }: AlbumDetailClientProps) {
 
   const handlePlayAlbum = () => {
     if (tracks && tracks.length > 0) {
+      // Always update trackList when playing a new album
       setTrackList(tracks);
-      playTrack(tracks[0]); // Play the first track
+      // Small delay to ensure trackList is updated before playing
+      setTimeout(() => {
+        playTrack(tracks[0]); // Play the first track
+      }, 50);
     }
   };
 
@@ -150,8 +154,12 @@ export function AlbumDetailClient({ album, tracks }: AlbumDetailClientProps) {
                       variant="ghost"
                       className="w-8 h-8 p-0 hidden group-hover:flex rounded-full"
                       onClick={() => {
+                        // Always update trackList first
                         setTrackList(tracks);
-                        playTrack(track);
+                        // Small delay to ensure trackList is updated
+                        setTimeout(() => {
+                          playTrack(track);
+                        }, 50);
                       }}
                     >
                       {currentTrack?.id === track.id && isPlaying ? (
