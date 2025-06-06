@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MusicPlayer } from "@/components/music/MusicPlayer";
-import { Play, Pause, Clock, Music, Heart, Share } from "lucide-react";
+import { Play, Pause, Clock, Music, Heart, Share, Download, Plus } from "lucide-react";
 import Link from "next/link";
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 import { Track } from "@/lib/definitions/Track";
@@ -210,10 +210,16 @@ export function AlbumDetailClient({ album, tracks }: AlbumDetailClientProps) {
                     </div>
 
                     <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button size="sm" variant="ghost" className="p-2">
+                      <Button size="sm" variant="ghost" className="p-2" title="Add to playlist">
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                      <Button size="sm" variant="ghost" className="p-2" title="Download">
+                        <Download className="h-4 w-4" />
+                      </Button>
+                      <Button size="sm" variant="ghost" className="p-2" title="Like">
                         <Heart className="h-4 w-4" />
                       </Button>
-                      <Button size="sm" variant="ghost" className="p-2">
+                      <Button size="sm" variant="ghost" className="p-2" title="Share">
                         <Share className="h-4 w-4" />
                       </Button>
                     </div>
