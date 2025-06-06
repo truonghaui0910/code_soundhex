@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useMemo } from "react";
 import Image from "next/image";
+import Link from 'next/link';
 import {
     Music,
     Search,
@@ -285,53 +286,54 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                         if (!track) return null;
 
                                         return (
-                                            <Card
-                                                key={track.album.id}
-                                                className="group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm"
-                                            >
-                                                <div className="relative aspect-square">
-                                                    {track.album
-                                                        .cover_image_url ? (
-                                                        <Image
-                                                            src={
-                                                                track.album
-                                                                    .cover_image_url
-                                                            }
-                                                            alt={
-                                                                track.album
-                                                                    .title
-                                                            }
-                                                            fill
-                                                            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
-                                                            className="object-cover group-hover:scale-105 transition-transform duration-300"
-                                                        />
-                                                    ) : (
-                                                        <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
-                                                            <Music className="h-12 w-12 text-white" />
-                                                        </div>
-                                                    )}
+                                            <Link key={track.album.id} href={`/album/${track.album.id}`}>
+                                                <Card
+                                                    className="group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm"
+                                                >
+                                                    <div className="relative aspect-square">
+                                                        {track.album
+                                                            .cover_image_url ? (
+                                                            <Image
+                                                                src={
+                                                                    track.album
+                                                                        .cover_image_url
+                                                                }
+                                                                alt={
+                                                                    track.album
+                                                                        .title
+                                                                }
+                                                                fill
+                                                                sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
+                                                                className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                                            />
+                                                        ) : (
+                                                            <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
+                                                                <Music className="h-12 w-12 text-white" />
+                                                            </div>
+                                                        )}
 
-                                                    <div className="absolute inset-0 flex items-center justify-center">
-                                                        <Button
-                                                            size="lg"
-                                                            onClick={() =>
-                                                                playTrack(track)
-                                                            }
-                                                            className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full bg-white text-purple-600 hover:bg-white/90"
-                                                        >
-                                                            <Play className="h-5 w-5" />
-                                                        </Button>
+                                                        <div className="absolute inset-0 flex items-center justify-center">
+                                                            <Button
+                                                                size="lg"
+                                                                onClick={() =>
+                                                                    playTrack(track)
+                                                                }
+                                                                className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full bg-white text-purple-600 hover:bg-white/90"
+                                                            >
+                                                                <Play className="h-5 w-5" />
+                                                            </Button>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <CardContent className="p-3">
-                                                    <h3 className="font-semibold text-sm mb-1 truncate">
-                                                        {track.album.title}
-                                                    </h3>
-                                                    <p className="text-gray-600 dark:text-gray-400 truncate text-xs">
-                                                        {track.artist.name}
-                                                    </p>
-                                                </CardContent>
-                                            </Card>
+                                                    <CardContent className="p-3">
+                                                        <h3 className="font-semibold text-sm mb-1 truncate">
+                                                            {track.album.title}
+                                                        </h3>
+                                                        <p className="text-gray-600 dark:text-gray-400 truncate text-xs">
+                                                            {track.artist.name}
+                                                        </p>
+                                                    </CardContent>
+                                                </Card>
+                                            </Link>
                                         );
                                     })}
                             </div>
@@ -431,53 +433,54 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                         if (!track) return null;
 
                                         return (
-                                            <Card
-                                                key={track.album.id}
-                                                className="group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm"
-                                            >
-                                                <div className="relative aspect-square">
-                                                    {track.album
-                                                        .cover_image_url ? (
-                                                        <Image
-                                                            src={
-                                                                track.album
-                                                                    .cover_image_url
-                                                            }
-                                                            alt={
-                                                                track.album
-                                                                    .title
-                                                            }
-                                                            fill
-                                                            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
-                                                            className="object-cover group-hover:scale-105 transition-transform duration-300"
-                                                        />
-                                                    ) : (
-                                                        <div className="w-full h-full bg-gradient-to-br from-green-400 to-teal-400 flex items-center justify-center">
-                                                            <Music className="h-12 w-12 text-white" />
-                                                        </div>
-                                                    )}
+                                            <Link key={track.album.id} href={`/album/${track.album.id}`}>
+                                                <Card
+                                                    className="group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm"
+                                                >
+                                                    <div className="relative aspect-square">
+                                                        {track.album
+                                                            .cover_image_url ? (
+                                                            <Image
+                                                                src={
+                                                                    track.album
+                                                                        .cover_image_url
+                                                                }
+                                                                alt={
+                                                                    track.album
+                                                                        .title
+                                                                }
+                                                                fill
+                                                                sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
+                                                                className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                                            />
+                                                        ) : (
+                                                            <div className="w-full h-full bg-gradient-to-br from-green-400 to-teal-400 flex items-center justify-center">
+                                                                <Music className="h-12 w-12 text-white" />
+                                                            </div>
+                                                        )}
 
-                                                    <div className="absolute inset-0 flex items-center justify-center">
-                                                        <Button
-                                                            size="lg"
-                                                            onClick={() =>
-                                                                playTrack(track)
-                                                            }
-                                                            className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full bg-white text-purple-600 hover:bg-white/90"
-                                                        >
-                                                            <Play className="h-5 w-5" />
-                                                        </Button>
+                                                        <div className="absolute inset-0 flex items-center justify-center">
+                                                            <Button
+                                                                size="lg"
+                                                                onClick={() =>
+                                                                    playTrack(track)
+                                                                }
+                                                                className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full bg-white text-purple-600 hover:bg-white/90"
+                                                            >
+                                                                <Play className="h-5 w-5" />
+                                                            </Button>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <CardContent className="p-3">
-                                                    <h3 className="font-semibold text-sm mb-1 truncate">
-                                                        {track.album.title}
-                                                    </h3>
-                                                    <p className="text-gray-600 dark:text-gray-400 truncate text-xs">
-                                                        {track.artist.name}
-                                                    </p>
-                                                </CardContent>
-                                            </Card>
+                                                    <CardContent className="p-3">
+                                                        <h3 className="font-semibold text-sm mb-1 truncate">
+                                                            {track.album.title}
+                                                        </h3>
+                                                        <p className="text-gray-600 dark:text-gray-400 truncate text-xs">
+                                                            {track.artist.name}
+                                                        </p>
+                                                    </CardContent>
+                                                </Card>
+                                            </Link>
                                         );
                                     })}
                             </div>
