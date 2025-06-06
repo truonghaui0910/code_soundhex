@@ -1,4 +1,3 @@
-"use client";
 
 import { notFound } from "next/navigation";
 import { TracksController } from "@/lib/controllers/tracks";
@@ -8,78 +7,37 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MusicPlayer } from "@/components/music/MusicPlayer";
-import { Play, Clock, Music, Heart, Share, Pause } from "lucide-react";
-import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
-import { useEffect, useState } from "react";
+import { Play, Clock, Music, Heart, Share } from "lucide-react";
 
 // Helper function to format time
 const formatDuration = (seconds: number | null) => {
-  if (!seconds) return "--:--";
-  const mins = Math.floor(seconds / 60);
-  const secs = Math.floor(seconds % 60);
-  return `${mins}:${secs.toString().padStart(2, "0")}`;
+    if (!seconds) return "--:--";
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
 };
 
-export default function AlbumDetailPage({
-  params,
-}: Readonly<{ params: { id: string } }>) {
+export default async function AlbumDetailPage({ params }: Readonly<{ params: { id: string } }>) {
   const albumId = Number(params.id);
-  const [album, setAlbum] = useState<any>(null);
-  const [tracks, setTracks] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  
-  // Audio player context
-  const { currentTrack, isPlaying, playTrack } = useAudioPlayer();
+  if (!albumId) return notFound();
 
-  useEffect(() => {
-    if (!albumId) return;
-
-    const loadData = async () => {
-      try {
-        setLoading(true);
-        const albums = await AlbumsController.getAllAlbums();
-        const foundAlbum = albums.find((a) => a.id === albumId);
-        const albumTracks = await TracksController.getTracksByAlbum(albumId);
-        
-        if (!foundAlbum) {
-          setError("Album not found");
-          return;
-        }
-        
-        setAlbum(foundAlbum);
-        setTracks(albumTracks);
-      } catch (err) {
-        setError("Không thể tải thông tin album.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadData();
-  }, [albumId]);
-
-  if (loading) {
+  // Lấy thông tin album và danh sách bài hát
+  let album, tracks;
+  try {
+    const albums = await AlbumsController.getAllAlbums();
+    album = albums.find((a) => a.id === albumId);
+    tracks = await TracksController.getTracksByAlbum(albumId);
+  } catch (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20">
         <div className="container mx-auto py-10">
           <h1 className="text-3xl font-bold mb-4">Album</h1>
-          <p>Đang tải...</p>
+          <p className="text-red-500">Không thể tải thông tin album.</p>
         </div>
       </div>
     );
   }
-
-  if (error || !album) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20">
-        <div className="container mx-auto py-10">
-          <h1 className="text-3xl font-bold mb-4">Album</h1>
-          <p className="text-red-500">{error || "Album not found"}</p>
-        </div>
-      </div>
-    );
-  }
+  if (!album) return notFound();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20">
@@ -90,12 +48,12 @@ export default function AlbumDetailPage({
           <div className="flex flex-col md:flex-row gap-8 items-center md:items-end">
             <div className="w-48 h-48 md:w-64 md:h-64 rounded-xl overflow-hidden bg-white/10 backdrop-blur-sm flex items-center justify-center shadow-2xl">
               {album.cover_image_url ? (
-                <Image
-                  src={album.cover_image_url}
-                  alt={album.title}
-                  width={256}
-                  height={256}
-                  className="object-cover w-full h-full"
+                <Image 
+                  src={album.cover_image_url} 
+                  alt={album.title} 
+                  width={256} 
+                  height={256} 
+                  className="object-cover w-full h-full" 
                 />
               ) : (
                 <Music className="h-20 w-20 text-white/60" />
@@ -105,13 +63,9 @@ export default function AlbumDetailPage({
               <Badge className="bg-white/20 text-white border-white/30 w-fit mx-auto md:mx-0">
                 Album
               </Badge>
-              <h1 className="text-4xl md:text-6xl font-bold leading-tight">
-                {album.title}
-              </h1>
+              <h1 className="text-4xl md:text-6xl font-bold leading-tight">{album.title}</h1>
               <div className="flex items-center gap-3 text-lg text-purple-100 justify-center md:justify-start">
-                <span className="font-medium">
-                  {album.artist?.name || "Unknown Artist"}
-                </span>
+                <span className="font-medium">{album.artist?.name || "Unknown Artist"}</span>
                 {album.release_date && (
                   <>
                     <span>•</span>
@@ -126,32 +80,15 @@ export default function AlbumDetailPage({
                 )}
               </div>
               <div className="flex gap-4 justify-center md:justify-start mt-4">
-                <Button
-                  size="lg"
-                  className="bg-white text-purple-600 hover:bg-white/90"
-                  onClick={() => {
-                    if (tracks && tracks.length > 0) {
-                      playTrack(tracks[0]);
-                    }
-                  }}
-                  disabled={!tracks || tracks.length === 0}
-                >
+                <Button size="lg" className="bg-white text-purple-600 hover:bg-white/90">
                   <Play className="mr-2 h-5 w-5" />
                   Play Album
                 </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="border-white/30 text-white hover:bg-white/10"
-                >
+                <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10">
                   <Heart className="mr-2 h-5 w-5" />
                   Save
                 </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="border-white/30 text-white hover:bg-white/10"
-                >
+                <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10">
                   <Share className="mr-2 h-5 w-5" />
                   Share
                 </Button>
@@ -170,10 +107,10 @@ export default function AlbumDetailPage({
                 <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
                   <Music className="h-4 w-4 text-white" />
                 </div>
-                Song list
+                Danh sách bài hát
               </h2>
             </div>
-
+            
             {tracks && tracks.length > 0 ? (
               <div className="space-y-1">
                 {tracks.map((track, idx) => (
@@ -188,18 +125,10 @@ export default function AlbumDetailPage({
                       size="sm"
                       variant="ghost"
                       className="w-8 h-8 p-0 hidden group-hover:flex rounded-full"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        playTrack(track);
-                      }}
                     >
-                      {currentTrack?.id === track.id && isPlaying ? (
-                        <Pause className="h-4 w-4" />
-                      ) : (
-                        <Play className="h-4 w-4" />
-                      )}
+                      <Play className="h-4 w-4" />
                     </Button>
-
+                    
                     <div className="w-12 h-12 rounded-lg overflow-hidden bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0">
                       {track.album?.cover_image_url ? (
                         <Image
