@@ -325,10 +325,10 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                         </div>
                                                     </div>
                                                     <CardContent className="p-3">
-                                                        <h3 className="font-semibold text-sm mb-1 truncate">
+                                                        <h3 className="font-semibold text-sm mb-1 truncate hover:underline cursor-pointer">
                                                             {track.album.title}
                                                         </h3>
-                                                        <p className="text-gray-600 dark:text-gray-400 truncate text-xs">
+                                                        <p className="text-gray-600 dark:text-gray-400 truncate text-xs hover:underline cursor-pointer">
                                                             {track.artist.name}
                                                         </p>
                                                     </CardContent>
@@ -393,7 +393,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                         <Users className="h-12 w-12 text-white" />
                                                     )}
                                                 </div>
-                                                <h3 className="font-semibold text-sm mb-1 truncate text-gray-900 dark:text-white">
+                                                <h3 className="font-semibold text-sm mb-1 truncate text-gray-900 dark:text-white hover:underline cursor-pointer">
                                                     {track.artist.name}
                                                 </h3>
                                                 <p className="text-gray-600 dark:text-gray-400 text-xs">
@@ -472,10 +472,10 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                         </div>
                                                     </div>
                                                     <CardContent className="p-3">
-                                                        <h3 className="font-semibold text-sm mb-1 truncate">
+                                                        <h3 className="font-semibold text-sm mb-1 truncate hover:underline cursor-pointer">
                                                             {track.album.title}
                                                         </h3>
-                                                        <p className="text-gray-600 dark:text-gray-400 truncate text-xs">
+                                                        <p className="text-gray-600 dark:text-gray-400 truncate text-xs hover:underline cursor-pointer">
                                                             {track.artist.name}
                                                         </p>
                                                     </CardContent>
@@ -551,7 +551,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                         <Users className="h-12 w-12 text-white" />
                                                     )}
                                                 </div>
-                                                <h3 className="font-semibold text-sm mb-1 truncate text-gray-900 dark:text-white">
+                                                <h3 className="font-semibold text-sm mb-1 truncate text-gray-900 dark:text-white hover:underline cursor-pointer">
                                                     {track.artist.name}
                                                 </h3>
                                                 <p className="text-gray-600 dark:text-gray-400 text-xs">
@@ -785,8 +785,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                         <div className="flex items-center justify-between">
                                             <Badge
                                                 variant="outline"
-                                                className="text-xs"
-                                            >
+                                                className="text-xs"                                            >
                                                 {track.genre?.name || "Unknown"}
                                             </Badge>
                                             <div className="flex items-center gap-1 text-xs text-gray-500">
