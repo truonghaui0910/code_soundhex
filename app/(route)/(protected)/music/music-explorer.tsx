@@ -4,21 +4,18 @@ import { useState, useRef, useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
-    Music,
     Search,
-    Upload,
-    Play,
-    Heart,
-    Share,
-    TrendingUp,
-    Clock,
-    Headphones,
-    Filter,
-    Plus,
-    Shuffle,
-    SkipForward,
-    Pause,
+    Music,
     Users,
+    Album,
+    TrendingUp,
+    Play,
+    Pause,
+    Heart,
+    Clock,
+    Filter,
+    Download,
+    Plus,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -790,7 +787,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                         <p className="text-gray-600 dark:text-gray-400 truncate text-sm mb-2">
                                             {track.artist.name}
                                         </p>
-                                        <p className="text-gray-500 dark:text-gray-500 truncate text-xs mb-3">
+                                        <p className="text-gray-500 dark:text-gray-500 truncatetext-xs mb-3">
                                             {track.album.title}
                                         </p>
 
@@ -811,22 +808,32 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                             </div>
                                         </div>
 
-                                        <div className="flex items-center justify-between mt-3 pt-3 border-t">
-                                            <Button
-                                                size="sm"
-                                                variant="ghost"
-                                                className="p-2"
-                                            >
-                                                <Heart className="h-4 w-4" />
-                                            </Button>
-                                            <Button
-                                                size="sm"
-                                                variant="ghost"
-                                                className="p-2"
-                                            >
-                                                <Share className="h-4 w-4" />
-                                            </Button>
-                                        </div>
+                                        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <Button
+                                                            size="sm"
+                                                            variant="ghost"
+                                                            className="p-2"
+                                                            title="Add to playlist"
+                                                        >
+                                                            <Plus className="h-4 w-4" />
+                                                        </Button>
+                                                        <Button
+                                                            size="sm"
+                                                            variant="ghost"
+                                                            className="p-2"
+                                                            title="Download"
+                                                        >
+                                                            <Download className="h-4 w-4" />
+                                                        </Button>
+                                                        <Button
+                                                            size="sm"
+                                                            variant="ghost"
+                                                            className="p-2"
+                                                            title="Like"
+                                                        >
+                                                            <Heart className="h-4 w-4" />
+                                                        </Button>
+                                                    </div>
                                     </CardContent>
                                 </Card>
                             ))}

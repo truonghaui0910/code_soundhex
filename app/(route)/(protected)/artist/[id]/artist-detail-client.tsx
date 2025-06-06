@@ -16,6 +16,8 @@ import {
   Users,
   Album,
   Pause,
+  Download,
+  Plus,
 } from "lucide-react";
 import Link from "next/link";
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
@@ -300,10 +302,16 @@ export function ArtistDetailClient({ artist, tracks, albums }: ArtistDetailClien
                     </div>
 
                     <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button size="sm" variant="ghost" className="p-2">
+                      <Button size="sm" variant="ghost" className="p-2" title="Add to playlist">
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                      <Button size="sm" variant="ghost" className="p-2" title="Download">
+                        <Download className="h-4 w-4" />
+                      </Button>
+                      <Button size="sm" variant="ghost" className="p-2" title="Like">
                         <Heart className="h-4 w-4" />
                       </Button>
-                      <Button size="sm" variant="ghost" className="p-2">
+                      <Button size="sm" variant="ghost" className="p-2" title="Share">
                         <Share className="h-4 w-4" />
                       </Button>
                     </div>
