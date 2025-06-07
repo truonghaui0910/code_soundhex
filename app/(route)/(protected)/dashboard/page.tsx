@@ -147,30 +147,30 @@ export default function Dashboard() {
                         </div>
 
                         {/* View Selector */}
-                        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mt-8">
+                        <div className="flex gap-4 mt-8">
                             <Button
                                 size="lg"
                                 onClick={() => setCurrentView("overview")}
-                                className={`flex-1 sm:flex-none justify-start sm:justify-center ${currentView === "overview" ? "bg-white text-purple-600 shadow-lg" : "bg-white/20 text-white hover:bg-white/30 border border-white/20"} transition-all duration-200`}
+                                className={`${currentView === "overview" ? "bg-white text-purple-600" : "bg-white/20 text-white hover:bg-white/30"}`}
                             >
                                 <Activity className="mr-2 h-5 w-5" />
-                                <span className="font-semibold">Overview</span>
+                                Overview
                             </Button>
                             <Button
                                 size="lg"
                                 onClick={() => setCurrentView("analytics")}
-                                className={`flex-1 sm:flex-none justify-start sm:justify-center ${currentView === "analytics" ? "bg-white text-purple-600 shadow-lg" : "bg-white/20 text-white hover:bg-white/30 border border-white/20"} transition-all duration-200`}
+                                className={`${currentView === "analytics" ? "bg-white text-purple-600" : "bg-white/20 text-white hover:bg-white/30"}`}
                             >
                                 <BarChart3 className="mr-2 h-5 w-5" />
-                                <span className="font-semibold">Analytics</span>
+                                Analytics
                             </Button>
                             <Button
                                 size="lg"
                                 onClick={() => setCurrentView("agreements")}
-                                className={`flex-1 sm:flex-none justify-start sm:justify-center ${currentView === "agreements" ? "bg-white text-purple-600 shadow-lg" : "bg-white/20 text-white hover:bg-white/30 border border-white/20"} transition-all duration-200`}
+                                className={`${currentView === "agreements" ? "bg-white text-purple-600" : "bg-white/20 text-white hover:bg-white/30"}`}
                             >
                                 <FileText className="mr-2 h-5 w-5" />
-                                <span className="font-semibold">Agreements</span>
+                                Agreements
                             </Button>
                         </div>
                     </div>
