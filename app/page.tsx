@@ -1,12 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Music, Play, Users, TrendingUp, Headphones, Menu, X } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { UserNav } from "@/components/layout/user-nav";
 import { SoundHexLogo } from "@/components/ui/soundhex-logo";
+import { supabase } from "@/lib/supabase/client";
 
 export default function Home() {
+  const router = useRouter();
   const [visible, setVisible] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, loading } = useCurrentUser();
@@ -78,14 +81,30 @@ export default function Home() {
               )}
             </div>
 
-            {/* Mobile Menu Button */}
+            {/* Mobile Menu Button / Logout */}
             <div className="md:hidden">
-              <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="text-foreground hover:text-primary transition-colors p-2"
-              >
-                {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-              </button>
+              {!loading && user ? (
+                <button
+                  onClick={async () => {
+                    try {
+                      await supabase.auth.signOut();
+                      router.push("/");
+                    } catch (error) {
+                      console.error("Error signing out:", error);
+                    }
+                  }}
+                  className="px-4 py-2 text-foreground hover:text-red-500 transition-colors font-medium"
+                >
+                  Logout
+                </button>
+              ) : (
+                <button
+                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                  className="text-foreground hover:text-primary transition-colors p-2"
+                >
+                  {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                </button>
+              )}
             </div>
           </div>
         </div>
