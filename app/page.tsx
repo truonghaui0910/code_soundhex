@@ -1,19 +1,38 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Music, Play, Users, TrendingUp, Headphones } from "lucide-react";
+import { Music, Play, Users, TrendingUp, Headphones, Menu, X } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { UserNav } from "@/components/layout/user-nav";
 import { SoundHexLogo } from "@/components/ui/soundhex-logo";
 
 export default function Home() {
   const [visible, setVisible] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, loading } = useCurrentUser();
 
   useEffect(() => {
     setVisible(true);
     console.log("Home page - User:", user, "Loading:", loading);
   }, []);
+
+  // Close mobile menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (mobileMenuOpen) {
+        const target = event.target as HTMLElement;
+        const nav = document.querySelector('nav');
+        if (nav && !nav.contains(target)) {
+          setMobileMenuOpen(false);
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [mobileMenuOpen]);
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-background via-card to-background">
@@ -24,27 +43,9 @@ export default function Home() {
             <div className="flex items-center space-x-3">
               <SoundHexLogo size={50} showText={true} animated={true} />
             </div>
-            {/* <div className="hidden md:flex space-x-8">
-              <a
-                href="#features"
-                className="text-foreground hover:text-primary transition-colors"
-              >
-                Features
-              </a>
-              <a
-                href="#pricing"
-                className="text-foreground hover:text-primary transition-colors"
-              >
-                Pricing
-              </a>
-              <a
-                href="#about"
-                className="text-foreground hover:text-primary transition-colors"
-              >
-                About
-              </a>
-            </div> */}
-            <div className="flex space-x-4">
+            
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex space-x-4">
               {!loading && (
                 <>
                   {user ? (
@@ -76,8 +77,84 @@ export default function Home() {
                 </>
               )}
             </div>
+
+            {/* Mobile Menu Button */}
+            <div className="md:hidden">
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="text-foreground hover:text-primary transition-colors p-2"
+              >
+                {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              </button>
+            </div>
           </div>
         </div>
+
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden absolute top-full left-0 right-0 glass-effect border-t border-border/20">
+            <div className="px-4 py-6 space-y-4">
+              {!loading && (
+                <>
+                  {user ? (
+                    <div className="space-y-4">
+                      <a
+                        href="/dashboard"
+                        className="block px-4 py-3 text-foreground hover:text-primary hover:bg-card/50 rounded-lg transition-all"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        Dashboard
+                      </a>
+                      <a
+                        href="/music"
+                        className="block px-4 py-3 text-foreground hover:text-primary hover:bg-card/50 rounded-lg transition-all"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        Explore Music
+                      </a>
+                      <div className="pt-4 border-t border-border/20">
+                        <UserNav user={user} />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <a
+                        href="/music"
+                        className="block px-4 py-3 text-foreground hover:text-primary hover:bg-card/50 rounded-lg transition-all"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        Explore Music
+                      </a>
+                      <a
+                        href="#features"
+                        className="block px-4 py-3 text-foreground hover:text-primary hover:bg-card/50 rounded-lg transition-all"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        Features
+                      </a>
+                      <div className="pt-4 border-t border-border/20 space-y-3">
+                        <a
+                          href="/login"
+                          className="block w-full px-4 py-3 text-center text-foreground hover:text-primary hover:bg-card/50 rounded-lg transition-all"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          Sign In
+                        </a>
+                        <a
+                          href="/register"
+                          className="block w-full btn-primary px-4 py-3 rounded-lg text-white font-medium text-center"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          Get Started
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* Hero Section */}
