@@ -9,11 +9,11 @@ export const metadata: Metadata = {
   description: 'Discover, stream, and upload music for free on SoundHex',
   icons: {
     icon: [
-      { url: '/favicon.ico', sizes: '32x32', type: 'image/x-icon' },
-      { url: '/favicon.svg', type: 'image/svg+xml' }
+      { url: '/favicon.ico?v=2', sizes: '32x32', type: 'image/x-icon' },
+      { url: '/favicon.svg?v=2', type: 'image/svg+xml' }
     ],
-    shortcut: '/favicon.ico',
-    apple: '/favicon.ico',
+    shortcut: '/favicon.ico?v=2',
+    apple: '/favicon.ico?v=2',
   },
 }
 
