@@ -327,21 +327,52 @@ export default function AgreementForm() {
               ) : (
                 <div className="grid gap-6">
                   {rightOptions.map((option) => (
-                    <div key={option.id} className="flex items-start space-x-4 border border-gray-200 dark:border-gray-700 p-6 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all duration-300 group">
-                      <Checkbox
-                        id={option.id}
-                        checked={option.checked}
-                        onCheckedChange={() => handleCheckboxChange(option.id)}
-                        className="mt-1 h-5 w-5"
-                      />
-                      <div className="space-y-2 flex-1">
+                    <div 
+                      key={option.id} 
+                      className={`flex items-start space-x-6 border-2 p-8 rounded-xl transition-all duration-300 group cursor-pointer ${
+                        option.checked 
+                          ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20 shadow-md' 
+                          : 'border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-600 hover:bg-gray-50 dark:hover:bg-gray-800/50'
+                      }`}
+                      onClick={() => handleCheckboxChange(option.id)}
+                    >
+                      <div className="flex-shrink-0 mt-1">
+                        <Checkbox
+                          id={option.id}
+                          checked={option.checked}
+                          onCheckedChange={() => handleCheckboxChange(option.id)}
+                          className={`h-6 w-6 ${
+                            option.checked 
+                              ? 'data-[state=checked]:bg-purple-600 data-[state=checked]:border-purple-600' 
+                              : 'border-gray-400 dark:border-gray-500'
+                          }`}
+                        />
+                      </div>
+                      <div className="space-y-3 flex-1">
                         <Label
                           htmlFor={option.id}
-                          className="font-semibold text-lg cursor-pointer group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors"
+                          className={`font-semibold text-xl cursor-pointer transition-colors block ${
+                            option.checked 
+                              ? 'text-purple-700 dark:text-purple-300' 
+                              : 'text-gray-900 dark:text-gray-100 group-hover:text-purple-600 dark:group-hover:text-purple-400'
+                          }`}
                         >
                           {option.title}
                         </Label>
-                        <p className="text-gray-600 dark:text-gray-300 leading-relaxed">{option.description}</p>
+                        <p className={`leading-relaxed text-base ${
+                          option.checked 
+                            ? 'text-purple-600 dark:text-purple-200' 
+                            : 'text-gray-600 dark:text-gray-300'
+                        }`}>
+                          {option.description}
+                        </p>
+                      </div>
+                      <div className="flex-shrink-0">
+                        {option.checked && (
+                          <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center">
+                            <CheckCircle className="h-5 w-5 text-white" />
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
