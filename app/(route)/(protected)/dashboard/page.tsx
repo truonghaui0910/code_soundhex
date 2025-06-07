@@ -192,7 +192,7 @@ export default function Dashboard() {
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <Card className="border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
+                                <Card className="border border-white/20 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm shadow-lg">
                                     <CardContent className="p-6">
                                         <div className="flex items-center justify-between">
                                             <div>
@@ -204,14 +204,14 @@ export default function Dashboard() {
                                                     {dashboardData.revenue.change}
                                                 </Badge>
                                             </div>
-                                            <div className="w-12 h-12 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center">
+                                            <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
                                                 <TrendingUp className="h-6 w-6 text-green-600" />
                                             </div>
                                         </div>
                                     </CardContent>
                                 </Card>
 
-                                <Card className="border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
+                                <Card className="border border-white/20 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm shadow-lg">
                                     <CardContent className="p-6">
                                         <div className="flex items-center justify-between">
                                             <div>
@@ -221,14 +221,14 @@ export default function Dashboard() {
                                                 </p>
                                                 <p className="text-sm text-gray-500 mt-2">Last 30 days</p>
                                             </div>
-                                            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center">
+                                            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
                                                 <BarChart3 className="h-6 w-6 text-blue-600" />
                                             </div>
                                         </div>
                                     </CardContent>
                                 </Card>
 
-                                <Card className="border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
+                                <Card className="border border-white/20 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm shadow-lg">
                                     <CardContent className="p-6">
                                         <div className="flex items-center justify-between">
                                             <div>
@@ -238,7 +238,7 @@ export default function Dashboard() {
                                                 </p>
                                                 <p className="text-sm text-gray-500 mt-2">All time</p>
                                             </div>
-                                            <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/20 rounded-full flex items-center justify-center">
+                                            <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center">
                                                 <Play className="h-6 w-6 text-purple-600" />
                                             </div>
                                         </div>
@@ -251,7 +251,7 @@ export default function Dashboard() {
                         <section>
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                                 {/* Recent Tracks */}
-                                <Card className="border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
+                                <Card className="border border-white/20 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm shadow-lg">
                                     <CardHeader>
                                         <CardTitle className="flex items-center gap-3">
                                             <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
@@ -262,7 +262,7 @@ export default function Dashboard() {
                                     </CardHeader>
                                     <CardContent className="space-y-4">
                                         {dashboardData.recentTracks.map((track) => (
-                                            <div key={track.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50">
+                                            <div key={track.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/80">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-8 h-8 rounded-full flex items-center justify-center">
                                                         {track.status === "approved" ? (
@@ -295,7 +295,7 @@ export default function Dashboard() {
                                 </Card>
 
                                 {/* Upload Status */}
-                                <Card className="border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
+                                <Card className="border border-white/20 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm shadow-lg">
                                     <CardHeader>
                                         <CardTitle className="flex items-center gap-3">
                                             <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-blue-500 rounded-full flex items-center justify-center">
@@ -337,7 +337,7 @@ export default function Dashboard() {
 
                         {/* Notifications */}
                         <section>
-                            <Card className="border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
+                            <Card className="border border-white/20 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm shadow-lg">
                                 <CardHeader>
                                     <CardTitle className="flex items-center gap-3">
                                         <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center">
@@ -348,7 +348,7 @@ export default function Dashboard() {
                                 </CardHeader>
                                 <CardContent className="space-y-4">
                                     {dashboardData.notifications.map((notification, index) => (
-                                        <div key={index} className="flex items-start gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50">
+                                        <div key={index} className="flex items-start gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-700/80">
                                             <div className="w-8 h-8 rounded-full flex items-center justify-center mt-1">
                                                 {notification.type === "approval" ? (
                                                     <AlertCircle className="h-5 w-5 text-orange-600" />
