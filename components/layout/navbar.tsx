@@ -9,12 +9,10 @@ import { UserNav } from "./user-nav";
 import { SoundHexLogo } from "@/components/ui/soundhex-logo";
 import { supabase } from "@/lib/supabase/client";
 
-
 export function Navbar() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -35,7 +33,7 @@ export function Navbar() {
           setUser(null);
         }
         setLoading(false);
-      }
+      },
     );
 
     return () => {
@@ -47,18 +45,18 @@ export function Navbar() {
     <div className="border-b fixed top-0 left-0 right-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm z-50">
       <div className="flex h-16 items-center px-4">
         <div className="flex items-center">
-        <Link href="/" className="flex items-center mr-2 sm:mr-6">
-            <SoundHexLogo size={40} showText={true} animated={false} />
+          <Link href="/" className="flex items-center mr-2 sm:mr-6">
+            <SoundHexLogo size={50} showText={true} animated={true} />
           </Link>
         </div>
 
         <div className="ml-auto flex items-center space-x-2 sm:space-x-4">
           {/* Upload Button */}
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             size="sm"
             className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0"
-            onClick={() => router.push('/music?tab=upload')}
+            onClick={() => router.push("/music?tab=upload")}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -77,15 +75,9 @@ export function Navbar() {
             Upload
           </Button>
 
-          {!loading && (
-            
-            <UserNav user={user} />
-            
-          )}
+          {!loading && <UserNav user={user} />}
         </div>
       </div>
-
-      
     </div>
   );
 }
