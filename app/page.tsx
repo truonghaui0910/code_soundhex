@@ -110,7 +110,14 @@ export default function Home() {
                         className="block px-6 py-4 text-foreground hover:text-white hover:bg-gradient-to-r hover:from-pink-500 hover:to-purple-600 rounded-xl transition-all font-semibold text-lg border border-border hover:border-transparent"
                         onClick={() => setMobileMenuOpen(false)}
                       >
-                        Explore Music
+                        Music
+                      </a>
+                      <a
+                        href="/agreements"
+                        className="block px-6 py-4 text-foreground hover:text-white hover:bg-gradient-to-r hover:from-pink-500 hover:to-purple-600 rounded-xl transition-all font-semibold text-lg border border-border hover:border-transparent"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        Agreements
                       </a>
                       <div className="pt-4 border-t border-border">
                         <UserNav user={user} />
