@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -147,30 +146,30 @@ export default function Dashboard() {
                         </div>
 
                         {/* View Selector */}
-                        <div className="flex gap-4 mt-8">
+                        <div className="flex flex-wrap gap-3 sm:gap-4 mt-8 justify-center">
                             <Button
                                 size="lg"
                                 onClick={() => setCurrentView("overview")}
-                                className={`${currentView === "overview" ? "bg-white text-purple-600" : "bg-white/20 text-white hover:bg-white/30"}`}
+                                className={`min-w-0 flex-shrink-0 ${currentView === "overview" ? "bg-white text-purple-600 shadow-lg" : "bg-white/20 text-white hover:bg-white/30 border border-white/20"} transition-all duration-200`}
                             >
                                 <Activity className="mr-2 h-5 w-5" />
-                                Overview
+                                <span className="font-semibold">Overview</span>
                             </Button>
                             <Button
                                 size="lg"
                                 onClick={() => setCurrentView("analytics")}
-                                className={`${currentView === "analytics" ? "bg-white text-purple-600" : "bg-white/20 text-white hover:bg-white/30"}`}
+                                className={`min-w-0 flex-shrink-0 ${currentView === "analytics" ? "bg-white text-purple-600 shadow-lg" : "bg-white/20 text-white hover:bg-white/30 border border-white/20"} transition-all duration-200`}
                             >
                                 <BarChart3 className="mr-2 h-5 w-5" />
-                                Analytics
+                                <span className="font-semibold">Analytics</span>
                             </Button>
                             <Button
                                 size="lg"
                                 onClick={() => setCurrentView("agreements")}
-                                className={`${currentView === "agreements" ? "bg-white text-purple-600" : "bg-white/20 text-white hover:bg-white/30"}`}
+                                className={`min-w-0 flex-shrink-0 ${currentView === "agreements" ? "bg-white text-purple-600 shadow-lg" : "bg-white/20 text-white hover:bg-white/30 border border-white/20"} transition-all duration-200`}
                             >
                                 <FileText className="mr-2 h-5 w-5" />
-                                Agreements
+                                <span className="font-semibold">Agreements</span>
                             </Button>
                         </div>
                     </div>
