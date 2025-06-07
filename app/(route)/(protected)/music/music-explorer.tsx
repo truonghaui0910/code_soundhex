@@ -50,7 +50,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
     const [currentView, setCurrentView] = useState<
         "featured" | "library" | "upload"
     >("featured");
-    const { currentTrack, isPlaying, playTrack } = useAudioPlayer();
+    const { currentTrack, isPlaying, playTrack, setTrackList } = useAudioPlayer();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { downloadTrack, isTrackDownloading } = useDownload();
     const searchParams = useSearchParams();
@@ -311,9 +311,17 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                             size="lg"
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
-                                                                playTrack(
-                                                                    track,
-                                                                );
+                                                                // Get all tracks from the same album
+                                                                const albumTracks = filteredTracks.filter(t => t.album.id === track.album.id);
+                                                                if (albumTracks.length > 0) {
+                                                                    setTrackList(albumTracks);
+                                                                    // Small delay to ensure trackList is updated
+                                                                    setTimeout(() => {
+                                                                        playTrack(track);
+                                                                    }, 50);
+                                                                } else {
+                                                                    playTrack(track);
+                                                                }
                                                             }}
                                                             className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full bg-white text-purple-600 hover:bg-white/90 pointer-events-auto"
                                                         >
