@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -72,6 +72,17 @@ const dashboardData = {
 
 export default function Dashboard() {
     const [currentView, setCurrentView] = useState<"overview" | "analytics" | "agreements">("overview");
+    const [mounted, setMounted] = useState(false);
+
+    // Format numbers consistently on client-side to prevent hydration mismatch
+    const formatNumber = (num: number): string => {
+        if (!mounted) return num.toString();
+        return num.toLocaleString('en-US');
+    };
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20">
@@ -95,7 +106,7 @@ export default function Dashboard() {
                                         <Play className="h-5 w-5 text-white" />
                                     </div>
                                     <div>
-                                        <p className="text-2xl font-bold">{dashboardData.stats.totalPlays.toLocaleString()}</p>
+                                        <p className="text-2xl font-bold">{formatNumber(dashboardData.stats.totalPlays)}</p>
                                         <p className="text-purple-200 text-sm">Total Plays</p>
                                     </div>
                                 </div>
@@ -128,7 +139,7 @@ export default function Dashboard() {
                                         <DollarSign className="h-5 w-5 text-white" />
                                     </div>
                                     <div>
-                                        <p className="text-2xl font-bold">${dashboardData.stats.monthlyEarnings.toLocaleString()}</p>
+                                        <p className="text-2xl font-bold">${formatNumber(dashboardData.stats.monthlyEarnings)}</p>
                                         <p className="text-purple-200 text-sm">This Month</p>
                                     </div>
                                 </div>
@@ -188,7 +199,7 @@ export default function Dashboard() {
                                             <div>
                                                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Monthly Revenue</p>
                                                 <p className="text-3xl font-bold text-gray-900 dark:text-white">
-                                                    ${dashboardData.revenue.monthly.toLocaleString()}
+                                                    ${formatNumber(dashboardData.revenue.monthly)}
                                                 </p>
                                                 <Badge variant="secondary" className="mt-2 bg-green-100 text-green-800">
                                                     {dashboardData.revenue.change}
@@ -224,7 +235,7 @@ export default function Dashboard() {
                                             <div>
                                                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Plays</p>
                                                 <p className="text-3xl font-bold text-gray-900 dark:text-white">
-                                                    {dashboardData.stats.totalPlays.toLocaleString()}
+                                                    {formatNumber(dashboardData.stats.totalPlays)}
                                                 </p>
                                                 <p className="text-sm text-gray-500 mt-2">All time</p>
                                             </div>
@@ -266,7 +277,7 @@ export default function Dashboard() {
                                                     <div>
                                                         <h3 className="font-semibold text-gray-900 dark:text-white">{track.title}</h3>
                                                         <p className="text-sm text-gray-500">
-                                                            {track.plays > 0 ? `${track.plays.toLocaleString()} plays` : 
+                                                            {track.plays > 0 ? `${formatNumber(track.plays)} plays` : 
                                                              track.status === "approved" ? "Ready for distribution" : 
                                                              track.status === "review" ? "Under review" : "Needs revision"}
                                                         </p>
