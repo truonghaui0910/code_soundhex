@@ -5,8 +5,16 @@ import { Toaster } from "sonner"
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Next.js App with Supabase',
-  description: 'A modern web application built with Next.js and Supabase',
+  title: 'SoundHex - Music Platform',
+  description: 'Discover, stream, and upload music for free on SoundHex',
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: '32x32', type: 'image/x-icon' },
+      { url: '/favicon.svg', type: 'image/svg+xml' }
+    ],
+    shortcut: '/favicon.ico',
+    apple: '/favicon.ico',
+  },
 }
 
 export default function RootLayout({
