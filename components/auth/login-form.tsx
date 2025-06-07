@@ -6,7 +6,7 @@ import Link from "next/link";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { supabase } from "@/lib/supabase/client";
+import { supabaseWithLogging } from "@/lib/supabase/client-with-logging";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -43,7 +43,7 @@ export function LoginForm() {
     setError(null);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabaseWithLogging.auth.signInWithPassword({
         email: values.email,
         password: values.password,
       });
