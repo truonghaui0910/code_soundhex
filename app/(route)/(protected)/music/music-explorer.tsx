@@ -390,7 +390,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                 key={track.artist.id}
                                                 className="group cursor-pointer text-center"
                                             >
-                                                <div className="w-32 h-32 mx-auto mb-3 rounded-full overflow-hidden bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center relative group-hover:scale-105 transition-transform duration-300">
+                                                <div className="aspect-square mx-auto mb-3 rounded-full overflow-hidden bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center relative group-hover:scale-105 transition-transform duration-300">
                                                     {track.artist
                                                         .profile_image_url ? (
                                                         <Image
@@ -403,7 +403,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                                     .name
                                                             }
                                                             fill
-                                                            sizes="128px"
+                                                            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
                                                             className="object-cover"
                                                         />
                                                     ) : (
