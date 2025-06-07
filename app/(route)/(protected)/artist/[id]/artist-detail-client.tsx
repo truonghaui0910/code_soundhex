@@ -54,7 +54,13 @@ interface ArtistDetailClientProps {
 }
 
 export function ArtistDetailClient({ artist, tracks, albums }: ArtistDetailClientProps) {
-  const { currentTrack, isPlaying, playTrack, setTrackList } = useAudioPlayer();
+  const {
+    currentTrack,
+    isPlaying,
+    playTrack,
+    setTrackList,
+    togglePlayPause,
+  } = useAudioPlayer();
   const { downloadTrack, downloadMultipleTracks, isDownloading, isTrackDownloading } = useDownload();
 
   const handlePlayAllTracks = () => {
@@ -72,7 +78,7 @@ export function ArtistDetailClient({ artist, tracks, albums }: ArtistDetailClien
       togglePlayPause();
       return;
     }
-    
+
     // Otherwise, set the track list and play the new track
     setTrackList(tracks);
     setTimeout(() => {
