@@ -1,4 +1,3 @@
-
 "use client";
 
 interface SoundHexLogoProps {
@@ -8,37 +7,49 @@ interface SoundHexLogoProps {
   animated?: boolean;
 }
 
-export function SoundHexLogo({ 
-  size = 80, 
-  showText = true, 
+export function SoundHexLogo({
+  size = 80,
+  showText = true,
   className = "",
-  animated = false 
+  animated = false,
 }: SoundHexLogoProps) {
   return (
     <div className={`flex items-center ${className}`}>
-      <div className={`relative ${animated ? 'animate-pulse' : ''}`}>
+      <div className={`relative ${animated ? "animate-pulse" : ""}`}>
         <svg
           width={size}
           height={size}
           viewBox="0 0 100 100"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          className="drop-shadow-lg"
+          className="drop-shadow-lg aspect-square"
         >
           {/* Gradient Definitions */}
           <defs>
-            <linearGradient id="hexGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <linearGradient
+              id="hexGradient"
+              x1="0%"
+              y1="0%"
+              x2="100%"
+              y2="100%"
+            >
               <stop offset="0%" stopColor="#dc2675" />
               <stop offset="50%" stopColor="#c026d3" />
               <stop offset="100%" stopColor="#7c3aed" />
             </linearGradient>
-            <linearGradient id="soundGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <linearGradient
+              id="soundGradient"
+              x1="0%"
+              y1="0%"
+              x2="100%"
+              y2="100%"
+            >
               <stop offset="0%" stopColor="#ffffff" />
               <stop offset="100%" stopColor="#fdf2f8" />
             </linearGradient>
             <radialGradient id="glowEffect">
-              <stop offset="0%" stopColor="#dc2675" stopOpacity="0.6"/>
-              <stop offset="100%" stopColor="#7c3aed" stopOpacity="0"/>
+              <stop offset="0%" stopColor="#dc2675" stopOpacity="0.6" />
+              <stop offset="100%" stopColor="#7c3aed" stopOpacity="0" />
             </radialGradient>
           </defs>
 
@@ -49,18 +60,18 @@ export function SoundHexLogo({
             r="48"
             fill="url(#glowEffect)"
             opacity="0.4"
-            className={animated ? 'animate-ping' : ''}
-            style={animated ? { animationDuration: '2s' } : {}}
+            className={animated ? "animate-ping" : ""}
+            style={animated ? { animationDuration: "2s" } : {}}
           />
 
           {/* Main Hexagon - Full size */}
           <polygon
-            points="50,5 85,25 85,75 50,95 15,75 15,25"
+            points="50,10 85,25 85,75 50,90 15,75 15,25"
             fill="url(#hexGradient)"
             stroke="white"
             strokeWidth="2"
-            className={animated ? 'animate-pulse' : ''}
-            style={animated ? { animationDuration: '3s' } : {}}
+            className={animated ? "animate-pulse" : ""}
+            style={animated ? { animationDuration: "3s" } : {}}
           />
 
           {/* Inner Hexagon Border */}
@@ -84,7 +95,7 @@ export function SoundHexLogo({
                 />
               )}
             </rect>
-            
+
             {/* Side waves */}
             <rect x="38" y="35" width="4" height="30" rx="2" opacity="0.8">
               {animated && (
@@ -96,7 +107,7 @@ export function SoundHexLogo({
                 />
               )}
             </rect>
-            
+
             <rect x="58" y="35" width="4" height="30" rx="2" opacity="0.8">
               {animated && (
                 <animate
@@ -174,9 +185,9 @@ export function SoundHexLogo({
           </circle>
         </svg>
       </div>
-      
+
       {showText && (
-        <span className="ml-3 text-2xl font-bold bg-gradient-to-r from-blue-600 via-cyan-600 to-blue-800 bg-clip-text text-transparent">
+        <span className="ml-3 text-2xl font-bold bg-gradient-to-r from-pink-500 via-purple-500 to-purple-600 bg-clip-text text-transparent">
           SoundHex
         </span>
       )}
