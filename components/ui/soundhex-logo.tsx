@@ -9,7 +9,7 @@ interface SoundHexLogoProps {
 }
 
 export function SoundHexLogo({ 
-  size = 40, 
+  size = 50, 
   showText = true, 
   className = "",
   animated = false 
@@ -27,23 +27,18 @@ export function SoundHexLogo({
         >
           {/* Gradient Definitions */}
           <defs>
-            <linearGradient id="mainGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#667eea" />
-              <stop offset="50%" stopColor="#764ba2" />
-              <stop offset="100%" stopColor="#f093fb" />
+            <linearGradient id="hexGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#00d4ff" />
+              <stop offset="50%" stopColor="#0099cc" />
+              <stop offset="100%" stopColor="#0066ff" />
             </linearGradient>
-            <linearGradient id="centerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#4facfe" />
-              <stop offset="100%" stopColor="#00f2fe" />
+            <linearGradient id="soundGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#ffffff" />
+              <stop offset="100%" stopColor="#e0f7ff" />
             </linearGradient>
-            <linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#ff9a9e" />
-              <stop offset="50%" stopColor="#fecfef" />
-              <stop offset="100%" stopColor="#fecfef" />
-            </linearGradient>
-            <radialGradient id="glowGradient">
-              <stop offset="0%" stopColor="#ffffff" stopOpacity="0.8"/>
-              <stop offset="100%" stopColor="#ffffff" stopOpacity="0"/>
+            <radialGradient id="glowEffect">
+              <stop offset="0%" stopColor="#00d4ff" stopOpacity="0.6"/>
+              <stop offset="100%" stopColor="#00d4ff" stopOpacity="0"/>
             </radialGradient>
           </defs>
 
@@ -51,49 +46,33 @@ export function SoundHexLogo({
           <circle
             cx="50"
             cy="50"
-            r="45"
-            fill="url(#glowGradient)"
-            opacity="0.3"
+            r="48"
+            fill="url(#glowEffect)"
+            opacity="0.4"
             className={animated ? 'animate-ping' : ''}
+            style={animated ? { animationDuration: '2s' } : {}}
+          />
+
+          {/* Main Hexagon */}
+          <polygon
+            points="50,15 75,30 75,60 50,75 25,60 25,30"
+            fill="url(#hexGradient)"
+            stroke="white"
+            strokeWidth="2"
+            className={animated ? 'animate-pulse' : ''}
             style={animated ? { animationDuration: '3s' } : {}}
           />
 
-          {/* Main Circle */}
-          <circle
-            cx="50"
-            cy="50"
-            r="35"
-            fill="url(#mainGradient)"
-            stroke="white"
-            strokeWidth="2"
-            className={animated ? 'animate-spin' : ''}
-            style={animated ? { animationDuration: '6s' } : {}}
-          />
-
-          {/* Inner Ring */}
-          <circle
-            cx="50"
-            cy="50"
-            r="28"
+          {/* Inner Hexagon Border */}
+          <polygon
+            points="50,20 70,32 70,58 50,70 30,58 30,32"
             fill="none"
-            stroke="url(#ringGradient)"
-            strokeWidth="2"
-            opacity="0.7"
-            className={animated ? 'animate-spin' : ''}
-            style={animated ? { animationDuration: '4s', animationDirection: 'reverse' } : {}}
-          />
-
-          {/* Center Circle */}
-          <circle
-            cx="50"
-            cy="50"
-            r="18"
-            fill="url(#centerGradient)"
-            className={animated ? 'animate-pulse' : ''}
+            stroke="rgba(255,255,255,0.3)"
+            strokeWidth="1"
           />
 
           {/* Sound Wave Visualization */}
-          <g fill="white" opacity="0.9">
+          <g fill="url(#soundGradient)" opacity="0.9">
             {/* Central wave */}
             <rect x="48" y="35" width="4" height="30" rx="2">
               {animated && (
@@ -129,7 +108,7 @@ export function SoundHexLogo({
               )}
             </rect>
 
-            <rect x="36" y="45" width="2" height="10" rx="1" opacity="0.6">
+            <rect x="37" y="45" width="2" height="10" rx="1" opacity="0.6">
               {animated && (
                 <animate
                   attributeName="height"
@@ -140,7 +119,7 @@ export function SoundHexLogo({
               )}
             </rect>
 
-            <rect x="62" y="45" width="2" height="10" rx="1" opacity="0.6">
+            <rect x="61" y="45" width="2" height="10" rx="1" opacity="0.6">
               {animated && (
                 <animate
                   attributeName="height"
@@ -152,28 +131,28 @@ export function SoundHexLogo({
             </rect>
           </g>
 
-          {/* Sparkle Effects */}
-          <circle cx="25" cy="25" r="2" fill="white" opacity="0.8">
+          {/* Accent Dots */}
+          <circle cx="35" cy="35" r="1.5" fill="white" opacity="0.7">
             {animated && (
               <animate
                 attributeName="opacity"
-                values="0.8;0.2;0.8"
+                values="0.7;0.2;0.7"
                 dur="2s"
                 repeatCount="indefinite"
               />
             )}
           </circle>
-          <circle cx="75" cy="75" r="1.5" fill="#f093fb" opacity="0.7">
+          <circle cx="65" cy="35" r="1.5" fill="white" opacity="0.5">
             {animated && (
               <animate
                 attributeName="opacity"
-                values="0.7;0.1;0.7"
+                values="0.5;0.1;0.5"
                 dur="2.5s"
                 repeatCount="indefinite"
               />
             )}
           </circle>
-          <circle cx="20" cy="75" r="1" fill="#00f2fe" opacity="0.6">
+          <circle cx="35" cy="65" r="1" fill="#00d4ff" opacity="0.6">
             {animated && (
               <animate
                 attributeName="opacity"
@@ -183,11 +162,21 @@ export function SoundHexLogo({
               />
             )}
           </circle>
+          <circle cx="65" cy="65" r="1" fill="#0066ff" opacity="0.4">
+            {animated && (
+              <animate
+                attributeName="opacity"
+                values="0.4;0.1;0.4"
+                dur="2.2s"
+                repeatCount="indefinite"
+              />
+            )}
+          </circle>
         </svg>
       </div>
       
       {showText && (
-        <span className="ml-3 text-2xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+        <span className="ml-3 text-2xl font-bold bg-gradient-to-r from-blue-600 via-cyan-600 to-blue-800 bg-clip-text text-transparent">
           SoundHex
         </span>
       )}
