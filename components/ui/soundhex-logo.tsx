@@ -23,7 +23,7 @@ export function SoundHexLogo({
           viewBox="0 0 100 100"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          className="drop-shadow-lg"
+          className="drop-shadow-lg aspect-square"
         >
           {/* Gradient Definitions */}
           <defs>
@@ -176,7 +176,7 @@ export function SoundHexLogo({
       </div>
       
       {showText && (
-        <span className="ml-3 text-2xl font-bold bg-gradient-to-r from-blue-600 via-cyan-600 to-blue-800 bg-clip-text text-transparent">
+        <span className="ml-3 text-2xl font-bold bg-gradient-to-r from-pink-500 via-purple-500 to-purple-600 bg-clip-text text-transparent">
           SoundHex
         </span>
       )}
