@@ -50,7 +50,13 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
     const [currentView, setCurrentView] = useState<
         "featured" | "library" | "upload"
     >("featured");
-    const { currentTrack, isPlaying, playTrack, setTrackList, togglePlayPause } = useAudioPlayer();
+    const {
+        currentTrack,
+        isPlaying,
+        playTrack,
+        setTrackList,
+        togglePlayPause,
+    } = useAudioPlayer();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { downloadTrack, isTrackDownloading } = useDownload();
     const searchParams = useSearchParams();
@@ -312,19 +318,46 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
                                                                 // Check if this track is currently playing
-                                                                if (currentTrack?.id === track.id && isPlaying) {
+                                                                if (
+                                                                    currentTrack?.id ===
+                                                                        track.id &&
+                                                                    isPlaying
+                                                                ) {
                                                                     // If playing, pause it
                                                                     togglePlayPause();
                                                                 } else {
                                                                     // If not playing or different track, play it
-                                                                    const albumTracks = filteredTracks.filter(t => t.album.id === track.album.id);
-                                                                    if (albumTracks.length > 0) {
-                                                                        setTrackList(albumTracks);
-                                                                        setTimeout(() => {
-                                                                            playTrack(track);
-                                                                        }, 50);
+                                                                    const albumTracks =
+                                                                        filteredTracks.filter(
+                                                                            (
+                                                                                t,
+                                                                            ) =>
+                                                                                t
+                                                                                    .album
+                                                                                    .id ===
+                                                                                track
+                                                                                    .album
+                                                                                    .id,
+                                                                        );
+                                                                    if (
+                                                                        albumTracks.length >
+                                                                        0
+                                                                    ) {
+                                                                        setTrackList(
+                                                                            albumTracks,
+                                                                        );
+                                                                        setTimeout(
+                                                                            () => {
+                                                                                playTrack(
+                                                                                    track,
+                                                                                );
+                                                                            },
+                                                                            50,
+                                                                        );
                                                                     } else {
-                                                                        playTrack(track);
+                                                                        playTrack(
+                                                                            track,
+                                                                        );
                                                                     }
                                                                 }
                                                             }}
@@ -466,7 +499,11 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                 <Button
                                                     size="lg"
                                                     onClick={() => {
-                                                        if (currentTrack?.id === track.id && isPlaying) {
+                                                        if (
+                                                            currentTrack?.id ===
+                                                                track.id &&
+                                                            isPlaying
+                                                        ) {
                                                             togglePlayPause();
                                                         } else {
                                                             playTrack(track);
@@ -537,7 +574,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                         )}
                                                     </span>
                                                 </div>
-                                            </CardContent>
+                                            </div>
                                         </CardContent>
                                     </Card>
                                 ))}
@@ -596,7 +633,11 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                             <Button
                                                 size="lg"
                                                 onClick={() => {
-                                                    if (currentTrack?.id === track.id && isPlaying) {
+                                                    if (
+                                                        currentTrack?.id ===
+                                                            track.id &&
+                                                        isPlaying
+                                                    ) {
                                                         togglePlayPause();
                                                     } else {
                                                         playTrack(track);
@@ -650,7 +691,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                         <p className="text-gray-600 dark:text-gray-400 truncate text-sm mb-2">
                                             {track.artist.name}
                                         </p>
-                                        <p className="text-gray-500 dark:text-gray-500 truncatetext-xs mb-3">
+                                        <p className="text-gray-500 dark:text-gray-500 truncate text-xs mb-3">
                                             {track.album.title}
                                         </p>
 
@@ -791,7 +832,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                         </p>
                                     </div>
                                     <div className="text-center p-6 rounded-xl bg-blue-50 dark:bg-blue-900/20">
-                                        <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-centermx-auto mb-3">
+                                        <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-3">
                                             <TrendingUp className="h-6 w-6 text-blue-600" />
                                         </div>
                                         <h4 className="font-semibold mb-2">
