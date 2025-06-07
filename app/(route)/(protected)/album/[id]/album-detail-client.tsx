@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { MusicPlayer } from "@/components/music/MusicPlayer";
 import { Play, Pause, Clock, Music, Heart, Share, Download, Plus } from "lucide-react";
 import Link from "next/link";
-import { useAudioPlayer, AudioPlayerContext } from "@/contexts/AudioPlayerContext";
+import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 import { Track } from "@/lib/definitions/Track";
 import { useDownload } from "@/hooks/use-download";
 import { useContext } from "react";

@@ -1,16 +1,9 @@
 "use client";
 
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { supabase } from "@/lib/supabase/client";
 import { User } from "@/hooks/use-current-user";
 
@@ -20,6 +13,8 @@ interface UserNavProps {
 
 export function UserNav({ user }: UserNavProps) {
   const router = useRouter();
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const handleSignOut = async () => {
     try {
@@ -29,6 +24,20 @@ export function UserNav({ user }: UserNavProps) {
       console.error("Error signing out:", error);
     }
   };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   if (!user) {
     return (
@@ -60,43 +69,62 @@ export function UserNav({ user }: UserNavProps) {
         .toUpperCase()
     : user.email?.charAt(0).toUpperCase() || "U";
 
+  const menuItems = [
+    { label: "Dashboard", href: "/dashboard" },
+    { label: "Music", href: "/music" },
+    { label: "Agreements", href: "/agreements" },
+    { label: "Sign out", action: handleSignOut, isSignOut: true },
+  ];
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-          <Avatar className="h-8 w-8">
-            <AvatarFallback className="bg-primary text-primary-foreground">
-              {userInitials}
-            </AvatarFallback>
-          </Avatar>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56 z-[9999]" align="end" forceMount>
-        <DropdownMenuLabel className="font-normal">
-          <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">
+    <div className="relative" ref={dropdownRef}>
+      <Button 
+        variant="ghost" 
+        className="relative h-8 w-8 rounded-full"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <Avatar className="h-8 w-8">
+          <AvatarFallback className="bg-primary text-primary-foreground">
+            {userInitials}
+          </AvatarFallback>
+        </Avatar>
+      </Button>
+
+      {isOpen && (
+        <div className="absolute right-0 top-full mt-2 w-56 rounded-md border bg-white dark:bg-gray-800 shadow-lg z-[9999]">
+          <div className="p-3 border-b border-gray-200 dark:border-gray-700">
+            <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
               {user.user_metadata?.name || "User"}
             </p>
-            <p className="text-xs leading-none text-muted-foreground">
+            <p className="text-xs text-gray-500 dark:text-gray-400">
               {user.email}
             </p>
           </div>
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => router.push("/dashboard")}>
-          Dashboard
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => router.push("/music")}>
-          Music
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => router.push("/agreements")}>
-          Agreements
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleSignOut}>
-          Sign out
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+          
+          <div className="py-1">
+            {menuItems.map((item, index) => (
+              <div key={index}>
+                {item.isSignOut && index > 0 && (
+                  <div className="h-px bg-gray-200 dark:bg-gray-700 my-1"></div>
+                )}
+                <button
+                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                  onClick={() => {
+                    if (item.action) {
+                      item.action();
+                    } else if (item.href) {
+                      router.push(item.href);
+                    }
+                    setIsOpen(false);
+                  }}
+                >
+                  {item.label}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

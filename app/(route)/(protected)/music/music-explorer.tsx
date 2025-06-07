@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
     Search,
     Music,
@@ -53,6 +54,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
     const { currentTrack, isPlaying, playTrack } = useAudioPlayer();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { downloadTrack, isTrackDownloading } = useDownload();
+    const searchParams = useSearchParams();
 
     // Get unique genres from tracks
     const genres = Array.from(
@@ -142,7 +144,15 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
 
     useEffect(() => {
         setMounted(true);
-    }, []);
+
+        // Check for the 'tab' parameter in the URL
+        const tab = searchParams.get("tab");
+        if (tab === "upload") {
+            setCurrentView("upload");
+            // Clear the URL parameter after setting the state
+            window.history.replaceState({}, '', '/music');
+        }
+    }, [searchParams]);
 
     if (!mounted) {
         return (
