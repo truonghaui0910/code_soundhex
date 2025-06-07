@@ -150,7 +150,7 @@ export function ArtistDetailClient({ artist, tracks, albums }: ArtistDetailClien
         </div>
       </div>
 
-      <div className="container mx-auto px-6 py-12 space-y-12">
+      <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-12">
         {/* Albums Section */}
         {albums && albums.length > 0 && (
           <Card className="border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm shadow-xl">

@@ -89,7 +89,7 @@ export default function Dashboard() {
             {/* Hero Section */}
             <div className="relative overflow-hidden bg-gradient-to-r from-slate-800 via-purple-900 to-slate-900 text-white">
                 <div className="absolute inset-0 bg-black/10"></div>
-                <div className="relative container mx-auto px-6 py-16">
+                <div className="relative container mx-auto px-4 sm:px-6 py-8 sm:py-16">
                     <div className="max-w-4xl">
                         <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
                             Welcome Back
@@ -178,7 +178,7 @@ export default function Dashboard() {
             </div>
 
             {/* Main Content */}
-            <div className="container mx-auto px-6 pb-32">
+            <div className="container mx-auto px-4 sm:px-6 pb-32">
                 {currentView === "overview" && (
                     <div className="space-y-8 pt-12">
                         {/* Revenue Section */}
