@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -8,7 +7,15 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { supabaseWithLogging } from "@/lib/supabase/client-with-logging";
-import { Mail, Lock, UserPlus, Eye, EyeOff, CheckCircle, ArrowLeft } from "lucide-react";
+import {
+  Mail,
+  Lock,
+  UserPlus,
+  Eye,
+  EyeOff,
+  CheckCircle,
+  ArrowLeft,
+} from "lucide-react";
 import { SoundHexLogo } from "@/components/ui/soundhex-logo";
 
 import { Button } from "@/components/ui/button";
@@ -22,14 +29,20 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
-const formSchema = z.object({
-  email: z.string().email({ message: "Please enter a valid email" }),
-  password: z.string().min(6, { message: "Password must be at least 6 characters" }),
-  confirmPassword: z.string().min(6, { message: "Password must be at least 6 characters" }),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
+const formSchema = z
+  .object({
+    email: z.string().email({ message: "Please enter a valid email" }),
+    password: z
+      .string()
+      .min(6, { message: "Password must be at least 6 characters" }),
+    confirmPassword: z
+      .string()
+      .min(6, { message: "Password must be at least 6 characters" }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
 
 export function RegisterForm() {
   const router = useRouter();
@@ -103,28 +116,44 @@ export function RegisterForm() {
                     Please verify your email
                   </h3>
                   <p className="text-green-600 dark:text-green-400 leading-relaxed text-lg">
-                    We've sent a verification email to <strong className="font-semibold">{registeredEmail}</strong>. 
-                    Please check your inbox and click the verification link to complete your registration.
+                    We've sent a verification email to{" "}
+                    <strong className="font-semibold">{registeredEmail}</strong>
+                    . Please check your inbox and click the verification link to
+                    complete your registration.
                   </p>
                 </div>
               </div>
-              
+
               <div className="space-y-4">
                 <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl">
                   <p className="text-blue-600 dark:text-blue-400 text-center">
-                    💡 <strong>Note:</strong> Didn't receive the email? Check your spam folder or try again in a few minutes.
+                    💡 <strong>Note:</strong> Didn't receive the email? Check
+                    your spam folder or try again in a few minutes.
                   </p>
                 </div>
-                
+
                 <div className="flex flex-col sm:flex-row gap-4">
-                  <Button asChild variant="outline" className="flex-1 h-11 rounded-lg border-gray-200 dark:border-gray-600">
-                    <Link href="/login" className="flex items-center justify-center space-x-2">
+                  <Button
+                    asChild
+                    variant="outline"
+                    className="flex-1 h-11 rounded-lg border-gray-200 dark:border-gray-600"
+                  >
+                    <Link
+                      href="/login"
+                      className="flex items-center justify-center space-x-2"
+                    >
                       <ArrowLeft className="h-4 w-4" />
                       <span>Go to Sign In</span>
                     </Link>
                   </Button>
-                  <Button asChild className="flex-1 h-11 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 rounded-lg">
-                    <Link href="/" className="flex items-center justify-center space-x-2">
+                  <Button
+                    asChild
+                    className="flex-1 h-11 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 rounded-lg"
+                  >
+                    <Link
+                      href="/"
+                      className="flex items-center justify-center space-x-2"
+                    >
                       <span>Back to Home</span>
                     </Link>
                   </Button>
@@ -143,11 +172,11 @@ export function RegisterForm() {
       <div className="w-full max-w-md">
         {/* Logo and Title */}
         <div className="text-center mb-8">
-          <div className="flex justify-center mb-6">
+          <div className="flex justify-center mb-3">
             <SoundHexLogo size={100} showText={false} animated={true} />
           </div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-3">
-            Sign Up
+            SoundHex
           </h1>
           <p className="text-gray-600 dark:text-gray-300 text-lg">
             Create your account to start your music journey
@@ -169,10 +198,10 @@ export function RegisterForm() {
                     <FormControl>
                       <div className="relative">
                         <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                        <Input 
-                          placeholder="your.email@example.com" 
+                        <Input
+                          placeholder="your.email@example.com"
                           className="pl-10 h-10 border-gray-200 dark:border-gray-600 focus:border-purple-500 dark:focus:border-purple-400 rounded-lg bg-gray-50 dark:bg-gray-700"
-                          {...field} 
+                          {...field}
                         />
                       </div>
                     </FormControl>
@@ -191,18 +220,22 @@ export function RegisterForm() {
                     <FormControl>
                       <div className="relative">
                         <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                        <Input 
+                        <Input
                           type={showPassword ? "text" : "password"}
-                          placeholder="••••••••" 
+                          placeholder="••••••••"
                           className="pl-10 pr-10 h-10 border-gray-200 dark:border-gray-600 focus:border-purple-500 dark:focus:border-purple-400 rounded-lg bg-gray-50 dark:bg-gray-700"
-                          {...field} 
+                          {...field}
                         />
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
                           className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
                         >
-                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          {showPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
                         </button>
                       </div>
                     </FormControl>
@@ -221,18 +254,24 @@ export function RegisterForm() {
                     <FormControl>
                       <div className="relative">
                         <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                        <Input 
+                        <Input
                           type={showConfirmPassword ? "text" : "password"}
-                          placeholder="••••••••" 
+                          placeholder="••••••••"
                           className="pl-10 pr-10 h-10 border-gray-200 dark:border-gray-600 focus:border-purple-500 dark:focus:border-purple-400 rounded-lg bg-gray-50 dark:bg-gray-700"
-                          {...field} 
+                          {...field}
                         />
                         <button
                           type="button"
-                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          onClick={() =>
+                            setShowConfirmPassword(!showConfirmPassword)
+                          }
                           className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
                         >
-                          {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          {showConfirmPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
                         </button>
                       </div>
                     </FormControl>
@@ -242,12 +281,14 @@ export function RegisterForm() {
               />
               {error && (
                 <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
-                  <p className="text-sm text-red-600 dark:text-red-400 text-center">{error}</p>
+                  <p className="text-sm text-red-600 dark:text-red-400 text-center">
+                    {error}
+                  </p>
                 </div>
               )}
-              <Button 
-                type="submit" 
-                className="w-full h-11 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-medium rounded-lg transition-all duration-300 shadow-lg" 
+              <Button
+                type="submit"
+                className="w-full h-11 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-medium rounded-lg transition-all duration-300 shadow-lg"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -264,20 +305,20 @@ export function RegisterForm() {
               </Button>
             </form>
           </Form>
-          
+
           {/* Footer Links */}
           <div className="mt-8 text-center space-y-4">
             <p className="text-gray-600 dark:text-gray-300">
               Already have an account?{" "}
-              <Link 
-                href="/login" 
+              <Link
+                href="/login"
                 className="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 font-medium hover:underline transition-colors"
               >
                 Sign in
               </Link>
             </p>
-            <Link 
-              href="/" 
+            <Link
+              href="/"
               className="block text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
             >
               Back to home

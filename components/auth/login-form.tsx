@@ -80,11 +80,11 @@ export function LoginForm() {
       <div className="w-full max-w-md">
         {/* Logo and Title */}
         <div className="text-center mb-8">
-          <div className="flex justify-center mb-6">
+          <div className="flex justify-center mb-3">
             <SoundHexLogo size={100} showText={false} animated={true} />
           </div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-3">
-            Sign In
+            SoundHex
           </h1>
           <p className="text-gray-600 dark:text-gray-300 text-lg">
             Welcome back to SoundHex
