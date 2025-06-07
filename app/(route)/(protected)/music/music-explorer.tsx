@@ -150,7 +150,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
         if (tab === "upload") {
             setCurrentView("upload");
             // Clear the URL parameter after setting the state
-            window.history.replaceState({}, '', '/music');
+            window.history.replaceState({}, "", "/music");
         }
     }, [searchParams]);
 
@@ -188,7 +188,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
 
                         {/* Search Bar */}
                         <div className="relative max-w-2xl mx-auto mb-8">
-                            <Search className="absolute left-4 top-4 h-5 w-5 text-gray-400 " />
+                            <Search className="absolute left-4 top-4 h-5 w-5 text-gray-400 z-10" />
                             <Input
                                 placeholder="Search songs, artists, albums..."
                                 value={searchQuery}
