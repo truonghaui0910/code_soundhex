@@ -299,12 +299,9 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                         if (!track) return null;
 
                                         return (
-                                            <Link
-                                                key={track.album.id}
-                                                href={`/album/${track.album.id}`}
-                                            >
-                                                <Card className="group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
-                                                    <div className="relative aspect-square">
+                                            <Card key={track.album.id} className="group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
+                                                <div className="relative aspect-square">
+                                                    <Link href={`/album/${track.album.id}`}>
                                                         {track.album
                                                             .cover_image_url ? (
                                                             <Image
@@ -325,31 +322,34 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                                 <Music className="h-12 w-12 text-white" />
                                                             </div>
                                                         )}
+                                                    </Link>
 
-                                                        <div className="absolute inset-0 flex items-center justify-center">
-                                                            <Button
-                                                                size="lg"
-                                                                onClick={() =>
-                                                                    playTrack(
-                                                                        track,
-                                                                    )
-                                                                }
-                                                                className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full bg-white text-purple-600 hover:bg-white/90"
-                                                            >
-                                                                <Play className="h-5 w-5" />
-                                                            </Button>
-                                                        </div>
+                                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                                        <Button
+                                                            size="lg"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                playTrack(track);
+                                                            }}
+                                                            className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full bg-white text-purple-600 hover:bg-white/90 pointer-events-auto"
+                                                        >
+                                                            <Play className="h-5 w-5" />
+                                                        </Button>
                                                     </div>
-                                                    <CardContent className="p-3">
+                                                </div>
+                                                <CardContent className="p-3">
+                                                    <Link href={`/album/${track.album.id}`}>
                                                         <h3 className="font-semibold text-sm mb-1 truncate hover:underline cursor-pointer">
                                                             {track.album.title}
                                                         </h3>
+                                                    </Link>
+                                                    <Link href={`/artist/${track.artist.id}`}>
                                                         <p className="text-gray-600 dark:text-gray-400 truncate text-xs hover:underline cursor-pointer">
                                                             {track.artist.name}
                                                         </p>
-                                                    </CardContent>
-                                                </Card>
-                                            </Link>
+                                                    </Link>
+                                                </CardContent>
+                                            </Card>
                                         );
                                     })}
                             </div>
@@ -452,12 +452,9 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                         if (!track) return null;
 
                                         return (
-                                            <Link
-                                                key={track.album.id}
-                                                href={`/album/${track.album.id}`}
-                                            >
-                                                <Card className="group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
-                                                    <div className="relative aspect-square">
+                                            <Card key={track.album.id} className="group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
+                                                <div className="relative aspect-square">
+                                                    <Link href={`/album/${track.album.id}`}>
                                                         {track.album
                                                             .cover_image_url ? (
                                                             <Image
@@ -478,31 +475,34 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                                 <Music className="h-12 w-12 text-white" />
                                                             </div>
                                                         )}
+                                                    </Link>
 
-                                                        <div className="absolute inset-0 flex items-center justify-center">
-                                                            <Button
-                                                                size="lg"
-                                                                onClick={() =>
-                                                                    playTrack(
-                                                                        track,
-                                                                    )
-                                                                }
-                                                                className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full bg-white text-purple-600 hover:bg-white/90"
-                                                            >
-                                                                <Play className="h-5 w-5" />
-                                                            </Button>
-                                                        </div>
+                                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                                        <Button
+                                                            size="lg"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                playTrack(track);
+                                                            }}
+                                                            className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full bg-white text-purple-600 hover:bg-white/90 pointer-events-auto"
+                                                        >
+                                                            <Play className="h-5 w-5" />
+                                                        </Button>
                                                     </div>
-                                                    <CardContent className="p-3">
+                                                </div>
+                                                <CardContent className="p-3">
+                                                    <Link href={`/album/${track.album.id}`}>
                                                         <h3 className="font-semibold text-sm mb-1 truncate hover:underline cursor-pointer">
                                                             {track.album.title}
                                                         </h3>
+                                                    </Link>
+                                                    <Link href={`/artist/${track.artist.id}`}>
                                                         <p className="text-gray-600 dark:text-gray-400 truncate text-xs hover:underline cursor-pointer">
                                                             {track.artist.name}
                                                         </p>
-                                                    </CardContent>
-                                                </Card>
-                                            </Link>
+                                                    </Link>
+                                                </CardContent>
+                                            </Card>
                                         );
                                     })}
                             </div>
