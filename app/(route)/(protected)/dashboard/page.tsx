@@ -150,7 +150,7 @@ export default function Dashboard() {
                             <Button
                                 size="lg"
                                 onClick={() => setCurrentView("overview")}
-                                className={`min-w-0 flex-shrink-0 ${currentView === "overview" ? "bg-white text-purple-600 shadow-lg" : "bg-white/20 text-white hover:bg-white/30 border border-white/20"} transition-all duration-200`}
+                                className={`min-w-0 flex-shrink-0 ${currentView === "overview" ? "bg-white text-purple-600 shadow-lg hover:bg-red-500 hover:text-white hover:shadow-xl" : "bg-white/20 text-white hover:bg-white/30 border border-white/20"} transition-all duration-200`}
                             >
                                 <Activity className="mr-2 h-5 w-5" />
                                 <span className="font-semibold">Overview</span>
@@ -158,7 +158,7 @@ export default function Dashboard() {
                             <Button
                                 size="lg"
                                 onClick={() => setCurrentView("analytics")}
-                                className={`min-w-0 flex-shrink-0 ${currentView === "analytics" ? "bg-white text-purple-600 shadow-lg" : "bg-white/20 text-white hover:bg-white/30 border border-white/20"} transition-all duration-200`}
+                                className={`min-w-0 flex-shrink-0 ${currentView === "analytics" ? "bg-white text-purple-600 shadow-lg hover:bg-red-500 hover:text-white hover:shadow-xl" : "bg-white/20 text-white hover:bg-white/30 border border-white/20"} transition-all duration-200`}
                             >
                                 <BarChart3 className="mr-2 h-5 w-5" />
                                 <span className="font-semibold">Analytics</span>
@@ -166,7 +166,7 @@ export default function Dashboard() {
                             <Button
                                 size="lg"
                                 onClick={() => setCurrentView("agreements")}
-                                className={`min-w-0 flex-shrink-0 ${currentView === "agreements" ? "bg-white text-purple-600 shadow-lg" : "bg-white/20 text-white hover:bg-white/30 border border-white/20"} transition-all duration-200`}
+                                className={`min-w-0 flex-shrink-0 ${currentView === "agreements" ? "bg-white text-purple-600 shadow-lg hover:bg-red-500 hover:text-white hover:shadow-xl" : "bg-white/20 text-white hover:bg-white/30 border border-white/20"} transition-all duration-200`}
                             >
                                 <FileText className="mr-2 h-5 w-5" />
                                 <span className="font-semibold">Agreements</span>
