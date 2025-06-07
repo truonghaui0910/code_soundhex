@@ -120,7 +120,20 @@ export default function Home() {
                         Agreements
                       </a>
                       <div className="pt-4 border-t border-border">
-                        <UserNav user={user} />
+                        <button
+                          onClick={async () => {
+                            try {
+                              await supabase.auth.signOut();
+                              router.push("/");
+                              setMobileMenuOpen(false);
+                            } catch (error) {
+                              console.error("Error signing out:", error);
+                            }
+                          }}
+                          className="w-full px-6 py-4 text-left text-red-500 hover:text-white hover:bg-gradient-to-r hover:from-red-500 hover:to-red-600 rounded-xl transition-all font-semibold text-lg border border-red-500/30 hover:border-transparent"
+                        >
+                          Logout
+                        </button>
                       </div>
                     </div>
                   ) : (
