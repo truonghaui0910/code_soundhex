@@ -50,7 +50,6 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
     const [currentView, setCurrentView] = useState<
         "featured" | "library" | "upload"
     >("featured");
-    const [mounted, setMounted] = useState(false);
     const { currentTrack, isPlaying, playTrack } = useAudioPlayer();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { downloadTrack, isTrackDownloading } = useDownload();
@@ -143,8 +142,6 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
     };
 
     useEffect(() => {
-        setMounted(true);
-
         // Check for the 'tab' parameter in the URL
         const tab = searchParams.get("tab");
         if (tab === "upload") {
@@ -153,26 +150,6 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
             window.history.replaceState({}, "", "/music");
         }
     }, [searchParams]);
-
-    if (!mounted) {
-        return (
-            <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20">
-                <div className="animate-pulse">
-                    <div className="h-96 bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600"></div>
-                    <div className="container mx-auto px-6 py-12">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                            {Array.from({ length: 8 }, (_, i) => (
-                                <div
-                                    key={i}
-                                    className="bg-gray-200 dark:bg-gray-700 rounded-lg h-64"
-                                />
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
-    }
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20">

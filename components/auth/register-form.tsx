@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -7,6 +8,8 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { supabaseWithLogging } from "@/lib/supabase/client-with-logging";
+import { Mail, Lock, UserPlus, Eye, EyeOff, CheckCircle, ArrowLeft } from "lucide-react";
+import { SoundHexLogo } from "@/components/ui/soundhex-logo";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -19,15 +22,13 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { CheckCircle } from "lucide-react";
 
 const formSchema = z.object({
-  email: z.string().email({ message: "Invalid email address" }),
+  email: z.string().email({ message: "Please enter a valid email" }),
   password: z.string().min(6, { message: "Password must be at least 6 characters" }),
   confirmPassword: z.string().min(6, { message: "Password must be at least 6 characters" }),
 }).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords do not match",
+  message: "Passwords don't match",
   path: ["confirmPassword"],
 });
 
@@ -37,6 +38,8 @@ export function RegisterForm() {
   const [error, setError] = useState<string | null>(null);
   const [isRegistered, setIsRegistered] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -52,7 +55,7 @@ export function RegisterForm() {
     setError(null);
 
     try {
-      const { error, data } = await supabase.auth.signUp({
+      const { error, data } = await supabaseWithLogging.auth.signUp({
         email: values.email,
         password: values.password,
         options: {
@@ -77,95 +80,218 @@ export function RegisterForm() {
 
   if (isRegistered) {
     return (
-      <Card className="w-full max-w-md mx-auto">
-        <CardHeader>
-          <CardTitle className="text-center">Registration Successful</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Alert className="bg-green-50 border-green-200">
-            <CheckCircle className="h-5 w-5 text-green-500" />
-            <AlertTitle>Please confirm your email</AlertTitle>
-            <AlertDescription>
-              We&apos;ve sent a confirmation email to <strong>{registeredEmail}</strong>. 
-              Please check your inbox and click the confirmation link to complete the registration process.
-            </AlertDescription>
-          </Alert>
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-500 mb-4">
-              Didn&apos;t receive the email? Check your spam folder or try again in a few minutes.
-            </p>
-            <Button asChild variant="outline">
-              <Link href="/login">Go to login page</Link>
-            </Button>
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20">
+        <div className="container mx-auto px-4 py-8 flex items-center justify-center min-h-screen">
+          <div className="w-full max-w-lg">
+            <Card className="border-0 shadow-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+              <CardHeader className="space-y-6 pb-8 text-center">
+                <div className="flex justify-center">
+                  <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center">
+                    <CheckCircle className="h-10 w-10 text-white" />
+                  </div>
+                </div>
+                <div>
+                  <CardTitle className="text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                    Success!
+                  </CardTitle>
+                  <CardDescription className="text-gray-600 dark:text-gray-300 text-lg mt-2">
+                    Registration completed successfully
+                  </CardDescription>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="p-6 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl">
+                  <div className="text-center space-y-3">
+                    <CheckCircle className="h-12 w-12 text-green-500 mx-auto" />
+                    <h3 className="text-lg font-semibold text-green-700 dark:text-green-300">
+                      Please verify your email
+                    </h3>
+                    <p className="text-green-600 dark:text-green-400 leading-relaxed">
+                      We've sent a verification email to <strong className="font-semibold">{registeredEmail}</strong>. 
+                      Please check your inbox and click the verification link to complete your registration.
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl">
+                    <p className="text-sm text-blue-600 dark:text-blue-400 text-center">
+                      💡 <strong>Note:</strong> Didn't receive the email? Check your spam folder or try again in a few minutes.
+                    </p>
+                  </div>
+                  
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <Button asChild variant="outline" className="flex-1 h-12 rounded-xl border-gray-200 dark:border-gray-600">
+                      <Link href="/login" className="flex items-center justify-center space-x-2">
+                        <ArrowLeft className="h-4 w-4" />
+                        <span>Go to Sign In</span>
+                      </Link>
+                    </Button>
+                    <Button asChild className="flex-1 h-12 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 rounded-xl">
+                      <Link href="/" className="flex items-center justify-center space-x-2">
+                        <span>Back to Home</span>
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader>
-        <CardTitle>Register</CardTitle>
-        <CardDescription>Create a new account</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input placeholder="your.email@example.com" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Password</FormLabel>
-                  <FormControl>
-                    <Input type="password" placeholder="••••••••" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="confirmPassword"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Confirm Password</FormLabel>
-                  <FormControl>
-                    <Input type="password" placeholder="••••••••" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {error && <p className="text-sm text-red-500">{error}</p>}
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Registering..." : "Register"}
-            </Button>
-          </form>
-        </Form>
-      </CardContent>
-      <CardFooter className="flex justify-center">
-        <p className="text-sm text-gray-500">
-          Already have an account?{" "}
-          <Link href="/login" className="text-blue-500 hover:underline">
-            Login
-          </Link>
-        </p>
-      </CardFooter>
-    </Card>
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20">
+      <div className="container mx-auto px-4 py-8 flex items-center justify-center min-h-screen">
+        <div className="w-full max-w-lg">
+          <Card className="border-0 shadow-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+            <CardHeader className="space-y-6 pb-8 text-center">
+              <div className="flex justify-center">
+                <SoundHexLogo size={80} showText={false} animated={true} />
+              </div>
+              <div>
+                <CardTitle className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  Sign Up
+                </CardTitle>
+                <CardDescription className="text-gray-600 dark:text-gray-300 text-lg mt-2">
+                  Create your account to start your music journey
+                </CardDescription>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-base font-semibold text-gray-700 dark:text-gray-200">
+                          Email
+                        </FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                            <Input 
+                              placeholder="your.email@example.com" 
+                              className="pl-10 h-12 border-gray-200 dark:border-gray-600 focus:border-purple-500 dark:focus:border-purple-400 rounded-xl bg-gray-50 dark:bg-gray-700 text-base"
+                              {...field} 
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-base font-semibold text-gray-700 dark:text-gray-200">
+                          Password
+                        </FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                            <Input 
+                              type={showPassword ? "text" : "password"}
+                              placeholder="••••••••" 
+                              className="pl-10 pr-10 h-12 border-gray-200 dark:border-gray-600 focus:border-purple-500 dark:focus:border-purple-400 rounded-xl bg-gray-50 dark:bg-gray-700 text-base"
+                              {...field} 
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowPassword(!showPassword)}
+                              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                            >
+                              {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                            </button>
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="confirmPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-base font-semibold text-gray-700 dark:text-gray-200">
+                          Confirm Password
+                        </FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                            <Input 
+                              type={showConfirmPassword ? "text" : "password"}
+                              placeholder="••••••••" 
+                              className="pl-10 pr-10 h-12 border-gray-200 dark:border-gray-600 focus:border-purple-500 dark:focus:border-purple-400 rounded-xl bg-gray-50 dark:bg-gray-700 text-base"
+                              {...field} 
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                            >
+                              {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                            </button>
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  {error && (
+                    <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+                      <p className="text-sm text-red-600 dark:text-red-400 text-center">{error}</p>
+                    </div>
+                  )}
+                  <Button 
+                    type="submit" 
+                    className="w-full h-12 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-[1.02] shadow-lg text-base" 
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <div className="flex items-center space-x-2">
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        <span>Creating account...</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center space-x-2">
+                        <UserPlus className="h-5 w-5" />
+                        <span>Sign Up</span>
+                      </div>
+                    )}
+                  </Button>
+                </form>
+              </Form>
+            </CardContent>
+            <CardFooter className="pt-6">
+              <div className="w-full text-center space-y-4">
+                <p className="text-gray-600 dark:text-gray-300">
+                  Already have an account?{" "}
+                  <Link 
+                    href="/login" 
+                    className="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 font-semibold hover:underline transition-colors"
+                  >
+                    Sign in
+                  </Link>
+                </p>
+                <Link 
+                  href="/" 
+                  className="text-sm text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+                >
+                  Back to home
+                </Link>
+              </div>
+            </CardFooter>
+          </Card>
+        </div>
+      </div>
+    </div>
   );
 }

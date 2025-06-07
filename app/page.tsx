@@ -24,7 +24,7 @@ export default function Home() {
             <div className="flex items-center space-x-3">
               <SoundHexLogo size={50} showText={true} animated={true} />
             </div>
-            <div className="hidden md:flex space-x-8">
+            {/* <div className="hidden md:flex space-x-8">
               <a
                 href="#features"
                 className="text-foreground hover:text-primary transition-colors"
@@ -43,7 +43,7 @@ export default function Home() {
               >
                 About
               </a>
-            </div>
+            </div> */}
             <div className="flex space-x-4">
               {!loading && (
                 <>
@@ -109,9 +109,12 @@ export default function Home() {
                 >
                   Start Distributing
                 </a>
-                <button className="px-8 py-4 rounded-lg border border-border text-foreground hover:bg-card transition-all">
-                  Watch Demo
-                </button>
+                <a
+                  href="/music"
+                  className="px-8 py-4 rounded-lg border border-border text-foreground hover:bg-card transition-all text-center"
+                >
+                  Explore Music
+                </a>
               </div>
             </div>
 
@@ -217,9 +220,12 @@ export default function Home() {
               >
                 Sign Up Now
               </a>
-              <button className="px-8 py-4 rounded-lg border border-border text-foreground hover:bg-card transition-all">
-                Learn More
-              </button>
+              <a
+                href="/music"
+                className="px-8 py-4 rounded-lg border border-border text-foreground hover:bg-card transition-all text-center"
+              >
+                Explore Music
+              </a>
             </div>
           </div>
         </div>
