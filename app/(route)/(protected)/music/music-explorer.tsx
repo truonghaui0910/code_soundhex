@@ -50,7 +50,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
     const [currentView, setCurrentView] = useState<
         "featured" | "library" | "upload"
     >("featured");
-    const { currentTrack, isPlaying, playTrack, setTrackList } = useAudioPlayer();
+    const { currentTrack, isPlaying, playTrack, setTrackList, togglePlayPause } = useAudioPlayer();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { downloadTrack, isTrackDownloading } = useDownload();
     const searchParams = useSearchParams();
@@ -311,16 +311,21 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                             size="lg"
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
-                                                                // Get all tracks from the same album
-                                                                const albumTracks = filteredTracks.filter(t => t.album.id === track.album.id);
-                                                                if (albumTracks.length > 0) {
-                                                                    setTrackList(albumTracks);
-                                                                    // Small delay to ensure trackList is updated
-                                                                    setTimeout(() => {
-                                                                        playTrack(track);
-                                                                    }, 50);
+                                                                // Check if this track is currently playing
+                                                                if (currentTrack?.id === track.id && isPlaying) {
+                                                                    // If playing, pause it
+                                                                    togglePlayPause();
                                                                 } else {
-                                                                    playTrack(track);
+                                                                    // If not playing or different track, play it
+                                                                    const albumTracks = filteredTracks.filter(t => t.album.id === track.album.id);
+                                                                    if (albumTracks.length > 0) {
+                                                                        setTrackList(albumTracks);
+                                                                        setTimeout(() => {
+                                                                            playTrack(track);
+                                                                        }, 50);
+                                                                    } else {
+                                                                        playTrack(track);
+                                                                    }
                                                                 }
                                                             }}
                                                             className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full bg-white text-purple-600 hover:bg-white/90 pointer-events-auto"
@@ -460,9 +465,13 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                             <div className="absolute inset-0 flex items-center justify-center">
                                                 <Button
                                                     size="lg"
-                                                    onClick={() =>
-                                                        playTrack(track)
-                                                    }
+                                                    onClick={() => {
+                                                        if (currentTrack?.id === track.id && isPlaying) {
+                                                            togglePlayPause();
+                                                        } else {
+                                                            playTrack(track);
+                                                        }
+                                                    }}
                                                     className="opacity-0 group-hover:opacity-100 transition-all duration-500 rounded-full bg-white text-purple-600 hover:bg-white/90 transform group-hover:scale-110"
                                                 >
                                                     {currentTrack?.id ===
@@ -528,7 +537,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                         )}
                                                     </span>
                                                 </div>
-                                            </div>
+                                            </CardContent>
                                         </CardContent>
                                     </Card>
                                 ))}
@@ -586,7 +595,13 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                         <div className="absolute inset-0 flex items-center justify-center rounded-t-lg">
                                             <Button
                                                 size="lg"
-                                                onClick={() => playTrack(track)}
+                                                onClick={() => {
+                                                    if (currentTrack?.id === track.id && isPlaying) {
+                                                        togglePlayPause();
+                                                    } else {
+                                                        playTrack(track);
+                                                    }
+                                                }}
                                                 className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full bg-white text-purple-600 hover:bg-white/90"
                                             >
                                                 {currentTrack?.id ===
