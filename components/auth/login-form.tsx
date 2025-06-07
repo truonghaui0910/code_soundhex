@@ -57,8 +57,12 @@ export function LoginForm() {
         // Wait a moment for session to be properly set
         await new Promise(resolve => setTimeout(resolve, 500));
         
+        // Get returnUrl from URL parameters or default to dashboard
+        const urlParams = new URLSearchParams(window.location.search);
+        const returnUrl = urlParams.get('returnUrl') || '/dashboard';
+        
         // Force a full page reload to ensure auth state is updated
-        window.location.href = "/dashboard";
+        window.location.href = returnUrl;
       }
     } catch (error) {
       setError("An error occurred during login");

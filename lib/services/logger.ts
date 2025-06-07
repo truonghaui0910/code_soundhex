@@ -1,4 +1,3 @@
-
 // Client-side logger (browser environment)
 export interface LogEntry {
   timestamp: string;

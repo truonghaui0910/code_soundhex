@@ -2,6 +2,10 @@ import { createMiddlewareClient } from "@supabase/auth-helpers-nextjs";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+// Cache session for a short time to avoid excessive requests
+const sessionCache = new Map<string, { session: any, timestamp: number }>();
+const CACHE_DURATION = 10000; // 10 seconds
+
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next();
   const supabase = createMiddlewareClient({ req, res });
@@ -31,11 +35,29 @@ export async function middleware(req: NextRequest) {
     return res;
   }
 
-  // Try to get session (no automatic refresh to avoid too many requests)
-  const {
-    data: { session },
-    error,
-  } = await supabase.auth.getSession();
+  // Check cache first
+  const cacheKey = req.headers.get('authorization') || 'anonymous';
+  const now = Date.now();
+  const cached = sessionCache.get(cacheKey);
+  
+  let session;
+  if (cached && (now - cached.timestamp) < CACHE_DURATION) {
+    session = cached.session;
+  } else {
+    // Get session only if not cached or cache expired
+    const { data: { session: freshSession }, error } = await supabase.auth.getSession();
+    session = freshSession;
+    
+    // Cache the session
+    sessionCache.set(cacheKey, { session, timestamp: now });
+    
+    // Clean old cache entries
+    for (const [key, value] of sessionCache.entries()) {
+      if ((now - value.timestamp) > CACHE_DURATION) {
+        sessionCache.delete(key);
+      }
+    }
+  }
 
   // Only log for actual protected routes
   if (req.nextUrl.pathname.startsWith('/') && !req.nextUrl.pathname.includes('.')) {

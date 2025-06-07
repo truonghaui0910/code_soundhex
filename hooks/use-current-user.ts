@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
 export type User = {
@@ -17,21 +18,26 @@ export function useCurrentUser() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const initialized = useRef(false);
 
   useEffect(() => {
-    const fetchUser = async () => {
+    // Prevent multiple initializations
+    if (initialized.current) return;
+    initialized.current = true;
+
+    const initializeAuth = async () => {
       try {
         setLoading(true);
+        
+        // Get initial session only once
         const { data: { session }, error: authError } = await supabase.auth.getSession();
         
         if (authError) {
-          throw authError;
-        }
-
-        if (session?.user) {
-          setUser(session.user as User);
-        } else {
+          console.error("Auth error:", authError);
+          setError(authError);
           setUser(null);
+        } else {
+          setUser(session?.user as User || null);
         }
       } catch (err) {
         console.error("Error fetching user:", err);
@@ -42,28 +48,30 @@ export function useCurrentUser() {
       }
     };
 
-    fetchUser();
+    initializeAuth();
 
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log('Auth state changed:', event, session?.user?.email);
       
-      if (event === 'SIGNED_IN' && session?.user) {
-        setUser(session.user as User);
+      // Only update state for important events, not token refresh
+      if (event === 'SIGNED_IN') {
+        setUser(session?.user as User || null);
         setLoading(false);
+        setError(null);
       } else if (event === 'SIGNED_OUT') {
         setUser(null);
         setLoading(false);
-      } else if (event === 'TOKEN_REFRESHED' && session?.user) {
-        setUser(session.user as User);
-        setLoading(false);
-      } else {
+        setError(null);
+      } else if (event === 'INITIAL_SESSION') {
         setUser(session?.user as User || null);
         setLoading(false);
       }
+      // Ignore TOKEN_REFRESHED events to prevent unnecessary updates
     });
 
     return () => {
-      authListener?.subscription.unsubscribe();
+      subscription.unsubscribe();
     };
   }, [supabase]);
 
