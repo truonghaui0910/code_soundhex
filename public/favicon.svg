@@ -1,0 +1,41 @@
+
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="hexGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#dc2675" />
+      <stop offset="50%" stop-color="#c026d3" />
+      <stop offset="100%" stop-color="#7c3aed" />
+    </linearGradient>
+    <linearGradient id="soundGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#fdf2f8" />
+    </linearGradient>
+  </defs>
+
+  <!-- Main Hexagon -->
+  <polygon
+    points="16,3 27,8 27,24 16,29 5,24 5,8"
+    fill="url(#hexGradient)"
+    stroke="white"
+    stroke-width="0.5"
+  />
+
+  <!-- Sound Wave Visualization -->
+  <g fill="url(#soundGradient)" opacity="0.9">
+    <!-- Central wave -->
+    <rect x="15" y="10" width="2" height="12" rx="1" />
+    
+    <!-- Side waves -->
+    <rect x="12" y="12" width="1.5" height="8" rx="0.75" opacity="0.8" />
+    <rect x="18.5" y="12" width="1.5" height="8" rx="0.75" opacity="0.8" />
+    
+    <rect x="10" y="14" width="1" height="4" rx="0.5" opacity="0.6" />
+    <rect x="21" y="14" width="1" height="4" rx="0.5" opacity="0.6" />
+  </g>
+
+  <!-- Accent Dots -->
+  <circle cx="10" cy="10" r="0.7" fill="white" opacity="0.7" />
+  <circle cx="22" cy="10" r="0.7" fill="white" opacity="0.5" />
+  <circle cx="10" cy="22" r="0.5" fill="#dc2675" opacity="0.6" />
+  <circle cx="22" cy="22" r="0.5" fill="#7c3aed" opacity="0.4" />
+</svg>
