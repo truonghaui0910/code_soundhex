@@ -92,7 +92,7 @@ export default function Home() {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden absolute top-full left-0 right-0 bg-background/95 backdrop-blur-md border-t border-border/20 shadow-lg z-[100]">
+          <div className="md:hidden absolute top-full left-0 right-0 bg-card/100 backdrop-blur-xl border-t border-border shadow-2xl z-[100]">
             <div className="px-4 py-6 space-y-4">
               {!loading && (
                 <>
@@ -100,19 +100,19 @@ export default function Home() {
                     <div className="space-y-4">
                       <a
                         href="/dashboard"
-                        className="block px-4 py-3 text-foreground hover:text-primary hover:bg-card/50 rounded-lg transition-all"
+                        className="block px-4 py-3 text-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-all font-medium"
                         onClick={() => setMobileMenuOpen(false)}
                       >
                         Dashboard
                       </a>
                       <a
                         href="/music"
-                        className="block px-4 py-3 text-foreground hover:text-primary hover:bg-card/50 rounded-lg transition-all"
+                        className="block px-4 py-3 text-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-all font-medium"
                         onClick={() => setMobileMenuOpen(false)}
                       >
                         Explore Music
                       </a>
-                      <div className="pt-4 border-t border-border/20">
+                      <div className="pt-4 border-t border-border">
                         <UserNav user={user} />
                       </div>
                     </div>
@@ -120,22 +120,15 @@ export default function Home() {
                     <div className="space-y-4">
                       <a
                         href="/music"
-                        className="block px-4 py-3 text-foreground hover:text-primary hover:bg-card/50 rounded-lg transition-all"
+                        className="block px-4 py-3 text-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-all font-medium"
                         onClick={() => setMobileMenuOpen(false)}
                       >
                         Explore Music
                       </a>
-                      <a
-                        href="#features"
-                        className="block px-4 py-3 text-foreground hover:text-primary hover:bg-card/50 rounded-lg transition-all"
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        Features
-                      </a>
-                      <div className="pt-4 border-t border-border/20 space-y-3">
+                      <div className="pt-4 border-t border-border space-y-3">
                         <a
                           href="/login"
-                          className="block w-full px-4 py-3 text-center text-foreground hover:text-primary hover:bg-card/50 rounded-lg transition-all"
+                          className="block w-full px-4 py-3 text-center text-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-all font-medium"
                           onClick={() => setMobileMenuOpen(false)}
                         >
                           Sign In
@@ -214,69 +207,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section id="features" className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-6">
-              Everything You <span className="gradient-text">Need</span>
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Professional tools and services designed for modern music creators
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[
-              {
-                icon: <TrendingUp className="w-8 h-8" />,
-                title: "100% Royalties",
-                description:
-                  "Keep everything you earn. No commission, no hidden fees.",
-              },
-              {
-                icon: <Music className="w-8 h-8" />,
-                title: "Unlimited Releases",
-                description: "Upload as many songs and albums as you want.",
-              },
-              {
-                icon: <Headphones className="w-8 h-8" />,
-                title: "Fast Distribution",
-                description:
-                  "Get your music on all platforms in just a few days.",
-              },
-              {
-                icon: <Users className="w-8 h-8" />,
-                title: "Split Payments",
-                description: "Share earnings with collaborators automatically.",
-              },
-              {
-                icon: <Play className="w-8 h-8" />,
-                title: "Real-time Analytics",
-                description: "Track your performance across all platforms.",
-              },
-              {
-                icon: <Music className="w-8 h-8" />,
-                title: "Global Reach",
-                description:
-                  "Distribute to 150+ stores and streaming platforms.",
-              },
-            ].map((feature, idx) => (
-              <div
-                key={idx}
-                className="music-card p-8 rounded-xl group animate-fadeInUp"
-                style={{ animationDelay: `${idx * 0.1}s` }}
-              >
-                <div className="text-primary mb-4 group-hover:scale-110 transition-transform">
-                  {feature.icon}
-                </div>
-                <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
-                <p className="text-muted-foreground">{feature.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      
 
       {/* CTA Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8">
