@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -9,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { FileText, Plus, ArrowLeft, Save, CheckCircle, Shield } from "lucide-react";
 
 // Types for our form fields
 interface RightOption {
@@ -230,118 +232,155 @@ export default function AgreementForm() {
   };
   
   return (
-    <div className="container mx-auto py-6 max-w-4xl">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">
-          {isLoading ? "Loading..." : `Create Agreement: ${templateName}`}
-        </h1>
-        <Button variant="outline" onClick={() => router.back()}>
-          Back to List
-        </Button>
-      </div>
-      
-      {/* Form Fields Section */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>Agreement Information</CardTitle>
-          <CardDescription>Enter the details for this agreement</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {isLoading ? (
-              <div className="flex justify-center items-center h-20">
-                <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-rose-600"></div>
-              </div>
-            ) : (
-              formFields.map((field) => (
-                <div key={field.id} className="grid w-full items-center gap-1.5">
-                  <Label htmlFor={field.id} className={field.required ? "after:content-['*'] after:ml-0.5 after:text-red-500" : ""}>
-                    {field.title}
-                  </Label>
-                  <Input
-                    id={field.id}
-                    value={field.value}
-                    onChange={(e) => handleFieldChange(field.id, e.target.value)}
-                    className="w-full"
-                    placeholder={`Enter ${field.title.toLowerCase()}`}
-                    required={field.required}
-                  />
-                </div>
-              ))
-            )}
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20">
+      {/* Hero Section */}
+      <div className="relative overflow-hidden bg-gradient-to-r from-slate-800 via-purple-900 to-slate-900 text-white">
+        <div className="absolute inset-0 bg-black/10"></div>
+        <div className="relative container mx-auto px-6 py-16">
+          <div className="max-w-4xl">
+            <div className="flex items-center gap-3 mb-4">
+              <FileText className="h-10 w-10 text-purple-300" />
+              <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
+                {isLoading ? "Loading..." : `Create Agreement`}
+              </h1>
+            </div>
+            <p className="text-xl md:text-2xl mb-8 text-purple-100">
+              {isLoading ? "Preparing agreement template..." : `Template: ${templateName}`}
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <Button 
+                variant="outline"
+                onClick={() => router.back()}
+                className="bg-white/10 hover:bg-white/20 border border-white/20 text-white backdrop-blur-sm"
+                size="lg"
+              >
+                <ArrowLeft className="mr-2 h-5 w-5" />
+                Back to List
+              </Button>
+            </div>
           </div>
-        </CardContent>
-      </Card>
-      
-      {/* Rights Options Section */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>Available Rights</CardTitle>
-          <CardDescription>Select the rights to include in this agreement</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="flex justify-center items-center h-40">
-              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-rose-600"></div>
-            </div>
-          ) : error ? (
-            <div className="bg-red-50 p-4 rounded-md border border-red-200 text-red-800">
-              <p className="font-medium">Error loading agreement options</p>
-              <p className="text-sm mt-1">{error}</p>
-              <p className="text-sm mt-2">Using default options instead.</p>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              {rightOptions.map((option) => (
-                <div key={option.id} className="flex items-start space-x-3 border p-4 rounded-lg hover:bg-gray-50 transition-colors">
-                  <Checkbox
-                    id={option.id}
-                    checked={option.checked}
-                    onCheckedChange={() => handleCheckboxChange(option.id)}
-                    className="mt-1"
-                  />
-                  <div className="space-y-1">
-                    <Label
-                      htmlFor={option.id}
-                      className="font-medium text-base cursor-pointer"
-                    >
-                      {option.title}
-                    </Label>
-                    <p className="text-sm text-gray-500">{option.description}</p>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="container mx-auto px-6 py-12 max-w-6xl">
+        <div className="grid gap-8">
+          {/* Form Fields Section */}
+          <Card className="border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Shield className="h-5 w-5" />
+                Agreement Information
+              </CardTitle>
+              <CardDescription>Enter the details for this agreement</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                {isLoading ? (
+                  <div className="flex justify-center items-center h-20">
+                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-600"></div>
                   </div>
+                ) : (
+                  formFields.map((field) => (
+                    <div key={field.id} className="grid w-full items-center gap-3">
+                      <Label 
+                        htmlFor={field.id} 
+                        className={`text-base font-medium ${field.required ? "after:content-['*'] after:ml-0.5 after:text-red-500" : ""}`}
+                      >
+                        {field.title}
+                      </Label>
+                      <Input
+                        id={field.id}
+                        value={field.value}
+                        onChange={(e) => handleFieldChange(field.id, e.target.value)}
+                        className="w-full h-12 text-base"
+                        placeholder={`Enter ${field.title.toLowerCase()}`}
+                        required={field.required}
+                      />
+                    </div>
+                  ))
+                )}
+              </div>
+            </CardContent>
+          </Card>
+          
+          {/* Rights Options Section */}
+          <Card className="border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CheckCircle className="h-5 w-5" />
+                Available Rights
+              </CardTitle>
+              <CardDescription>Select the rights to include in this agreement</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <div className="flex justify-center items-center h-40">
+                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-600"></div>
                 </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-      
-      {/* Notes Section */}
-      {/* <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>Additional Notes</CardTitle>
-          <CardDescription>Add any additional notes or terms for this agreement</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Textarea
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            placeholder="Enter any additional notes or specific terms..."
-            className="min-h-32"
-          />
-        </CardContent>
-      </Card> */}
-      
-      <div className="flex justify-end space-x-4">
-        <Button variant="outline" onClick={() => router.back()}>
-          Cancel
-        </Button>
-        <Button 
-          onClick={handleSave} 
-          disabled={isSaving || isLoading}
-        >
-          {isSaving ? "Saving..." : "Save Agreement"}
-        </Button>
+              ) : error ? (
+                <div className="bg-red-50 dark:bg-red-900/20 p-6 rounded-lg border border-red-200 dark:border-red-800 text-red-800 dark:text-red-200">
+                  <p className="font-medium">Error loading agreement options</p>
+                  <p className="text-sm mt-2">{error}</p>
+                  <p className="text-sm mt-2">Using default options instead.</p>
+                </div>
+              ) : (
+                <div className="grid gap-6">
+                  {rightOptions.map((option) => (
+                    <div key={option.id} className="flex items-start space-x-4 border border-gray-200 dark:border-gray-700 p-6 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all duration-300 group">
+                      <Checkbox
+                        id={option.id}
+                        checked={option.checked}
+                        onCheckedChange={() => handleCheckboxChange(option.id)}
+                        className="mt-1 h-5 w-5"
+                      />
+                      <div className="space-y-2 flex-1">
+                        <Label
+                          htmlFor={option.id}
+                          className="font-semibold text-lg cursor-pointer group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors"
+                        >
+                          {option.title}
+                        </Label>
+                        <p className="text-gray-600 dark:text-gray-300 leading-relaxed">{option.description}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+          
+          {/* Action Buttons */}
+          <div className="flex justify-end space-x-4">
+            <Button 
+              variant="outline" 
+              onClick={() => router.back()}
+              size="lg"
+              className="px-8"
+            >
+              <ArrowLeft className="mr-2 h-5 w-5" />
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSave} 
+              disabled={isSaving || isLoading}
+              size="lg"
+              className="px-8 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+            >
+              {isSaving ? (
+                <>
+                  <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white mr-2"></div>
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="mr-2 h-5 w-5" />
+                  Save Agreement
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   );
