@@ -26,7 +26,7 @@ interface AlbumDetailClientProps {
 }
 
 export function AlbumDetailClient({ album, tracks }: AlbumDetailClientProps) {
-  const { currentTrack, isPlaying, playTrack, setTrackList } = useAudioPlayer();
+  const { currentTrack, isPlaying, playTrack, setTrackList, togglePlayPause } = useAudioPlayer();
   const { downloadTrack, downloadMultipleTracks, isDownloading, isTrackDownloading } = useDownload();
 
   const handlePlayAlbum = () => {
@@ -156,9 +156,14 @@ export function AlbumDetailClient({ album, tracks }: AlbumDetailClientProps) {
                       variant="ghost"
                       className="w-8 h-8 p-0 hidden group-hover:flex rounded-full"
                       onClick={() => {
-                        // Always update trackList first
+                        // If this track is currently playing, just toggle play/pause
+                        if (currentTrack?.id === track.id && isPlaying) {
+                          togglePlayPause();
+                          return;
+                        }
+                        
+                        // Otherwise, set track list and play the new track
                         setTrackList(tracks);
-                        // Small delay to ensure trackList is updated
                         setTimeout(() => {
                           playTrack(track);
                         }, 50);
