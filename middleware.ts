@@ -40,9 +40,11 @@ export async function middleware(req: NextRequest) {
   }
 
   console.log(
-    "Middleware session check:",
-    !!session,
+    "Middleware executing for:",
     req.nextUrl.pathname,
+    "Session exists:",
+    !!session,
+    "Error:",
     error?.message || "no error",
   );
 
@@ -61,12 +63,19 @@ export async function middleware(req: NextRequest) {
   // Redirect to login if accessing protected route without session
   if (isProtectedPath && !session) {
     console.log(
-      "Redirecting to login - no session for protected path:",
+      "🔒 REDIRECTING TO LOGIN - No session for protected path:",
       req.nextUrl.pathname,
     );
     const redirectUrl = new URL("/login", req.url);
     redirectUrl.searchParams.set("returnUrl", req.nextUrl.pathname);
     return NextResponse.redirect(redirectUrl);
+  }
+
+  if (isProtectedPath && session) {
+    console.log(
+      "✅ ALLOWING ACCESS - Valid session for protected path:",
+      req.nextUrl.pathname,
+    );
   }
 
   // Redirect to dashboard if accessing login/register with valid session
@@ -83,6 +92,14 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - images, videos, audio files
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|mp3|mp4|wav)$).*)',
   ],
 };
