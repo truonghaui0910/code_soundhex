@@ -1,7 +1,5 @@
 
-import { writeFileSync, appendFileSync, existsSync } from 'fs';
-import { join } from 'path';
-
+// Client-side logger (browser environment)
 export interface LogEntry {
   timestamp: string;
   level: 'INFO' | 'ERROR' | 'WARN' | 'DEBUG';
@@ -14,14 +12,7 @@ export interface LogEntry {
   data?: any;
 }
 
-class Logger {
-  private logDir = join(process.cwd(), 'logs');
-  
-  private getLogFileName(type: 'supabase' | 'general' = 'general'): string {
-    const date = new Date().toISOString().split('T')[0];
-    return join(this.logDir, `${type}-${date}.log`);
-  }
-
+class ClientLogger {
   private formatLogEntry(entry: LogEntry): string {
     return `${entry.timestamp} [${entry.level}] ${entry.operation} - ${JSON.stringify({
       method: entry.method,
@@ -30,7 +21,7 @@ class Logger {
       duration: entry.duration,
       error: entry.error,
       data: entry.data
-    })}\n`;
+    })}`;
   }
 
   public logSupabaseRequest(entry: Omit<LogEntry, 'timestamp'>): void {
@@ -40,27 +31,29 @@ class Logger {
         timestamp: new Date().toISOString()
       };
 
-      const logFile = this.getLogFileName('supabase');
       const formattedEntry = this.formatLogEntry(logEntry);
 
-      // Ensure logs directory exists
-      if (!existsSync(this.logDir)) {
-        require('fs').mkdirSync(this.logDir, { recursive: true });
-      }
-
-      // Append to log file
-      if (existsSync(logFile)) {
-        appendFileSync(logFile, formattedEntry);
-      } else {
-        writeFileSync(logFile, formattedEntry);
-      }
-
-      // Also log to console in development
+      // Log to console in development
       if (process.env.NODE_ENV === 'development') {
         console.log(`🔍 Supabase ${entry.level}:`, entry.operation, entry.data || '');
       }
+
+      // Store in localStorage for client-side persistence (optional)
+      if (typeof window !== 'undefined' && window.localStorage) {
+        try {
+          const logs = JSON.parse(localStorage.getItem('supabase_logs') || '[]');
+          logs.push(logEntry);
+          // Keep only last 100 logs to prevent localStorage bloat
+          if (logs.length > 100) {
+            logs.splice(0, logs.length - 100);
+          }
+          localStorage.setItem('supabase_logs', JSON.stringify(logs));
+        } catch (storageError) {
+          console.warn('Failed to store log in localStorage:', storageError);
+        }
+      }
     } catch (error) {
-      console.error('Failed to write log:', error);
+      console.error('Failed to log:', error);
     }
   }
 
@@ -88,6 +81,26 @@ class Logger {
       data
     });
   }
+
+  // Method to get logs from localStorage
+  public getLogs(): LogEntry[] {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      try {
+        return JSON.parse(localStorage.getItem('supabase_logs') || '[]');
+      } catch (error) {
+        console.error('Failed to retrieve logs from localStorage:', error);
+        return [];
+      }
+    }
+    return [];
+  }
+
+  // Method to clear logs
+  public clearLogs(): void {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.removeItem('supabase_logs');
+    }
+  }
 }
 
-export const logger = new Logger();
+export const logger = new ClientLogger();
