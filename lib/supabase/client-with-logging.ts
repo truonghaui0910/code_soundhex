@@ -1,6 +1,6 @@
-
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { logger } from "@/lib/services/logger";
+import { logger } from "../services/logger";
+import { serverLogger } from "../services/server-logger";
 
 class SupabaseClientWithLogging {
   private client = createClientComponentClient();
@@ -13,11 +13,11 @@ class SupabaseClientWithLogging {
     signInWithPassword: async (credentials: { email: string; password: string }) => {
       const startTime = Date.now();
       logger.logInfo('AUTH_SIGNIN_START', { email: credentials.email });
-      
+
       try {
         const result = await this.client.auth.signInWithPassword(credentials);
         const duration = Date.now() - startTime;
-        
+
         if (result.error) {
           logger.logError('AUTH_SIGNIN_ERROR', result.error.message, {
             email: credentials.email,
@@ -30,7 +30,7 @@ class SupabaseClientWithLogging {
             duration
           });
         }
-        
+
         return result;
       } catch (error) {
         const duration = Date.now() - startTime;
@@ -45,11 +45,11 @@ class SupabaseClientWithLogging {
     signUp: async (credentials: { email: string; password: string; options?: any }) => {
       const startTime = Date.now();
       logger.logInfo('AUTH_SIGNUP_START', { email: credentials.email });
-      
+
       try {
         const result = await this.client.auth.signUp(credentials);
         const duration = Date.now() - startTime;
-        
+
         if (result.error) {
           logger.logError('AUTH_SIGNUP_ERROR', result.error.message, {
             email: credentials.email,
@@ -62,7 +62,7 @@ class SupabaseClientWithLogging {
             duration
           });
         }
-        
+
         return result;
       } catch (error) {
         const duration = Date.now() - startTime;
@@ -77,21 +77,21 @@ class SupabaseClientWithLogging {
     signOut: async () => {
       const startTime = Date.now();
       logger.logInfo('AUTH_SIGNOUT_START');
-      
+
       try {
         const result = await this.client.auth.signOut();
         const duration = Date.now() - startTime;
-        
+
         // Clear session cache
         this.sessionCache = null;
         this.lastSessionCheck = 0;
-        
+
         if (result.error) {
           logger.logError('AUTH_SIGNOUT_ERROR', result.error.message, { duration });
         } else {
           logger.logInfo('AUTH_SIGNOUT_SUCCESS', { duration });
         }
-        
+
         return result;
       } catch (error) {
         const duration = Date.now() - startTime;
@@ -102,22 +102,22 @@ class SupabaseClientWithLogging {
 
     getSession: async () => {
       const now = Date.now();
-      
+
       // Return cached session if still valid
       if (this.sessionCache && (now - this.lastSessionCheck) < this.SESSION_CACHE_DURATION) {
         return this.sessionCache;
       }
-      
+
       const startTime = Date.now();
-      
+
       try {
         const result = await this.client.auth.getSession();
         const duration = Date.now() - startTime;
-        
+
         // Cache the result
         this.sessionCache = result;
         this.lastSessionCheck = now;
-        
+
         if (result.error) {
           logger.logError('AUTH_GET_SESSION_ERROR', result.error.message, { duration });
         }
@@ -129,7 +129,7 @@ class SupabaseClientWithLogging {
             duration
           });
         }
-        
+
         return result;
       } catch (error) {
         const duration = Date.now() - startTime;
@@ -157,7 +157,7 @@ class SupabaseClientWithLogging {
   // Database methods with logging (simplified to reduce noise)
   from = (table: string) => {
     const query = this.client.from(table);
-    
+
     const originalSelect = query.select.bind(query);
     const originalInsert = query.insert.bind(query);
     const originalUpdate = query.update.bind(query);
@@ -166,7 +166,7 @@ class SupabaseClientWithLogging {
     query.select = (...args: any[]) => {
       const startTime = Date.now();
       const result = originalSelect(...args);
-      
+
       // Override the promise to log completion (only errors)
       const originalThen = result.then.bind(result);
       result.then = (onResolve: any, onReject?: any) => {
@@ -193,7 +193,7 @@ class SupabaseClientWithLogging {
           }
         );
       };
-      
+
       return result;
     };
 
@@ -201,7 +201,7 @@ class SupabaseClientWithLogging {
       const startTime = Date.now();
       logger.logInfo('DB_INSERT_START', { table });
       const result = originalInsert(values);
-      
+
       const originalThen = result.then.bind(result);
       result.then = (onResolve: any, onReject?: any) => {
         return originalThen(
@@ -230,7 +230,7 @@ class SupabaseClientWithLogging {
           }
         );
       };
-      
+
       return result;
     };
 
