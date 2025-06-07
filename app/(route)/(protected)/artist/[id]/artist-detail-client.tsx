@@ -67,6 +67,13 @@ export function ArtistDetailClient({ artist, tracks, albums }: ArtistDetailClien
   };
 
   const handlePlayTrack = (track: Track) => {
+    // If this track is currently playing, just toggle play/pause
+    if (currentTrack?.id === track.id && isPlaying) {
+      togglePlayPause();
+      return;
+    }
+    
+    // Otherwise, set the track list and play the new track
     setTrackList(tracks);
     setTimeout(() => {
       playTrack(track);
