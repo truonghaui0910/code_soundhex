@@ -437,8 +437,8 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                 </h2>
                             </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                                {featuredTracks.slice(0, 8).map((track) => (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+                                {featuredTracks.slice(0, 10).map((track) => (
                                     <Card
                                         key={track.id}
                                         className="group hover:shadow-2xl transition-all duration-500 cursor-pointer overflow-hidden border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm"
