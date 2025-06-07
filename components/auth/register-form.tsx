@@ -117,13 +117,13 @@ export function RegisterForm() {
                 </div>
                 
                 <div className="flex flex-col sm:flex-row gap-4">
-                  <Button asChild variant="outline" className="flex-1 h-14 rounded-xl border-gray-200 dark:border-gray-600 text-lg">
+                  <Button asChild variant="outline" className="flex-1 h-11 rounded-lg border-gray-200 dark:border-gray-600">
                     <Link href="/login" className="flex items-center justify-center space-x-2">
-                      <ArrowLeft className="h-5 w-5" />
+                      <ArrowLeft className="h-4 w-4" />
                       <span>Go to Sign In</span>
                     </Link>
                   </Button>
-                  <Button asChild className="flex-1 h-14 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 rounded-xl text-lg">
+                  <Button asChild className="flex-1 h-11 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 rounded-lg">
                     <Link href="/" className="flex items-center justify-center space-x-2">
                       <span>Back to Home</span>
                     </Link>
@@ -146,10 +146,10 @@ export function RegisterForm() {
           <div className="flex justify-center mb-6">
             <SoundHexLogo size={100} showText={false} animated={true} />
           </div>
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-3">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-3">
             Sign Up
           </h1>
-          <p className="text-gray-600 dark:text-gray-300 text-xl">
+          <p className="text-gray-600 dark:text-gray-300 text-lg">
             Create your account to start your music journey
           </p>
         </div>
@@ -163,15 +163,15 @@ export function RegisterForm() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-lg font-semibold text-gray-700 dark:text-gray-200">
+                    <FormLabel className="text-sm font-medium text-gray-700 dark:text-gray-200">
                       Email
                     </FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                         <Input 
                           placeholder="your.email@example.com" 
-                          className="pl-12 h-14 border-gray-200 dark:border-gray-600 focus:border-purple-500 dark:focus:border-purple-400 rounded-xl bg-gray-50 dark:bg-gray-700 text-lg"
+                          className="pl-10 h-10 border-gray-200 dark:border-gray-600 focus:border-purple-500 dark:focus:border-purple-400 rounded-lg bg-gray-50 dark:bg-gray-700"
                           {...field} 
                         />
                       </div>
@@ -185,24 +185,24 @@ export function RegisterForm() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-lg font-semibold text-gray-700 dark:text-gray-200">
+                    <FormLabel className="text-sm font-medium text-gray-700 dark:text-gray-200">
                       Password
                     </FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                         <Input 
                           type={showPassword ? "text" : "password"}
                           placeholder="••••••••" 
-                          className="pl-12 pr-12 h-14 border-gray-200 dark:border-gray-600 focus:border-purple-500 dark:focus:border-purple-400 rounded-xl bg-gray-50 dark:bg-gray-700 text-lg"
+                          className="pl-10 pr-10 h-10 border-gray-200 dark:border-gray-600 focus:border-purple-500 dark:focus:border-purple-400 rounded-lg bg-gray-50 dark:bg-gray-700"
                           {...field} 
                         />
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
                         >
-                          {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         </button>
                       </div>
                     </FormControl>
@@ -215,24 +215,24 @@ export function RegisterForm() {
                 name="confirmPassword"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-lg font-semibold text-gray-700 dark:text-gray-200">
+                    <FormLabel className="text-sm font-medium text-gray-700 dark:text-gray-200">
                       Confirm Password
                     </FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                         <Input 
                           type={showConfirmPassword ? "text" : "password"}
                           placeholder="••••••••" 
-                          className="pl-12 pr-12 h-14 border-gray-200 dark:border-gray-600 focus:border-purple-500 dark:focus:border-purple-400 rounded-xl bg-gray-50 dark:bg-gray-700 text-lg"
+                          className="pl-10 pr-10 h-10 border-gray-200 dark:border-gray-600 focus:border-purple-500 dark:focus:border-purple-400 rounded-lg bg-gray-50 dark:bg-gray-700"
                           {...field} 
                         />
                         <button
                           type="button"
                           onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                          className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
                         >
-                          {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                          {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         </button>
                       </div>
                     </FormControl>
@@ -247,17 +247,17 @@ export function RegisterForm() {
               )}
               <Button 
                 type="submit" 
-                className="w-full h-14 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-[1.02] shadow-lg text-lg" 
+                className="w-full h-11 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-medium rounded-lg transition-all duration-300 shadow-lg" 
                 disabled={isLoading}
               >
                 {isLoading ? (
-                  <div className="flex items-center space-x-3">
-                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                     <span>Creating account...</span>
                   </div>
                 ) : (
-                  <div className="flex items-center space-x-3">
-                    <UserPlus className="h-6 w-6" />
+                  <div className="flex items-center space-x-2">
+                    <UserPlus className="h-4 w-4" />
                     <span>Sign Up</span>
                   </div>
                 )}
@@ -267,11 +267,11 @@ export function RegisterForm() {
           
           {/* Footer Links */}
           <div className="mt-8 text-center space-y-4">
-            <p className="text-gray-600 dark:text-gray-300 text-lg">
+            <p className="text-gray-600 dark:text-gray-300">
               Already have an account?{" "}
               <Link 
                 href="/login" 
-                className="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 font-semibold hover:underline transition-colors"
+                className="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 font-medium hover:underline transition-colors"
               >
                 Sign in
               </Link>
