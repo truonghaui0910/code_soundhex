@@ -100,17 +100,24 @@ export default function Home() {
                     <div className="space-y-4">
                       <a
                         href="/dashboard"
-                        className="block px-4 py-3 text-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-all font-medium"
+                        className="block px-6 py-4 text-foreground hover:text-white hover:bg-gradient-to-r hover:from-pink-500 hover:to-purple-600 rounded-xl transition-all font-semibold text-lg border border-border hover:border-transparent"
                         onClick={() => setMobileMenuOpen(false)}
                       >
                         Dashboard
                       </a>
                       <a
                         href="/music"
-                        className="block px-4 py-3 text-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-all font-medium"
+                        className="block px-6 py-4 text-foreground hover:text-white hover:bg-gradient-to-r hover:from-pink-500 hover:to-purple-600 rounded-xl transition-all font-semibold text-lg border border-border hover:border-transparent"
                         onClick={() => setMobileMenuOpen(false)}
                       >
-                        Explore Music
+                        Music
+                      </a>
+                      <a
+                        href="/agreements"
+                        className="block px-6 py-4 text-foreground hover:text-white hover:bg-gradient-to-r hover:from-pink-500 hover:to-purple-600 rounded-xl transition-all font-semibold text-lg border border-border hover:border-transparent"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        Agreements
                       </a>
                       <div className="pt-4 border-t border-border">
                         <UserNav user={user} />
@@ -120,22 +127,22 @@ export default function Home() {
                     <div className="space-y-4">
                       <a
                         href="/music"
-                        className="block px-4 py-3 text-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-all font-medium"
+                        className="block px-6 py-4 text-foreground hover:text-white hover:bg-gradient-to-r hover:from-pink-500 hover:to-purple-600 rounded-xl transition-all font-semibold text-lg border border-border hover:border-transparent"
                         onClick={() => setMobileMenuOpen(false)}
                       >
                         Explore Music
                       </a>
-                      <div className="pt-4 border-t border-border space-y-3">
+                      <div className="pt-6 border-t border-border space-y-4">
                         <a
                           href="/login"
-                          className="block w-full px-4 py-3 text-center text-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-all font-medium"
+                          className="block w-full px-6 py-4 text-center text-foreground hover:text-white hover:bg-gradient-to-r hover:from-pink-500 hover:to-purple-600 rounded-xl transition-all font-semibold text-lg border border-border hover:border-transparent"
                           onClick={() => setMobileMenuOpen(false)}
                         >
                           Sign In
                         </a>
                         <a
                           href="/register"
-                          className="block w-full btn-primary px-4 py-3 rounded-lg text-white font-medium text-center"
+                          className="block w-full btn-primary px-6 py-4 rounded-xl text-white font-semibold text-lg text-center shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all"
                           onClick={() => setMobileMenuOpen(false)}
                         >
                           Get Started
