@@ -43,7 +43,7 @@ export default function Home() {
             <div className="flex items-center space-x-3">
               <SoundHexLogo size={50} showText={true} animated={true} />
             </div>
-            
+
             {/* Desktop Navigation */}
             <div className="hidden md:flex space-x-4">
               {!loading && (
@@ -92,7 +92,7 @@ export default function Home() {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden absolute top-full left-0 right-0 glass-effect border-t border-border/20">
+          <div className="md:hidden absolute top-full left-0 right-0 bg-background/95 backdrop-blur-md border-t border-border/20 shadow-lg z-[100]">
             <div className="px-4 py-6 space-y-4">
               {!loading && (
                 <>
