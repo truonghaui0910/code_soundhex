@@ -60,7 +60,7 @@ export function SoundHexLogo({
             r="48"
             fill="url(#glowEffect)"
             opacity="0.4"
-            className={animated ? "animate-ping" : ""}
+            className={animated ? "" : ""}
             style={animated ? { animationDuration: "2s" } : {}}
           />
 
