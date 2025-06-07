@@ -146,7 +146,7 @@ export default function Dashboard() {
                         </div>
 
                         {/* View Selector */}
-                        <div className="flex flex-wrap gap-3 sm:gap-4 mt-8 justify-center">
+                        <div className="flex flex-wrap gap-3 sm:gap-4 mt-8 justify-center sm:justify-start">
                             <Button
                                 size="lg"
                                 onClick={() => setCurrentView("overview")}
