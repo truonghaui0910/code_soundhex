@@ -240,9 +240,9 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
             </div>
 
             {/* Main Content */}
-            <div className="container mx-auto px-6 pb-32">
+            <div className="container mx-auto px-4 sm:px-6 pb-32 space-y-8 sm:space-y-16 pt-8 sm:pt-12">
                 {currentView === "featured" && (
-                    <div className="space-y-16 pt-12">
+                    <div className="space-y-16">
 
                         {/* Albums Section */}
                         <section>
@@ -520,7 +520,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                 )}
 
                 {currentView === "library" && (
-                    <div className="space-y-6 pt-12">
+                    <div className="space-y-6">
                         <div className="flex items-center justify-between">
                             <h2 className="text-xl font-bold flex items-center gap-3">
                                 <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full flex items-center justify-center">
@@ -758,7 +758,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                         </p>
                                     </div>
                                     <div className="text-center p-6 rounded-xl bg-blue-50 dark:bg-blue-900/20">
-                                        <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-3">
+                                        <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-centermx-auto mb-3">
                                             <TrendingUp className="h-6 w-6 text-blue-600" />
                                         </div>
                                         <h4 className="font-semibold mb-2">

@@ -16,7 +16,7 @@ export default async function AlbumPage() {
     );
   }
   return (
-    <div className="container mx-auto py-10 space-y-6">
+    <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-6">
       <div className="flex flex-col gap-2 mb-6">
         <h1 className="text-3xl font-bold tracking-tight">Albums</h1>
         <p className="text-muted-foreground">Khám phá các album nổi bật, nghệ sĩ và năm phát hành.</p>
