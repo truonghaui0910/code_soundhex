@@ -63,13 +63,17 @@ async function fetchSpotifyData(url: string, userEmail?: string) {
     const data = await response.json();
 
     // Log response từ automusic.win
-    serverLogger.logInfo("AUTOMUSIC_API_RESPONSE", {
-      url,
-      status: response.status,
-      duration: Date.now() - startTime,
-      dataKeys: Object.keys(data || {}),
-      tracksCount: data?.tracks?.items?.length || data?.items?.length || 0,
-    }, userEmail);
+    serverLogger.logInfo(
+      "AUTOMUSIC_API_RESPONSE",
+      {
+        url,
+        status: response.status,
+        duration: Date.now() - startTime,
+        dataKeys: Object.keys(data || {}),
+        tracksCount: data?.tracks?.items?.length || data?.items?.length || 0,
+      },
+      userEmail,
+    );
 
     return data;
   } catch (error) {
@@ -104,14 +108,13 @@ export async function POST(request: NextRequest) {
 
   try {
     const { spotifyUrl } = await request.json();
-    
+
     // Get user email from Supabase session (secure way)
     const supabase = createRouteHandlerClient({ cookies });
-    const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
     const userEmail = session?.user?.email || undefined;
-
-    // Chỉ log 1 dòng request
-    serverLogger.logInfo("SPOTIFY_REQUEST", { url: spotifyUrl }, userEmail);
 
     if (!spotifyUrl) {
       return NextResponse.json(
@@ -172,7 +175,10 @@ export async function POST(request: NextRequest) {
           albumInfoData.tracks?.items?.map((track: SpotifyTrack) => ({
             id: track.id,
             name: track.name,
-            artist: track.artists?.[0]?.name || albumInfoData.artists?.[0]?.name || "Unknown Artist",
+            artist:
+              track.artists?.[0]?.name ||
+              albumInfoData.artists?.[0]?.name ||
+              "Unknown Artist",
             album: albumInfoData.name || "Unknown Album",
             duration: Math.floor(track.duration_ms / 1000),
             image: albumInfoData.images?.[0]?.url || "",
@@ -198,16 +204,17 @@ export async function POST(request: NextRequest) {
         const playlistData = await fetchSpotifyData(apiUrl, userEmail);
 
         // playlistData now contains complete playlist info with tracks.items array
-        const mappedPlaylistTracks = playlistData.tracks?.items?.map((item: any) => ({
-          id: item.track?.id,
-          name: item.track?.name,
-          artist: item.track?.artists?.[0]?.name || "Unknown Artist",
-          album: item.track?.album?.name || "Unknown Album",
-          duration: Math.floor(item.track?.duration_ms / 1000),
-          image: item.track?.album?.images?.[0]?.url || "",
-          isrc: item.track?.external_ids?.isrc || null,
-          preview_url: item.track?.preview_url,
-        })) || [];
+        const mappedPlaylistTracks =
+          playlistData.tracks?.items?.map((item: any) => ({
+            id: item.track?.id,
+            name: item.track?.name,
+            artist: item.track?.artists?.[0]?.name || "Unknown Artist",
+            album: item.track?.album?.name || "Unknown Album",
+            duration: Math.floor(item.track?.duration_ms / 1000),
+            image: item.track?.album?.images?.[0]?.url || "",
+            isrc: item.track?.external_ids?.isrc || null,
+            preview_url: item.track?.preview_url,
+          })) || [];
 
         data = {
           type: "playlist",
@@ -215,7 +222,10 @@ export async function POST(request: NextRequest) {
             id: playlistData.id || spotifyId,
             name: playlistData.name || "Unknown Playlist",
             artist: `${mappedPlaylistTracks.length} tracks`,
-            image: playlistData.images?.[0]?.url || mappedPlaylistTracks[0]?.image || "",
+            image:
+              playlistData.images?.[0]?.url ||
+              mappedPlaylistTracks[0]?.image ||
+              "",
             release_date: "",
             tracks: mappedPlaylistTracks,
           },
@@ -251,11 +261,15 @@ export async function POST(request: NextRequest) {
     const totalDuration = Date.now() - requestStartTime;
 
     // Chỉ log 1 dòng response
-    serverLogger.logInfo("SPOTIFY_RESPONSE", {
-      type: urlType,
-      data: data,
-      duration: totalDuration,
-    }, userEmail);
+    serverLogger.logInfo(
+      "SPOTIFY_RESPONSE",
+      {
+        type: urlType,
+        data: data,
+        duration: totalDuration,
+      },
+      userEmail,
+    );
 
     return NextResponse.json(data);
   } catch (error) {
