@@ -553,6 +553,27 @@ export function MusicUpload() {
                                                                                               <Check className="h-4 w-4 text-purple-600" />
                                                                                           )}
                                                                                       </div>
+                                                                                      <div className="w-12 h-12 rounded overflow-hidden bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
+                                                                                          {track.image || album.image ? (
+                                                                                              <Image
+                                                                                                  src={
+                                                                                                      track.image || album.image
+                                                                                                  }
+                                                                                                  alt={
+                                                                                                      track.name
+                                                                                                  }
+                                                                                                  width={
+                                                                                                      48
+                                                                                                  }
+                                                                                                  height={
+                                                                                                      48
+                                                                                                  }
+                                                                                                  className="object-cover w-full h-full"
+                                                                                              />
+                                                                                          ) : (
+                                                                                              <Music className="h-6 w-6 text-white" />
+                                                                                          )}
+                                                                                      </div>
                                                                                       <div className="flex-1">
                                                                                           <div className="font-medium">
                                                                                               {
