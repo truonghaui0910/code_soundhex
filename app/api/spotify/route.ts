@@ -260,12 +260,24 @@ export async function POST(request: NextRequest) {
 
     const totalDuration = Date.now() - requestStartTime;
 
+    // Get track count based on type
+    let trackCount = 0;
+    if (urlType === "track") {
+      trackCount = 1;
+    } else if (urlType === "album" || urlType === "playlist") {
+      trackCount = data.data.tracks?.length || 0;
+    } else if (urlType === "artist") {
+      trackCount = data.data.albums?.reduce((total: number, album: any) => {
+        return total + (album.tracks?.length || 0);
+      }, 0) || 0;
+    }
+
     // Chỉ log 1 dòng response
     serverLogger.logInfo(
       "SPOTIFY_RESPONSE",
       {
         type: urlType,
-        data: data,
+        trackCount: trackCount,
         duration: totalDuration,
       },
       userEmail,
