@@ -6,6 +6,11 @@ interface SpotifyTrack {
   id: string;
   name: string;
   artists: Array<{ name: string }>;
+  album: {
+    name: string;
+    images: Array<{ url: string }>;
+    release_date: string;
+  };
   duration_ms: number;
   external_ids?: {
     isrc?: string;
@@ -36,27 +41,25 @@ export async function POST(request: NextRequest) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     
-    const albumData = await response.json();
+    const albumTracksData = await response.json();
     
     serverLogger.logDebug('ALBUM_TRACKS_RAW_DATA', {
-      albumId: albumData.id,
-      albumName: albumData.name,
-      hasArtists: !!albumData.artists,
-      hasImages: !!albumData.images,
-      hasTracks: !!albumData.tracks,
-      tracksType: typeof albumData.tracks,
-      tracksHasItems: !!albumData.tracks?.items,
-      tracksItemsCount: albumData.tracks?.items?.length || 0,
-      tracksItemsType: Array.isArray(albumData.tracks?.items) ? 'array' : typeof albumData.tracks?.items
+      hasItems: !!albumTracksData.items,
+      itemsType: typeof albumTracksData.items,
+      itemsIsArray: Array.isArray(albumTracksData.items),
+      itemsCount: albumTracksData.items?.length || 0,
+      dataKeys: Object.keys(albumTracksData || {})
     });
     
-    const tracks = albumData.tracks?.items?.map((track: SpotifyTrack) => ({
+    // API trả về { items: [...], href, limit, next, offset, previous, total }
+    // items chứa array các track
+    const tracks = albumTracksData.items?.map((track: SpotifyTrack) => ({
       id: track.id,
       name: track.name,
       artist: track.artists?.[0]?.name || 'Unknown Artist',
-      album: albumData.name,
+      album: track.album?.name || 'Unknown Album',
       duration: Math.floor(track.duration_ms / 1000),
-      image: albumData.images?.[0]?.url || '',
+      image: track.album?.images?.[0]?.url || '',
       isrc: track.external_ids?.isrc || null,
       preview_url: track.preview_url
     })) || [];
@@ -65,7 +68,7 @@ export async function POST(request: NextRequest) {
     
     serverLogger.logInfo('ALBUM_TRACKS_SUCCESS', { 
       albumId, 
-      originalTracksCount: albumData.tracks?.items?.length || 0,
+      originalTracksCount: albumTracksData.items?.length || 0,
       mappedTracksCount: tracks.length,
       duration 
     });
@@ -75,7 +78,6 @@ export async function POST(request: NextRequest) {
     const duration = Date.now() - startTime;
     
     serverLogger.logError('ALBUM_TRACKS_ERROR', error instanceof Error ? error.message : 'Unknown error', { 
-      albumId: request.body, 
       duration 
     });
     
