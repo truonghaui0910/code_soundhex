@@ -45,7 +45,6 @@ interface SpotifyAlbum {
     id: string;
     name: string;
     artist: string;
-```text
     image: string;
     tracks: SpotifyTrack[];
     release_date: string;
@@ -54,7 +53,8 @@ interface SpotifyAlbum {
 interface SpotifyArtist {
     id: string;
     name: string;
-    image: string;albums: SpotifyAlbum[];
+    image: string;
+    albums: SpotifyAlbum[];
 }
 
 interface UploadFormData {
@@ -71,8 +71,12 @@ export function MusicUpload() {
     const [spotifyUrl, setSpotifyUrl] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [spotifyData, setSpotifyData] = useState<any>(null);
-    const [selectedTracks, setSelectedTracks] = useState<Set<string>>(new Set());
-    const [expandedAlbums, setExpandedAlbums] = useState<Set<string>>(new Set());
+    const [selectedTracks, setSelectedTracks] = useState<Set<string>>(
+        new Set(),
+    );
+    const [expandedAlbums, setExpandedAlbums] = useState<Set<string>>(
+        new Set(),
+    );
     const [loadingAlbums, setLoadingAlbums] = useState<Set<string>>(new Set());
     const [uploadForm, setUploadForm] = useState<UploadFormData>({
         title: "",
@@ -118,10 +122,12 @@ export function MusicUpload() {
             setSpotifyData(data);
 
             // Auto-select all tracks for album, playlist, and single track
-            if (data.type === 'album' || data.type === 'playlist') {
-                const trackIds = new Set(data.data.tracks.map((track: SpotifyTrack) => track.id));
+            if (data.type === "album" || data.type === "playlist") {
+                const trackIds = new Set(
+                    data.data.tracks.map((track: SpotifyTrack) => track.id),
+                );
                 setSelectedTracks(trackIds);
-            } else if (data.type === 'track') {
+            } else if (data.type === "track") {
                 setSelectedTracks(new Set([data.data.id]));
             }
         } catch (error) {
@@ -135,19 +141,19 @@ export function MusicUpload() {
     const loadAlbumTracks = async (albumId: string) => {
         if (loadingAlbums.has(albumId)) return;
 
-        setLoadingAlbums(prev => new Set(prev).add(albumId));
+        setLoadingAlbums((prev) => new Set(prev).add(albumId));
 
         try {
-            const response = await fetch('/api/spotify/album-info', {
-                method: 'POST',
+            const response = await fetch("/api/spotify/album-info", {
+                method: "POST",
                 headers: {
-                    'Content-Type': 'application/json',
+                    "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ albumId })
+                body: JSON.stringify({ albumId }),
             });
 
             if (!response.ok) {
-                throw new Error('Failed to load album tracks');
+                throw new Error("Failed to load album tracks");
             }
 
             const { data } = await response.json();
@@ -159,13 +165,15 @@ export function MusicUpload() {
                 data: {
                     ...prev.data,
                     albums: prev.data.albums.map((album: SpotifyAlbum) =>
-                        album.id === albumId ? { ...album, tracks: data.tracks } : album
-                    )
-                }
+                        album.id === albumId
+                            ? { ...album, tracks: data.tracks }
+                            : album,
+                    ),
+                },
             }));
 
             // Auto-select all tracks from this album
-            setSelectedTracks(prev => {
+            setSelectedTracks((prev) => {
                 const newSelected = new Set(prev);
                 data.tracks.forEach((track: SpotifyTrack) => {
                     newSelected.add(track.id);
@@ -173,10 +181,10 @@ export function MusicUpload() {
                 return newSelected;
             });
         } catch (error) {
-            console.error('Error loading album tracks:', error);
-            alert('Failed to load album tracks');
+            console.error("Error loading album tracks:", error);
+            alert("Failed to load album tracks");
         } finally {
-            setLoadingAlbums(prev => {
+            setLoadingAlbums((prev) => {
                 const newSet = new Set(prev);
                 newSet.delete(albumId);
                 return newSet;
@@ -201,7 +209,9 @@ export function MusicUpload() {
         } else {
             newExpanded.add(albumId);
             // Load tracks if not already loaded
-            const album = spotifyData?.data?.albums?.find((a: SpotifyAlbum) => a.id === albumId);
+            const album = spotifyData?.data?.albums?.find(
+                (a: SpotifyAlbum) => a.id === albumId,
+            );
             if (album && (!album.tracks || album.tracks.length === 0)) {
                 await loadAlbumTracks(albumId);
             }
@@ -234,15 +244,18 @@ export function MusicUpload() {
         // Get selected track data
         const selectedTrackData: SpotifyTrack[] = [];
 
-        if (spotifyData.type === 'track') {
+        if (spotifyData.type === "track") {
             selectedTrackData.push(spotifyData.data);
-        } else if (spotifyData.type === 'album' || spotifyData.type === 'playlist') {
+        } else if (
+            spotifyData.type === "album" ||
+            spotifyData.type === "playlist"
+        ) {
             spotifyData.data.tracks.forEach((track: SpotifyTrack) => {
                 if (selectedTracks.has(track.id)) {
                     selectedTrackData.push(track);
                 }
             });
-        } else if (spotifyData.type === 'artist') {
+        } else if (spotifyData.type === "artist") {
             spotifyData.data.albums.forEach((album: SpotifyAlbum) => {
                 album.tracks?.forEach((track: SpotifyTrack) => {
                     if (selectedTracks.has(track.id)) {
@@ -270,7 +283,8 @@ export function MusicUpload() {
                             Upload Your Music
                         </h1>
                         <p className="text-xl md:text-2xl mb-8 text-purple-100">
-                            Import from Spotify or upload directly from your device
+                            Import from Spotify or upload directly from your
+                            device
                         </p>
 
                         {/* Tab Buttons */}
@@ -319,18 +333,24 @@ export function MusicUpload() {
                             </CardHeader>
                             <CardContent className="space-y-6">
                                 <div className="space-y-2">
-                                    <Label htmlFor="spotify-url">Spotify URL</Label>
+                                    <Label htmlFor="spotify-url">
+                                        Spotify URL
+                                    </Label>
                                     <div className="flex gap-2">
                                         <Input
                                             id="spotify-url"
                                             placeholder="Paste Spotify artist, album, playlist, or track URL here..."
                                             value={spotifyUrl}
-                                            onChange={(e) => setSpotifyUrl(e.target.value)}
+                                            onChange={(e) =>
+                                                setSpotifyUrl(e.target.value)
+                                            }
                                             className="flex-1"
                                         />
                                         <Button
                                             onClick={handleSpotifySubmit}
-                                            disabled={isLoading || !spotifyUrl.trim()}
+                                            disabled={
+                                                isLoading || !spotifyUrl.trim()
+                                            }
                                         >
                                             {isLoading ? (
                                                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -389,9 +409,15 @@ export function MusicUpload() {
                                             <div className="flex items-center gap-4">
                                                 <div className="w-16 h-16 rounded-full overflow-hidden bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
                                                     {spotifyData.data.image ? (
-                                                        <Image 
-                                                            src={spotifyData.data.image} 
-                                                            alt={spotifyData.data.name}
+                                                        <Image
+                                                            src={
+                                                                spotifyData.data
+                                                                    .image
+                                                            }
+                                                            alt={
+                                                                spotifyData.data
+                                                                    .name
+                                                            }
                                                             width={64}
                                                             height={64}
                                                             className="object-cover w-full h-full"
@@ -401,95 +427,177 @@ export function MusicUpload() {
                                                     )}
                                                 </div>
                                                 <div>
-                                                    <h3 className="text-xl font-bold">{spotifyData.data.name}</h3>
+                                                    <h3 className="text-xl font-bold">
+                                                        {spotifyData.data.name}
+                                                    </h3>
                                                     <p className="text-gray-600 dark:text-gray-400">
-                                                        {spotifyData.data.albums.length} albums available
+                                                        {
+                                                            spotifyData.data
+                                                                .albums.length
+                                                        }{" "}
+                                                        albums available
                                                     </p>
                                                 </div>
                                             </div>
 
                                             {/* Albums List */}
                                             <div className="space-y-4">
-                                                <h4 className="font-semibold">Select albums to import:</h4>
-                                                {spotifyData.data.albums.map((album: SpotifyAlbum) => (
-                                                    <div key={album.id} className="border rounded-lg p-4">
+                                                <h4 className="font-semibold">
+                                                    Select albums to import:
+                                                </h4>
+                                                {spotifyData.data.albums.map(
+                                                    (album: SpotifyAlbum) => (
                                                         <div
-                                                            className="flex items-center gap-4 cursor-pointer"
-                                                            onClick={() => toggleAlbumExpansion(album.id)}
+                                                            key={album.id}
+                                                            className="border rounded-lg p-4"
                                                         >
-                                                            <div className="w-12 h-12 rounded overflow-hidden bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
-                                                                {album.image ? (
-                                                                    <Image 
-                                                                        src={album.image} 
-                                                                        alt={album.name}
-                                                                        width={48}
-                                                                        height={48}
-                                                                        className="object-cover w-full h-full"
-                                                                    />
+                                                            <div
+                                                                className="flex items-center gap-4 cursor-pointer"
+                                                                onClick={() =>
+                                                                    toggleAlbumExpansion(
+                                                                        album.id,
+                                                                    )
+                                                                }
+                                                            >
+                                                                <div className="w-12 h-12 rounded overflow-hidden bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
+                                                                    {album.image ? (
+                                                                        <Image
+                                                                            src={
+                                                                                album.image
+                                                                            }
+                                                                            alt={
+                                                                                album.name
+                                                                            }
+                                                                            width={
+                                                                                48
+                                                                            }
+                                                                            height={
+                                                                                48
+                                                                            }
+                                                                            className="object-cover w-full h-full"
+                                                                        />
+                                                                    ) : (
+                                                                        <Album className="h-6 w-6 text-white" />
+                                                                    )}
+                                                                </div>
+                                                                <div className="flex-1">
+                                                                    <h5 className="font-semibold">
+                                                                        {
+                                                                            album.name
+                                                                        }
+                                                                    </h5>
+                                                                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                                                                        {album
+                                                                            .tracks
+                                                                            ?.length ||
+                                                                            0}{" "}
+                                                                        tracks •{" "}
+                                                                        {
+                                                                            album.release_date
+                                                                        }
+                                                                    </p>
+                                                                </div>
+                                                                {loadingAlbums.has(
+                                                                    album.id,
+                                                                ) ? (
+                                                                    <Loader2 className="h-5 w-5 animate-spin" />
+                                                                ) : expandedAlbums.has(
+                                                                      album.id,
+                                                                  ) ? (
+                                                                    <ChevronDown className="h-5 w-5" />
                                                                 ) : (
-                                                                    <Album className="h-6 w-6 text-white" />
+                                                                    <ChevronRight className="h-5 w-5" />
                                                                 )}
                                                             </div>
-                                                            <div className="flex-1">
-                                                                <h5 className="font-semibold">{album.name}</h5>
-                                                                <p className="text-sm text-gray-600 dark:text-gray-400">
-                                                                    {album.tracks?.length || 0} tracks • {album.release_date}
-                                                                </p>
-                                                            </div>
-                                                            {loadingAlbums.has(album.id) ? (
-                                                                <Loader2 className="h-5 w-5 animate-spin" />
-                                                            ) : expandedAlbums.has(album.id) ? (
-                                                                <ChevronDown className="h-5 w-5" />
-                                                            ) : (
-                                                                <ChevronRight className="h-5 w-5" />
+
+                                                            {expandedAlbums.has(
+                                                                album.id,
+                                                            ) && (
+                                                                <div className="mt-4 space-y-2">
+                                                                    <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                                                                        Loading
+                                                                        tracks...
+                                                                    </div>
+                                                                    {album.tracks &&
+                                                                    Array.isArray(
+                                                                        album.tracks,
+                                                                    ) &&
+                                                                    album.tracks
+                                                                        .length >
+                                                                        0
+                                                                        ? album.tracks.map(
+                                                                              (
+                                                                                  track: SpotifyTrack,
+                                                                              ) => (
+                                                                                  <div
+                                                                                      key={
+                                                                                          track.id
+                                                                                      }
+                                                                                      className={`flex items-center gap-3 p-2 rounded cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 ${
+                                                                                          selectedTracks.has(
+                                                                                              track.id,
+                                                                                          )
+                                                                                              ? "bg-purple-50 dark:bg-purple-900/20"
+                                                                                              : ""
+                                                                                      }`}
+                                                                                      onClick={() =>
+                                                                                          toggleTrackSelection(
+                                                                                              track.id,
+                                                                                          )
+                                                                                      }
+                                                                                  >
+                                                                                      <div className="w-6 h-6 rounded border-2 border-purple-400 flex items-center justify-center">
+                                                                                          {selectedTracks.has(
+                                                                                              track.id,
+                                                                                          ) && (
+                                                                                              <Check className="h-4 w-4 text-purple-600" />
+                                                                                          )}
+                                                                                      </div>
+                                                                                      <div className="flex-1">
+                                                                                          <div className="font-medium">
+                                                                                              {
+                                                                                                  track.name
+                                                                                              }
+                                                                                          </div>
+                                                                                          <div className="text-sm text-gray-600 dark:text-gray-400">
+                                                                                              {
+                                                                                                  track.artist
+                                                                                              }{" "}
+                                                                                              •{" "}
+                                                                                              {formatDuration(
+                                                                                                  track.duration,
+                                                                                              )}
+                                                                                          </div>
+                                                                                      </div>
+                                                                                  </div>
+                                                                              ),
+                                                                          )
+                                                                        : null}
+                                                                </div>
                                                             )}
                                                         </div>
-
-                                                        {expandedAlbums.has(album.id) && (
-                                                            <div className="mt-4 space-y-2">
-                                                                <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                                                                    Loading tracks...
-                                                                </div>
-                                                                {album.tracks && Array.isArray(album.tracks) && album.tracks.length > 0 ? album.tracks.map((track: SpotifyTrack) => (
-                                                                    <div
-                                                                        key={track.id}
-                                                                        className={`flex items-center gap-3 p-2 rounded cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 ${
-                                                                            selectedTracks.has(track.id)
-                                                                                ? "bg-purple-50 dark:bg-purple-900/20"
-                                                                                : ""
-                                                                        }`}
-                                                                        onClick={() => toggleTrackSelection(track.id)}
-                                                                    >
-                                                                        <div className="w-6 h-6 rounded border-2 border-purple-400 flex items-center justify-center">
-                                                                            {selectedTracks.has(track.id) && (
-                                                                                <Check className="h-4 w-4 text-purple-600" />
-                                                                            )}
-                                                                        </div>
-                                                                        <div className="flex-1">
-                                                                            <div className="font-medium">{track.name}</div>
-                                                                            <div className="text-sm text-gray-600 dark:text-gray-400">
-                                                                                {track.artist} • {formatDuration(track.duration)}
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                )) : null}
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                ))}
+                                                    ),
+                                                )}
                                             </div>
                                         </div>
                                     )}
 
-                                    {(spotifyData.type === "album" || spotifyData.type === "playlist") && (
+                                    {(spotifyData.type === "album" ||
+                                        spotifyData.type === "playlist") && (
                                         <div className="space-y-6">
                                             {/* Album/Playlist Info */}
                                             <div className="flex items-center gap-4">
                                                 <div className="w-16 h-16 rounded overflow-hidden bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
                                                     {spotifyData.data.image ? (
-                                                        <Image 
-                                                            src={spotifyData.data.image} 
-                                                            alt={spotifyData.data.name}
+                                                        <Image
+                                                            src={
+                                                                spotifyData.data
+                                                                    .image
+                                                            }
+                                                            alt={
+                                                                spotifyData.data
+                                                                    .name
+                                                            }
                                                             width={64}
                                                             height={64}
                                                             className="object-cover w-full h-full"
@@ -499,57 +607,100 @@ export function MusicUpload() {
                                                     )}
                                                 </div>
                                                 <div>
-                                                    <h3 className="text-xl font-bold">{spotifyData.data.name}</h3>
+                                                    <h3 className="text-xl font-bold">
+                                                        {spotifyData.data.name}
+                                                    </h3>
                                                     <p className="text-gray-600 dark:text-gray-400">
-                                                        by {spotifyData.data.artist} • {spotifyData.data.tracks.length} tracks
+                                                        by{" "}
+                                                        {
+                                                            spotifyData.data
+                                                                .artist
+                                                        }{" "}
+                                                        •{" "}
+                                                        {
+                                                            spotifyData.data
+                                                                .tracks.length
+                                                        }{" "}
+                                                        tracks
                                                     </p>
                                                 </div>
                                             </div>
 
                                             {/* Tracks List */}
                                             <div className="space-y-2">
-                                                <h4 className="font-semibold">Select tracks to import:</h4>
-                                                {spotifyData.data.tracks.map((track: SpotifyTrack) => (
-                                                    <div
-                                                        key={track.id}
-                                                        className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 ${
-                                                            selectedTracks.has(track.id)
-                                                                ? "bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700"
-                                                                : "border border-gray-200 dark:border-gray-700"
-                                                        }`}
-                                                        onClick={() => toggleTrackSelection(track.id)}
-                                                    >
-                                                        <div className="w-6 h-6 rounded border-2 border-purple-400 flex items-center justify-center">
-                                                            {selectedTracks.has(track.id) && (
-                                                                <Check className="h-4 w-4 text-purple-600" />
-                                                            )}
-                                                        </div>
-                                                        <div className="w-12 h-12 rounded overflow-hidden bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
-                                                            {track.image ? (
-                                                                <Image 
-                                                                    src={track.image} 
-                                                                    alt={track.name}
-                                                                    width={48}
-                                                                    height={48}
-                                                                    className="object-cover w-full h-full"
-                                                                />
-                                                            ) : (
-                                                                <Music className="h-6 w-6 text-white" />
-                                                            )}
-                                                        </div>
-                                                        <div className="flex-1">
-                                                            <p className="font-semibold">{track.name}</p>
-                                                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                                                                {track.artist} • {formatDuration(track.duration)}
-                                                                {track.isrc && (
-                                                                    <span className="ml-2 text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">
-                                                                        ISRC: {track.isrc}
-                                                                    </span>
+                                                <h4 className="font-semibold">
+                                                    Select tracks to import:
+                                                </h4>
+                                                {spotifyData.data.tracks.map(
+                                                    (track: SpotifyTrack) => (
+                                                        <div
+                                                            key={track.id}
+                                                            className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 ${
+                                                                selectedTracks.has(
+                                                                    track.id,
+                                                                )
+                                                                    ? "bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700"
+                                                                    : "border border-gray-200 dark:border-gray-700"
+                                                            }`}
+                                                            onClick={() =>
+                                                                toggleTrackSelection(
+                                                                    track.id,
+                                                                )
+                                                            }
+                                                        >
+                                                            <div className="w-6 h-6 rounded border-2 border-purple-400 flex items-center justify-center">
+                                                                {selectedTracks.has(
+                                                                    track.id,
+                                                                ) && (
+                                                                    <Check className="h-4 w-4 text-purple-600" />
                                                                 )}
-                                                            </p>
+                                                            </div>
+                                                            <div className="w-12 h-12 rounded overflow-hidden bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
+                                                                {track.image ? (
+                                                                    <Image
+                                                                        src={
+                                                                            track.image
+                                                                        }
+                                                                        alt={
+                                                                            track.name
+                                                                        }
+                                                                        width={
+                                                                            48
+                                                                        }
+                                                                        height={
+                                                                            48
+                                                                        }
+                                                                        className="object-cover w-full h-full"
+                                                                    />
+                                                                ) : (
+                                                                    <Music className="h-6 w-6 text-white" />
+                                                                )}
+                                                            </div>
+                                                            <div className="flex-1">
+                                                                <p className="font-semibold">
+                                                                    {track.name}
+                                                                </p>
+                                                                <p className="text-sm text-gray-600 dark:text-gray-400">
+                                                                    {
+                                                                        track.artist
+                                                                    }{" "}
+                                                                    •{" "}
+                                                                    {formatDuration(
+                                                                        track.duration,
+                                                                    )}
+                                                                    {track.isrc && (
+                                                                        <span className="ml-2 text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">
+                                                                            ISRC:{" "}
+                                                                            {
+                                                                                track.isrc
+                                                                            }
+                                                                        </span>
+                                                                    )}
+                                                                </p>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                ))}
+                                                    ),
+                                                )}
                                             </div>
                                         </div>
                                     )}
@@ -560,9 +711,15 @@ export function MusicUpload() {
                                             <div className="flex items-center gap-4">
                                                 <div className="w-16 h-16 rounded overflow-hidden bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
                                                     {spotifyData.data.image ? (
-                                                        <Image 
-                                                            src={spotifyData.data.image} 
-                                                            alt={spotifyData.data.name}
+                                                        <Image
+                                                            src={
+                                                                spotifyData.data
+                                                                    .image
+                                                            }
+                                                            alt={
+                                                                spotifyData.data
+                                                                    .name
+                                                            }
                                                             width={64}
                                                             height={64}
                                                             className="object-cover w-full h-full"
@@ -572,15 +729,33 @@ export function MusicUpload() {
                                                     )}
                                                 </div>
                                                 <div>
-                                                    <h3 className="text-xl font-bold">{spotifyData.data.name}</h3>
+                                                    <h3 className="text-xl font-bold">
+                                                        {spotifyData.data.name}
+                                                    </h3>
                                                     <p className="text-gray-600 dark:text-gray-400">
-                                                        by {spotifyData.data.artist} • from {spotifyData.data.album}
+                                                        by{" "}
+                                                        {
+                                                            spotifyData.data
+                                                                .artist
+                                                        }{" "}
+                                                        • from{" "}
+                                                        {spotifyData.data.album}
                                                     </p>
                                                     <p className="text-sm text-gray-500">
-                                                        Duration: {formatDuration(spotifyData.data.duration)}
-                                                        {spotifyData.data.isrc && (
+                                                        Duration:{" "}
+                                                        {formatDuration(
+                                                            spotifyData.data
+                                                                .duration,
+                                                        )}
+                                                        {spotifyData.data
+                                                            .isrc && (
                                                             <span className="ml-2 text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">
-                                                                ISRC: {spotifyData.data.isrc}
+                                                                ISRC:{" "}
+                                                                {
+                                                                    spotifyData
+                                                                        .data
+                                                                        .isrc
+                                                                }
                                                             </span>
                                                         )}
                                                     </p>
@@ -590,7 +765,10 @@ export function MusicUpload() {
                                             <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg p-4">
                                                 <div className="flex items-center gap-2 text-green-700 dark:text-green-400">
                                                     <Check className="h-5 w-5" />
-                                                    <span className="font-semibold">Track selected for import</span>
+                                                    <span className="font-semibold">
+                                                        Track selected for
+                                                        import
+                                                    </span>
                                                 </div>
                                             </div>
                                         </div>
@@ -603,7 +781,10 @@ export function MusicUpload() {
                                             disabled={selectedTracks.size === 0}
                                             className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
                                         >
-                                            Import {selectedTracks.size} Track{selectedTracks.size !== 1 ? "s" : ""}
+                                            Import {selectedTracks.size} Track
+                                            {selectedTracks.size !== 1
+                                                ? "s"
+                                                : ""}
                                         </Button>
                                     </div>
                                 </CardContent>
@@ -628,7 +809,9 @@ export function MusicUpload() {
                                 <Label htmlFor="music-file">Audio File *</Label>
                                 <div
                                     className="border-2 border-dashed border-purple-300 dark:border-purple-600 rounded-xl p-8 hover:border-purple-400 transition-colors bg-purple-50/50 dark:bg-purple-900/20 cursor-pointer"
-                                    onClick={() => fileInputRef.current?.click()}
+                                    onClick={() =>
+                                        fileInputRef.current?.click()
+                                    }
                                 >
                                     <div className="text-center space-y-4">
                                         <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto">
@@ -640,14 +823,21 @@ export function MusicUpload() {
                                                     {uploadForm.file.name}
                                                 </p>
                                                 <p className="text-sm text-gray-500">
-                                                    {(uploadForm.file.size / (1024 * 1024)).toFixed(2)} MB
+                                                    {(
+                                                        uploadForm.file.size /
+                                                        (1024 * 1024)
+                                                    ).toFixed(2)}{" "}
+                                                    MB
                                                 </p>
                                             </div>
                                         ) : (
                                             <div>
-                                                <p className="font-semibold">Drop your music file here</p>
+                                                <p className="font-semibold">
+                                                    Drop your music file here
+                                                </p>
                                                 <p className="text-gray-600 dark:text-gray-400">
-                                                    Supports MP3, WAV, FLAC formats
+                                                    Supports MP3, WAV, FLAC
+                                                    formats
                                                 </p>
                                             </div>
                                         )}
@@ -673,19 +863,27 @@ export function MusicUpload() {
                                         placeholder="Enter track title"
                                         value={uploadForm.title}
                                         onChange={(e) =>
-                                            setUploadForm({ ...uploadForm, title: e.target.value })
+                                            setUploadForm({
+                                                ...uploadForm,
+                                                title: e.target.value,
+                                            })
                                         }
                                     />
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="artist">Artist Name *</Label>
+                                    <Label htmlFor="artist">
+                                        Artist Name *
+                                    </Label>
                                     <Input
                                         id="artist"
                                         placeholder="Enter artist name"
                                         value={uploadForm.artist}
                                         onChange={(e) =>
-                                            setUploadForm({ ...uploadForm, artist: e.target.value })
+                                            setUploadForm({
+                                                ...uploadForm,
+                                                artist: e.target.value,
+                                            })
                                         }
                                     />
                                 </div>
@@ -697,7 +895,10 @@ export function MusicUpload() {
                                         placeholder="Enter album name"
                                         value={uploadForm.album}
                                         onChange={(e) =>
-                                            setUploadForm({ ...uploadForm, album: e.target.value })
+                                            setUploadForm({
+                                                ...uploadForm,
+                                                album: e.target.value,
+                                            })
                                         }
                                     />
                                 </div>
@@ -708,7 +909,10 @@ export function MusicUpload() {
                                         id="genre"
                                         value={uploadForm.genre}
                                         onChange={(e) =>
-                                            setUploadForm({ ...uploadForm, genre: e.target.value })
+                                            setUploadForm({
+                                                ...uploadForm,
+                                                genre: e.target.value,
+                                            })
                                         }
                                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800"
                                     >
@@ -716,9 +920,13 @@ export function MusicUpload() {
                                         <option value="pop">Pop</option>
                                         <option value="rock">Rock</option>
                                         <option value="hip-hop">Hip Hop</option>
-                                        <option value="electronic">Electronic</option>
+                                        <option value="electronic">
+                                            Electronic
+                                        </option>
                                         <option value="jazz">Jazz</option>
-                                        <option value="classical">Classical</option>
+                                        <option value="classical">
+                                            Classical
+                                        </option>
                                         <option value="country">Country</option>
                                         <option value="r&b">R&B</option>
                                     </select>
@@ -733,7 +941,10 @@ export function MusicUpload() {
                                     rows={4}
                                     value={uploadForm.description}
                                     onChange={(e) =>
-                                        setUploadForm({ ...uploadForm, description: e.target.value })
+                                        setUploadForm({
+                                            ...uploadForm,
+                                            description: e.target.value,
+                                        })
                                     }
                                 />
                             </div>
@@ -742,7 +953,11 @@ export function MusicUpload() {
                             <div className="flex justify-end pt-4">
                                 <Button
                                     onClick={handleUploadSubmit}
-                                    disabled={!uploadForm.file || !uploadForm.title || !uploadForm.artist}
+                                    disabled={
+                                        !uploadForm.file ||
+                                        !uploadForm.title ||
+                                        !uploadForm.artist
+                                    }
                                     className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
                                 >
                                     <Upload className="mr-2 h-4 w-4" />
