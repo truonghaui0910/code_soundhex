@@ -6,16 +6,23 @@ interface SpotifyTrack {
   id: string;
   name: string;
   artists: Array<{ name: string }>;
-  album: {
-    name: string;
-    images: Array<{ url: string }>;
-    release_date: string;
-  };
   duration_ms: number;
   external_ids?: {
     isrc?: string;
   };
   preview_url?: string;
+  track_number: number;
+}
+
+interface AlbumInfoResponse {
+  id: string;
+  name: string;
+  artists: Array<{ name: string }>;
+  images: Array<{ url: string }>;
+  release_date: string;
+  tracks: {
+    items: SpotifyTrack[];
+  };
 }
 
 export async function POST(request: NextRequest) {
@@ -31,7 +38,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Album ID is required' }, { status: 400 });
     }
 
-    const apiUrl = `http://source.automusic.win/spotify/album-tracks-onl/get/${albumId}`;
+    // Updated API endpoint
+    const apiUrl = `http://automusic.win/spotify/album-info/get/${albumId}`;
     serverLogger.logInfo('ALBUM_TRACKS_API_CALL', { apiUrl });
     
     const response = await fetch(apiUrl);
@@ -41,25 +49,25 @@ export async function POST(request: NextRequest) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     
-    const albumTracksData = await response.json();
+    const albumData: AlbumInfoResponse = await response.json();
     
     serverLogger.logDebug('ALBUM_TRACKS_RAW_DATA', {
-      hasItems: !!albumTracksData.items,
-      itemsType: typeof albumTracksData.items,
-      itemsIsArray: Array.isArray(albumTracksData.items),
-      itemsCount: albumTracksData.items?.length || 0,
-      dataKeys: Object.keys(albumTracksData || {})
+      hasAlbumData: !!albumData,
+      albumName: albumData?.name,
+      hasTracks: !!albumData?.tracks?.items,
+      tracksIsArray: Array.isArray(albumData?.tracks?.items),
+      tracksCount: albumData?.tracks?.items?.length || 0,
+      dataKeys: Object.keys(albumData || {})
     });
     
-    // API trả về { items: [...], href, limit, next, offset, previous, total }
-    // items chứa array các track
-    const tracks = albumTracksData.items?.map((track: SpotifyTrack) => ({
+    // Extract tracks from the new album info structure
+    const tracks = albumData?.tracks?.items?.map((track: SpotifyTrack) => ({
       id: track.id,
       name: track.name,
-      artist: track.artists?.[0]?.name || 'Unknown Artist',
-      album: track.album?.name || 'Unknown Album',
+      artist: track.artists?.[0]?.name || albumData.artists?.[0]?.name || 'Unknown Artist',
+      album: albumData.name || 'Unknown Album',
       duration: Math.floor(track.duration_ms / 1000),
-      image: track.album?.images?.[0]?.url || '',
+      image: albumData.images?.[0]?.url || '',
       isrc: track.external_ids?.isrc || null,
       preview_url: track.preview_url
     })) || [];
@@ -68,7 +76,8 @@ export async function POST(request: NextRequest) {
     
     serverLogger.logInfo('ALBUM_TRACKS_SUCCESS', { 
       albumId, 
-      originalTracksCount: albumTracksData.items?.length || 0,
+      albumName: albumData?.name,
+      originalTracksCount: albumData?.tracks?.items?.length || 0,
       mappedTracksCount: tracks.length,
       duration 
     });
