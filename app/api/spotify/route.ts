@@ -144,17 +144,23 @@ export async function POST(request: NextRequest) {
         break;
 
       case "album":
+        // Get album info first
+        const albumInfoUrl = `http://source.automusic.win/spotify/album-onl/get/${spotifyId}`;
+        const albumInfo = await fetchSpotifyData(albumInfoUrl);
+
+        // Get album tracks
         apiUrl = `http://source.automusic.win/spotify/album-tracks-onl/get/${spotifyId}`;
         const albumTracksData = await fetchSpotifyData(apiUrl);
 
+        // albumTracksData has structure: { items: [...], limit, next, offset, previous, total }
         const mappedTracks =
-          albumTracksData.tracks?.items?.map((track: SpotifyTrack) => ({
+          albumTracksData.items?.map((track: SpotifyTrack) => ({
             id: track.id,
             name: track.name,
             artist: track.artists?.[0]?.name || "Unknown Artist",
-            album: albumTracksData.name,
+            album: albumInfo.name || "Unknown Album",
             duration: Math.floor(track.duration_ms / 1000),
-            image: albumTracksData.images?.[0]?.url || "",
+            image: albumInfo.images?.[0]?.url || "",
             isrc: track.external_ids?.isrc || null,
             preview_url: track.preview_url,
           })) || [];
@@ -162,11 +168,11 @@ export async function POST(request: NextRequest) {
         data = {
           type: "album",
           data: {
-            id: albumTracksData.id,
-            name: albumTracksData.name,
-            artist: albumTracksData.artists?.[0]?.name || "Unknown Artist",
-            image: albumTracksData.images?.[0]?.url || "",
-            release_date: albumTracksData.release_date,
+            id: albumInfo.id,
+            name: albumInfo.name,
+            artist: albumInfo.artists?.[0]?.name || "Unknown Artist",
+            image: albumInfo.images?.[0]?.url || "",
+            release_date: albumInfo.release_date,
             tracks: mappedTracks,
           },
         };
