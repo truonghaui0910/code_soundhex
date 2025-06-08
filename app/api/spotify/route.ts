@@ -35,7 +35,12 @@ interface SpotifyArtist {
 }
 
 async function fetchSpotifyData(url: string) {
+  const startTime = Date.now();
+  
   try {
+    // Log request tới automusic.win
+    serverLogger.logInfo('AUTOMUSIC_API_REQUEST', { url });
+    
     const response = await fetch(url);
 
     if (!response.ok) {
@@ -43,9 +48,22 @@ async function fetchSpotifyData(url: string) {
     }
 
     const data = await response.json();
+    
+    // Log response từ automusic.win
+    serverLogger.logInfo('AUTOMUSIC_API_RESPONSE', { 
+      url, 
+      status: response.status,
+      duration: Date.now() - startTime,
+      dataKeys: Object.keys(data || {}),
+      tracksCount: data?.tracks?.items?.length || data?.items?.length || 0
+    });
+    
     return data;
   } catch (error) {
-    serverLogger.logError('SPOTIFY_API_ERROR', error instanceof Error ? error.message : 'Unknown error', { url });
+    serverLogger.logError('AUTOMUSIC_API_ERROR', error instanceof Error ? error.message : 'Unknown error', { 
+      url,
+      duration: Date.now() - startTime
+    });
     throw error;
   }
 }
