@@ -30,7 +30,7 @@ import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
-// Mock data types
+// Updated types based on real Spotify API response
 interface SpotifyTrack {
     id: string;
     name: string;
@@ -38,6 +38,7 @@ interface SpotifyTrack {
     album: string;
     duration: number;
     image: string;
+    isrc?: string | null;
     preview_url?: string;
 }
 
@@ -73,6 +74,7 @@ export function MusicUpload() {
     const [spotifyData, setSpotifyData] = useState<any>(null);
     const [selectedTracks, setSelectedTracks] = useState<Set<string>>(new Set());
     const [expandedAlbums, setExpandedAlbums] = useState<Set<string>>(new Set());
+    const [loadingAlbums, setLoadingAlbums] = useState<Set<string>>(new Set());
     const [uploadForm, setUploadForm] = useState<UploadFormData>({
         title: "",
         artist: "",
@@ -83,131 +85,83 @@ export function MusicUpload() {
     });
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // Mock Spotify data
-    const mockArtistData: SpotifyArtist = {
-        id: "artist1",
-        name: "The Weekend",
-        image: "/images/artist-mock.jpg",
-        albums: [
-            {
-                id: "album1",
-                name: "After Hours",
-                artist: "The Weekend",
-                image: "/images/album1-mock.jpg",
-                release_date: "2020-03-20",
-                tracks: [
-                    {
-                        id: "track1",
-                        name: "Blinding Lights",
-                        artist: "The Weekend",
-                        album: "After Hours",
-                        duration: 200,
-                        image: "/images/album1-mock.jpg",
-                    },
-                    {
-                        id: "track2",
-                        name: "In Your Eyes",
-                        artist: "The Weekend",
-                        album: "After Hours",
-                        duration: 230,
-                        image: "/images/album1-mock.jpg",
-                    },
-                ],
-            },
-            {
-                id: "album2",
-                name: "Beauty Behind The Madness",
-                artist: "The Weekend",
-                image: "/images/album2-mock.jpg",
-                release_date: "2015-08-28",
-                tracks: [
-                    {
-                        id: "track3",
-                        name: "Can't Feel My Face",
-                        artist: "The Weekend",
-                        album: "Beauty Behind The Madness",
-                        duration: 213,
-                        image: "/images/album2-mock.jpg",
-                    },
-                ],
-            },
-        ],
-    };
-
-    const mockAlbumData: SpotifyAlbum = {
-        id: "album1",
-        name: "After Hours",
-        artist: "The Weekend",
-        image: "/images/album1-mock.jpg",
-        release_date: "2020-03-20",
-        tracks: [
-            {
-                id: "track1",
-                name: "Blinding Lights",
-                artist: "The Weekend",
-                album: "After Hours",
-                duration: 200,
-                image: "/images/album1-mock.jpg",
-            },
-            {
-                id: "track2",
-                name: "In Your Eyes",
-                artist: "The Weekend",
-                album: "After Hours",
-                duration: 230,
-                image: "/images/album1-mock.jpg",
-            },
-        ],
-    };
-
-    const mockTrackData: SpotifyTrack = {
-        id: "track1",
-        name: "Blinding Lights",
-        artist: "The Weekend",
-        album: "After Hours",
-        duration: 200,
-        image: "/images/album1-mock.jpg",
-    };
-
     const formatDuration = (seconds: number) => {
         const mins = Math.floor(seconds / 60);
         const secs = seconds % 60;
         return `${mins}:${secs.toString().padStart(2, "0")}`;
     };
 
-    const detectSpotifyUrlType = (url: string) => {
-        if (url.includes("/artist/")) return "artist";
-        if (url.includes("/album/")) return "album";
-        if (url.includes("/playlist/")) return "playlist";
-        if (url.includes("/track/")) return "track";
-        return null;
-    };
-
     const handleSpotifySubmit = async () => {
         if (!spotifyUrl.trim()) return;
 
         setIsLoading(true);
-        const urlType = detectSpotifyUrlType(spotifyUrl);
+        
+        try {
+            const response = await fetch('/api/spotify', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ spotifyUrl }),
+            });
 
-        // Simulate API call
-        setTimeout(() => {
-            switch (urlType) {
-                case "artist":
-                    setSpotifyData({ type: "artist", data: mockArtistData });
-                    break;
-                case "album":
-                case "playlist":
-                    setSpotifyData({ type: "album", data: mockAlbumData });
-                    break;
-                case "track":
-                    setSpotifyData({ type: "track", data: mockTrackData });
-                    setSelectedTracks(new Set([mockTrackData.id]));
-                    break;
-                default:
-                    alert("Invalid Spotify URL");
+            if (!response.ok) {
+                throw new Error('Failed to fetch Spotify data');
             }
+
+            const data = await response.json();
+            setSpotifyData(data);
+            
+            // Auto-select track if it's a single track
+            if (data.type === 'track') {
+                setSelectedTracks(new Set([data.data.id]));
+            }
+        } catch (error) {
+            console.error('Error fetching Spotify data:', error);
+            alert('Failed to fetch data from Spotify. Please check the URL and try again.');
+        } finally {
             setIsLoading(false);
-        }, 1500);
+        }
+    };
+
+    const loadAlbumTracks = async (albumId: string) => {
+        setLoadingAlbums(prev => new Set([...prev, albumId]));
+        
+        try {
+            const response = await fetch('/api/spotify/album-tracks', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ albumId }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch album tracks');
+            }
+
+            const { tracks } = await response.json();
+            
+            // Update the album with tracks
+            setSpotifyData((prev: any) => ({
+                ...prev,
+                data: {
+                    ...prev.data,
+                    albums: prev.data.albums.map((album: SpotifyAlbum) =>
+                        album.id === albumId ? { ...album, tracks } : album
+                    )
+                }
+            }));
+        } catch (error) {
+            console.error('Error loading album tracks:', error);
+            alert('Failed to load album tracks');
+        } finally {
+            setLoadingAlbums(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(albumId);
+                return newSet;
+            });
+        }
     };
 
     const toggleTrackSelection = (trackId: string) => {
@@ -220,12 +174,17 @@ export function MusicUpload() {
         setSelectedTracks(newSelection);
     };
 
-    const toggleAlbumExpansion = (albumId: string) => {
+    const toggleAlbumExpansion = async (albumId: string) => {
         const newExpanded = new Set(expandedAlbums);
         if (newExpanded.has(albumId)) {
             newExpanded.delete(albumId);
         } else {
             newExpanded.add(albumId);
+            // Load tracks if not already loaded
+            const album = spotifyData?.data?.albums?.find((a: SpotifyAlbum) => a.id === albumId);
+            if (album && (!album.tracks || album.tracks.length === 0)) {
+                await loadAlbumTracks(albumId);
+            }
         }
         setExpandedAlbums(newExpanded);
     };
@@ -251,7 +210,29 @@ export function MusicUpload() {
             alert("Please select at least one track");
             return;
         }
-        console.log("Selected tracks:", Array.from(selectedTracks));
+        
+        // Get selected track data
+        const selectedTrackData: SpotifyTrack[] = [];
+        
+        if (spotifyData.type === 'track') {
+            selectedTrackData.push(spotifyData.data);
+        } else if (spotifyData.type === 'album' || spotifyData.type === 'playlist') {
+            spotifyData.data.tracks.forEach((track: SpotifyTrack) => {
+                if (selectedTracks.has(track.id)) {
+                    selectedTrackData.push(track);
+                }
+            });
+        } else if (spotifyData.type === 'artist') {
+            spotifyData.data.albums.forEach((album: SpotifyAlbum) => {
+                album.tracks?.forEach((track: SpotifyTrack) => {
+                    if (selectedTracks.has(track.id)) {
+                        selectedTrackData.push(track);
+                    }
+                });
+            });
+        }
+        
+        console.log("Selected tracks data:", selectedTrackData);
         alert(`${selectedTracks.size} track(s) will be processed for upload!`);
     };
 
@@ -386,8 +367,18 @@ export function MusicUpload() {
                                         <div className="space-y-6">
                                             {/* Artist Info */}
                                             <div className="flex items-center gap-4">
-                                                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
-                                                    <Users className="h-8 w-8 text-white" />
+                                                <div className="w-16 h-16 rounded-full overflow-hidden bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
+                                                    {spotifyData.data.image ? (
+                                                        <Image 
+                                                            src={spotifyData.data.image} 
+                                                            alt={spotifyData.data.name}
+                                                            width={64}
+                                                            height={64}
+                                                            className="object-cover w-full h-full"
+                                                        />
+                                                    ) : (
+                                                        <Users className="h-8 w-8 text-white" />
+                                                    )}
                                                 </div>
                                                 <div>
                                                     <h3 className="text-xl font-bold">{spotifyData.data.name}</h3>
@@ -406,23 +397,35 @@ export function MusicUpload() {
                                                             className="flex items-center gap-4 cursor-pointer"
                                                             onClick={() => toggleAlbumExpansion(album.id)}
                                                         >
-                                                            <div className="w-12 h-12 rounded bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
-                                                                <Album className="h-6 w-6 text-white" />
+                                                            <div className="w-12 h-12 rounded overflow-hidden bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
+                                                                {album.image ? (
+                                                                    <Image 
+                                                                        src={album.image} 
+                                                                        alt={album.name}
+                                                                        width={48}
+                                                                        height={48}
+                                                                        className="object-cover w-full h-full"
+                                                                    />
+                                                                ) : (
+                                                                    <Album className="h-6 w-6 text-white" />
+                                                                )}
                                                             </div>
                                                             <div className="flex-1">
                                                                 <h5 className="font-semibold">{album.name}</h5>
                                                                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                                                                    {album.tracks.length} tracks • {album.release_date}
+                                                                    {album.tracks?.length || 0} tracks • {album.release_date}
                                                                 </p>
                                                             </div>
-                                                            {expandedAlbums.has(album.id) ? (
+                                                            {loadingAlbums.has(album.id) ? (
+                                                                <Loader2 className="h-5 w-5 animate-spin" />
+                                                            ) : expandedAlbums.has(album.id) ? (
                                                                 <ChevronDown className="h-5 w-5" />
                                                             ) : (
                                                                 <ChevronRight className="h-5 w-5" />
                                                             )}
                                                         </div>
 
-                                                        {expandedAlbums.has(album.id) && (
+                                                        {expandedAlbums.has(album.id) && album.tracks && (
                                                             <div className="mt-4 space-y-2">
                                                                 {album.tracks.map((track) => (
                                                                     <div
@@ -443,6 +446,11 @@ export function MusicUpload() {
                                                                             <p className="font-medium">{track.name}</p>
                                                                             <p className="text-sm text-gray-600 dark:text-gray-400">
                                                                                 {formatDuration(track.duration)}
+                                                                                {track.isrc && (
+                                                                                    <span className="ml-2 text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">
+                                                                                        ISRC: {track.isrc}
+                                                                                    </span>
+                                                                                )}
                                                                             </p>
                                                                         </div>
                                                                     </div>
@@ -459,8 +467,18 @@ export function MusicUpload() {
                                         <div className="space-y-6">
                                             {/* Album/Playlist Info */}
                                             <div className="flex items-center gap-4">
-                                                <div className="w-16 h-16 rounded bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
-                                                    <Album className="h-8 w-8 text-white" />
+                                                <div className="w-16 h-16 rounded overflow-hidden bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
+                                                    {spotifyData.data.image ? (
+                                                        <Image 
+                                                            src={spotifyData.data.image} 
+                                                            alt={spotifyData.data.name}
+                                                            width={64}
+                                                            height={64}
+                                                            className="object-cover w-full h-full"
+                                                        />
+                                                    ) : (
+                                                        <Album className="h-8 w-8 text-white" />
+                                                    )}
                                                 </div>
                                                 <div>
                                                     <h3 className="text-xl font-bold">{spotifyData.data.name}</h3>
@@ -488,13 +506,28 @@ export function MusicUpload() {
                                                                 <Check className="h-4 w-4 text-purple-600" />
                                                             )}
                                                         </div>
-                                                        <div className="w-12 h-12 rounded bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
-                                                            <Music className="h-6 w-6 text-white" />
+                                                        <div className="w-12 h-12 rounded overflow-hidden bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
+                                                            {track.image ? (
+                                                                <Image 
+                                                                    src={track.image} 
+                                                                    alt={track.name}
+                                                                    width={48}
+                                                                    height={48}
+                                                                    className="object-cover w-full h-full"
+                                                                />
+                                                            ) : (
+                                                                <Music className="h-6 w-6 text-white" />
+                                                            )}
                                                         </div>
                                                         <div className="flex-1">
                                                             <p className="font-semibold">{track.name}</p>
                                                             <p className="text-sm text-gray-600 dark:text-gray-400">
                                                                 {track.artist} • {formatDuration(track.duration)}
+                                                                {track.isrc && (
+                                                                    <span className="ml-2 text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">
+                                                                        ISRC: {track.isrc}
+                                                                    </span>
+                                                                )}
                                                             </p>
                                                         </div>
                                                     </div>
@@ -507,8 +540,18 @@ export function MusicUpload() {
                                         <div className="space-y-6">
                                             {/* Track Info */}
                                             <div className="flex items-center gap-4">
-                                                <div className="w-16 h-16 rounded bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
-                                                    <Music className="h-8 w-8 text-white" />
+                                                <div className="w-16 h-16 rounded overflow-hidden bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
+                                                    {spotifyData.data.image ? (
+                                                        <Image 
+                                                            src={spotifyData.data.image} 
+                                                            alt={spotifyData.data.name}
+                                                            width={64}
+                                                            height={64}
+                                                            className="object-cover w-full h-full"
+                                                        />
+                                                    ) : (
+                                                        <Music className="h-8 w-8 text-white" />
+                                                    )}
                                                 </div>
                                                 <div>
                                                     <h3 className="text-xl font-bold">{spotifyData.data.name}</h3>
@@ -517,6 +560,11 @@ export function MusicUpload() {
                                                     </p>
                                                     <p className="text-sm text-gray-500">
                                                         Duration: {formatDuration(spotifyData.data.duration)}
+                                                        {spotifyData.data.isrc && (
+                                                            <span className="ml-2 text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">
+                                                                ISRC: {spotifyData.data.isrc}
+                                                            </span>
+                                                        )}
                                                     </p>
                                                 </div>
                                             </div>
