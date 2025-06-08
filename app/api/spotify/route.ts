@@ -69,7 +69,6 @@ async function fetchSpotifyData(url: string, userEmail?: string) {
         url,
         status: response.status,
         duration: Date.now() - startTime,
-        dataKeys: Object.keys(data || {}),
         tracksCount: data?.tracks?.items?.length || data?.items?.length || 0,
       },
       userEmail,
