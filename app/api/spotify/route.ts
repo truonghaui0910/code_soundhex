@@ -45,12 +45,12 @@ interface AlbumInfoResponse {
   };
 }
 
-async function fetchSpotifyData(url: string) {
+async function fetchSpotifyData(url: string, userEmail?: string) {
   const startTime = Date.now();
 
   try {
     // Log request tới automusic.win
-    serverLogger.logInfo("AUTOMUSIC_API_REQUEST", { url });
+    serverLogger.logInfo("AUTOMUSIC_API_REQUEST", { url }, userEmail);
 
     const response = await fetch(url);
 
@@ -67,7 +67,7 @@ async function fetchSpotifyData(url: string) {
       duration: Date.now() - startTime,
       dataKeys: Object.keys(data || {}),
       tracksCount: data?.tracks?.items?.length || data?.items?.length || 0,
-    });
+    }, userEmail);
 
     return data;
   } catch (error) {
@@ -78,6 +78,7 @@ async function fetchSpotifyData(url: string) {
         url,
         duration: Date.now() - startTime,
       },
+      userEmail,
     );
     throw error;
   }
@@ -101,9 +102,14 @@ export async function POST(request: NextRequest) {
 
   try {
     const { spotifyUrl } = await request.json();
+    
+    // Get user email from headers (if available from auth middleware)
+    const userEmail = request.headers.get('X-User-Email') || 
+                     request.headers.get('X-Replit-User-Name') || 
+                     undefined;
 
     // Chỉ log 1 dòng request
-    serverLogger.logInfo("SPOTIFY_REQUEST", { url: spotifyUrl });
+    serverLogger.logInfo("SPOTIFY_REQUEST", { url: spotifyUrl }, userEmail);
 
     if (!spotifyUrl) {
       return NextResponse.json(
@@ -129,11 +135,11 @@ export async function POST(request: NextRequest) {
       case "artist":
         // Get artist info first
         apiUrl = `http://source.automusic.win/spotify/artist-onl/get/${spotifyId}`;
-        const artistData = await fetchSpotifyData(apiUrl);
+        const artistData = await fetchSpotifyData(apiUrl, userEmail);
 
         // Get artist albums
         const albumsUrl = `http://automusic.win/spotify/artist-albums-onl/get/${spotifyId}`;
-        const albumsData = await fetchSpotifyData(albumsUrl);
+        const albumsData = await fetchSpotifyData(albumsUrl, userEmail);
 
         data = {
           type: "artist",
@@ -157,7 +163,7 @@ export async function POST(request: NextRequest) {
       case "album":
         // Use new album-info API to get complete album information
         apiUrl = `http://automusic.win/spotify/album-info/get/${spotifyId}`;
-        const albumInfoData = await fetchSpotifyData(apiUrl);
+        const albumInfoData = await fetchSpotifyData(apiUrl, userEmail);
 
         // albumInfoData has complete album info plus tracks
         const mappedTracks =
@@ -187,7 +193,7 @@ export async function POST(request: NextRequest) {
 
       case "playlist":
         apiUrl = `http://automusic.win/spotify/playlist-info/get/${spotifyId}`;
-        const playlistData = await fetchSpotifyData(apiUrl);
+        const playlistData = await fetchSpotifyData(apiUrl, userEmail);
 
         // playlistData now contains complete playlist info with tracks.items array
         const mappedPlaylistTracks = playlistData.tracks?.items?.map((item: any) => ({
@@ -216,7 +222,7 @@ export async function POST(request: NextRequest) {
 
       case "track":
         apiUrl = `http://source.automusic.win/spotify/track-onl/get/${spotifyId}`;
-        const trackData = await fetchSpotifyData(apiUrl);
+        const trackData = await fetchSpotifyData(apiUrl, userEmail);
 
         data = {
           type: "track",
@@ -247,7 +253,7 @@ export async function POST(request: NextRequest) {
       type: urlType,
       data: data,
       duration: totalDuration,
-    });
+    }, userEmail);
 
     return NextResponse.json(data);
   } catch (error) {
@@ -259,6 +265,7 @@ export async function POST(request: NextRequest) {
       {
         duration: totalDuration,
       },
+      userEmail,
     );
 
     return NextResponse.json(
