@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef } from "react";
@@ -92,56 +91,67 @@ export function MusicUpload() {
     };
 
     const handleSpotifySubmit = async () => {
-        if (!spotifyUrl.trim()) return;
+        if (!spotifyUrl.trim()) {
+            alert("Please enter a Spotify URL");
+            return;
+        }
 
         setIsLoading(true);
-        
+        setSpotifyData(null);
+        setSelectedTracks(new Set());
+
         try {
-            const response = await fetch('/api/spotify', {
-                method: 'POST',
+            const response = await fetch("/api/spotify", {
+                method: "POST",
                 headers: {
-                    'Content-Type': 'application/json',
+                    "Content-Type": "application/json",
                 },
                 body: JSON.stringify({ spotifyUrl }),
             });
 
             if (!response.ok) {
-                throw new Error('Failed to fetch Spotify data');
+                throw new Error("Failed to fetch Spotify data");
             }
 
             const data = await response.json();
+            console.log("Spotify data:", data);
             setSpotifyData(data);
-            
-            // Auto-select track if it's a single track
-            if (data.type === 'track') {
+
+            // Auto-select all tracks for album, playlist, and single track
+            if (data.type === 'album' || data.type === 'playlist') {
+                const trackIds = new Set(data.data.tracks.map((track: SpotifyTrack) => track.id));
+                setSelectedTracks(trackIds);
+            } else if (data.type === 'track') {
                 setSelectedTracks(new Set([data.data.id]));
             }
         } catch (error) {
-            console.error('Error fetching Spotify data:', error);
-            alert('Failed to fetch data from Spotify. Please check the URL and try again.');
+            console.error("Error:", error);
+            alert("Failed to fetch Spotify data");
         } finally {
             setIsLoading(false);
         }
     };
 
     const loadAlbumTracks = async (albumId: string) => {
-        setLoadingAlbums(prev => new Set([...prev, albumId]));
-        
+        if (loadingAlbums.has(albumId)) return;
+
+        setLoadingAlbums(prev => new Set(prev).add(albumId));
+
         try {
             const response = await fetch('/api/spotify/album-tracks', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ albumId }),
+                body: JSON.stringify({ albumId })
             });
 
             if (!response.ok) {
-                throw new Error('Failed to fetch album tracks');
+                throw new Error('Failed to load album tracks');
             }
 
             const { tracks } = await response.json();
-            
+
             // Update the album with tracks
             setSpotifyData((prev: any) => ({
                 ...prev,
@@ -152,6 +162,15 @@ export function MusicUpload() {
                     )
                 }
             }));
+
+            // Auto-select all tracks from this album
+            setSelectedTracks(prev => {
+                const newSelected = new Set(prev);
+                tracks.forEach((track: SpotifyTrack) => {
+                    newSelected.add(track.id);
+                });
+                return newSelected;
+            });
         } catch (error) {
             console.error('Error loading album tracks:', error);
             alert('Failed to load album tracks');
@@ -210,10 +229,10 @@ export function MusicUpload() {
             alert("Please select at least one track");
             return;
         }
-        
+
         // Get selected track data
         const selectedTrackData: SpotifyTrack[] = [];
-        
+
         if (spotifyData.type === 'track') {
             selectedTrackData.push(spotifyData.data);
         } else if (spotifyData.type === 'album' || spotifyData.type === 'playlist') {
@@ -231,7 +250,7 @@ export function MusicUpload() {
                 });
             });
         }
-        
+
         console.log("Selected tracks data:", selectedTrackData);
         alert(`${selectedTracks.size} track(s) will be processed for upload!`);
     };
