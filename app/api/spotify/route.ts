@@ -1,5 +1,5 @@
-
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from "next/server";
+import { serverLogger } from "@/lib/services/server-logger";
 
 interface SpotifyTrack {
   id: string;
@@ -35,23 +35,48 @@ interface SpotifyArtist {
 }
 
 async function fetchSpotifyData(url: string) {
+  const startTime = Date.now();
+
   try {
+    // Log request tới automusic.win
+    serverLogger.logInfo("AUTOMUSIC_API_REQUEST", { url });
+
     const response = await fetch(url);
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    return await response.json();
+
+    const data = await response.json();
+
+    // Log response từ automusic.win
+    serverLogger.logInfo("AUTOMUSIC_API_RESPONSE", {
+      url,
+      status: response.status,
+      duration: Date.now() - startTime,
+      dataKeys: Object.keys(data || {}),
+      tracksCount: data?.tracks?.items?.length || data?.items?.length || 0,
+    });
+
+    return data;
   } catch (error) {
-    console.error('Error fetching from Spotify API:', error);
+    serverLogger.logError(
+      "AUTOMUSIC_API_ERROR",
+      error instanceof Error ? error.message : "Unknown error",
+      {
+        url,
+        duration: Date.now() - startTime,
+      },
+    );
     throw error;
   }
 }
 
 function detectSpotifyUrlType(url: string) {
-  if (url.includes('/artist/')) return 'artist';
-  if (url.includes('/album/')) return 'album';
-  if (url.includes('/playlist/')) return 'playlist';
-  if (url.includes('/track/')) return 'track';
+  if (url.includes("/artist/")) return "artist";
+  if (url.includes("/album/")) return "album";
+  if (url.includes("/playlist/")) return "playlist";
+  if (url.includes("/track/")) return "track";
   return null;
 }
 
@@ -61,132 +86,175 @@ function extractSpotifyId(url: string) {
 }
 
 export async function POST(request: NextRequest) {
+  const requestStartTime = Date.now();
+
   try {
     const { spotifyUrl } = await request.json();
-    
+
+    // Chỉ log 1 dòng request
+    serverLogger.logInfo("SPOTIFY_REQUEST", { url: spotifyUrl });
+
     if (!spotifyUrl) {
-      return NextResponse.json({ error: 'Spotify URL is required' }, { status: 400 });
+      return NextResponse.json(
+        { error: "Spotify URL is required" },
+        { status: 400 },
+      );
     }
 
     const urlType = detectSpotifyUrlType(spotifyUrl);
     const spotifyId = extractSpotifyId(spotifyUrl);
 
     if (!urlType || !spotifyId) {
-      return NextResponse.json({ error: 'Invalid Spotify URL' }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid Spotify URL" },
+        { status: 400 },
+      );
     }
 
-    let apiUrl = '';
+    let apiUrl = "";
     let data;
 
     switch (urlType) {
-      case 'artist':
+      case "artist":
         // Get artist info first
         apiUrl = `http://source.automusic.win/spotify/artist-onl/get/${spotifyId}`;
         const artistData = await fetchSpotifyData(apiUrl);
-        
+
         // Get artist albums
         const albumsUrl = `http://automusic.win/spotify/artist-albums-onl/get/${spotifyId}`;
         const albumsData = await fetchSpotifyData(albumsUrl);
-        
+
         data = {
-          type: 'artist',
+          type: "artist",
           data: {
             id: artistData.id,
             name: artistData.name,
-            image: artistData.images?.[0]?.url || '',
-            albums: albumsData.items?.map((album: SpotifyAlbum) => ({
-              id: album.id,
-              name: album.name,
-              artist: album.artists?.[0]?.name || artistData.name,
-              image: album.images?.[0]?.url || '',
-              release_date: album.release_date,
-              tracks: [] // Will be populated when album is expanded
-            })) || []
-          }
+            image: artistData.images?.[0]?.url || "",
+            albums:
+              albumsData.items?.map((album: SpotifyAlbum) => ({
+                id: album.id,
+                name: album.name,
+                artist: album.artists?.[0]?.name || artistData.name,
+                image: album.images?.[0]?.url || "",
+                release_date: album.release_date,
+                tracks: [], // Will be populated when album is expanded
+              })) || [],
+          },
         };
         break;
 
-      case 'album':
+      case "album":
         apiUrl = `http://source.automusic.win/spotify/album-tracks-onl/get/${spotifyId}`;
         const albumTracksData = await fetchSpotifyData(apiUrl);
-        
+
+        const mappedTracks =
+          albumTracksData.tracks?.items?.map((track: SpotifyTrack) => ({
+            id: track.id,
+            name: track.name,
+            artist: track.artists?.[0]?.name || "Unknown Artist",
+            album: albumTracksData.name,
+            duration: Math.floor(track.duration_ms / 1000),
+            image: albumTracksData.images?.[0]?.url || "",
+            isrc: track.external_ids?.isrc || null,
+            preview_url: track.preview_url,
+          })) || [];
+
         data = {
-          type: 'album',
+          type: "album",
           data: {
             id: albumTracksData.id,
             name: albumTracksData.name,
-            artist: albumTracksData.artists?.[0]?.name || 'Unknown Artist',
-            image: albumTracksData.images?.[0]?.url || '',
+            artist: albumTracksData.artists?.[0]?.name || "Unknown Artist",
+            image: albumTracksData.images?.[0]?.url || "",
             release_date: albumTracksData.release_date,
-            tracks: albumTracksData.tracks?.items?.map((track: SpotifyTrack) => ({
-              id: track.id,
-              name: track.name,
-              artist: track.artists?.[0]?.name || 'Unknown Artist',
-              album: albumTracksData.name,
-              duration: Math.floor(track.duration_ms / 1000),
-              image: albumTracksData.images?.[0]?.url || '',
-              isrc: track.external_ids?.isrc || null,
-              preview_url: track.preview_url
-            })) || []
-          }
+            tracks: mappedTracks,
+          },
         };
         break;
 
-      case 'playlist':
+      case "playlist":
         apiUrl = `http://source.automusic.win/spotify/playlist-onl/get/${spotifyId}`;
         const playlistData = await fetchSpotifyData(apiUrl);
-        
+
+        const mappedPlaylistTracks =
+          playlistData.tracks?.items?.map((item: any) => ({
+            id: item.track?.id,
+            name: item.track?.name,
+            artist: item.track?.artists?.[0]?.name || "Unknown Artist",
+            album: item.track?.album?.name || "Unknown Album",
+            duration: Math.floor(item.track?.duration_ms / 1000),
+            image: item.track?.album?.images?.[0]?.url || "",
+            isrc: item.track?.external_ids?.isrc || null,
+            preview_url: item.track?.preview_url,
+          })) || [];
+
         data = {
-          type: 'playlist',
+          type: "playlist",
           data: {
             id: playlistData.id,
             name: playlistData.name,
             artist: `${playlistData.tracks?.total || 0} tracks`,
-            image: playlistData.images?.[0]?.url || '',
-            release_date: '',
-            tracks: playlistData.tracks?.items?.map((item: any) => ({
-              id: item.track.id,
-              name: item.track.name,
-              artist: item.track.artists?.[0]?.name || 'Unknown Artist',
-              album: item.track.album?.name || 'Unknown Album',
-              duration: Math.floor(item.track.duration_ms / 1000),
-              image: item.track.album?.images?.[0]?.url || '',
-              isrc: item.track.external_ids?.isrc || null,
-              preview_url: item.track.preview_url
-            })) || []
-          }
+            image: playlistData.images?.[0]?.url || "",
+            release_date: "",
+            tracks: mappedPlaylistTracks,
+          },
         };
+        serverLogger.logInfo("SPOTIFY_RESPONSE", {
+          type: urlType,
+          datax: data,
+        });
         break;
 
-      case 'track':
+      case "track":
         apiUrl = `http://source.automusic.win/spotify/track-onl/get/${spotifyId}`;
         const trackData = await fetchSpotifyData(apiUrl);
-        
+
         data = {
-          type: 'track',
+          type: "track",
           data: {
             id: trackData.id,
             name: trackData.name,
-            artist: trackData.artists?.[0]?.name || 'Unknown Artist',
-            album: trackData.album?.name || 'Unknown Album',
+            artist: trackData.artists?.[0]?.name || "Unknown Artist",
+            album: trackData.album?.name || "Unknown Album",
             duration: Math.floor(trackData.duration_ms / 1000),
-            image: trackData.album?.images?.[0]?.url || '',
+            image: trackData.album?.images?.[0]?.url || "",
             isrc: trackData.external_ids?.isrc || null,
-            preview_url: trackData.preview_url
-          }
+            preview_url: trackData.preview_url,
+          },
         };
         break;
 
       default:
-        return NextResponse.json({ error: 'Unsupported URL type' }, { status: 400 });
+        return NextResponse.json(
+          { error: "Unsupported URL type" },
+          { status: 400 },
+        );
     }
+
+    const totalDuration = Date.now() - requestStartTime;
+
+    // Chỉ log 1 dòng response
+    serverLogger.logInfo("SPOTIFY_RESPONSE", {
+      type: urlType,
+      data: data,
+      duration: totalDuration,
+    });
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error('Spotify API error:', error);
+    const totalDuration = Date.now() - requestStartTime;
+
+    serverLogger.logError(
+      "SPOTIFY_ERROR",
+      error instanceof Error ? error.message : "Unknown error",
+      {
+        duration: totalDuration,
+      },
+    );
+
     return NextResponse.json(
-      { error: 'Failed to fetch data from Spotify' },
-      { status: 500 }
+      { error: "Failed to fetch data from Spotify" },
+      { status: 500 },
     );
   }
 }
