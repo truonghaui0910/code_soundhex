@@ -53,8 +53,7 @@ interface SpotifyAlbum {
 interface SpotifyArtist {
     id: string;
     name: string;
-    image: string;
-    albums: SpotifyAlbum[];
+    image: string;albums: SpotifyAlbum[];
 }
 
 interface UploadFormData {
@@ -138,7 +137,7 @@ export function MusicUpload() {
         setLoadingAlbums(prev => new Set(prev).add(albumId));
 
         try {
-            const response = await fetch('/api/spotify/album-tracks', {
+            const response = await fetch('/api/spotify/album-info', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -150,7 +149,8 @@ export function MusicUpload() {
                 throw new Error('Failed to load album tracks');
             }
 
-            const { tracks } = await response.json();
+            const { data } = await response.json();
+            console.log("Album data:", data);
 
             // Update the album with tracks
             setSpotifyData((prev: any) => ({
@@ -158,7 +158,7 @@ export function MusicUpload() {
                 data: {
                     ...prev.data,
                     albums: prev.data.albums.map((album: SpotifyAlbum) =>
-                        album.id === albumId ? { ...album, tracks } : album
+                        album.id === albumId ? { ...album, tracks: data.tracks } : album
                     )
                 }
             }));
@@ -166,7 +166,7 @@ export function MusicUpload() {
             // Auto-select all tracks from this album
             setSelectedTracks(prev => {
                 const newSelected = new Set(prev);
-                tracks.forEach((track: SpotifyTrack) => {
+                data.tracks.forEach((track: SpotifyTrack) => {
                     newSelected.add(track.id);
                 });
                 return newSelected;
@@ -444,9 +444,9 @@ export function MusicUpload() {
                                                             )}
                                                         </div>
 
-                                                        {expandedAlbums.has(album.id) && album.tracks && (
+                                                        {album.tracks && Array.isArray(album.tracks) && album.tracks.length > 0 && (
                                                             <div className="mt-4 space-y-2">
-                                                                {album.tracks.map((track) => (
+                                                                {album.tracks.map((track: SpotifyTrack) => (
                                                                     <div
                                                                         key={track.id}
                                                                         className={`flex items-center gap-3 p-2 rounded cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 ${
