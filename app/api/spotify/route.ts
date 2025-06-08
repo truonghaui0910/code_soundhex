@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { serverLogger } from "@/lib/services/server-logger";
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { cookies } from "next/headers";
 
 interface SpotifyTrack {
   id: string;
@@ -103,8 +105,10 @@ export async function POST(request: NextRequest) {
   try {
     const { spotifyUrl } = await request.json();
     
-    // Get user email from headers (set by middleware)
-    const userEmail = request.headers.get('X-User-Email') || undefined;
+    // Get user email from Supabase session (secure way)
+    const supabase = createRouteHandlerClient({ cookies });
+    const { data: { session } } = await supabase.auth.getSession();
+    const userEmail = session?.user?.email || undefined;
 
     // Chỉ log 1 dòng request
     serverLogger.logInfo("SPOTIFY_REQUEST", { url: spotifyUrl }, userEmail);

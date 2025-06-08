@@ -101,18 +101,6 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
-  // Add user email to request headers for logging
-  if (session?.user?.email) {
-    const requestHeaders = new Headers(req.headers);
-    requestHeaders.set('X-User-Email', session.user.email);
-    
-    return NextResponse.next({
-      request: {
-        headers: requestHeaders,
-      },
-    });
-  }
-
   return res;
 }
 
