@@ -92,6 +92,11 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
+  // Add user email to request headers for logging
+  if (session?.user?.email) {
+    res.headers.set('X-User-Email', session.user.email);
+  }
+
   // Redirect to dashboard if accessing login/register with valid session
   if (
     session &&

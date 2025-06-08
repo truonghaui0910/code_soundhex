@@ -103,10 +103,8 @@ export async function POST(request: NextRequest) {
   try {
     const { spotifyUrl } = await request.json();
     
-    // Get user email from headers (if available from auth middleware)
-    const userEmail = request.headers.get('X-User-Email') || 
-                     request.headers.get('X-Replit-User-Name') || 
-                     undefined;
+    // Get user email from headers (set by middleware)
+    const userEmail = request.headers.get('X-User-Email') || undefined;
 
     // Chỉ log 1 dòng request
     serverLogger.logInfo("SPOTIFY_REQUEST", { url: spotifyUrl }, userEmail);
