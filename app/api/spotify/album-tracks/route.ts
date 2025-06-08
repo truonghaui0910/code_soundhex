@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
 
     const apiUrl = `http://source.automusic.win/spotify/album-tracks-onl/get/${albumId}`;
     const response = await fetch(apiUrl);
-    
+  
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
