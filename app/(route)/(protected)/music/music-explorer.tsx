@@ -762,90 +762,13 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                 )}
 
                 {currentView === "upload" && (
-                    <div className="max-w-4xl mx-auto space-y-8 pt-12">
-                        <div className="text-center">
-                            <h2 className="text-xl font-bold mb-4 flex items-center justify-center gap-3">
-                                <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
-                                    <Upload className="h-5 w-5 text-white" />
-                                </div>
-                                Upload Your Music
-                            </h2>
-                            <p className="text-gray-600 dark:text-gray-400 text-lg">
-                                Share your creativity with the world. Upload
-                                your tracks and reach new audiences.
-                            </p>
-                        </div>
-
-                        <Card className="p-8 border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
-                            <div className="text-center space-y-6">
-                                <div className="border-2 border-dashed border-purple-300 dark:border-purple-600 rounded-xl p-12 hover:border-purple-400 transition-colors bg-purple-50/50 dark:bg-purple-900/20">
-                                    <div className="w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                                        <Upload className="h-10 w-10 text-white" />
-                                    </div>
-                                    <h3 className="text-xl font-semibold mb-2">
-                                        Drag & Drop Your Music Files
-                                    </h3>
-                                    <p className="text-gray-600 dark:text-gray-400 mb-6">
-                                        Support for MP3, WAV, FLAC, and more
-                                    </p>
-                                    <Button
-                                        onClick={handleUploadClick}
-                                        size="lg"
-                                        className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-                                    >
-                                        <Plus className="mr-2 h-5 w-5" />
-                                        Choose Files
-                                    </Button>
-                                    <input
-                                        ref={fileInputRef}
-                                        type="file"
-                                        accept="audio/*"
-                                        multiple
-                                        onChange={handleFileUpload}
-                                        className="hidden"
-                                    />
-                                </div>
-
-                                <div className="grid md:grid-cols-3 gap-6 mt-8">
-                                    <div className="text-center p-6 rounded-xl bg-purple-50 dark:bg-purple-900/20">
-                                        <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center mx-auto mb-3">
-                                            <Music className="h-6 w-6 text-purple-600" />
-                                        </div>
-                                        <h4 className="font-semibold mb-2">
-                                            High Quality
-                                        </h4>
-                                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                                            Upload in lossless quality for the
-                                            best listening experience
-                                        </p>
-                                    </div>
-                                    <div className="text-center p-6 rounded-xl bg-green-50 dark:bg-green-900/20">
-                                        <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-3">
-                                            <Share className="h-6 w-6 text-green-600" />
-                                        </div>
-                                        <h4 className="font-semibold mb-2">
-                                            Easy Sharing
-                                        </h4>
-                                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                                            Share your music instantly with
-                                            built-in social features
-                                        </p>
-                                    </div>
-                                    <div className="text-center p-6 rounded-xl bg-blue-50 dark:bg-blue-900/20">
-                                        <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-3">
-                                            <TrendingUp className="h-6 w-6 text-blue-600" />
-                                        </div>
-                                        <h4 className="font-semibold mb-2">
-                                            Analytics
-                                        </h4>
-                                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                                            Track plays, likes, and audience
-                                            engagement
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </Card>
+                    <div className="text-center">
+                        <p className="text-lg text-gray-600 dark:text-gray-400 mb-6">
+                            Redirecting to upload page...
+                        </p>
+                        <script>
+                            {typeof window !== 'undefined' && window.location.replace('/music/upload')}
+                        </script>
                     </div>
                 )}
             </div>
