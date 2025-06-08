@@ -34,6 +34,17 @@ interface SpotifyArtist {
   images: Array<{ url: string }>;
 }
 
+interface AlbumInfoResponse {
+  id: string;
+  name: string;
+  artists: Array<{ name: string }>;
+  images: Array<{ url: string }>;
+  release_date: string;
+  tracks: {
+    items: SpotifyTrack[];
+  };
+}
+
 async function fetchSpotifyData(url: string) {
   const startTime = Date.now();
 
@@ -144,25 +155,19 @@ export async function POST(request: NextRequest) {
         break;
 
       case "album":
-        // Get album tracks (this API returns both album info and tracks)
-        apiUrl = `http://source.automusic.win/spotify/album-tracks-onl/get/${spotifyId}`;
-        const albumTracksData = await fetchSpotifyData(apiUrl);
+        // Use new album-info API to get complete album information
+        apiUrl = `http://automusic.win/spotify/album-info/get/${spotifyId}`;
+        const albumInfoData = await fetchSpotifyData(apiUrl);
 
-        // albumTracksData has structure: { items: [...], limit, next, offset, previous, total }
-        // Lấy thông tin album từ track đầu tiên
-        const firstTrack = albumTracksData.items?.[0];
-        const albumName = firstTrack?.album?.name || "Unknown Album";
-        const albumImage = firstTrack?.album?.images?.[0]?.url || "";
-        const albumArtist = firstTrack?.album?.artists?.[0]?.name || "Unknown Artist";
-
+        // albumInfoData has complete album info plus tracks
         const mappedTracks =
-          albumTracksData.items?.map((track: SpotifyTrack) => ({
+          albumInfoData.tracks?.items?.map((track: SpotifyTrack) => ({
             id: track.id,
             name: track.name,
-            artist: track.artists?.[0]?.name || "Unknown Artist",
-            album: albumName,
+            artist: track.artists?.[0]?.name || albumInfoData.artists?.[0]?.name || "Unknown Artist",
+            album: albumInfoData.name || "Unknown Album",
             duration: Math.floor(track.duration_ms / 1000),
-            image: albumImage,
+            image: albumInfoData.images?.[0]?.url || "",
             isrc: track.external_ids?.isrc || null,
             preview_url: track.preview_url,
           })) || [];
@@ -170,11 +175,11 @@ export async function POST(request: NextRequest) {
         data = {
           type: "album",
           data: {
-            id: spotifyId, // sử dụng spotifyId vì không có album info riêng
-            name: albumName,
-            artist: albumArtist,
-            image: albumImage,
-            release_date: firstTrack?.album?.release_date || "",
+            id: albumInfoData.id || spotifyId,
+            name: albumInfoData.name || "Unknown Album",
+            artist: albumInfoData.artists?.[0]?.name || "Unknown Artist",
+            image: albumInfoData.images?.[0]?.url || "",
+            release_date: albumInfoData.release_date || "",
             tracks: mappedTracks,
           },
         };
