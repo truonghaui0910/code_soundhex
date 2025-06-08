@@ -267,21 +267,11 @@ export async function POST(request: NextRequest) {
     } else if (urlType === "album" || urlType === "playlist") {
       trackCount = data.data.tracks?.length || 0;
     } else if (urlType === "artist") {
-      trackCount = data.data.albums?.reduce((total: number, album: any) => {
-        return total + (album.tracks?.length || 0);
-      }, 0) || 0;
+      trackCount =
+        data.data.albums?.reduce((total: number, album: any) => {
+          return total + (album.tracks?.length || 0);
+        }, 0) || 0;
     }
-
-    // Chỉ log 1 dòng response
-    serverLogger.logInfo(
-      "SPOTIFY_RESPONSE",
-      {
-        type: urlType,
-        trackCount: trackCount,
-        duration: totalDuration,
-      },
-      userEmail,
-    );
 
     return NextResponse.json(data);
   } catch (error) {
