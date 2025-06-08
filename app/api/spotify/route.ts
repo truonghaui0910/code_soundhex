@@ -144,23 +144,25 @@ export async function POST(request: NextRequest) {
         break;
 
       case "album":
-        // Get album info first
-        const albumInfoUrl = `http://source.automusic.win/spotify/album-onl/get/${spotifyId}`;
-        const albumInfo = await fetchSpotifyData(albumInfoUrl);
-
-        // Get album tracks
+        // Get album tracks (this API returns both album info and tracks)
         apiUrl = `http://source.automusic.win/spotify/album-tracks-onl/get/${spotifyId}`;
         const albumTracksData = await fetchSpotifyData(apiUrl);
 
         // albumTracksData has structure: { items: [...], limit, next, offset, previous, total }
+        // Lấy thông tin album từ track đầu tiên
+        const firstTrack = albumTracksData.items?.[0];
+        const albumName = firstTrack?.album?.name || "Unknown Album";
+        const albumImage = firstTrack?.album?.images?.[0]?.url || "";
+        const albumArtist = firstTrack?.album?.artists?.[0]?.name || "Unknown Artist";
+
         const mappedTracks =
           albumTracksData.items?.map((track: SpotifyTrack) => ({
             id: track.id,
             name: track.name,
             artist: track.artists?.[0]?.name || "Unknown Artist",
-            album: albumInfo.name || "Unknown Album",
+            album: albumName,
             duration: Math.floor(track.duration_ms / 1000),
-            image: albumInfo.images?.[0]?.url || "",
+            image: albumImage,
             isrc: track.external_ids?.isrc || null,
             preview_url: track.preview_url,
           })) || [];
@@ -168,11 +170,11 @@ export async function POST(request: NextRequest) {
         data = {
           type: "album",
           data: {
-            id: albumInfo.id,
-            name: albumInfo.name,
-            artist: albumInfo.artists?.[0]?.name || "Unknown Artist",
-            image: albumInfo.images?.[0]?.url || "",
-            release_date: albumInfo.release_date,
+            id: spotifyId, // sử dụng spotifyId vì không có album info riêng
+            name: albumName,
+            artist: albumArtist,
+            image: albumImage,
+            release_date: firstTrack?.album?.release_date || "",
             tracks: mappedTracks,
           },
         };
