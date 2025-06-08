@@ -92,11 +92,6 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
-  // Add user email to request headers for logging
-  if (session?.user?.email) {
-    res.headers.set('X-User-Email', session.user.email);
-  }
-
   // Redirect to dashboard if accessing login/register with valid session
   if (
     session &&
@@ -104,6 +99,18 @@ export async function middleware(req: NextRequest) {
   ) {
     const redirectUrl = new URL("/music", req.url);
     return NextResponse.redirect(redirectUrl);
+  }
+
+  // Add user email to request headers for logging
+  if (session?.user?.email) {
+    const requestHeaders = new Headers(req.headers);
+    requestHeaders.set('X-User-Email', session.user.email);
+    
+    return NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    });
   }
 
   return res;
