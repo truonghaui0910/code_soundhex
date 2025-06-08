@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { serverLogger } from "@/lib/services/server-logger";
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { cookies } from "next/headers";
 
 interface SpotifyTrack {
   id: string;
@@ -45,12 +47,12 @@ interface AlbumInfoResponse {
   };
 }
 
-async function fetchSpotifyData(url: string) {
+async function fetchSpotifyData(url: string, userEmail?: string) {
   const startTime = Date.now();
 
   try {
     // Log request tới automusic.win
-    serverLogger.logInfo("AUTOMUSIC_API_REQUEST", { url });
+    serverLogger.logInfo("AUTOMUSIC_API_REQUEST", { url }, userEmail);
 
     const response = await fetch(url);
 
@@ -61,13 +63,17 @@ async function fetchSpotifyData(url: string) {
     const data = await response.json();
 
     // Log response từ automusic.win
-    serverLogger.logInfo("AUTOMUSIC_API_RESPONSE", {
-      url,
-      status: response.status,
-      duration: Date.now() - startTime,
-      dataKeys: Object.keys(data || {}),
-      tracksCount: data?.tracks?.items?.length || data?.items?.length || 0,
-    });
+    serverLogger.logInfo(
+      "AUTOMUSIC_API_RESPONSE",
+      {
+        url,
+        status: response.status,
+        duration: Date.now() - startTime,
+        dataKeys: Object.keys(data || {}),
+        tracksCount: data?.tracks?.items?.length || data?.items?.length || 0,
+      },
+      userEmail,
+    );
 
     return data;
   } catch (error) {
@@ -78,6 +84,7 @@ async function fetchSpotifyData(url: string) {
         url,
         duration: Date.now() - startTime,
       },
+      userEmail,
     );
     throw error;
   }
@@ -102,8 +109,12 @@ export async function POST(request: NextRequest) {
   try {
     const { spotifyUrl } = await request.json();
 
-    // Chỉ log 1 dòng request
-    serverLogger.logInfo("SPOTIFY_REQUEST", { url: spotifyUrl });
+    // Get user email from Supabase session (secure way)
+    const supabase = createRouteHandlerClient({ cookies });
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    const userEmail = session?.user?.email || undefined;
 
     if (!spotifyUrl) {
       return NextResponse.json(
@@ -129,11 +140,11 @@ export async function POST(request: NextRequest) {
       case "artist":
         // Get artist info first
         apiUrl = `http://source.automusic.win/spotify/artist-onl/get/${spotifyId}`;
-        const artistData = await fetchSpotifyData(apiUrl);
+        const artistData = await fetchSpotifyData(apiUrl, userEmail);
 
         // Get artist albums
         const albumsUrl = `http://automusic.win/spotify/artist-albums-onl/get/${spotifyId}`;
-        const albumsData = await fetchSpotifyData(albumsUrl);
+        const albumsData = await fetchSpotifyData(albumsUrl, userEmail);
 
         data = {
           type: "artist",
@@ -157,14 +168,17 @@ export async function POST(request: NextRequest) {
       case "album":
         // Use new album-info API to get complete album information
         apiUrl = `http://automusic.win/spotify/album-info/get/${spotifyId}`;
-        const albumInfoData = await fetchSpotifyData(apiUrl);
+        const albumInfoData = await fetchSpotifyData(apiUrl, userEmail);
 
         // albumInfoData has complete album info plus tracks
         const mappedTracks =
           albumInfoData.tracks?.items?.map((track: SpotifyTrack) => ({
             id: track.id,
             name: track.name,
-            artist: track.artists?.[0]?.name || albumInfoData.artists?.[0]?.name || "Unknown Artist",
+            artist:
+              track.artists?.[0]?.name ||
+              albumInfoData.artists?.[0]?.name ||
+              "Unknown Artist",
             album: albumInfoData.name || "Unknown Album",
             duration: Math.floor(track.duration_ms / 1000),
             image: albumInfoData.images?.[0]?.url || "",
@@ -187,19 +201,20 @@ export async function POST(request: NextRequest) {
 
       case "playlist":
         apiUrl = `http://automusic.win/spotify/playlist-info/get/${spotifyId}`;
-        const playlistData = await fetchSpotifyData(apiUrl);
+        const playlistData = await fetchSpotifyData(apiUrl, userEmail);
 
         // playlistData now contains complete playlist info with tracks.items array
-        const mappedPlaylistTracks = playlistData.tracks?.items?.map((item: any) => ({
-          id: item.track?.id,
-          name: item.track?.name,
-          artist: item.track?.artists?.[0]?.name || "Unknown Artist",
-          album: item.track?.album?.name || "Unknown Album",
-          duration: Math.floor(item.track?.duration_ms / 1000),
-          image: item.track?.album?.images?.[0]?.url || "",
-          isrc: item.track?.external_ids?.isrc || null,
-          preview_url: item.track?.preview_url,
-        })) || [];
+        const mappedPlaylistTracks =
+          playlistData.tracks?.items?.map((item: any) => ({
+            id: item.track?.id,
+            name: item.track?.name,
+            artist: item.track?.artists?.[0]?.name || "Unknown Artist",
+            album: item.track?.album?.name || "Unknown Album",
+            duration: Math.floor(item.track?.duration_ms / 1000),
+            image: item.track?.album?.images?.[0]?.url || "",
+            isrc: item.track?.external_ids?.isrc || null,
+            preview_url: item.track?.preview_url,
+          })) || [];
 
         data = {
           type: "playlist",
@@ -207,7 +222,10 @@ export async function POST(request: NextRequest) {
             id: playlistData.id || spotifyId,
             name: playlistData.name || "Unknown Playlist",
             artist: `${mappedPlaylistTracks.length} tracks`,
-            image: playlistData.images?.[0]?.url || mappedPlaylistTracks[0]?.image || "",
+            image:
+              playlistData.images?.[0]?.url ||
+              mappedPlaylistTracks[0]?.image ||
+              "",
             release_date: "",
             tracks: mappedPlaylistTracks,
           },
@@ -216,7 +234,7 @@ export async function POST(request: NextRequest) {
 
       case "track":
         apiUrl = `http://source.automusic.win/spotify/track-onl/get/${spotifyId}`;
-        const trackData = await fetchSpotifyData(apiUrl);
+        const trackData = await fetchSpotifyData(apiUrl, userEmail);
 
         data = {
           type: "track",
@@ -243,11 +261,15 @@ export async function POST(request: NextRequest) {
     const totalDuration = Date.now() - requestStartTime;
 
     // Chỉ log 1 dòng response
-    serverLogger.logInfo("SPOTIFY_RESPONSE", {
-      type: urlType,
-      data: data,
-      duration: totalDuration,
-    });
+    serverLogger.logInfo(
+      "SPOTIFY_RESPONSE",
+      {
+        type: urlType,
+        data: data,
+        duration: totalDuration,
+      },
+      userEmail,
+    );
 
     return NextResponse.json(data);
   } catch (error) {
@@ -259,6 +281,7 @@ export async function POST(request: NextRequest) {
       {
         duration: totalDuration,
       },
+      userEmail,
     );
 
     return NextResponse.json(
