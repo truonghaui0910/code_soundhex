@@ -186,30 +186,28 @@ export async function POST(request: NextRequest) {
         break;
 
       case "playlist":
-        apiUrl = `http://source.automusic.win/spotify/playlist-onl/get/${spotifyId}`;
+        apiUrl = `http://automusic.win/spotify/playlist-info/get/${spotifyId}`;
         const playlistData = await fetchSpotifyData(apiUrl);
 
-        // playlistData is an array of track items
-        const mappedPlaylistTracks = Array.isArray(playlistData) 
-          ? playlistData.map((item: any) => ({
-              id: item.track?.id,
-              name: item.track?.name,
-              artist: item.track?.artists?.[0]?.name || "Unknown Artist",
-              album: item.track?.album?.name || "Unknown Album",
-              duration: Math.floor(item.track?.duration_ms / 1000),
-              image: item.track?.album?.images?.[0]?.url || "",
-              isrc: item.track?.external_ids?.isrc || null,
-              preview_url: item.track?.preview_url,
-            })) 
-          : [];
+        // playlistData now contains complete playlist info with tracks.items array
+        const mappedPlaylistTracks = playlistData.tracks?.items?.map((item: any) => ({
+          id: item.track?.id,
+          name: item.track?.name,
+          artist: item.track?.artists?.[0]?.name || "Unknown Artist",
+          album: item.track?.album?.name || "Unknown Album",
+          duration: Math.floor(item.track?.duration_ms / 1000),
+          image: item.track?.album?.images?.[0]?.url || "",
+          isrc: item.track?.external_ids?.isrc || null,
+          preview_url: item.track?.preview_url,
+        })) || [];
 
         data = {
           type: "playlist",
           data: {
-            id: spotifyId, // Use the original ID since API doesn't return playlist info
-            name: `Playlist ${spotifyId}`, // Fallback name
+            id: playlistData.id || spotifyId,
+            name: playlistData.name || "Unknown Playlist",
             artist: `${mappedPlaylistTracks.length} tracks`,
-            image: mappedPlaylistTracks[0]?.image || "",
+            image: playlistData.images?.[0]?.url || mappedPlaylistTracks[0]?.image || "",
             release_date: "",
             tracks: mappedPlaylistTracks,
           },
