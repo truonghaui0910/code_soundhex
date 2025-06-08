@@ -89,7 +89,7 @@ export function MusicUpload() {
         file: null,
     });
     const fileInputRef = useRef<HTMLInputElement>(null);
-    
+
     // Audio player context
     const {
         currentTrack,
@@ -615,8 +615,9 @@ export function MusicUpload() {
                                                                                                   const trackToPlay = {
                                                                                                       id: track.id,
                                                                                                       title: track.name,
+                                                                                                      file_url: track.preview_url ? `/api/proxy-audio?url=${encodeURIComponent(track.preview_url)}` : "",
                                                                                                       duration: track.duration,
-                                                                                                      audio_file_url: track.preview_url || "",
+                                                                                                      audio_file_url: track.preview_url ? `/api/proxy-audio?url=${encodeURIComponent(track.preview_url)}` : "",
                                                                                                       artist: {
                                                                                                           id: "spotify-artist",
                                                                                                           name: track.artist,
@@ -631,8 +632,9 @@ export function MusicUpload() {
                                                                                                   const albumTracks = album.tracks?.map((t: SpotifyTrack) => ({
                                                                                                       id: t.id,
                                                                                                       title: t.name,
+                                                                                                      file_url: t.preview_url ? `/api/proxy-audio?url=${encodeURIComponent(t.preview_url)}` : "",
                                                                                                       duration: t.duration,
-                                                                                                      audio_file_url: t.preview_url || "",
+                                                                                                      audio_file_url: t.preview_url ? `/api/proxy-audio?url=${encodeURIComponent(t.preview_url)}` : "",
                                                                                                       artist: {
                                                                                                           id: "spotify-artist",
                                                                                                           name: t.artist,
@@ -798,8 +800,9 @@ export function MusicUpload() {
                                                                         const trackToPlay = {
                                                                             id: track.id,
                                                                             title: track.name,
+                                                                            file_url: track.preview_url ? `/api/proxy-audio?url=${encodeURIComponent(track.preview_url)}` : "",
                                                                             duration: track.duration,
-                                                                            audio_file_url: track.preview_url || "",
+                                                                            audio_file_url: track.preview_url ? `/api/proxy-audio?url=${encodeURIComponent(track.preview_url)}` : "",
                                                                             artist: {
                                                                                 id: "spotify-artist",
                                                                                 name: track.artist,
@@ -814,8 +817,9 @@ export function MusicUpload() {
                                                                         const allTracks = spotifyData.data.tracks.map((t: SpotifyTrack) => ({
                                                                             id: t.id,
                                                                             title: t.name,
+                                                                            file_url: t.preview_url ? `/api/proxy-audio?url=${encodeURIComponent(t.preview_url)}` : "",
                                                                             duration: t.duration,
-                                                                            audio_file_url: t.preview_url || "",
+                                                                            audio_file_url: t.preview_url ? `/api/proxy-audio?url=${encodeURIComponent(t.preview_url)}` : "",
                                                                             artist: {
                                                                                 id: "spotify-artist",
                                                                                 name: t.artist,
@@ -878,7 +882,7 @@ export function MusicUpload() {
                                                             spotifyData.data
                                                                 .artist
                                                         }{" "}
-                                                        • from{" "}
+                                                                                       • from{" "}
                                                         {spotifyData.data.album}
                                                     </p>
                                                     <p className="text-sm text-gray-500">
@@ -922,8 +926,9 @@ export function MusicUpload() {
                                                                 const trackToPlay = {
                                                                     id: spotifyData.data.id,
                                                                     title: spotifyData.data.name,
+                                                                    file_url: spotifyData.data.preview_url ? `/api/proxy-audio?url=${encodeURIComponent(spotifyData.data.preview_url)}` : "",
                                                                     duration: spotifyData.data.duration,
-                                                                    audio_file_url: spotifyData.data.preview_url || "",
+                                                                    audio_file_url: spotifyData.data.preview_url ? `/api/proxy-audio?url=${encodeURIComponent(spotifyData.data.preview_url)}` : "",
                                                                     artist: {
                                                                         id: "spotify-artist",
                                                                         name: spotifyData.data.artist,
