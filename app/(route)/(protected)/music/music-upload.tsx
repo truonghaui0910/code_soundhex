@@ -45,6 +45,7 @@ interface SpotifyAlbum {
     id: string;
     name: string;
     artist: string;
+```text
     image: string;
     tracks: SpotifyTrack[];
     release_date: string;
@@ -444,9 +445,12 @@ export function MusicUpload() {
                                                             )}
                                                         </div>
 
-                                                        {album.tracks && Array.isArray(album.tracks) && album.tracks.length > 0 && (
+                                                        {expandedAlbums.has(album.id) && (
                                                             <div className="mt-4 space-y-2">
-                                                                {album.tracks.map((track: SpotifyTrack) => (
+                                                                <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                                                                    Loading tracks...
+                                                                </div>
+                                                                {album.tracks && Array.isArray(album.tracks) && album.tracks.length > 0 ? album.tracks.map((track: SpotifyTrack) => (
                                                                     <div
                                                                         key={track.id}
                                                                         className={`flex items-center gap-3 p-2 rounded cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 ${
@@ -462,18 +466,13 @@ export function MusicUpload() {
                                                                             )}
                                                                         </div>
                                                                         <div className="flex-1">
-                                                                            <p className="font-medium">{track.name}</p>
-                                                                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                                                                                {formatDuration(track.duration)}
-                                                                                {track.isrc && (
-                                                                                    <span className="ml-2 text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">
-                                                                                        ISRC: {track.isrc}
-                                                                                    </span>
-                                                                                )}
-                                                                            </p>
+                                                                            <div className="font-medium">{track.name}</div>
+                                                                            <div className="text-sm text-gray-600 dark:text-gray-400">
+                                                                                {track.artist} • {formatDuration(track.duration)}
+                                                                            </div>
                                                                         </div>
                                                                     </div>
-                                                                ))}
+                                                                )) : null}
                                                             </div>
                                                         )}
                                                     </div>
