@@ -115,7 +115,7 @@ export class TracksController {
       const { data: artistsData } = await supabase.from("artists").select("id, name, profile_image_url").in("id", artistIds);
       if (artistsData) {
         for (const artist of artistsData) {
-          artistsMap[artist.id] = { id: artist.id, name: artist.name, profile_image_url: artist.profile_image_url };
+          artistsMap[artist.id] = { id: artist.id, name: artist.name };
         }
       }
     }
