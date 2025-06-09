@@ -109,10 +109,10 @@ export function TracksList({ initialTracks }: TracksListProps) {
                                     <TableRow
                                         key={track.id}
                                         onClick={() => playTrack(track)}
-                                        className={`cursor-pointer hover:bg-muted/50 ${currentTrack?.id === track.id ? "bg-muted" : ""}`}
+                                        className={`cursor-pointer hover:bg-muted/50 ${currentTrack?.id === Number(track.id) ? "bg-muted" : ""}`}
                                     >
                                         <TableCell>
-                                            {currentTrack?.id === track.id &&
+                                            {currentTrack?.id === Number(track.id) &&
                                             isPlaying ? (
                                                 <div className="w-5 h-5 flex items-center justify-center">
                                                     <div className="flex items-end space-x-0.5 h-4">
