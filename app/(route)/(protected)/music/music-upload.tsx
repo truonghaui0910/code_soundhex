@@ -932,7 +932,7 @@ export function MusicUpload() {
                                                                 className="h-8 w-8 rounded-full"
                                                             >
                                                                 {currentTrack?.id ===
-                                                                    track.id &&
+                                                                    Number(track.id) &&
                                                                 isPlaying ? (
                                                                     <Pause className="h-4 w-4" />
                                                                 ) : (
