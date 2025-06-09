@@ -30,6 +30,7 @@ import { Separator } from "@/components/ui/separator";
 import { Track } from "@/lib/definitions/Track";
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 import { useDownload } from "@/hooks/use-download";
+import { useRouter } from "next/navigation";
 
 // Helper function to format time
 const formatDuration = (seconds: number | null) => {
@@ -38,6 +39,23 @@ const formatDuration = (seconds: number | null) => {
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, "0")}`;
 };
+
+// Component to handle upload page redirect
+function UploadRedirect() {
+    const router = useRouter();
+    
+    useEffect(() => {
+        router.replace('/music/upload');
+    }, [router]);
+
+    return (
+        <div className="text-center">
+            <p className="text-lg text-gray-600 dark:text-gray-400 mb-6">
+                Redirecting to upload page...
+            </p>
+        </div>
+    );
+}
 
 interface MusicExplorerProps {
     initialTracks: Track[];
@@ -766,14 +784,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                 )}
 
                 {currentView === "upload" && (
-                    <div className="text-center">
-                        <p className="text-lg text-gray-600 dark:text-gray-400 mb-6">
-                            Redirecting to upload page...
-                        </p>
-                        <script>
-                            {typeof window !== 'undefined' && window.location.replace('/music/upload')}
-                        </script>
-                    </div>
+                    <UploadRedirect />
                 )}
             </div>
         </div>

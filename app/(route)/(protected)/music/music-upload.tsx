@@ -134,12 +134,14 @@ export function MusicUpload() {
 
             // Auto-select all tracks for album, playlist, and single track
             if (data.type === "album" || data.type === "playlist") {
-                const trackIds = new Set(
-                    data.data.tracks.map((track: SpotifyTrack) => track.id),
+                const trackIds = new Set<string>(
+                    data.data.tracks.map((track: SpotifyTrack) =>
+                        String(track.id),
+                    ),
                 );
                 setSelectedTracks(trackIds);
             } else if (data.type === "track") {
-                setSelectedTracks(new Set([data.data.id]));
+                setSelectedTracks(new Set([String(data.data.id)]));
             }
         } catch (error) {
             console.error("Error:", error);
@@ -552,7 +554,7 @@ export function MusicUpload() {
                                                                                               : ""
                                                                                       }`}
                                                                                   >
-                                                                                      <div 
+                                                                                      <div
                                                                                           className="w-6 h-6 rounded border-2 border-purple-400 flex items-center justify-center cursor-pointer"
                                                                                           onClick={() =>
                                                                                               toggleTrackSelection(
@@ -567,10 +569,12 @@ export function MusicUpload() {
                                                                                           )}
                                                                                       </div>
                                                                                       <div className="w-12 h-12 rounded overflow-hidden bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
-                                                                                          {track.image || album.image ? (
+                                                                                          {track.image ||
+                                                                                          album.image ? (
                                                                                               <Image
                                                                                                   src={
-                                                                                                      track.image || album.image
+                                                                                                      track.image ||
+                                                                                                      album.image
                                                                                                   }
                                                                                                   alt={
                                                                                                       track.name
@@ -606,52 +610,97 @@ export function MusicUpload() {
                                                                                       <Button
                                                                                           size="sm"
                                                                                           variant="ghost"
-                                                                                          onClick={(e) => {
+                                                                                          onClick={(
+                                                                                              e,
+                                                                                          ) => {
                                                                                               e.stopPropagation();
-                                                                                              if (currentTrack?.id === track.id && isPlaying) {
+                                                                                              if (
+                                                                                                  currentTrack?.id ===
+                                                                                                      Number(
+                                                                                                          track.id,
+                                                                                                      ) &&
+                                                                                                  isPlaying
+                                                                                              ) {
                                                                                                   togglePlayPause();
                                                                                               } else {
                                                                                                   // Convert SpotifyTrack to Track format
-                                                                                                  const trackToPlay = {
-                                                                                                      id: track.id,
-                                                                                                      title: track.name,
-                                                                                                      file_url: track.preview_url ? `/api/proxy-audio?url=${encodeURIComponent(track.preview_url)}` : "",
-                                                                                                      duration: track.duration,
-                                                                                                      audio_file_url: track.preview_url ? `/api/proxy-audio?url=${encodeURIComponent(track.preview_url)}` : "",
-                                                                                                      artist: {
-                                                                                                          id: "spotify-artist",
-                                                                                                          name: track.artist,
-                                                                                                      },
-                                                                                                      album: {
-                                                                                                          id: album.id,
-                                                                                                          title: album.name,
-                                                                                                          cover_image_url: track.image || album.image,
-                                                                                                      },
-                                                                                                  };
+                                                                                                  const trackToPlay =
+                                                                                                      {
+                                                                                                          id: track.id,
+                                                                                                          title: track.name,
+                                                                                                          file_url:
+                                                                                                              track.preview_url
+                                                                                                                  ? `/api/proxy-audio?url=${encodeURIComponent(track.preview_url)}`
+                                                                                                                  : "",
+                                                                                                          duration:
+                                                                                                              track.duration,
+                                                                                                          audio_file_url:
+                                                                                                              track.preview_url
+                                                                                                                  ? `/api/proxy-audio?url=${encodeURIComponent(track.preview_url)}`
+                                                                                                                  : "",
+                                                                                                          artist: {
+                                                                                                              id: "spotify-artist",
+                                                                                                              name: track.artist,
+                                                                                                          },
+                                                                                                          album: {
+                                                                                                              id: album.id,
+                                                                                                              title: album.name,
+                                                                                                              cover_image_url:
+                                                                                                                  track.image ||
+                                                                                                                  album.image,
+                                                                                                          },
+                                                                                                      };
                                                                                                   // Set track list for navigation
-                                                                                                  const albumTracks = album.tracks?.map((t: SpotifyTrack) => ({
-                                                                                                      id: t.id,
-                                                                                                      title: t.name,
-                                                                                                      file_url: t.preview_url ? `/api/proxy-audio?url=${encodeURIComponent(t.preview_url)}` : "",
-                                                                                                      duration: t.duration,
-                                                                                                      audio_file_url: t.preview_url ? `/api/proxy-audio?url=${encodeURIComponent(t.preview_url)}` : "",
-                                                                                                      artist: {
-                                                                                                          id: "spotify-artist",
-                                                                                                          name: t.artist,
-                                                                                                      },
-                                                                                                      album: {
-                                                                                                          id: album.id,
-                                                                                                          title: album.name,
-                                                                                                          cover_image_url: t.image || album.image,
-                                                                                                      },
-                                                                                                  })) || [];
-                                                                                                  setTrackList(albumTracks);
-                                                                                                  playTrack(trackToPlay);
+                                                                                                  const albumTracks =
+                                                                                                      album.tracks?.map(
+                                                                                                          (
+                                                                                                              t: SpotifyTrack,
+                                                                                                          ) => ({
+                                                                                                              id: Number(
+                                                                                                                  t.id,
+                                                                                                              ),
+                                                                                                              title: t.name,
+                                                                                                              file_url:
+                                                                                                                  t.preview_url
+                                                                                                                      ? `/api/proxy-audio?url=${encodeURIComponent(t.preview_url)}`
+                                                                                                                      : "",
+                                                                                                              duration:
+                                                                                                                  t.duration,
+                                                                                                              audio_file_url:
+                                                                                                                  t.preview_url
+                                                                                                                      ? `/api/proxy-audio?url=${encodeURIComponent(t.preview_url)}`
+                                                                                                                      : "",
+                                                                                                              artist: {
+                                                                                                                  id: "spotify-artist",
+                                                                                                                  name: t.artist,
+                                                                                                              },
+                                                                                                              album: {
+                                                                                                                  id: Number(
+                                                                                                                      album.id,
+                                                                                                                  ),
+                                                                                                                  title: album.name,
+                                                                                                                  cover_image_url:
+                                                                                                                      t.image ||
+                                                                                                                      album.image,
+                                                                                                              },
+                                                                                                          }),
+                                                                                                      ) ||
+                                                                                                      [];
+                                                                                                  setTrackList(
+                                                                                                      albumTracks,
+                                                                                                  );
+                                                                                                  playTrack(
+                                                                                                      trackToPlay,
+                                                                                                  );
                                                                                               }
                                                                                           }}
                                                                                           className="h-8 w-8 rounded-full"
                                                                                       >
-                                                                                          {currentTrack?.id === track.id && isPlaying ? (
+                                                                                          {currentTrack?.id ===
+                                                                                              Number(
+                                                                                                  track.id,
+                                                                                              ) &&
+                                                                                          isPlaying ? (
                                                                                               <Pause className="h-4 w-4" />
                                                                                           ) : (
                                                                                               <Play className="h-4 w-4" />
@@ -731,7 +780,7 @@ export function MusicUpload() {
                                                                     : "border border-gray-200 dark:border-gray-700"
                                                             }`}
                                                         >
-                                                            <div 
+                                                            <div
                                                                 className="w-6 h-6 rounded border-2 border-purple-400 flex items-center justify-center cursor-pointer"
                                                                 onClick={() =>
                                                                     toggleTrackSelection(
@@ -791,52 +840,100 @@ export function MusicUpload() {
                                                             <Button
                                                                 size="sm"
                                                                 variant="ghost"
-                                                                onClick={(e) => {
+                                                                onClick={(
+                                                                    e,
+                                                                ) => {
                                                                     e.stopPropagation();
-                                                                    if (currentTrack?.id === track.id && isPlaying) {
+                                                                    if (
+                                                                        currentTrack?.id ===
+                                                                            Number(
+                                                                                track.id,
+                                                                            ) &&
+                                                                        isPlaying
+                                                                    ) {
                                                                         togglePlayPause();
                                                                     } else {
                                                                         // Convert SpotifyTrack to Track format
-                                                                        const trackToPlay = {
-                                                                            id: track.id,
-                                                                            title: track.name,
-                                                                            file_url: track.preview_url ? `/api/proxy-audio?url=${encodeURIComponent(track.preview_url)}` : "",
-                                                                            duration: track.duration,
-                                                                            audio_file_url: track.preview_url ? `/api/proxy-audio?url=${encodeURIComponent(track.preview_url)}` : "",
-                                                                            artist: {
-                                                                                id: "spotify-artist",
-                                                                                name: track.artist,
-                                                                            },
-                                                                            album: {
-                                                                                id: spotifyData.data.id,
-                                                                                title: spotifyData.data.name,
-                                                                                cover_image_url: track.image,
-                                                                            },
-                                                                        };
+                                                                        const trackToPlay =
+                                                                            {
+                                                                                id: track.id,
+                                                                                title: track.name,
+                                                                                file_url:
+                                                                                    track.preview_url
+                                                                                        ? `/api/proxy-audio?url=${encodeURIComponent(track.preview_url)}`
+                                                                                        : "",
+                                                                                duration:
+                                                                                    track.duration,
+                                                                                audio_file_url:
+                                                                                    track.preview_url
+                                                                                        ? `/api/proxy-audio?url=${encodeURIComponent(track.preview_url)}`
+                                                                                        : "",
+                                                                                artist: {
+                                                                                    id: "spotify-artist",
+                                                                                    name: track.artist,
+                                                                                },
+                                                                                album: {
+                                                                                    id: spotifyData
+                                                                                        .data
+                                                                                        .id,
+                                                                                    title: spotifyData
+                                                                                        .data
+                                                                                        .name,
+                                                                                    cover_image_url:
+                                                                                        track.image,
+                                                                                },
+                                                                            };
                                                                         // Set track list for navigation
-                                                                        const allTracks = spotifyData.data.tracks.map((t: SpotifyTrack) => ({
-                                                                            id: t.id,
-                                                                            title: t.name,
-                                                                            file_url: t.preview_url ? `/api/proxy-audio?url=${encodeURIComponent(t.preview_url)}` : "",
-                                                                            duration: t.duration,
-                                                                            audio_file_url: t.preview_url ? `/api/proxy-audio?url=${encodeURIComponent(t.preview_url)}` : "",
-                                                                            artist: {
-                                                                                id: "spotify-artist",
-                                                                                name: t.artist,
-                                                                            },
-                                                                            album: {
-                                                                                id: spotifyData.data.id,
-                                                                                title: spotifyData.data.name,
-                                                                                cover_image_url: t.image,
-                                                                            },
-                                                                        }));
-                                                                        setTrackList(allTracks);
-                                                                        playTrack(trackToPlay);
+                                                                        const allTracks =
+                                                                            spotifyData.data.tracks.map(
+                                                                                (
+                                                                                    t: SpotifyTrack,
+                                                                                ) => ({
+                                                                                    id: Number(
+                                                                                        t.id,
+                                                                                    ),
+                                                                                    title: t.name,
+                                                                                    file_url:
+                                                                                        t.preview_url
+                                                                                            ? `/api/proxy-audio?url=${encodeURIComponent(t.preview_url)}`
+                                                                                            : "",
+                                                                                    duration:
+                                                                                        t.duration,
+                                                                                    audio_file_url:
+                                                                                        t.preview_url
+                                                                                            ? `/api/proxy-audio?url=${encodeURIComponent(t.preview_url)}`
+                                                                                            : "",
+                                                                                    artist: {
+                                                                                        id: "spotify-artist",
+                                                                                        name: t.artist,
+                                                                                    },
+                                                                                    album: {
+                                                                                        id: Number(
+                                                                                            spotifyData
+                                                                                                .data
+                                                                                                .id,
+                                                                                        ),
+                                                                                        title: spotifyData
+                                                                                            .data
+                                                                                            .name,
+                                                                                        cover_image_url:
+                                                                                            t.image,
+                                                                                    },
+                                                                                }),
+                                                                            );
+                                                                        setTrackList(
+                                                                            allTracks,
+                                                                        );
+                                                                        playTrack(
+                                                                            trackToPlay,
+                                                                        );
                                                                     }
                                                                 }}
                                                                 className="h-8 w-8 rounded-full"
                                                             >
-                                                                {currentTrack?.id === track.id && isPlaying ? (
+                                                                {currentTrack?.id ===
+                                                                    track.id &&
+                                                                isPlaying ? (
                                                                     <Pause className="h-4 w-4" />
                                                                 ) : (
                                                                     <Play className="h-4 w-4" />
@@ -882,7 +979,7 @@ export function MusicUpload() {
                                                             spotifyData.data
                                                                 .artist
                                                         }{" "}
-                                                                                       • from{" "}
+                                                        • from{" "}
                                                         {spotifyData.data.album}
                                                     </p>
                                                     <p className="text-sm text-gray-500">
@@ -911,7 +1008,8 @@ export function MusicUpload() {
                                                     <div className="flex items-center gap-2 text-green-700 dark:text-green-400">
                                                         <Check className="h-5 w-5" />
                                                         <span className="font-semibold">
-                                                            Track selected for import
+                                                            Track selected for
+                                                            import
                                                         </span>
                                                     </div>
                                                     <Button
@@ -919,33 +1017,76 @@ export function MusicUpload() {
                                                         variant="ghost"
                                                         onClick={(e) => {
                                                             e.stopPropagation();
-                                                            if (currentTrack?.id === spotifyData.data.id && isPlaying) {
+                                                            if (
+                                                                currentTrack?.id ===
+                                                                    Number(
+                                                                        spotifyData
+                                                                            .data
+                                                                            .id,
+                                                                    ) &&
+                                                                isPlaying
+                                                            ) {
                                                                 togglePlayPause();
                                                             } else {
                                                                 // Convert SpotifyTrack to Track format
-                                                                const trackToPlay = {
-                                                                    id: spotifyData.data.id,
-                                                                    title: spotifyData.data.name,
-                                                                    file_url: spotifyData.data.preview_url ? `/api/proxy-audio?url=${encodeURIComponent(spotifyData.data.preview_url)}` : "",
-                                                                    duration: spotifyData.data.duration,
-                                                                    audio_file_url: spotifyData.data.preview_url ? `/api/proxy-audio?url=${encodeURIComponent(spotifyData.data.preview_url)}` : "",
-                                                                    artist: {
-                                                                        id: "spotify-artist",
-                                                                        name: spotifyData.data.artist,
-                                                                    },
-                                                                    album: {
-                                                                        id: "spotify-album",
-                                                                        title: spotifyData.data.album,
-                                                                        cover_image_url: spotifyData.data.image,
-                                                                    },
-                                                                };
-                                                                setTrackList([trackToPlay]);
-                                                                playTrack(trackToPlay);
+                                                                const trackToPlay =
+                                                                    {
+                                                                        id: Number(
+                                                                            spotifyData
+                                                                                .data
+                                                                                .id,
+                                                                        ),
+                                                                        title: spotifyData
+                                                                            .data
+                                                                            .name,
+                                                                        file_url:
+                                                                            spotifyData
+                                                                                .data
+                                                                                .preview_url
+                                                                                ? `/api/proxy-audio?url=${encodeURIComponent(spotifyData.data.preview_url)}`
+                                                                                : "",
+                                                                        duration:
+                                                                            spotifyData
+                                                                                .data
+                                                                                .duration,
+                                                                        audio_file_url:
+                                                                            spotifyData
+                                                                                .data
+                                                                                .preview_url
+                                                                                ? `/api/proxy-audio?url=${encodeURIComponent(spotifyData.data.preview_url)}`
+                                                                                : "",
+                                                                        artist: {
+                                                                            id: "spotify-artist",
+                                                                            name: spotifyData
+                                                                                .data
+                                                                                .artist,
+                                                                        },
+                                                                        album: {
+                                                                            id: "spotify-album",
+                                                                            title: spotifyData
+                                                                                .data
+                                                                                .album,
+                                                                            cover_image_url:
+                                                                                spotifyData
+                                                                                    .data
+                                                                                    .image,
+                                                                        },
+                                                                    };
+                                                                setTrackList([
+                                                                    trackToPlay,
+                                                                ]);
+                                                                playTrack(
+                                                                    trackToPlay,
+                                                                );
                                                             }
                                                         }}
                                                         className="h-8 w-8 rounded-full bg-green-600 hover:bg-green-700 text-white"
                                                     >
-                                                        {currentTrack?.id === spotifyData.data.id && isPlaying ? (
+                                                        {currentTrack?.id ===
+                                                            Number(
+                                                                spotifyData.data
+                                                                    .id,
+                                                            ) && isPlaying ? (
                                                             <Pause className="h-4 w-4" />
                                                         ) : (
                                                             <Play className="h-4 w-4" />
