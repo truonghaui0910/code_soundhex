@@ -2,6 +2,7 @@
 export interface Track {
   id: number;
   title: string;
+  description?: string;
   duration: number | null;
   file_url?: string;
   audio_file_url?: string;

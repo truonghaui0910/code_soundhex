@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   Music,
   Play,
@@ -13,11 +14,13 @@ import {
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { UserNav } from "@/components/layout/user-nav";
 import { SoundHexLogo } from "@/components/ui/soundhex-logo";
+import { supabase } from "@/lib/supabase/client";
 
 export default function Home() {
   const [visible, setVisible] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, loading } = useCurrentUser();
+  const router = useRouter();
 
   useEffect(() => {
     setVisible(true);

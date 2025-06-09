@@ -26,7 +26,7 @@ export function Navbar() {
     fetchUser();
 
     const { data: authListener } = supabaseWithLogging.auth.onAuthStateChange(
-      (event, session) => {
+      (event: string, session: any) => {
         if (session?.user) {
           setUser(session.user);
         } else {

@@ -104,16 +104,16 @@ function extractSpotifyId(url: string) {
 
 export async function POST(request: NextRequest) {
   const requestStartTime = Date.now();
+  
+  // Get user email from Supabase session (secure way) - moved outside try-catch
+  const supabase = createRouteHandlerClient({ cookies });
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  const userEmail = session?.user?.email || undefined;
 
   try {
     const { spotifyUrl } = await request.json();
-
-    // Get user email from Supabase session (secure way)
-    const supabase = createRouteHandlerClient({ cookies });
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    const userEmail = session?.user?.email || undefined;
 
     if (!spotifyUrl) {
       return NextResponse.json(
