@@ -116,7 +116,7 @@ export function RegisterForm() {
                     Please verify your email
                   </h3>
                   <p className="text-green-600 dark:text-green-400 leading-relaxed text-lg">
-                    We've sent a verification email to{" "}
+                    We&apos;ve sent a verification email to{" "}
                     <strong className="font-semibold">{registeredEmail}</strong>
                     . Please check your inbox and click the verification link to
                     complete your registration.
@@ -127,8 +127,8 @@ export function RegisterForm() {
               <div className="space-y-4">
                 <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl">
                   <p className="text-blue-600 dark:text-blue-400 text-center">
-                    💡 <strong>Note:</strong> Didn&apos;t receive the email? Check
-                    your spam folder or try again in a few minutes.
+                    💡 <strong>Note:</strong> Didn&apos;t receive the email?
+                    Check your spam folder or try again in a few minutes.
                   </p>
                 </div>
 
