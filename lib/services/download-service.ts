@@ -40,7 +40,8 @@ export class DownloadService {
       const fileExtension = this.getFileExtension(track.file_url) || 'mp3';
       
       // Set download filename
-      link.download = `${track.artist.name} - ${track.title}.${fileExtension}`;
+      const artistName = track.artist?.name || 'Unknown Artist';
+      link.download = `${artistName} - ${track.title}.${fileExtension}`;
       
       // Append to body, click, and remove
       document.body.appendChild(link);
