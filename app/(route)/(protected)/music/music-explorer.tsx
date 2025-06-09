@@ -71,10 +71,10 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
         const matchesSearch =
             !searchQuery ||
             track.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            track.artist.name
+            (track.artist?.name || "")
                 .toLowerCase()
                 .includes(searchQuery.toLowerCase()) ||
-            track.album.title.toLowerCase().includes(searchQuery.toLowerCase());
+            (track.album?.title || "").toLowerCase().includes(searchQuery.toLowerCase());
 
         const matchesGenre =
             selectedGenre === "all" || track.genre?.name === selectedGenre;
