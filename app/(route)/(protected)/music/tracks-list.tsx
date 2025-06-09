@@ -2,12 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import {
-    Music,
-    Clock,
-    Search,
-    Volume2
-} from "lucide-react";
+import { Music, Clock, Search, Volume2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -49,9 +44,10 @@ export function TracksList({ initialTracks }: TracksListProps) {
         const query = searchQuery.toLowerCase();
         return (
             track.title.toLowerCase().includes(query) ||
-            track.artist.name.toLowerCase().includes(query) ||
-            track.album.title.toLowerCase().includes(query) ||
-            (track.genre?.name.toLowerCase().includes(query) || false)
+            track.artist?.name.toLowerCase().includes(query) ||
+            track.album?.title.toLowerCase().includes(query) ||
+            track.genre?.name.toLowerCase().includes(query) ||
+            false
         );
     });
 
@@ -88,15 +84,23 @@ export function TracksList({ initialTracks }: TracksListProps) {
                             {error ? (
                                 // Error state
                                 <TableRow>
-                                    <TableCell colSpan={6} className="h-24 text-center text-red-500">
+                                    <TableCell
+                                        colSpan={6}
+                                        className="h-24 text-center text-red-500"
+                                    >
                                         Error loading tracks: {error}
                                     </TableCell>
                                 </TableRow>
                             ) : filteredTracks.length === 0 ? (
                                 // Empty or no search results
                                 <TableRow>
-                                    <TableCell colSpan={6} className="h-24 text-center">
-                                        {searchQuery ? "No tracks matching your search." : "No tracks available."}
+                                    <TableCell
+                                        colSpan={6}
+                                        className="h-24 text-center"
+                                    >
+                                        {searchQuery
+                                            ? "No tracks matching your search."
+                                            : "No tracks available."}
                                     </TableCell>
                                 </TableRow>
                             ) : (
@@ -105,16 +109,37 @@ export function TracksList({ initialTracks }: TracksListProps) {
                                     <TableRow
                                         key={track.id}
                                         onClick={() => playTrack(track)}
-                                        className={`cursor-pointer hover:bg-muted/50 ${currentTrack?.id === track.id ? 'bg-muted' : ''}`}
+                                        className={`cursor-pointer hover:bg-muted/50 ${currentTrack?.id === track.id ? "bg-muted" : ""}`}
                                     >
                                         <TableCell>
-                                            {currentTrack?.id === track.id && isPlaying ? (
+                                            {currentTrack?.id === track.id &&
+                                            isPlaying ? (
                                                 <div className="w-5 h-5 flex items-center justify-center">
                                                     <div className="flex items-end space-x-0.5 h-4">
-                                                        <div className="w-0.5 bg-rose-600 animate-equalize-1" style={{ height: '30%' }}></div>
-                                                        <div className="w-0.5 bg-rose-600 animate-equalize-2" style={{ height: '100%' }}></div>
-                                                        <div className="w-0.5 bg-rose-600 animate-equalize-3" style={{ height: '60%' }}></div>
-                                                        <div className="w-0.5 bg-rose-600 animate-equalize-4" style={{ height: '80%' }}></div>
+                                                        <div
+                                                            className="w-0.5 bg-rose-600 animate-equalize-1"
+                                                            style={{
+                                                                height: "30%",
+                                                            }}
+                                                        ></div>
+                                                        <div
+                                                            className="w-0.5 bg-rose-600 animate-equalize-2"
+                                                            style={{
+                                                                height: "100%",
+                                                            }}
+                                                        ></div>
+                                                        <div
+                                                            className="w-0.5 bg-rose-600 animate-equalize-3"
+                                                            style={{
+                                                                height: "60%",
+                                                            }}
+                                                        ></div>
+                                                        <div
+                                                            className="w-0.5 bg-rose-600 animate-equalize-4"
+                                                            style={{
+                                                                height: "80%",
+                                                            }}
+                                                        ></div>
                                                     </div>
                                                 </div>
                                             ) : (
@@ -123,9 +148,13 @@ export function TracksList({ initialTracks }: TracksListProps) {
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex items-center gap-3">
-                                                {track.album.cover_image_url ? (
+                                                {track.album
+                                                    ?.cover_image_url ? (
                                                     <Image
-                                                        src={track.album.cover_image_url}
+                                                        src={
+                                                            track.album
+                                                                ?.cover_image_url
+                                                        }
                                                         alt={`Album ${track.album.title}`}
                                                         width={48}
                                                         height={48}
@@ -137,7 +166,9 @@ export function TracksList({ initialTracks }: TracksListProps) {
                                                     </div>
                                                 )}
                                                 <div>
-                                                    <div className="font-medium">{track.title}</div>
+                                                    <div className="font-medium">
+                                                        {track.title}
+                                                    </div>
                                                     {track.description && (
                                                         <div className="text-xs text-muted-foreground truncate max-w-[300px]">
                                                             {track.description}
@@ -146,13 +177,23 @@ export function TracksList({ initialTracks }: TracksListProps) {
                                                 </div>
                                             </div>
                                         </TableCell>
-                                        <TableCell>{track.artist.name}</TableCell>
-                                        <TableCell>{track.album.title}</TableCell>
+                                        <TableCell>
+                                            {track.artist?.name ||
+                                                "Unknown Artist"}
+                                        </TableCell>
+                                        <TableCell>
+                                            {track.album?.title ||
+                                                "Unknown Album"}
+                                        </TableCell>
                                         <TableCell>
                                             {track.genre ? (
-                                                <Badge variant="outline">{track.genre.name}</Badge>
+                                                <Badge variant="outline">
+                                                    {track.genre.name}
+                                                </Badge>
                                             ) : (
-                                                <span className="text-muted-foreground">--</span>
+                                                <span className="text-muted-foreground">
+                                                    --
+                                                </span>
                                             )}
                                         </TableCell>
                                         <TableCell className="text-right font-mono">
