@@ -626,7 +626,7 @@ export function MusicUpload() {
                                                                                                   // Convert SpotifyTrack to Track format
                                                                                                   const trackToPlay =
                                                                                                       {
-                                                                                                          id: track.id,
+                                                                                                          id: Number(track.id),
                                                                                                           title: track.name,
                                                                                                           file_url:
                                                                                                               track.preview_url
@@ -643,7 +643,7 @@ export function MusicUpload() {
                                                                                                               name: track.artist,
                                                                                                           },
                                                                                                           album: {
-                                                                                                              id: album.id,
+                                                                                                              id: Number(album.id),
                                                                                                               title: album.name,
                                                                                                               cover_image_url:
                                                                                                                   track.image ||
@@ -856,7 +856,7 @@ export function MusicUpload() {
                                                                         // Convert SpotifyTrack to Track format
                                                                         const trackToPlay =
                                                                             {
-                                                                                id: track.id,
+                                                                                id: Number(track.id),
                                                                                 title: track.name,
                                                                                 file_url:
                                                                                     track.preview_url
@@ -873,9 +873,9 @@ export function MusicUpload() {
                                                                                     name: track.artist,
                                                                                 },
                                                                                 album: {
-                                                                                    id: spotifyData
+                                                                                    id: Number(spotifyData
                                                                                         .data
-                                                                                        .id,
+                                                                                        .id),
                                                                                     title: spotifyData
                                                                                         .data
                                                                                         .name,
@@ -922,7 +922,7 @@ export function MusicUpload() {
                                                                                 }),
                                                                             );
                                                                         setTrackList(
-                                                                            allTracks,
+                                                                                                           allTracks,
                                                                         );
                                                                         playTrack(
                                                                             trackToPlay,
