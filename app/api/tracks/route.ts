@@ -2,9 +2,13 @@ import { NextResponse } from "next/server";
 import { TracksController } from "@/lib/controllers/tracks";
 import { NextRequest } from "next/server";
 
+// Declare this route as dynamic since it uses search params
+export const dynamic = "force-dynamic";
+
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
+    // Use request.nextUrl.searchParams instead of new URL(request.url)
+    const { searchParams } = request.nextUrl;
     const albumId = searchParams.get("albumId");
     const artistId = searchParams.get("artistId");
 
@@ -24,7 +28,7 @@ export async function GET(request: NextRequest) {
     console.error("Error fetching tracks:", error);
     return NextResponse.json(
       { error: "Failed to fetch tracks" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
