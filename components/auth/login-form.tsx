@@ -7,7 +7,7 @@ import Link from "next/link";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { supabaseWithLogging } from "@/lib/supabase/client-with-logging";
+import { supabase } from "@/lib/supabase/client";
 import { Mail, Lock, LogIn, Eye, EyeOff } from "lucide-react";
 import { SoundHexLogo } from "@/components/ui/soundhex-logo";
 
@@ -46,7 +46,7 @@ export function LoginForm() {
     setError(null);
 
     try {
-      const { data, error } = await supabaseWithLogging.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: values.email,
         password: values.password,
       });
