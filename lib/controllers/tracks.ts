@@ -146,47 +146,7 @@ export class TracksController {
     return tracksWithInfo;
   }
 
-  /**
-   * Lấy danh sách bài hát theo nghệ sĩ
-   */
-  static async getTracksByArtist(artistId: number): Promise<Track[]> {
-    const supabase = createClientComponentClient<Database>();
-
-    const { data, error } = await supabase
-      .from("tracks")
-      .select(`
-        *,
-        artist:artist_id(id, name),
-        album:album_id(id, title, cover_image_url),
-        genre:genre_id(id, name)
-      `)
-      .eq("artist_id", artistId)
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      console.error(`Error fetching tracks for artist ${artistId}:`, error);
-      throw new Error(`Failed to fetch tracks: ${error.message}`);
-    }
-
-    const tracksWithInfo = (data ?? []).map((track: any) => ({
-      ...track,
-      artist: track.artist ? {
-        id: track.artist.id,
-        name: track.artist.name,
-        profile_image_url: null
-      } : null,
-      album: track.album ? {
-        id: track.album.id,
-        title: track.album.title,
-        cover_image_url: track.album.cover_image_url
-      } : null,
-      genre: track.genre ? {
-        id: track.genre.id,
-        name: track.genre.name
-      } : null,
-    }));
-    return tracksWithInfo;
-  }
+  
 
   /**
    * Lấy danh sách bài hát theo thể loại
