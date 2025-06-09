@@ -630,7 +630,7 @@ export function MusicUpload() {
                                                                                                   };
                                                                                                   // Set track list for navigation
                                                                                                   const albumTracks = album.tracks?.map((t: SpotifyTrack) => ({
-                                                                                                      id: t.id,
+                                                                                                      id: Number(t.id),
                                                                                                       title: t.name,
                                                                                                       file_url: t.preview_url ? `/api/proxy-audio?url=${encodeURIComponent(t.preview_url)}` : "",
                                                                                                       duration: t.duration,
@@ -640,7 +640,7 @@ export function MusicUpload() {
                                                                                                           name: t.artist,
                                                                                                       },
                                                                                                       album: {
-                                                                                                          id: album.id,
+                                                                                                          id: Number(album.id),
                                                                                                           title: album.name,
                                                                                                           cover_image_url: t.image || album.image,
                                                                                                       },
@@ -815,7 +815,7 @@ export function MusicUpload() {
                                                                         };
                                                                         // Set track list for navigation
                                                                         const allTracks = spotifyData.data.tracks.map((t: SpotifyTrack) => ({
-                                                                            id: t.id,
+                                                                            id: Number(t.id),
                                                                             title: t.name,
                                                                             file_url: t.preview_url ? `/api/proxy-audio?url=${encodeURIComponent(t.preview_url)}` : "",
                                                                             duration: t.duration,
@@ -825,7 +825,7 @@ export function MusicUpload() {
                                                                                 name: t.artist,
                                                                             },
                                                                             album: {
-                                                                                id: spotifyData.data.id,
+                                                                                id: Number(spotifyData.data.id),
                                                                                 title: spotifyData.data.name,
                                                                                 cover_image_url: t.image,
                                                                             },
@@ -919,12 +919,12 @@ export function MusicUpload() {
                                                         variant="ghost"
                                                         onClick={(e) => {
                                                             e.stopPropagation();
-                                                            if (currentTrack?.id === spotifyData.data.id && isPlaying) {
+                                                            if (currentTrack?.id === Number(spotifyData.data.id) && isPlaying) {
                                                                 togglePlayPause();
                                                             } else {
                                                                 // Convert SpotifyTrack to Track format
                                                                 const trackToPlay = {
-                                                                    id: spotifyData.data.id,
+                                                                    id: Number(spotifyData.data.id),
                                                                     title: spotifyData.data.name,
                                                                     file_url: spotifyData.data.preview_url ? `/api/proxy-audio?url=${encodeURIComponent(spotifyData.data.preview_url)}` : "",
                                                                     duration: spotifyData.data.duration,
@@ -945,7 +945,7 @@ export function MusicUpload() {
                                                         }}
                                                         className="h-8 w-8 rounded-full bg-green-600 hover:bg-green-700 text-white"
                                                     >
-                                                        {currentTrack?.id === spotifyData.data.id && isPlaying ? (
+                                                        {currentTrack?.id === Number(spotifyData.data.id) && isPlaying ? (
                                                             <Pause className="h-4 w-4" />
                                                         ) : (
                                                             <Play className="h-4 w-4" />
