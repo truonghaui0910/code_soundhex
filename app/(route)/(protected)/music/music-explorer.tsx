@@ -377,13 +377,15 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                             {track.album.title}
                                                         </h3>
                                                     </Link>
-                                                    <Link
-                                                        href={`/artist/${track.artist.id}`}
-                                                    >
-                                                        <p className="text-gray-600 dark:text-gray-400 truncate text-xs hover:underline cursor-pointer">
-                                                            {track.artist.name}
-                                                        </p>
-                                                    </Link>
+                                                    {track.artist && (
+                                                        <Link
+                                                            href={`/artist/${track.artist.id}`}
+                                                        >
+                                                            <p className="text-gray-600 dark:text-gray-400 truncate text-xs hover:underline cursor-pointer">
+                                                                {track.artist.name}
+                                                            </p>
+                                                        </Link>
+                                                    )}
                                                 </CardContent>
                                             </Card>
                                         );
@@ -479,13 +481,13 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                         className="group hover:shadow-2xl transition-all duration-500 cursor-pointer overflow-hidden border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm"
                                     >
                                         <div className="relative aspect-square">
-                                            {track.album.cover_image_url ? (
+                                            {track.album?.cover_image_url ? (
                                                 <Image
                                                     src={
                                                         track.album
                                                             .cover_image_url
                                                     }
-                                                    alt={track.album.title}
+                                                    alt={track.album?.title || track.title}
                                                     fill
                                                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                                                     className="object-cover group-hover:scale-110 transition-transform duration-500"
@@ -558,7 +560,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                 {track.title}
                                             </h3>
                                             <p className="text-gray-600 dark:text-gray-400 truncate text-sm">
-                                                {track.artist.name}
+                                                {track.artist?.name || "Unknown Artist"}
                                             </p>
                                             <div className="flex items-center justify-between mt-3">
                                                 <Badge
@@ -614,12 +616,12 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                     className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm"
                                 >
                                     <div className="relative aspect-square">
-                                        {track.album.cover_image_url ? (
+                                        {track.album?.cover_image_url ? (
                                             <Image
                                                 src={
                                                     track.album.cover_image_url
                                                 }
-                                                alt={track.album.title}
+                                                alt={track.album?.title || track.title}
                                                 fill
                                                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                                                 className="object-cover rounded-t-lg group-hover:scale-105 transition-transform duration-300"
@@ -691,10 +693,10 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                             {track.title}
                                         </h3>
                                         <p className="text-gray-600 dark:text-gray-400 truncate text-sm mb-2">
-                                            {track.artist.name}
+                                            {track.artist?.name || "Unknown Artist"}
                                         </p>
                                         <p className="text-gray-500 dark:text-gray-500 truncate text-xs mb-3">
-                                            {track.album.title}
+                                            {track.album?.title || "Unknown Album"}
                                         </p>
 
                                         <div className="flex items-center justify-between">
