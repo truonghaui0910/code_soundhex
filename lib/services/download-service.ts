@@ -6,6 +6,10 @@ export class DownloadService {
    * Download a track file to user's device
    */
   static async downloadTrack(track: Track): Promise<void> {
+    if (!track.file_url) {
+      throw new Error('Track file URL is not available');
+    }
+    
     try {
       let response: Response;
       
@@ -101,6 +105,10 @@ export class DownloadService {
    * Get download size estimate (optional)
    */
   static async getTrackSize(track: Track): Promise<number | null> {
+    if (!track.file_url) {
+      return null;
+    }
+    
     try {
       const response = await fetch(track.file_url, { method: 'HEAD' });
       const contentLength = response.headers.get('content-length');
