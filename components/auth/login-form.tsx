@@ -175,7 +175,7 @@ export function LoginForm() {
           {/* Footer Links */}
           <div className="mt-8 text-center space-y-4">
             <p className="text-gray-600 dark:text-gray-300">
-              Don't have an account?{" "}
+              Don&apos;t have an account?{" "}
               <Link 
                 href="/register" 
                 className="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 font-medium hover:underline transition-colors"

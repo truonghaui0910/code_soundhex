@@ -127,7 +127,7 @@ export function RegisterForm() {
               <div className="space-y-4">
                 <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl">
                   <p className="text-blue-600 dark:text-blue-400 text-center">
-                    💡 <strong>Note:</strong> Didn't receive the email? Check
+                    💡 <strong>Note:</strong> Didn&apos;t receive the email? Check
                     your spam folder or try again in a few minutes.
                   </p>
                 </div>
