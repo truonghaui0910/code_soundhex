@@ -49,8 +49,8 @@ export function TracksList({ initialTracks }: TracksListProps) {
         const query = searchQuery.toLowerCase();
         return (
             track.title.toLowerCase().includes(query) ||
-            track.artist.name.toLowerCase().includes(query) ||
-            track.album.title.toLowerCase().includes(query) ||
+            track.artist?.name.toLowerCase().includes(query) ||
+            track.album?.title.toLowerCase().includes(query) ||
             (track.genre?.name.toLowerCase().includes(query) || false)
         );
     });
@@ -146,8 +146,8 @@ export function TracksList({ initialTracks }: TracksListProps) {
                                                 </div>
                                             </div>
                                         </TableCell>
-                                        <TableCell>{track.artist.name}</TableCell>
-                                        <TableCell>{track.album.title}</TableCell>
+                                        <TableCell>{track.artist?.name || "Unknown Artist"}</TableCell>
+                                        <TableCell>{track.album?.title || "Unknown Album"}</TableCell>
                                         <TableCell>
                                             {track.genre ? (
                                                 <Badge variant="outline">{track.genre.name}</Badge>
