@@ -134,12 +134,12 @@ export function MusicUpload() {
 
             // Auto-select all tracks for album, playlist, and single track
             if (data.type === "album" || data.type === "playlist") {
-                const trackIds = new Set(
-                    data.data.tracks.map((track: SpotifyTrack) => track.id as string),
+                const trackIds = new Set<string>(
+                    data.data.tracks.map((track: SpotifyTrack) => String(track.id)),
                 );
                 setSelectedTracks(trackIds);
             } else if (data.type === "track") {
-                setSelectedTracks(new Set([data.data.id]));
+                setSelectedTracks(new Set([String(data.data.id)]));
             }
         } catch (error) {
             console.error("Error:", error);
