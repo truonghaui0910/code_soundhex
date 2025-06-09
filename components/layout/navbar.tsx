@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { UserNav } from "./user-nav";
 import { SoundHexLogo } from "@/components/ui/soundhex-logo";
-import { supabaseWithLogging } from "@/lib/supabase/client-with-logging";
+import { supabase } from "@/lib/supabase/client";
 
 export function Navbar() {
   const router = useRouter();
@@ -16,7 +16,7 @@ export function Navbar() {
 
   useEffect(() => {
     const fetchUser = async () => {
-      const { data } = await supabaseWithLogging.auth.getSession();
+      const { data } = await supabase.auth.getSession();
       if (data.session?.user) {
         setUser(data.session.user);
       }
@@ -25,7 +25,7 @@ export function Navbar() {
 
     fetchUser();
 
-    const { data: authListener } = supabaseWithLogging.auth.onAuthStateChange(
+    const { data: authListener } = supabase.auth.onAuthStateChange(
       (event: string, session: any) => {
         if (session?.user) {
           setUser(session.user);
