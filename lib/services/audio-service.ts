@@ -95,7 +95,7 @@ export class AudioService {
    * Tải và phát một bài hát
    */
   public playTrack(track: Track): void {
-    if (!this.audio) return;
+    if (!this.audio || !track.file_url) return;
     
     this.currentTrack = track;
     this.audio.src = track.file_url;

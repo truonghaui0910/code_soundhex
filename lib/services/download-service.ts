@@ -6,6 +6,10 @@ export class DownloadService {
    * Download a track file to user's device
    */
   static async downloadTrack(track: Track): Promise<void> {
+    if (!track.file_url) {
+      throw new Error('Track file URL is not available');
+    }
+    
     try {
       let response: Response;
       
@@ -36,7 +40,8 @@ export class DownloadService {
       const fileExtension = this.getFileExtension(track.file_url) || 'mp3';
       
       // Set download filename
-      link.download = `${track.artist.name} - ${track.title}.${fileExtension}`;
+      const artistName = track.artist?.name || 'Unknown Artist';
+      link.download = `${artistName} - ${track.title}.${fileExtension}`;
       
       // Append to body, click, and remove
       document.body.appendChild(link);
@@ -101,6 +106,10 @@ export class DownloadService {
    * Get download size estimate (optional)
    */
   static async getTrackSize(track: Track): Promise<number | null> {
+    if (!track.file_url) {
+      return null;
+    }
+    
     try {
       const response = await fetch(track.file_url, { method: 'HEAD' });
       const contentLength = response.headers.get('content-length');
