@@ -43,8 +43,11 @@ interface Album {
   id: number;
   title: string;
   cover_image_url: string | null;
+  artist: {
+    id: number;
+    name: string;
+  };
   release_date: string | null;
-  artist?: Artist;
 }
 
 interface ArtistDetailClientProps {
