@@ -52,7 +52,7 @@ export async function middleware(req: NextRequest) {
     sessionCache.set(cacheKey, { session, timestamp: now });
     
     // Clean old cache entries
-    for (const [key, value] of sessionCache.entries()) {
+    for (const [key, value] of Array.from(sessionCache.entries())) {
       if ((now - value.timestamp) > CACHE_DURATION) {
         sessionCache.delete(key);
       }
