@@ -8,6 +8,7 @@ export interface Track {
   artist?: {
     id: string | number;
     name: string;
+    profile_image_url?: string;
   };
   album?: {
     id: string | number;
