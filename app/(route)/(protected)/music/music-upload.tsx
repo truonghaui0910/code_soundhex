@@ -527,20 +527,22 @@ export function MusicUpload() {
                                                                 album.id,
                                                             ) && (
                                                                 <div className="mt-4 space-y-2">
-                                                                    <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                                                                        Loading
-                                                                        tracks...
-                                                                    </div>
-                                                                    {album.tracks &&
-                                                                    Array.isArray(
-                                                                        album.tracks,
-                                                                    ) &&
-                                                                    album.tracks
-                                                                        .length >
-                                                                        0
-                                                                        ? album.tracks.map(
-                                                                              (
-                                                                                  track: SpotifyTrack,
+                                                                    {loadingAlbums.has(album.id) ? (
+                                                                        <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                                                                            Loading
+                                                                            tracks...
+                                                                        </div>
+                                                                    ) : (
+                                                                        album.tracks &&
+                                                                        Array.isArray(
+                                                                            album.tracks,
+                                                                        ) &&
+                                                                        album.tracks
+                                                                            .length >
+                                                                            0
+                                                                            ? album.tracks.map(
+                                                                                  (
+                                                                                      track: SpotifyTrack,
                                                                               ) => (
                                                                                   <div
                                                                                       key={
