@@ -135,7 +135,7 @@ export function MusicUpload() {
             // Auto-select all tracks for album, playlist, and single track
             if (data.type === "album" || data.type === "playlist") {
                 const trackIds = new Set(
-                    data.data.tracks.map((track: SpotifyTrack) => track.id),
+                    data.data.tracks.map((track: SpotifyTrack) => track.id as string),
                 );
                 setSelectedTracks(trackIds);
             } else if (data.type === "track") {
