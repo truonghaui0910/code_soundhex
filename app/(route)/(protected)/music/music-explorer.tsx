@@ -89,18 +89,20 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
     const uniqueAlbums = useMemo(() => {
         return Array.from(
             new Map(
-                tracks.map((track) => [
-                    track.album.id,
-                    {
-                        id: track.album.id,
-                        title: track.album.title,
-                        cover_image_url: track.album.cover_image_url,
-                        artist: track.artist,
-                        tracksCount: tracks.filter(
-                            (t) => t.album.id === track.album.id,
-                        ).length,
-                    },
-                ]),
+                tracks
+                    .filter((track) => track.album) // Filter out tracks without album
+                    .map((track) => [
+                        track.album!.id,
+                        {
+                            id: track.album!.id,
+                            title: track.album!.title,
+                            cover_image_url: track.album!.cover_image_url,
+                            artist: track.artist,
+                            tracksCount: tracks.filter(
+                                (t) => t.album && t.album.id === track.album!.id,
+                            ).length,
+                        },
+                    ]),
             ).values(),
         );
     }, [tracks]);
@@ -108,17 +110,19 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
     const uniqueArtists = useMemo(() => {
         return Array.from(
             new Map(
-                tracks.map((track) => [
-                    track.artist.id,
-                    {
-                        id: track.artist.id,
-                        name: track.artist.name,
-                        profile_image_url: track.artist.profile_image_url,
-                        tracksCount: tracks.filter(
-                            (t) => t.artist.id === track.artist.id,
-                        ).length,
-                    },
-                ]),
+                tracks
+                    .filter((track) => track.artist) // Filter out tracks without artist
+                    .map((track) => [
+                        track.artist!.id,
+                        {
+                            id: track.artist!.id,
+                            name: track.artist!.name,
+                            profile_image_url: track.artist!.profile_image_url,
+                            tracksCount: tracks.filter(
+                                (t) => t.artist && t.artist.id === track.artist!.id,
+                            ).length,
+                        },
+                    ]),
             ).values(),
         );
     }, [tracks]);
@@ -269,17 +273,17 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                                 {Array.from(
                                     new Set(
-                                        filteredTracks.map(
-                                            (track) => track.album.id,
-                                        ),
+                                        filteredTracks
+                                            .filter((track) => track.album)
+                                            .map((track) => track.album!.id),
                                     ),
                                 )
                                     .slice(0, 25)
                                     .map((albumId) => {
                                         const track = filteredTracks.find(
-                                            (t) => t.album.id === albumId,
+                                            (t) => t.album && t.album.id === albumId,
                                         );
-                                        if (!track) return null;
+                                        if (!track || !track.album) return null;
 
                                         return (
                                             <Card
@@ -332,12 +336,10 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                                             (
                                                                                 t,
                                                                             ) =>
-                                                                                t
-                                                                                    .album
-                                                                                    .id ===
-                                                                                track
-                                                                                    .album
-                                                                                    .id,
+                                                                                t.album &&
+                                                                                track.album &&
+                                                                                t.album.id ===
+                                                                                track.album.id,
                                                                         );
                                                                     if (
                                                                         albumTracks.length >
@@ -403,20 +405,20 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                                 {Array.from(
                                     new Set(
-                                        filteredTracks.map(
-                                            (track) => track.artist.id,
-                                        ),
+                                        filteredTracks
+                                            .filter((track) => track.artist)
+                                            .map((track) => track.artist!.id),
                                     ),
                                 )
                                     .slice(0, 25)
                                     .map((artistId) => {
                                         const track = filteredTracks.find(
-                                            (t) => t.artist.id === artistId,
+                                            (t) => t.artist && t.artist.id === artistId,
                                         );
                                         const artistTracks = tracks.filter(
-                                            (t) => t.artist.id === artistId,
+                                            (t) => t.artist && t.artist.id === artistId,
                                         );
-                                        if (!track) return null;
+                                        if (!track || !track.artist) return null;
 
                                         return (
                                             <div
