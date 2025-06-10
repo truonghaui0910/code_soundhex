@@ -26,7 +26,7 @@ export async function middleware(req: NextRequest) {
     "/sw.js",    // Service worker
     "/manifest.json"
   ];
-  
+
   const isPublicPath = publicPaths.includes(req.nextUrl.pathname);
   const shouldSkip = skipPaths.some((path) => req.nextUrl.pathname.startsWith(path)) ||
                     req.nextUrl.pathname.includes('.') && !req.nextUrl.pathname.includes('/'); // Skip files with extensions
@@ -39,7 +39,7 @@ export async function middleware(req: NextRequest) {
   const cacheKey = req.headers.get('authorization') || 'anonymous';
   const now = Date.now();
   const cached = sessionCache.get(cacheKey);
-  
+
   let session;
   if (cached && (now - cached.timestamp) < CACHE_DURATION) {
     session = cached.session;
@@ -47,10 +47,10 @@ export async function middleware(req: NextRequest) {
     // Get session only if not cached or cache expired
     const { data: { session: freshSession }, error } = await supabase.auth.getSession();
     session = freshSession;
-    
+
     // Cache the session
     sessionCache.set(cacheKey, { session, timestamp: now });
-    
+
     // Clean old cache entries
     for (const [key, value] of Array.from(sessionCache.entries())) {
       if ((now - value.timestamp) > CACHE_DURATION) {
@@ -62,10 +62,10 @@ export async function middleware(req: NextRequest) {
   // Only log for actual protected routes
   if (req.nextUrl.pathname.startsWith('/') && !req.nextUrl.pathname.includes('.')) {
     console.log(
-      "🔍 Middleware check:",
-      req.nextUrl.pathname,
-      "Session:",
-      !!session
+      "👤 User:",
+      session?.user?.email || "anonymous",
+      "accessing:",
+      req.nextUrl.pathname
     );
   }
 
@@ -79,11 +79,11 @@ export async function middleware(req: NextRequest) {
     "/right-management",
     "/artist"
   ];
-  
+
   const isProtectedPath = protectedPaths.some((path) =>
     req.nextUrl.pathname.startsWith(path)
   );
-  
+
   // Redirect to login if accessing protected route without session
   if (isProtectedPath && !session) {
     console.log("🔒 Redirecting to login:", req.nextUrl.pathname);
