@@ -522,194 +522,230 @@ export function MusicUpload() {
                                                                     <ChevronRight className="h-5 w-5" />
                                                                 )}
                                                             </div>
-
                                                             {expandedAlbums.has(
                                                                 album.id,
                                                             ) && (
                                                                 <div className="mt-4 space-y-2">
-                                                                    <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                                                                        Loading
-                                                                        tracks...
-                                                                    </div>
-                                                                    {album.tracks &&
-                                                                    Array.isArray(
-                                                                        album.tracks,
-                                                                    ) &&
-                                                                    album.tracks
-                                                                        .length >
-                                                                        0
-                                                                        ? album.tracks.map(
-                                                                              (
-                                                                                  track: SpotifyTrack,
-                                                                              ) => (
-                                                                                  <div
-                                                                                      key={
-                                                                                          track.id
-                                                                                      }
-                                                                                      className={`flex items-center gap-3 p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 ${
-                                                                                          selectedTracks.has(
-                                                                                              track.id,
-                                                                                          )
-                                                                                              ? "bg-purple-50 dark:bg-purple-900/20"
-                                                                                              : ""
-                                                                                      }`}
-                                                                                  >
-                                                                                      <div
-                                                                                          className="w-6 h-6 rounded border-2 border-purple-400 flex items-center justify-center cursor-pointer"
-                                                                                          onClick={() =>
-                                                                                              toggleTrackSelection(
-                                                                                                  track.id,
-                                                                                              )
-                                                                                          }
-                                                                                      >
-                                                                                          {selectedTracks.has(
-                                                                                              track.id,
-                                                                                          ) && (
-                                                                                              <Check className="h-4 w-4 text-purple-600" />
-                                                                                          )}
-                                                                                      </div>
-                                                                                      <div className="w-12 h-12 rounded overflow-hidden bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
-                                                                                          {track.image ||
-                                                                                          album.image ? (
-                                                                                              <Image
-                                                                                                  src={
-                                                                                                      track.image ||
-                                                                                                      album.image
-                                                                                                  }
-                                                                                                  alt={
-                                                                                                      track.name
-                                                                                                  }
-                                                                                                  width={
-                                                                                                      48
-                                                                                                  }
-                                                                                                  height={
-                                                                                                      48
-                                                                                                  }
-                                                                                                  className="object-cover w-full h-full"
-                                                                                              />
-                                                                                          ) : (
-                                                                                              <Music className="h-6 w-6 text-white" />
-                                                                                          )}
-                                                                                      </div>
-                                                                                      <div className="flex-1">
-                                                                                          <div className="font-medium">
-                                                                                              {
-                                                                                                  track.name
-                                                                                              }
-                                                                                          </div>
-                                                                                          <div className="text-sm text-gray-600 dark:text-gray-400">
-                                                                                              {
-                                                                                                  track.artist
-                                                                                              }{" "}
-                                                                                              •{" "}
-                                                                                              {formatDuration(
-                                                                                                  track.duration,
-                                                                                              )}
-                                                                                          </div>
-                                                                                      </div>
-                                                                                      <Button
-                                                                                          size="sm"
-                                                                                          variant="ghost"
-                                                                                          onClick={(
-                                                                                              e,
-                                                                                          ) => {
-                                                                                              e.stopPropagation();
-                                                                                              if (
-                                                                                                  currentTrack?.id ===
-                                                                                                      Number(
-                                                                                                          track.id,
-                                                                                                      ) &&
-                                                                                                  isPlaying
-                                                                                              ) {
-                                                                                                  togglePlayPause();
-                                                                                              } else {
-                                                                                                  // Convert SpotifyTrack to Track format
-                                                                                                  const trackToPlay =
-                                                                                                      {
-                                                                                                          id: Number(track.id),
-                                                                                                          title: track.name,
-                                                                                                          file_url:
-                                                                                                              track.preview_url
-                                                                                                                  ? `/api/proxy-audio?url=${encodeURIComponent(track.preview_url)}`
-                                                                                                                  : "",
-                                                                                                          duration:
-                                                                                                              track.duration,
-                                                                                                          audio_file_url:
-                                                                                                              track.preview_url
-                                                                                                                  ? `/api/proxy-audio?url=${encodeURIComponent(track.preview_url)}`
-                                                                                                                  : "",
-                                                                                                          artist: {
-                                                                                                              id: "spotify-artist",
-                                                                                                              name: track.artist,
-                                                                                                          },
-                                                                                                          album: {
-                                                                                                              id: Number(album.id),
-                                                                                                              title: album.name,
-                                                                                                              cover_image_url:
-                                                                                                                  track.image ||
-                                                                                                                  album.image,
-                                                                                                          },
-                                                                                                      };
-                                                                                                  // Set track list for navigation
-                                                                                                  const albumTracks =
-                                                                                                      album.tracks?.map(
-                                                                                                          (
-                                                                                                              t: SpotifyTrack,
-                                                                                                          ) => ({
-                                                                                                              id: Number(
-                                                                                                                  t.id,
-                                                                                                              ),
-                                                                                                              title: t.name,
-                                                                                                              file_url:
-                                                                                                                  t.preview_url
-                                                                                                                      ? `/api/proxy-audio?url=${encodeURIComponent(t.preview_url)}`
-                                                                                                                      : "",
-                                                                                                              duration:
-                                                                                                                  t.duration,
-                                                                                                              audio_file_url:
-                                                                                                                  t.preview_url
-                                                                                                                      ? `/api/proxy-audio?url=${encodeURIComponent(t.preview_url)}`
-                                                                                                                      : "",
-                                                                                                              artist: {
-                                                                                                                  id: "spotify-artist",
-                                                                                                                  name: t.artist,
-                                                                                                              },
-                                                                                                              album: {
-                                                                                                                  id: Number(
-                                                                                                                      album.id,
-                                                                                                                  ),
-                                                                                                                  title: album.name,
-                                                                                                                  cover_image_url:
-                                                                                                                      t.image ||
-                                                                                                                      album.image,
-                                                                                                              },
-                                                                                                          }),
-                                                                                                      ) ||
-                                                                                                      [];
-                                                                                                  setTrackList(
-                                                                                                      albumTracks,
-                                                                                                  );
-                                                                                                  playTrack(
-                                                                                                      trackToPlay,
-                                                                                                  );
-                                                                                              }
-                                                                                          }}
-                                                                                          className="h-8 w-8 rounded-full"
-                                                                                      >
-                                                                                          {currentTrack?.id ===
-                                                                                              Number(
-                                                                                                  track.id,
-                                                                                              ) &&
-                                                                                          isPlaying ? (
-                                                                                              <Pause className="h-4 w-4" />
-                                                                                          ) : (
-                                                                                              <Play className="h-4 w-4" />
-                                                                                          )}
-                                                                                      </Button>
-                                                                                  </div>
-                                                                              ),
-                                                                          )
-                                                                        : null}
+                                                                    {loadingAlbums.has(
+                                                                        album.id,
+                                                                    ) ? (
+                                                                        <div className="text-sm text-gray-600 dark:text-gray-400 mb-2 flex items-center gap-2">
+                                                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                                                            Loading
+                                                                            tracks...
+                                                                        </div>
+                                                                    ) : album.tracks &&
+                                                                      Array.isArray(
+                                                                          album.tracks,
+                                                                      ) &&
+                                                                      album
+                                                                          .tracks
+                                                                          .length >
+                                                                          0 ? (
+                                                                        // Hiển thị tracks khi có data
+                                                                        album.tracks.map(
+                                                                            (
+                                                                                track: SpotifyTrack,
+                                                                            ) => (
+                                                                                <div
+                                                                                    key={
+                                                                                        track.id
+                                                                                    }
+                                                                                    className={`flex items-center gap-3 p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 ${
+                                                                                        selectedTracks.has(
+                                                                                            track.id,
+                                                                                        )
+                                                                                            ? "bg-purple-50 dark:bg-purple-900/20"
+                                                                                            : ""
+                                                                                    }`}
+                                                                                >
+                                                                                    <div
+                                                                                        className="w-6 h-6 rounded border-2 border-purple-400 flex items-center justify-center cursor-pointer"
+                                                                                        onClick={() =>
+                                                                                            toggleTrackSelection(
+                                                                                                track.id,
+                                                                                            )
+                                                                                        }
+                                                                                    >
+                                                                                        {selectedTracks.has(
+                                                                                            track.id,
+                                                                                        ) && (
+                                                                                            <Check className="h-4 w-4 text-purple-600" />
+                                                                                        )}
+                                                                                    </div>
+                                                                                    <div className="w-12 h-12 rounded overflow-hidden bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
+                                                                                        {track.image ||
+                                                                                        album.image ? (
+                                                                                            <Image
+                                                                                                src={
+                                                                                                    track.image ||
+                                                                                                    album.image
+                                                                                                }
+                                                                                                alt={
+                                                                                                    track.name
+                                                                                                }
+                                                                                                width={
+                                                                                                    48
+                                                                                                }
+                                                                                                height={
+                                                                                                    48
+                                                                                                }
+                                                                                                className="object-cover w-full h-full"
+                                                                                            />
+                                                                                        ) : (
+                                                                                            <Music className="h-6 w-6 text-white" />
+                                                                                        )}
+                                                                                    </div>
+                                                                                    <div className="flex-1">
+                                                                                        <div className="font-medium">
+                                                                                            {
+                                                                                                track.name
+                                                                                            }
+                                                                                        </div>
+                                                                                        <div className="text-sm text-gray-600 dark:text-gray-400">
+                                                                                            {
+                                                                                                track.artist
+                                                                                            }{" "}
+                                                                                            •{" "}
+                                                                                            {formatDuration(
+                                                                                                track.duration,
+                                                                                            )}
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <Button
+                                                                                        size="sm"
+                                                                                        variant="ghost"
+                                                                                        onClick={(
+                                                                                            e,
+                                                                                        ) => {
+                                                                                            e.stopPropagation();
+                                                                                            if (
+                                                                                                currentTrack?.id ===
+                                                                                                    Number(
+                                                                                                        track.id,
+                                                                                                    ) &&
+                                                                                                isPlaying
+                                                                                            ) {
+                                                                                                togglePlayPause();
+                                                                                            } else {
+                                                                                                // Convert SpotifyTrack to Track format
+                                                                                                const trackToPlay =
+                                                                                                    {
+                                                                                                        id: Number(
+                                                                                                            track.id,
+                                                                                                        ),
+                                                                                                        title: track.name,
+                                                                                                        file_url:
+                                                                                                            track.preview_url
+                                                                                                                ? `/api/proxy-audio?url=${encodeURIComponent(track.preview_url)}`
+                                                                                                                : "",
+                                                                                                        duration:
+                                                                                                            track.duration,
+                                                                                                        audio_file_url:
+                                                                                                            track.preview_url
+                                                                                                                ? `/api/proxy-audio?url=${encodeURIComponent(track.preview_url)}`
+                                                                                                                : "",
+                                                                                                        artist: {
+                                                                                                            id: "spotify-artist",
+                                                                                                            name: track.artist,
+                                                                                                        },
+                                                                                                        album: {
+                                                                                                            id: Number(
+                                                                                                                album.id,
+                                                                                                            ),
+                                                                                                            title: album.name,
+                                                                                                            cover_image_url:
+                                                                                                                track.image ||
+                                                                                                                album.image,
+                                                                                                        },
+                                                                                                    };
+                                                                                                // Set track list for navigation
+                                                                                                const albumTracks =
+                                                                                                    album.tracks?.map(
+                                                                                                        (
+                                                                                                            t: SpotifyTrack,
+                                                                                                        ) => ({
+                                                                                                            id: Number(
+                                                                                                                t.id,
+                                                                                                            ),
+                                                                                                            title: t.name,
+                                                                                                            file_url:
+                                                                                                                t.preview_url
+                                                                                                                    ? `/api/proxy-audio?url=${encodeURIComponent(t.preview_url)}`
+                                                                                                                    : "",
+                                                                                                            duration:
+                                                                                                                t.duration,
+                                                                                                            audio_file_url:
+                                                                                                                t.preview_url
+                                                                                                                    ? `/api/proxy-audio?url=${encodeURIComponent(t.preview_url)}`
+                                                                                                                    : "",
+                                                                                                            artist: {
+                                                                                                                id: "spotify-artist",
+                                                                                                                name: t.artist,
+                                                                                                            },
+                                                                                                            album: {
+                                                                                                                id: Number(
+                                                                                                                    album.id,
+                                                                                                                ),
+                                                                                                                title: album.name,
+                                                                                                                cover_image_url:
+                                                                                                                    t.image ||
+                                                                                                                    album.image,
+                                                                                                            },
+                                                                                                        }),
+                                                                                                    ) ||
+                                                                                                    [];
+                                                                                                setTrackList(
+                                                                                                    albumTracks,
+                                                                                                );
+                                                                                                playTrack(
+                                                                                                    trackToPlay,
+                                                                                                );
+                                                                                            }
+                                                                                        }}
+                                                                                        className="h-8 w-8 rounded-full"
+                                                                                    >
+                                                                                        {currentTrack?.id ===
+                                                                                            Number(
+                                                                                                track.id,
+                                                                                            ) &&
+                                                                                        isPlaying ? (
+                                                                                            <Pause className="h-4 w-4" />
+                                                                                        ) : (
+                                                                                            <Play className="h-4 w-4" />
+                                                                                        )}
+                                                                                    </Button>
+                                                                                </div>
+                                                                            ),
+                                                                        )
+                                                                    ) : (
+                                                                        // Fallback khi không có tracks
+                                                                        <div className="text-sm text-gray-500 dark:text-gray-400 p-4 text-center border border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
+                                                                            {album.tracks &&
+                                                                            album
+                                                                                .tracks
+                                                                                .length ===
+                                                                                0 ? (
+                                                                                "No tracks found in this album"
+                                                                            ) : (
+                                                                                <Button
+                                                                                    variant="ghost"
+                                                                                    size="sm"
+                                                                                    onClick={() =>
+                                                                                        loadAlbumTracks(
+                                                                                            album.id,
+                                                                                        )
+                                                                                    }
+                                                                                    className="text-purple-600 hover:text-purple-700"
+                                                                                >
+                                                                                    <Download className="h-4 w-4 mr-2" />
+                                                                                    Load
+                                                                                    album
+                                                                                    tracks
+                                                                                </Button>
+                                                                            )}
+                                                                        </div>
+                                                                    )}
                                                                 </div>
                                                             )}
                                                         </div>
@@ -856,7 +892,9 @@ export function MusicUpload() {
                                                                         // Convert SpotifyTrack to Track format
                                                                         const trackToPlay =
                                                                             {
-                                                                                id: Number(track.id),
+                                                                                id: Number(
+                                                                                    track.id,
+                                                                                ),
                                                                                 title: track.name,
                                                                                 file_url:
                                                                                     track.preview_url
@@ -873,9 +911,11 @@ export function MusicUpload() {
                                                                                     name: track.artist,
                                                                                 },
                                                                                 album: {
-                                                                                    id: Number(spotifyData
-                                                                                        .data
-                                                                                        .id),
+                                                                                    id: Number(
+                                                                                        spotifyData
+                                                                                            .data
+                                                                                            .id,
+                                                                                    ),
                                                                                     title: spotifyData
                                                                                         .data
                                                                                         .name,
@@ -922,7 +962,7 @@ export function MusicUpload() {
                                                                                 }),
                                                                             );
                                                                         setTrackList(
-                                                                                                           allTracks,
+                                                                            allTracks,
                                                                         );
                                                                         playTrack(
                                                                             trackToPlay,
@@ -932,7 +972,9 @@ export function MusicUpload() {
                                                                 className="h-8 w-8 rounded-full"
                                                             >
                                                                 {currentTrack?.id ===
-                                                                    Number(track.id) &&
+                                                                    Number(
+                                                                        track.id,
+                                                                    ) &&
                                                                 isPlaying ? (
                                                                     <Pause className="h-4 w-4" />
                                                                 ) : (
