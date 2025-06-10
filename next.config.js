@@ -1,8 +1,23 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     images: {
-        domains: ["storage.automusic.win", "i.scdn.co", "mosaic.scdn.co"],
+        remotePatterns: [
+            {
+                protocol: 'https',
+                hostname: 'storage.automusic.win',
+            },
+            {
+                protocol: 'https',
+                hostname: 'i.scdn.co',
+            },
+            {
+                protocol: 'https',
+                hostname: 'mosaic.scdn.co',
+            },
+        ],
+        unoptimized: true, // Disable optimization for Docker
     },
+    output: 'standalone', // Better for Docker deployment
 };
 
 module.exports = nextConfig;
