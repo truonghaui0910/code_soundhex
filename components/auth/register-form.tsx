@@ -95,12 +95,18 @@ export function RegisterForm() {
 
     try {
       const returnUrl = '/music'; // Default return URL for registration
-      const redirectTo = `${window.location.origin}/api/auth/callback?returnUrl=${encodeURIComponent(returnUrl)}`;
-      
+
+      // Import và sử dụng utility function
+      const { getClientBaseUrl } = await import('@/lib/utils/get-base-url');
+      const baseUrl = getClientBaseUrl();
+      const redirectTo = `${baseUrl}/api/auth/callback?returnUrl=${encodeURIComponent(returnUrl)}`;
+
       // Log the redirectTo URL for debugging
       console.log('🔗 Google OAuth redirectTo (Register):', redirectTo);
       console.log('📍 Return URL (Register):', returnUrl);
-      
+      console.log('🌐 Base URL:', baseUrl);
+      console.log('🌍 Environment:', process.env.NODE_ENV);
+
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
