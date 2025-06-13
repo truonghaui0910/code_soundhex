@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -59,11 +58,11 @@ export function LoginForm() {
       if (data.session) {
         // Wait a moment for session to be properly set
         await new Promise(resolve => setTimeout(resolve, 500));
-        
+
         // Get returnUrl from URL parameters or default to music
         const urlParams = new URLSearchParams(window.location.search);
         const returnUrl = urlParams.get('returnUrl') || '/music';
-        
+
         // Force a full page reload to ensure auth state is updated
         window.location.href = returnUrl;
       }
@@ -80,12 +79,18 @@ export function LoginForm() {
 
     try {
       const returnUrl = new URLSearchParams(window.location.search).get('returnUrl') || '/music';
-      const redirectTo = `${window.location.origin}/api/auth/callback?returnUrl=${encodeURIComponent(returnUrl)}`;
-      
+
+      // Import và sử dụng utility function
+      const { getClientBaseUrl } = await import('@/lib/utils/get-base-url');
+      const baseUrl = getClientBaseUrl();
+      const redirectTo = `${baseUrl}/api/auth/callback?returnUrl=${encodeURIComponent(returnUrl)}`;
+
       // Log the redirectTo URL for debugging
       console.log('🔗 Google OAuth redirectTo:', redirectTo);
       console.log('📍 Return URL:', returnUrl);
-      
+      console.log('🌐 Base URL:', baseUrl);
+      console.log('🌍 Environment:', process.env.NODE_ENV);
+
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -199,7 +204,7 @@ export function LoginForm() {
                   </div>
                 )}
               </Button>
-              
+
               {/* Divider */}
               <div className="relative my-6">
                 <div className="absolute inset-0 flex items-center">
@@ -231,7 +236,7 @@ export function LoginForm() {
               </Button>
             </form>
           </Form>
-          
+
           {/* Footer Links */}
           <div className="mt-8 text-center space-y-4">
             <p className="text-gray-600 dark:text-gray-300">
