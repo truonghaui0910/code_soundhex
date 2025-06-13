@@ -82,9 +82,31 @@ export function RegisterForm() {
 
       setRegisteredEmail(values.email);
       setIsRegistered(true);
-      form.reset();
     } catch (error) {
       setError("An error occurred during registration");
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function handleGoogleSignup() {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/api/auth/callback?returnUrl=/music`
+        }
+      });
+
+      if (error) {
+        setError(error.message);
+        return;
+      }
+    } catch (error) {
+      setError("An error occurred during Google signup");
     } finally {
       setIsLoading(false);
     }
@@ -304,6 +326,23 @@ export function RegisterForm() {
                 )}
               </Button>
             </form>
+            <Button
+              type="button"
+              className="w-full h-11 mt-4 bg-blue-500 hover:bg-blue-700 text-white font-medium rounded-lg transition-all duration-300 shadow-lg"
+              disabled={isLoading}
+              onClick={handleGoogleSignup}
+            >
+              {isLoading ? (
+                <div className="flex items-center space-x-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>Signing up with Google...</span>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-2">
+                  <span>Sign Up with Google</span>
+                </div>
+              )}
+            </Button>
           </Form>
 
           {/* Footer Links */}

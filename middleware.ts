@@ -61,8 +61,21 @@ export async function middleware(req: NextRequest) {
 
   // Only log for actual protected routes
   if (req.nextUrl.pathname.startsWith('/') && !req.nextUrl.pathname.includes('.')) {
+    // Get Vietnam time (GMT+7)
+    const now = new Date();
+    const vietnamTime = new Date(now.getTime() + (7 * 60 * 60 * 1000));
+    
+    const year = vietnamTime.getFullYear();
+    const month = String(vietnamTime.getMonth() + 1).padStart(2, '0');
+    const day = String(vietnamTime.getDate()).padStart(2, '0');
+    const hours = String(vietnamTime.getHours()).padStart(2, '0');
+    const minutes = String(vietnamTime.getMinutes()).padStart(2, '0');
+    const seconds = String(vietnamTime.getSeconds()).padStart(2, '0');
+    
+    const timestamp = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    
     console.log(
-      "👤 User:",
+      `[${timestamp}] 👤 User:`,
       session?.user?.email || "anonymous",
       "accessing:",
       req.nextUrl.pathname
@@ -86,7 +99,20 @@ export async function middleware(req: NextRequest) {
 
   // Redirect to login if accessing protected route without session
   if (isProtectedPath && !session) {
-    console.log("🔒 Redirecting to login:", req.nextUrl.pathname);
+    // Get Vietnam time (GMT+7)
+    const now = new Date();
+    const vietnamTime = new Date(now.getTime() + (7 * 60 * 60 * 1000));
+    
+    const year = vietnamTime.getFullYear();
+    const month = String(vietnamTime.getMonth() + 1).padStart(2, '0');
+    const day = String(vietnamTime.getDate()).padStart(2, '0');
+    const hours = String(vietnamTime.getHours()).padStart(2, '0');
+    const minutes = String(vietnamTime.getMinutes()).padStart(2, '0');
+    const seconds = String(vietnamTime.getSeconds()).padStart(2, '0');
+    
+    const timestamp = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    
+    console.log(`[${timestamp}] 🔒 Redirecting to login:`, req.nextUrl.pathname);
     const redirectUrl = new URL("/login", req.url);
     redirectUrl.searchParams.set("returnUrl", req.nextUrl.pathname);
     return NextResponse.redirect(redirectUrl);
