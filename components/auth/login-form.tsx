@@ -79,10 +79,17 @@ export function LoginForm() {
     setError(null);
 
     try {
+      const returnUrl = new URLSearchParams(window.location.search).get('returnUrl') || '/music';
+      const redirectTo = `${window.location.origin}/api/auth/callback?returnUrl=${encodeURIComponent(returnUrl)}`;
+      
+      // Log the redirectTo URL for debugging
+      console.log('🔗 Google OAuth redirectTo:', redirectTo);
+      console.log('📍 Return URL:', returnUrl);
+      
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/api/auth/callback?returnUrl=${encodeURIComponent(new URLSearchParams(window.location.search).get('returnUrl') || '/music')}`
+          redirectTo: redirectTo
         }
       });
 
