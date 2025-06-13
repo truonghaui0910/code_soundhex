@@ -94,10 +94,17 @@ export function RegisterForm() {
     setError(null);
 
     try {
+      const returnUrl = '/music'; // Default return URL for registration
+      const redirectTo = `${window.location.origin}/api/auth/callback?returnUrl=${encodeURIComponent(returnUrl)}`;
+      
+      // Log the redirectTo URL for debugging
+      console.log('🔗 Google OAuth redirectTo (Register):', redirectTo);
+      console.log('📍 Return URL (Register):', returnUrl);
+      
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/api/auth/callback?returnUrl=/music`
+          redirectTo: redirectTo
         }
       });
 
