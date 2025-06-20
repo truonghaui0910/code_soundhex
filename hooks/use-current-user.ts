@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState, useRef } from "react";
@@ -28,10 +27,10 @@ export function useCurrentUser() {
     const initializeAuth = async () => {
       try {
         setLoading(true);
-        
+
         // Get initial session only once
         const { data: { session }, error: authError } = await supabase.auth.getSession();
-        
+
         if (authError) {
           console.error("Auth error:", authError);
           setError(authError);
@@ -53,7 +52,7 @@ export function useCurrentUser() {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log('Auth state changed:', event, session?.user?.email);
-      
+
       // Only update state for important events, not token refresh
       if (event === 'SIGNED_IN') {
         setUser(session?.user as User || null);
