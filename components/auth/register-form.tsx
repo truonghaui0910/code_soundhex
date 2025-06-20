@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -96,16 +97,14 @@ export function RegisterForm() {
     try {
       const returnUrl = '/music'; // Default return URL for registration
 
-      // Import và sử dụng utility function
-      const { getClientBaseUrl } = await import('@/lib/utils/get-base-url');
-      const baseUrl = getClientBaseUrl();
+      // Use NEXT_PUBLIC_SITE_URL or fallback to window.location.origin
+      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
       const redirectTo = `${baseUrl}/api/auth/callback?returnUrl=${encodeURIComponent(returnUrl)}`;
 
       // Log the redirectTo URL for debugging
       console.log('🔗 Google OAuth redirectTo (Register):', redirectTo);
       console.log('📍 Return URL (Register):', returnUrl);
       console.log('🌐 Base URL:', baseUrl);
-      console.log('🌍 Environment:', process.env.NODE_ENV);
 
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
