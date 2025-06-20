@@ -34,7 +34,8 @@ export async function GET(request: NextRequest) {
   }
 
   // Redirect to the return URL or default to music page
-  const redirectUrl = new URL(returnUrl, requestUrl.origin);
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || requestUrl.origin;
+  const redirectUrl = new URL(returnUrl, baseUrl);
   console.log(`[${timestamp}] 🎯 Redirecting to: ${redirectUrl.toString()}`);
   
   return NextResponse.redirect(redirectUrl);
