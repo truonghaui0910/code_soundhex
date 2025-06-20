@@ -88,7 +88,7 @@ export async function middleware(req: NextRequest) {
     "/license", 
     "/agreements", 
     "/album",
-    "/music",
+    "/music/upload", // Only upload requires authentication
     "/right-management",
     "/artist"
   ];
