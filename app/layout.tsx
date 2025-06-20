@@ -2,6 +2,8 @@ import "./globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { Toaster } from "sonner";
+import { AudioPlayerProvider } from "@/contexts/AudioPlayerContext";
+import { MusicPlayer } from "@/components/music/MusicPlayer";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -41,8 +43,11 @@ export default function RootLayout({
         className={`${inter.className} dark:bg-background dark:text-foreground bg-background text-foreground`}
         style={{ backgroundColor: "hsl(220 15% 12%)", color: "hsl(0 0% 85%)" }}
       >
-        {children}
-        <Toaster position="top-right" richColors />
+        <AudioPlayerProvider>
+          {children}
+          <MusicPlayer />
+          <Toaster position="top-right" richColors />
+        </AudioPlayerProvider>
       </body>
     </html>
   );

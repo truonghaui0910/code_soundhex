@@ -256,8 +256,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                 )}
             </div>
 
-            {/* Music Player */}
-            <MusicPlayer />
+            {/* Music Player đã được thêm vào root layout */}
         </div>
     );
 }
