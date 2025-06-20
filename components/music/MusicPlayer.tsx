@@ -52,7 +52,7 @@ export function MusicPlayer() {
 
   // Use effect for debugging
   useEffect(() => {
-    console.log("MusicPlayer: currentTrack =", currentTrack?.title || null);
+    console.log("MusicPlayer: currentTrack =", currentTrack?.id || null);
     console.log("MusicPlayer: isPlaying =", isPlaying);
   }, [currentTrack, isPlaying]);
 
