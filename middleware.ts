@@ -88,7 +88,6 @@ export async function middleware(req: NextRequest) {
     "/license", 
     "/agreements", 
     "/album",
-    "/music",
     "/right-management",
     "/artist"
   ];
