@@ -1,12 +1,68 @@
 
-import { Metadata } from "next";
-import { MusicUpload } from "../music-upload";
+"use client";
 
-export const metadata: Metadata = {
-  title: "Upload Music - SoundHex",
-  description: "Upload your music to SoundHex or import from Spotify",
-};
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { MusicUpload } from "../music-upload";
+import { toast } from "sonner";
+
+interface Agreement {
+  id: number;
+  status: string;
+}
 
 export default function UploadPage() {
+  const router = useRouter();
+  const [isValidated, setIsValidated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const validateAgreements = async () => {
+      try {
+        const response = await fetch("/api/agreements/list");
+        
+        if (!response.ok) {
+          throw new Error("Failed to fetch agreements");
+        }
+
+        const data = await response.json();
+        const agreements: Agreement[] = Array.isArray(data.data) ? data.data : Array.isArray(data) ? data : [];
+        
+        // Check if there's at least one completed agreement
+        const hasCompletedAgreement = agreements.some(
+          agreement => agreement.status.toLowerCase() === 'completed'
+        );
+
+        if (!hasCompletedAgreement) {
+          toast.error("You need at least one completed agreement before uploading music");
+          router.push("/agreements");
+          return;
+        }
+
+        setIsValidated(true);
+      } catch (error) {
+        console.error("Error validating agreements:", error);
+        toast.error("Failed to validate agreements");
+        router.push("/agreements");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    validateAgreements();
+  }, [router]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-600"></div>
+      </div>
+    );
+  }
+
+  if (!isValidated) {
+    return null; // Will redirect to agreements page
+  }
+
   return <MusicUpload />;
 }
