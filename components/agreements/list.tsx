@@ -143,8 +143,24 @@ export default function AgreementsList() {
   };
 
   // Download document
-  const downloadDocument = (url: string) => {
-    window.open(url, '_blank');
+  const downloadDocument = async (agreementId: number) => {
+    try {
+      const response = await fetch(`/api/agreements?id=${agreementId}`);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch document info: ${response.status}`);
+      }
+      const data = await response.json();
+      
+      // Check if audit_log_url exists in the response
+      if (data && data.audit_log_url) {
+        window.open(data.audit_log_url, '_blank');
+      } else {
+        toast.error("Document not available");
+      }
+    } catch (error: any) {
+      console.error("Error downloading document:", error);
+      toast.error(error.message || "Failed to download document");
+    }
   };
 
   // Create new agreement
@@ -335,11 +351,11 @@ export default function AgreementsList() {
                                   </Button>
                                 )}
 
-                                {agreement.status.toLowerCase() === "completed" && agreement.audit_log_url && (
+                                {agreement.status.toLowerCase() === "completed" && (
                                   <Button
                                     variant="outline"
                                     size="sm"
-                                    onClick={() => downloadDocument(agreement.audit_log_url!)}
+                                    onClick={() => downloadDocument(agreement.id)}
                                   >
                                     <Download className="mr-1 h-3 w-3" />
                                     Document
@@ -442,18 +458,16 @@ export default function AgreementsList() {
                   </div>
                 </div>
 
-                {selectedAgreement.audit_log_url && (
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Documents</h3>
-                    <Button 
-                      variant="outline"
-                      onClick={() => downloadDocument(selectedAgreement.audit_log_url!)}
-                    >
-                      <Download className="mr-2 h-4 w-4" />
-                      Download Audit Log
-                    </Button>
-                  </div>
-                )}
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Documents</h3>
+                  <Button 
+                    variant="outline"
+                    onClick={() => downloadDocument(selectedAgreement.id)}
+                  >
+                    <Download className="mr-2 h-4 w-4" />
+                    Download Document
+                  </Button>
+                </div>
               </div>
 
               <DialogFooter>
