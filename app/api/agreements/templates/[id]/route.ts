@@ -95,7 +95,7 @@ export async function GET(
   try {
     const response = await fetch(`http://178.156.150.2:8083/items/templates/${id}`, {
       headers: {
-        "Authorization": "Bearer Fm70LiZ8WQ_1ExEVCqOxyoEgkwjiQiXs"
+        "Authorization": `Bearer ${process.env.TEMPLATES_API_BEARER_TOKEN!}`
       },
       cache: 'no-store'
     });
