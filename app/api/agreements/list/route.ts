@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
       `https://docs.360digital.fm/api/submissions?q=${encodeURIComponent(userEmail)}&limit=100`,
       {
         headers: {
-          'X-Auth-Token': 'qh3zTkMnTUNxCvbwSxZx99fuUoLG45fmeK6ZUYUYdKC'
+          'X-Auth-Token': process.env.FORM_SUBMISSION_API_TOKEN!
         }
       }
     );

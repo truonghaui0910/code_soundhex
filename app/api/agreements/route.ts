@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
     const submissionResponse = await fetch('https://docs.360digital.fm/api/submissions/emails', {
       method: 'POST',
       headers: {
-        'X-Auth-Token': 'qh3zTkMnTUNxCvbwSxZx99fuUoLG45fmeK6ZUYUYdKC',
+        'X-Auth-Token': process.env.FORM_SUBMISSION_API_TOKEN!,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
     const updateResponse = await fetch(`http://178.156.150.2:8083/items/submitters/${submissionId}`, {
       method: 'PATCH',
       headers: {
-        'Authorization': 'Bearer Fm70LiZ8WQ_1ExEVCqOxyoEgkwjiQiXs',
+        'Authorization': `Bearer ${process.env.TEMPLATES_API_BEARER_TOKEN!}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
