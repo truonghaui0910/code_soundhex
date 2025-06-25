@@ -139,3 +139,59 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+export async function GET(request: NextRequest) {
+  try {
+    // Get the current user's session
+    const supabase = createRouteHandlerClient({ cookies });
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+    
+    // Get submission ID from URL params
+    const { searchParams } = new URL(request.url);
+    const submissionId = searchParams.get('id');
+    
+    if (!submissionId) {
+      return NextResponse.json(
+        { error: "Submission ID is required" },
+        { status: 400 }
+      );
+    }
+    
+    // Call the external API to get submission details
+    const response = await fetch(
+      `https://docs.360digital.fm/api/submissions/${submissionId}`,
+      {
+        headers: {
+          'X-Auth-Token': process.env.FORM_SUBMISSION_API_TOKEN!
+        }
+      }
+    );
+    
+    if (!response.ok) {
+      console.error('API error:', await response.text());
+      return NextResponse.json(
+        { error: `Failed to fetch submission details: ${response.status}` },
+        { status: 500 }
+      );
+    }
+    
+    const data = await response.json();
+    
+    // Return the data
+    return NextResponse.json(data);
+    
+  } catch (err) {
+    console.error("Error fetching submission details:", err);
+    return NextResponse.json(
+      { error: "Failed to fetch submission details", message: err instanceof Error ? err.message : "Unknown error" },
+      { status: 500 }
+    );
+  }
+}
