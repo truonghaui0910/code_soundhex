@@ -151,12 +151,15 @@ export default function AgreementsList() {
       }
       const data = await response.json();
 
-      // Get document URL from documents array
-      if (data && data.documents && data.documents.length > 0 && data.documents[0].url) {
-        window.open(data.documents[0].url, '_blank');
-      } else if (data && data.audit_log_url) {
-        // Fallback to audit_log_url if documents array doesn't have URL
+      // Get document URL - prioritize audit_log_url from response
+      if (data && data.audit_log_url) {
         window.open(data.audit_log_url, '_blank');
+      } else if (data && data.documents && data.documents.length > 0 && data.documents[0].url) {
+        // Fallback to documents array if available
+        window.open(data.documents[0].url, '_blank');
+      } else if (data && data.combined_document_url) {
+        // Another fallback to combined_document_url
+        window.open(data.combined_document_url, '_blank');
       } else {
         toast.error("Document not available");
       }
@@ -465,7 +468,13 @@ export default function AgreementsList() {
                   <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Documents</h3>
                   <Button 
                     variant="outline"
-                    onClick={() => downloadDocument(selectedAgreement.id)}
+                    onClick={() => {
+                      if (selectedAgreement.audit_log_url) {
+                        window.open(selectedAgreement.audit_log_url, '_blank');
+                      } else {
+                        downloadDocument(selectedAgreement.id);
+                      }
+                    }}
                   >
                     <Download className="mr-2 h-4 w-4" />
                     Download Document
