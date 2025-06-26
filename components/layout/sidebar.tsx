@@ -147,6 +147,7 @@ export function Sidebar() {
           {item.title}
         </Link>
       ))}
+       
     </div>
   );
 
@@ -161,6 +162,17 @@ export function Sidebar() {
       </SheetTrigger>
       <SheetContent side="left" className="w-64 p-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
         <SidebarContent />
+         <Link
+              href="/upload"
+              className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
+                pathname === "/upload"
+                  ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300"
+                  : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+              }`}
+            >
+              <Upload className="h-5 w-5" />
+              <span>Upload Music</span>
+            </Link>
       </SheetContent>
     </Sheet>
   );
@@ -175,6 +187,17 @@ export function Sidebar() {
       }}
     >
       <SidebarContent />
+       <Link
+              href="/upload"
+              className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
+                pathname === "/upload"
+                  ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300"
+                  : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+              }`}
+            >
+              <Upload className="h-5 w-5" />
+              <span>Upload Music</span>
+            </Link>
     </div>
   );
 
