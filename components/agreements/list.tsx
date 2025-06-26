@@ -151,15 +151,12 @@ export default function AgreementsList() {
       }
       const data = await response.json();
 
-      // Get document URL - prioritize audit_log_url from response
-      if (data && data.audit_log_url) {
-        window.open(data.audit_log_url, '_blank');
-      } else if (data && data.documents && data.documents.length > 0 && data.documents[0].url) {
-        // Fallback to documents array if available
+      // Get document URL from documents array
+      if (data && data.documents && data.documents.length > 0 && data.documents[0].url) {
         window.open(data.documents[0].url, '_blank');
-      } else if (data && data.combined_document_url) {
-        // Another fallback to combined_document_url
-        window.open(data.combined_document_url, '_blank');
+      } else if (data && data.audit_log_url) {
+        // Fallback to audit_log_url if documents array doesn't have URL
+        window.open(data.audit_log_url, '_blank');
       } else {
         toast.error("Document not available");
       }
