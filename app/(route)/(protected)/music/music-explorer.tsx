@@ -43,9 +43,9 @@ const formatDuration = (seconds: number | null) => {
 // Component to handle upload page redirect
 function UploadRedirect() {
     const router = useRouter();
-    
+
     useEffect(() => {
-        router.replace('/music/upload');
+        router.replace('/upload');
     }, [router]);
 
     return (
@@ -220,14 +220,12 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                 <Headphones className="mr-2 h-5 w-5" />
                                 Full Library
                             </Button>
-                            <Button
-                                size="lg"
-                                onClick={() => setCurrentView("upload")}
-                                className={`${currentView === "upload" ? "bg-white text-purple-600 hover:bg-red-500 hover:text-white" : "bg-white/20 text-white hover:bg-white/30"}`}
-                            >
-                                <Upload className="mr-2 h-5 w-5" />
-                                Upload Music
-                            </Button>
+                            <Link href="/upload">
+                                <Button size="lg">
+                                    <Upload className="mr-2 h-5 w-5" />
+                                    Upload Music
+                                </Button>
+                            </Link>
                         </div>
                     </div>
                 </div>
