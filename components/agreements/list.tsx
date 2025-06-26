@@ -468,13 +468,7 @@ export default function AgreementsList() {
                   <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Documents</h3>
                   <Button 
                     variant="outline"
-                    onClick={() => {
-                      if (selectedAgreement.audit_log_url) {
-                        window.open(selectedAgreement.audit_log_url, '_blank');
-                      } else {
-                        downloadDocument(selectedAgreement.id);
-                      }
-                    }}
+                    onClick={() => downloadDocument(selectedAgreement.id)}
                   >
                     <Download className="mr-2 h-4 w-4" />
                     Download Document
