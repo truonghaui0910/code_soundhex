@@ -646,34 +646,104 @@ export function MusicUpload() {
                                                         </div>
 
                                                         {expandedAlbums.has(album.id) && album.tracks && album.tracks.length > 0 && (
-                                                            <div className="mt-4 pl-4 border-l-2 border-gray-200 dark:border-gray-700 space-y-2">
-                                                                {album.tracks.map((track: SpotifyTrack, index: number) => (
-                                                                    <div
-                                                                        key={track.id}
-                                                                        className={`flex items-center gap-4 p-2 rounded cursor-pointer transition-colors ${
-                                                                            selectedTracks.has(track.id)
-                                                                                ? "bg-purple-50 dark:bg-purple-900/20"
-                                                                                : "hover:bg-gray-50 dark:hover:bg-gray-800"
-                                                                        }`}
-                                                                        onClick={() => toggleTrackSelection(track.id)}
-                                                                    >
-                                                                        <div className="w-4 h-4 flex items-center justify-center">
-                                                                            {selectedTracks.has(track.id) ? (
-                                                                                <Check className="h-3 w-3 text-purple-600" />
-                                                                            ) : (
-                                                                                <span className="text-xs text-gray-400">{index + 1}</span>
-                                                                            )}
-                                                                        </div>
-                                                                        <div className="flex-1 min-w-0">
-                                                                            <p className="text-sm font-medium truncate">{track.name}</p>
-                                                                        </div>
-                                                                        <div className="text-xs text-gray-500">
-                                                                            {formatDuration(track.duration)}
-                                                                        </div>
-                                                                    </div>
-                                                                ))}
+                                                            <div className="mt-4 space-y-2">
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                                                        Select tracks from this album:
+                                                    </span>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => {
+                                                            const allAlbumTrackIds = album.tracks.map((t: SpotifyTrack) => t.id);
+                                                            const allSelected = allAlbumTrackIds.every(id => selectedTracks.has(id));
+
+                                                            if (allSelected) {
+                                                                // Deselect all tracks from this album
+                                                                const newSelection = new Set(selectedTracks);
+                                                                allAlbumTrackIds.forEach(id => newSelection.delete(id));
+                                                                setSelectedTracks(newSelection);
+                                                            } else {
+                                                                // Select all tracks from this album
+                                                                const newSelection = new Set(selectedTracks);
+                                                                allAlbumTrackIds.forEach(id => newSelection.add(id));
+                                                                setSelectedTracks(newSelection);
+                                                            }
+                                                        }}
+                                                    >
+                                                        {album.tracks.every((t: SpotifyTrack) => selectedTracks.has(t.id)) ? "Deselect All" : "Select All"}
+                                                    </Button>
+                                                </div>
+
+                                                <div className="space-y-2 max-h-64 overflow-y-auto pl-4 border-l-2 border-gray-200 dark:border-gray-700">
+                                                    {album.tracks.map((track: SpotifyTrack, index: number) => (
+                                                        <div
+                                                            key={track.id}
+                                                            className={`flex items-center gap-4 p-3 rounded-lg border cursor-pointer transition-colors ${
+                                                                selectedTracks.has(track.id)
+                                                                    ? "bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-700"
+                                                                    : "bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800"
+                                                            }`}
+                                                            onClick={() => toggleTrackSelection(track.id)}
+                                                        >
+                                                            <div className="w-6 h-6 flex items-center justify-center">
+                                                                {selectedTracks.has(track.id) ? (
+                                                                    <Check className="h-4 w-4 text-purple-600" />
+                                                                ) : (
+                                                                    <span className="text-sm text-gray-400">{index + 1}</span>
+                                                                )}
                                                             </div>
-                                                        )}
+
+                                                            <div className="relative">
+                                                                <Image
+                                                                    src={track.image || album.image || "/images/soundhex.png"}
+                                                                    alt={track.name}
+                                                                    width={48}
+                                                                    height={48}
+                                                                    className="rounded"
+                                                                />
+                                                                {track.preview_url && (
+                                                                    <Button
+                                                                        size="sm"
+                                                                        className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full p-0"
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            if (currentTrack?.id === track.id) {
+                                                                                togglePlayPause();
+                                                                            } else {
+                                                                                playTrack({
+                                                                                    id: track.id,
+                                                                                    title: track.name,
+                                                                                    artist: track.artist,
+                                                                                    image: track.image,
+                                                                                    audio_url: track.preview_url,
+                                                                                    duration: track.duration
+                                                                                });
+                                                                            }
+                                                                        }}
+                                                                    >
+                                                                        {currentTrack?.id === track.id && isPlaying ? (
+                                                                            <Pause className="h-2 w-2" />
+                                                                        ) : (
+                                                                            <Play className="h-2 w-2" />
+                                                                        )}
+                                                                    </Button>
+                                                                )}
+                                                            </div>
+
+                                                            <div className="flex-1 min-w-0">
+                                                                <p className="font-medium truncate">{track.name}</p>
+                                                                <p className="text-sm text-gray-600 dark:text-gray-400 truncate">{track.artist}</p>
+                                                            </div>
+
+                                                            <div className="flex items-center gap-4 text-sm text-gray-500">
+                                                                <span>{formatDuration(track.duration)}</span>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
                                                     </div>
                                                 ))}
                                             </div>
