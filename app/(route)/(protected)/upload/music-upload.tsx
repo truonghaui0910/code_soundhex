@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef } from "react";
@@ -89,7 +88,8 @@ export function MusicUpload() {
         description: "",
         file: null,
     });
-    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [fileInputRef] = useState<any>(useRef(null));
+    const [ownershipConfirmed, setOwnershipConfirmed] = useState(false);
 
     // Audio player context
     const {
@@ -417,15 +417,291 @@ export function MusicUpload() {
                                     </div>
                                 </CardHeader>
                                 <CardContent className="space-y-6">
-                                    {/* Spotify results rendering logic - keeping the same as original */}
-                                    {/* This is a complex section with many conditionals, keeping it intact */}
-                                    
+                                    {/* Single Track */}
+                                    {spotifyData.type === "track" && (
+                                        <div className="space-y-4">
+                                            <div className="flex items-center gap-4 p-4 border rounded-lg bg-gray-50 dark:bg-gray-800/50">
+                                                <div className="relative">
+                                                    <Image
+                                                        src={spotifyData.data.image || "/images/soundhex.png"}
+                                                        alt={spotifyData.data.name}
+                                                        width={80}
+                                                        height={80}
+                                                        className="rounded-lg"
+                                                    />
+                                                    {spotifyData.data.preview_url && (
+                                                        <Button
+                                                            size="sm"
+                                                            className="absolute bottom-2 right-2 w-8 h-8 rounded-full p-0"
+                                                            onClick={() => {
+                                                                if (currentTrack?.id === spotifyData.data.id) {
+                                                                    togglePlayPause();
+                                                                } else {
+                                                                    playTrack({
+                                                                        id: spotifyData.data.id,
+                                                                        title: spotifyData.data.name,
+                                                                        artist: spotifyData.data.artist,
+                                                                        image: spotifyData.data.image,
+                                                                        audio_url: spotifyData.data.preview_url,
+                                                                        duration: spotifyData.data.duration
+                                                                    });
+                                                                }
+                                                            }}
+                                                        >
+                                                            {currentTrack?.id === spotifyData.data.id && isPlaying ? (
+                                                                <Pause className="h-3 w-3" />
+                                                            ) : (
+                                                                <Play className="h-3 w-3" />
+                                                            )}
+                                                        </Button>
+                                                    )}
+                                                </div>
+                                                <div className="flex-1">
+                                                    <h3 className="font-semibold">{spotifyData.data.name}</h3>
+                                                    <p className="text-gray-600 dark:text-gray-400">{spotifyData.data.artist}</p>
+                                                    <p className="text-sm text-gray-500">{spotifyData.data.album}</p>
+                                                    <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
+                                                        <span>{formatDuration(spotifyData.data.duration)}</span>
+                                                        {spotifyData.data.isrc && <span>ISRC: {spotifyData.data.isrc}</span>}
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <Badge variant={selectedTracks.has(spotifyData.data.id) ? "default" : "secondary"}>
+                                                        {selectedTracks.has(spotifyData.data.id) ? "Selected" : "Not Selected"}
+                                                    </Badge>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Album or Playlist */}
+                                    {(spotifyData.type === "album" || spotifyData.type === "playlist") && (
+                                        <div className="space-y-6">
+                                            {/* Album/Playlist Header */}
+                                            <div className="flex items-start gap-6">
+                                                <Image
+                                                    src={spotifyData.data.image || "/images/soundhex.png"}
+                                                    alt={spotifyData.data.name}
+                                                    width={160}
+                                                    height={160}
+                                                    className="rounded-lg shadow-lg"
+                                                />
+                                                <div className="flex-1 space-y-2">
+                                                    <Badge variant="outline" className="mb-2">
+                                                        {spotifyData.type === "album" ? "Album" : "Playlist"}
+                                                    </Badge>
+                                                    <h3 className="text-2xl font-bold">{spotifyData.data.name}</h3>
+                                                    <p className="text-lg text-gray-600 dark:text-gray-400">{spotifyData.data.artist}</p>
+                                                    {spotifyData.data.release_date && (
+                                                        <p className="text-sm text-gray-500">Released: {spotifyData.data.release_date}</p>
+                                                    )}
+                                                    <p className="text-sm text-gray-500">{spotifyData.data.tracks?.length || 0} tracks</p>
+                                                </div>
+                                            </div>
+
+                                            <Separator />
+
+                                            {/* Track Selection */}
+                                            <div className="space-y-4">
+                                                <div className="flex items-center justify-between">
+                                                    <h4 className="font-semibold">Select tracks to import:</h4>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => {
+                                                            const allTrackIds = spotifyData.data.tracks.map((t: SpotifyTrack) => t.id);
+                                                            if (selectedTracks.size === allTrackIds.length) {
+                                                                setSelectedTracks(new Set());
+                                                            } else {
+                                                                setSelectedTracks(new Set(allTrackIds));
+                                                            }
+                                                        }}
+                                                    >
+                                                        {selectedTracks.size === spotifyData.data.tracks?.length ? "Deselect All" : "Select All"}
+                                                    </Button>
+                                                </div>
+
+                                                <div className="space-y-2 max-h-96 overflow-y-auto">
+                                                    {spotifyData.data.tracks?.map((track: SpotifyTrack, index: number) => (
+                                                        <div
+                                                            key={track.id}
+                                                            className={`flex items-center gap-4 p-3 rounded-lg border cursor-pointer transition-colors ${
+                                                                selectedTracks.has(track.id)
+                                                                    ? "bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-700"
+                                                                    : "bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800"
+                                                            }`}
+                                                            onClick={() => toggleTrackSelection(track.id)}
+                                                        >
+                                                            <div className="w-6 h-6 flex items-center justify-center">
+                                                                {selectedTracks.has(track.id) ? (
+                                                                    <Check className="h-4 w-4 text-purple-600" />
+                                                                ) : (
+                                                                    <span className="text-sm text-gray-400">{index + 1}</span>
+                                                                )}
+                                                            </div>
+
+                                                            <div className="relative">
+                                                                <Image
+                                                                    src={track.image || spotifyData.data.image || "/images/soundhex.png"}
+                                                                    alt={track.name}
+                                                                    width={48}
+                                                                    height={48}
+                                                                    className="rounded"
+                                                                />
+                                                                {track.preview_url && (
+                                                                    <Button
+                                                                        size="sm"
+                                                                        className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full p-0"
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            if (currentTrack?.id === track.id) {
+                                                                                togglePlayPause();
+                                                                            } else {
+                                                                                playTrack({
+                                                                                    id: track.id,
+                                                                                    title: track.name,
+                                                                                    artist: track.artist,
+                                                                                    image: track.image,
+                                                                                    audio_url: track.preview_url,
+                                                                                    duration: track.duration
+                                                                                });
+                                                                            }
+                                                                        }}
+                                                                    >
+                                                                        {currentTrack?.id === track.id && isPlaying ? (
+                                                                            <Pause className="h-2 w-2" />
+                                                                        ) : (
+                                                                            <Play className="h-2 w-2" />
+                                                                        )}
+                                                                    </Button>
+                                                                )}
+                                                            </div>
+
+                                                            <div className="flex-1 min-w-0">
+                                                                <p className="font-medium truncate">{track.name}</p>
+                                                                <p className="text-sm text-gray-600 dark:text-gray-400 truncate">{track.artist}</p>
+                                                            </div>
+
+                                                            <div className="flex items-center gap-4 text-sm text-gray-500">
+                                                                <span>{formatDuration(track.duration)}</span>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Artist */}
+                                    {spotifyData.type === "artist" && (
+                                        <div className="space-y-6">
+                                            {/* Artist Header */}
+                                            <div className="flex items-start gap-6">
+                                                <Image
+                                                    src={spotifyData.data.image || "/images/soundhex.png"}
+                                                    alt={spotifyData.data.name}
+                                                    width={160}
+                                                    height={160}
+                                                    className="rounded-lg shadow-lg"
+                                                />
+                                                <div className="flex-1 space-y-2">
+                                                    <Badge variant="outline" className="mb-2">Artist</Badge>
+                                                    <h3 className="text-2xl font-bold">{spotifyData.data.name}</h3>
+                                                    <p className="text-sm text-gray-500">{spotifyData.data.albums?.length || 0} albums</p>
+                                                </div>
+                                            </div>
+
+                                            <Separator />
+
+                                            {/* Albums List */}
+                                            <div className="space-y-4">
+                                                <h4 className="font-semibold">Select albums to import:</h4>
+                                                {spotifyData.data.albums.map((album: SpotifyAlbum) => (
+                                                    <div key={album.id} className="border rounded-lg p-4">
+                                                        <div
+                                                            className="flex items-center gap-4 cursor-pointer"
+                                                            onClick={() => toggleAlbumExpansion(album.id)}
+                                                        >
+                                                            <Image
+                                                                src={album.image || "/images/soundhex.png"}
+                                                                alt={album.name}
+                                                                width={64}
+                                                                height={64}
+                                                                className="rounded"
+                                                            />
+                                                            <div className="flex-1">
+                                                                <h5 className="font-medium">{album.name}</h5>
+                                                                <p className="text-sm text-gray-600 dark:text-gray-400">{album.artist}</p>
+                                                                <p className="text-xs text-gray-500">{album.release_date}</p>
+                                                            </div>
+                                                            <div className="flex items-center gap-2">
+                                                                {loadingAlbums.has(album.id) ? (
+                                                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                                                ) : expandedAlbums.has(album.id) ? (
+                                                                    <ChevronDown className="h-4 w-4" />
+                                                                ) : (
+                                                                    <ChevronRight className="h-4 w-4" />
+                                                                )}
+                                                            </div>
+                                                        </div>
+
+                                                        {expandedAlbums.has(album.id) && album.tracks && album.tracks.length > 0 && (
+                                                            <div className="mt-4 pl-4 border-l-2 border-gray-200 dark:border-gray-700 space-y-2">
+                                                                {album.tracks.map((track: SpotifyTrack, index: number) => (
+                                                                    <div
+                                                                        key={track.id}
+                                                                        className={`flex items-center gap-4 p-2 rounded cursor-pointer transition-colors ${
+                                                                            selectedTracks.has(track.id)
+                                                                                ? "bg-purple-50 dark:bg-purple-900/20"
+                                                                                : "hover:bg-gray-50 dark:hover:bg-gray-800"
+                                                                        }`}
+                                                                        onClick={() => toggleTrackSelection(track.id)}
+                                                                    >
+                                                                        <div className="w-4 h-4 flex items-center justify-center">
+                                                                            {selectedTracks.has(track.id) ? (
+                                                                                <Check className="h-3 w-3 text-purple-600" />
+                                                                            ) : (
+                                                                                <span className="text-xs text-gray-400">{index + 1}</span>
+                                                                            )}
+                                                                        </div>
+                                                                        <div className="flex-1 min-w-0">
+                                                                            <p className="text-sm font-medium truncate">{track.name}</p>
+                                                                        </div>
+                                                                        <div className="text-xs text-gray-500">
+                                                                            {formatDuration(track.duration)}
+                                                                        </div>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Ownership Confirmation */}
+                                    <div className="border-t pt-6">
+                                        <div className="flex items-start space-x-3">
+                                            <input
+                                                type="checkbox"
+                                                id="ownership-confirmation"
+                                                checked={ownershipConfirmed}
+                                                onChange={(e) => setOwnershipConfirmed(e.target.checked)}
+                                                className="mt-1 h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                                            />
+                                            <label htmlFor="ownership-confirmation" className="text-sm text-gray-700 dark:text-gray-300">
+                                                <span className="font-medium">Ownership Confirmation:</span> I hereby confirm that I am the rightful owner or have proper authorization to upload and distribute the selected music tracks. I understand that uploading copyrighted material without permission is prohibited and may result in legal consequences. I take full responsibility for ensuring all uploaded content complies with copyright laws and licensing requirements.
+                                            </label>
+                                        </div>
+                                    </div>
+
                                     {/* Submit Button */}
                                     <div className="flex justify-end pt-4">
                                         <Button
                                             onClick={submitSpotifyTracks}
-                                            disabled={selectedTracks.size === 0}
-                                            className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                                            disabled={selectedTracks.size === 0 || !ownershipConfirmed}
+                                            className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
                                             Import {selectedTracks.size} Track
                                             {selectedTracks.size !== 1
@@ -540,7 +816,8 @@ export function MusicUpload() {
                                         id="album"
                                         placeholder="Enter album name"
                                         value={uploadForm.album}
-                                        onChange={(e) =>
+                                        onChange={(e)```text
+ =>
                                             setUploadForm({
                                                 ...uploadForm,
                                                 album: e.target.value,

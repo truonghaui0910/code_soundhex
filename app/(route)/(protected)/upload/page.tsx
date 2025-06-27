@@ -17,6 +17,8 @@ export default function UploadPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isCancelled = false;
+    
     const validateAgreements = async () => {
       try {
         const response = await fetch("/api/agreements/list");
@@ -33,6 +35,8 @@ export default function UploadPage() {
           agreement => agreement.status.toLowerCase() === 'completed'
         );
 
+        if (isCancelled) return; // Prevent state updates if component unmounted
+
         if (!hasCompletedAgreement) {
           toast.error("You need at least one completed agreement before uploading music");
           router.push("/agreements");
@@ -41,15 +45,23 @@ export default function UploadPage() {
 
         setIsValidated(true);
       } catch (error) {
+        if (isCancelled) return;
+        
         console.error("Error validating agreements:", error);
         toast.error("Failed to validate agreements");
         router.push("/agreements");
       } finally {
-        setIsLoading(false);
+        if (!isCancelled) {
+          setIsLoading(false);
+        }
       }
     };
 
     validateAgreements();
+
+    return () => {
+      isCancelled = true;
+    };
   }, [router]);
 
   if (isLoading) {
