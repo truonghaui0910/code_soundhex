@@ -816,8 +816,7 @@ export function MusicUpload() {
                                         id="album"
                                         placeholder="Enter album name"
                                         value={uploadForm.album}
-                                        onChange={(e)```text
- =>
+                                        onChange={(e) =>
                                             setUploadForm({
                                                 ...uploadForm,
                                                 album: e.target.value,
