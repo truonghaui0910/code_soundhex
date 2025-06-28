@@ -284,10 +284,18 @@ export function MusicUpload() {
     };
 
     const handlePlayTrack = (track: SpotifyTrack) => {
-        if (!track.preview_url) return;
+        console.log('handlePlayTrack called with:', track);
+        
+        if (!track.preview_url) {
+            console.log('No preview_url available for track:', track.name);
+            alert('Preview not available for this track');
+            return;
+        }
 
-        // Convert Spotify track to our Track format
-        const trackId = track.id.includes('spotify') ? parseInt(track.id.split(':').pop() || '0') : parseInt(track.id) || Date.now();
+        console.log('Preview URL:', track.preview_url);
+
+        // Keep track ID as string to avoid conversion issues
+        const trackId = track.id || `spotify-${Date.now()}`;
         const convertedTrack = {
             id: trackId,
             title: track.name,
@@ -310,16 +318,18 @@ export function MusicUpload() {
             genre: null
         };
 
+        console.log('Converted track:', convertedTrack);
+
         // Create track list from current Spotify data
         let trackListForPlayer: any[] = [];
 
         if (spotifyData?.type === "track") {
             trackListForPlayer = [convertedTrack];
         } else if (spotifyData?.type === "album" || spotifyData?.type === "playlist") {
-            trackListForPlayer = spotifyData.data.tracks.map((t: SpotifyTrack) => {
-                const tId = t.id.includes('spotify') ? parseInt(t.id.split(':').pop() || '0') : parseInt(t.id) || Date.now();
-                return {
-                    id: tId,
+            trackListForPlayer = spotifyData.data.tracks
+                .filter((t: SpotifyTrack) => t.preview_url) // Only include tracks with preview_url
+                .map((t: SpotifyTrack) => ({
+                    id: t.id || `spotify-${Date.now()}-${Math.random()}`,
                     title: t.name,
                     artist: { id: 1, name: t.artist },
                     album: { 
@@ -335,43 +345,51 @@ export function MusicUpload() {
                     image: t.image,
                     isrc: t.isrc || null,
                     genre: null
-                };
-            });
+                }));
         } else if (spotifyData?.type === "artist") {
             trackListForPlayer = [];
             spotifyData.data.albums.forEach((album: SpotifyAlbum) => {
                 if (album.tracks) {
-                    album.tracks.forEach((t: SpotifyTrack) => {
-                        const tId = t.id.includes('spotify') ? parseInt(t.id.split(':').pop() || '0') : parseInt(t.id) || Date.now();
-                        trackListForPlayer.push({
-                            id: tId,
-                            title: t.name,
-                            artist: { id: 1, name: t.artist },
-                            album: { 
-                                id: 1, 
-                                title: t.album,
-                                cover_image_url: t.image || album.image,
-                                release_date: null
-                            },
-                            audio_url: t.preview_url,
-                            duration: t.duration,
-                            created_at: new Date().toISOString(),
-                            updated_at: new Date().toISOString(),
-                            image: t.image || album.image,
-                            isrc: t.isrc || null,
-                            genre: null
+                    album.tracks
+                        .filter((t: SpotifyTrack) => t.preview_url) // Only include tracks with preview_url
+                        .forEach((t: SpotifyTrack) => {
+                            trackListForPlayer.push({
+                                id: t.id || `spotify-${Date.now()}-${Math.random()}`,
+                                title: t.name,
+                                artist: { id: 1, name: t.artist },
+                                album: { 
+                                    id: 1, 
+                                    title: t.album,
+                                    cover_image_url: t.image || album.image,
+                                    release_date: null
+                                },
+                                audio_url: t.preview_url,
+                                duration: t.duration,
+                                created_at: new Date().toISOString(),
+                                updated_at: new Date().toISOString(),
+                                image: t.image || album.image,
+                                isrc: t.isrc || null,
+                                genre: null
+                            });
                         });
-                    });
                 }
             });
         }
 
+        console.log('Track list for player:', trackListForPlayer);
+
         // Set track list and play
+        console.log('Setting track list:', trackListForPlayer);
         setTrackList(trackListForPlayer);
 
+        console.log('Current track ID:', currentTrack?.id);
+        console.log('Converted track ID:', convertedTrack.id);
+
         if (currentTrack?.id === convertedTrack.id) {
+            console.log('Same track, toggling play/pause');
             togglePlayPause();
         } else {
+            console.log('Different track, playing new track');
             playTrack(convertedTrack);
         }
     };
@@ -637,7 +655,7 @@ export function MusicUpload() {
                                                                             handlePlayTrack(track);
                                                                         }}
                                                                     >
-                                                                        {currentTrack && String(currentTrack.id) === String(track.id) && isPlaying ? (
+                                                                        {currentTrack && currentTrack.id === track.id && isPlaying ? (
                                                                             <Pause className="h-2 w-2" />
                                                                         ) : (
                                                                             <Play className="h-2 w-2" />
@@ -780,7 +798,7 @@ export function MusicUpload() {
                                                                                             handlePlayTrack(track);
                                                                                         }}
                                                                                     >
-                                                                                        {currentTrack && String(currentTrack.id) === String(track.id) && isPlaying ? (
+                                                                                        {currentTrack && currentTrack.id === track.id && isPlaying ? (
                                                                                             <Pause className="h-2 w-2" />
                                                                                         ) : (
                                                                                             <Play className="h-2 w-2" />
