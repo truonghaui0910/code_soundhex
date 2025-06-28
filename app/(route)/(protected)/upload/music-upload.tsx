@@ -288,8 +288,9 @@ export function MusicUpload() {
         if (!track.preview_url) return;
 
         // Convert Spotify track to our Track format
+        const trackId = track.id.includes('spotify') ? parseInt(track.id.split(':').pop() || '0') : parseInt(track.id) || Date.now();
         const convertedTrack = {
-            id: parseInt(track.id),
+            id: trackId,
             title: track.name,
             artist: { 
                 id: 1,
@@ -316,31 +317,35 @@ export function MusicUpload() {
         if (spotifyData?.type === "track") {
             trackListForPlayer = [convertedTrack];
         } else if (spotifyData?.type === "album" || spotifyData?.type === "playlist") {
-            trackListForPlayer = spotifyData.data.tracks.map((t: SpotifyTrack) => ({
-                id: parseInt(t.id),
-                title: t.name,
-                artist: { id: 1, name: t.artist },
-                album: { 
-                    id: 1, 
-                    title: t.album,
-                    cover_image_url: t.image,
-                    release_date: null
-                },
-                audio_url: t.preview_url,
-                duration: t.duration,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-                image: t.image,
-                isrc: t.isrc || null,
-                genre: null
-            }));
+            trackListForPlayer = spotifyData.data.tracks.map((t: SpotifyTrack) => {
+                const tId = t.id.includes('spotify') ? parseInt(t.id.split(':').pop() || '0') : parseInt(t.id) || Date.now();
+                return {
+                    id: tId,
+                    title: t.name,
+                    artist: { id: 1, name: t.artist },
+                    album: { 
+                        id: 1, 
+                        title: t.album,
+                        cover_image_url: t.image,
+                        release_date: null
+                    },
+                    audio_url: t.preview_url,
+                    duration: t.duration,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString(),
+                    image: t.image,
+                    isrc: t.isrc || null,
+                    genre: null
+                };
+            });
         } else if (spotifyData?.type === "artist") {
             trackListForPlayer = [];
             spotifyData.data.albums.forEach((album: SpotifyAlbum) => {
                 if (album.tracks) {
                     album.tracks.forEach((t: SpotifyTrack) => {
+                        const tId = t.id.includes('spotify') ? parseInt(t.id.split(':').pop() || '0') : parseInt(t.id) || Date.now();
                         trackListForPlayer.push({
-                            id: parseInt(t.id),
+                            id: tId,
                             title: t.name,
                             artist: { id: 1, name: t.artist },
                             album: { 
@@ -365,7 +370,7 @@ export function MusicUpload() {
         // Set track list and play
         setTrackList(trackListForPlayer);
 
-        if (currentTrack?.id === parseInt(track.id)) {
+        if (currentTrack?.id === convertedTrack.id) {
             togglePlayPause();
         } else {
             playTrack(convertedTrack);
