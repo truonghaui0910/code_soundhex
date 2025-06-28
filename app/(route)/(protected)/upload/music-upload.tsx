@@ -284,113 +284,87 @@ export function MusicUpload() {
     };
 
     const handlePlayTrack = (track: SpotifyTrack) => {
-        console.log('handlePlayTrack called with:', track);
-        
         if (!track.preview_url) {
-            console.log('No preview_url available for track:', track.name);
             alert('Preview not available for this track');
             return;
         }
 
-        console.log('Preview URL:', track.preview_url);
-
-        // Keep track ID as string to avoid conversion issues
-        const trackId = track.id || `spotify-${Date.now()}`;
-        const convertedTrack = {
-            id: trackId,
+        // Convert SpotifyTrack to Track format similar to music/music-upload.tsx
+        const trackToPlay = {
+            id: Number(track.id),
             title: track.name,
-            artist: { 
-                id: 1,
-                name: track.artist 
+            file_url: track.preview_url ? `/api/proxy-audio?url=${encodeURIComponent(track.preview_url)}` : "",
+            duration: track.duration,
+            audio_file_url: track.preview_url ? `/api/proxy-audio?url=${encodeURIComponent(track.preview_url)}` : "",
+            artist: {
+                id: "spotify-artist",
+                name: track.artist,
             },
-            album: { 
-                id: 1,
+            album: {
+                id: Number(track.id),
                 title: track.album,
                 cover_image_url: track.image,
-                release_date: null
             },
-            audio_url: track.preview_url,
-            duration: track.duration,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            image: track.image,
-            isrc: track.isrc || null,
-            genre: null
         };
 
-        console.log('Converted track:', convertedTrack);
-
-        // Create track list from current Spotify data
-        let trackListForPlayer: any[] = [];
+        // Create track list for navigation
+        let allTracks: any[] = [];
 
         if (spotifyData?.type === "track") {
-            trackListForPlayer = [convertedTrack];
+            allTracks = [trackToPlay];
         } else if (spotifyData?.type === "album" || spotifyData?.type === "playlist") {
-            trackListForPlayer = spotifyData.data.tracks
-                .filter((t: SpotifyTrack) => t.preview_url) // Only include tracks with preview_url
+            allTracks = spotifyData.data.tracks
+                .filter((t: SpotifyTrack) => t.preview_url)
                 .map((t: SpotifyTrack) => ({
-                    id: t.id || `spotify-${Date.now()}-${Math.random()}`,
+                    id: Number(t.id),
                     title: t.name,
-                    artist: { id: 1, name: t.artist },
-                    album: { 
-                        id: 1, 
+                    file_url: t.preview_url ? `/api/proxy-audio?url=${encodeURIComponent(t.preview_url)}` : "",
+                    duration: t.duration,
+                    audio_file_url: t.preview_url ? `/api/proxy-audio?url=${encodeURIComponent(t.preview_url)}` : "",
+                    artist: {
+                        id: "spotify-artist",
+                        name: t.artist,
+                    },
+                    album: {
+                        id: Number(t.id),
                         title: t.album,
                         cover_image_url: t.image,
-                        release_date: null
                     },
-                    audio_url: t.preview_url,
-                    duration: t.duration,
-                    created_at: new Date().toISOString(),
-                    updated_at: new Date().toISOString(),
-                    image: t.image,
-                    isrc: t.isrc || null,
-                    genre: null
                 }));
         } else if (spotifyData?.type === "artist") {
-            trackListForPlayer = [];
+            allTracks = [];
             spotifyData.data.albums.forEach((album: SpotifyAlbum) => {
                 if (album.tracks) {
                     album.tracks
-                        .filter((t: SpotifyTrack) => t.preview_url) // Only include tracks with preview_url
+                        .filter((t: SpotifyTrack) => t.preview_url)
                         .forEach((t: SpotifyTrack) => {
-                            trackListForPlayer.push({
-                                id: t.id || `spotify-${Date.now()}-${Math.random()}`,
+                            allTracks.push({
+                                id: Number(t.id),
                                 title: t.name,
-                                artist: { id: 1, name: t.artist },
-                                album: { 
-                                    id: 1, 
-                                    title: t.album,
-                                    cover_image_url: t.image || album.image,
-                                    release_date: null
-                                },
-                                audio_url: t.preview_url,
+                                file_url: t.preview_url ? `/api/proxy-audio?url=${encodeURIComponent(t.preview_url)}` : "",
                                 duration: t.duration,
-                                created_at: new Date().toISOString(),
-                                updated_at: new Date().toISOString(),
-                                image: t.image || album.image,
-                                isrc: t.isrc || null,
-                                genre: null
+                                audio_file_url: t.preview_url ? `/api/proxy-audio?url=${encodeURIComponent(t.preview_url)}` : "",
+                                artist: {
+                                    id: "spotify-artist",
+                                    name: t.artist,
+                                },
+                                album: {
+                                    id: Number(album.id),
+                                    title: album.name,
+                                    cover_image_url: t.image || album.image,
+                                },
                             });
                         });
                 }
             });
         }
 
-        console.log('Track list for player:', trackListForPlayer);
+        setTrackList(allTracks);
 
-        // Set track list and play
-        console.log('Setting track list:', trackListForPlayer);
-        setTrackList(trackListForPlayer);
-
-        console.log('Current track ID:', currentTrack?.id);
-        console.log('Converted track ID:', convertedTrack.id);
-
-        if (currentTrack?.id === convertedTrack.id) {
-            console.log('Same track, toggling play/pause');
+        if (currentTrack?.id === Number(track.id) && isPlaying) {
             togglePlayPause();
         } else {
-            console.log('Different track, playing new track');
-            playTrack(convertedTrack);
+            playTrack(trackToPlay);
         }
     };
 
@@ -655,7 +629,7 @@ export function MusicUpload() {
                                                                             handlePlayTrack(track);
                                                                         }}
                                                                     >
-                                                                        {currentTrack && currentTrack.id === track.id && isPlaying ? (
+                                                                        {currentTrack?.id === Number(track.id) && isPlaying ? (
                                                                             <Pause className="h-2 w-2" />
                                                                         ) : (
                                                                             <Play className="h-2 w-2" />
@@ -798,7 +772,7 @@ export function MusicUpload() {
                                                                                             handlePlayTrack(track);
                                                                                         }}
                                                                                     >
-                                                                                        {currentTrack && currentTrack.id === track.id && isPlaying ? (
+                                                                                        {currentTrack?.id === Number(track.id) && isPlaying ? (
                                                                                             <Pause className="h-2 w-2" />
                                                                                         ) : (
                                                                                             <Play className="h-2 w-2" />
