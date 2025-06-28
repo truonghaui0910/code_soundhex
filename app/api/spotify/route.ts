@@ -104,7 +104,7 @@ function extractSpotifyId(url: string) {
 
 export async function POST(request: NextRequest) {
   const requestStartTime = Date.now();
-  
+
   // Get user email from Supabase session (secure way) - moved outside try-catch
   const supabase = createRouteHandlerClient({ cookies });
   const {
@@ -205,14 +205,19 @@ export async function POST(request: NextRequest) {
         // playlistData now contains complete playlist info with tracks.items array
         const mappedPlaylistTracks =
           playlistData.tracks?.items?.map((item: any) => ({
-            id: item.track?.id,
-            name: item.track?.name,
-            artist: item.track?.artists?.[0]?.name || "Unknown Artist",
-            album: item.track?.album?.name || "Unknown Album",
-            duration: Math.floor(item.track?.duration_ms / 1000),
-            image: item.track?.album?.images?.[0]?.url || "",
-            isrc: item.track?.external_ids?.isrc || null,
-            preview_url: item.track?.preview_url,
+            id: item.track.id,
+            name: item.track.name,
+            artist: item.track.artists[0]?.name || "Unknown Artist",
+            album: item.track.album.name,
+            duration: Math.floor(item.track.duration_ms / 1000),
+            image: item.track.album.images[0]?.url || "",
+            isrc: item.track.external_ids?.isrc || null,
+            preview_url: item.track.preview_url,
+            artists: item.track.artists,
+            album_data: {
+              release_date: item.track.album.release_date,
+              description: null,
+            },
           })) || [];
 
         data = {
@@ -246,6 +251,11 @@ export async function POST(request: NextRequest) {
             image: trackData.album?.images?.[0]?.url || "",
             isrc: trackData.external_ids?.isrc || null,
             preview_url: trackData.preview_url,
+            artists: trackData.artists,
+            album_data: {
+              release_date: trackData.album.release_date,
+              description: null,
+            },
           },
         };
         break;

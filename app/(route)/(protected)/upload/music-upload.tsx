@@ -249,38 +249,72 @@ export function MusicUpload() {
         alert("Upload functionality will be implemented soon!");
     };
 
-    const submitSpotifyTracks = () => {
+    const submitSpotifyTracks = async () => {
         if (selectedTracks.size === 0) {
             alert("Please select at least one track");
             return;
         }
 
-        // Get selected track data
-        const selectedTrackData: SpotifyTrack[] = [];
+        setIsLoading(true);
 
-        if (spotifyData.type === "track") {
-            selectedTrackData.push(spotifyData.data);
-        } else if (
-            spotifyData.type === "album" ||
-            spotifyData.type === "playlist"
-        ) {
-            spotifyData.data.tracks.forEach((track: SpotifyTrack) => {
-                if (selectedTracks.has(track.id)) {
-                    selectedTrackData.push(track);
-                }
-            });
-        } else if (spotifyData.type === "artist") {
-            spotifyData.data.albums.forEach((album: SpotifyAlbum) => {
-                album.tracks?.forEach((track: SpotifyTrack) => {
+        try {
+            // Get selected track data
+            const selectedTrackData: SpotifyTrack[] = [];
+
+            if (spotifyData.type === "track") {
+                selectedTrackData.push(spotifyData.data);
+            } else if (
+                spotifyData.type === "album" ||
+                spotifyData.type === "playlist"
+            ) {
+                spotifyData.data.tracks.forEach((track: SpotifyTrack) => {
                     if (selectedTracks.has(track.id)) {
                         selectedTrackData.push(track);
                     }
                 });
-            });
-        }
+            } else if (spotifyData.type === "artist") {
+                spotifyData.data.albums.forEach((album: SpotifyAlbum) => {
+                    album.tracks?.forEach((track: SpotifyTrack) => {
+                        if (selectedTracks.has(track.id)) {
+                            selectedTrackData.push(track);
+                        }
+                    });
+                });
+            }
 
-        console.log("Selected tracks data:", selectedTrackData);
-        alert(`${selectedTracks.size} track(s) will be processed for upload!`);
+            // Call import API
+            const response = await fetch("/api/import-music", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ tracks: selectedTrackData }),
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.error || "Failed to import tracks");
+            }
+
+            alert(`Success! ${result.results.success} tracks imported successfully.${
+                result.results.failed > 0 
+                    ? ` ${result.results.failed} tracks failed to import.` 
+                    : ""
+            }`);
+
+            // Reset form
+            setSpotifyData(null);
+            setSelectedTracks(new Set());
+            setSpotifyUrl("");
+            setOwnershipConfirmed(false);
+
+        } catch (error) {
+            console.error("Import error:", error);
+            alert(`Failed to import tracks: ${error instanceof Error ? error.message : "Unknown error"}`);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const handlePlayTrack = (track: SpotifyTrack) => {
@@ -820,13 +854,20 @@ export function MusicUpload() {
                                     <div className="flex justify-end pt-4">
                                         <Button
                                             onClick={submitSpotifyTracks}
-                                            disabled={selectedTracks.size === 0 || !ownershipConfirmed}
+                                            disabled={selectedTracks.size === 0 || !ownershipConfirmed || isLoading}
                                             className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
-                                            Import {selectedTracks.size} Track
-                                            {selectedTracks.size !== 1
-                                                ? "s"
-                                                : ""}
+                                            {isLoading ? (
+                                                <>
+                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                    Importing...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    Import {selectedTracks.size} Track
+                                                    {selectedTracks.size !== 1 ? "s" : ""}
+                                                </>
+                                            )}
                                         </Button>
                                     </div>
                                 </CardContent>
