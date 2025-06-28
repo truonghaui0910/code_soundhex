@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef } from "react";
@@ -313,7 +312,7 @@ export function MusicUpload() {
 
         // Create track list from current Spotify data
         let trackListForPlayer: any[] = [];
-        
+
         if (spotifyData?.type === "track") {
             trackListForPlayer = [convertedTrack];
         } else if (spotifyData?.type === "album" || spotifyData?.type === "playlist") {
@@ -638,7 +637,7 @@ export function MusicUpload() {
                                                                             handlePlayTrack(track);
                                                                         }}
                                                                     >
-                                                                        {currentTrack?.id === track.id && isPlaying ? (
+                                                                        {currentTrack && String(currentTrack.id) === String(track.id) && isPlaying ? (
                                                                             <Pause className="h-2 w-2" />
                                                                         ) : (
                                                                             <Play className="h-2 w-2" />
@@ -781,7 +780,7 @@ export function MusicUpload() {
                                                                                             handlePlayTrack(track);
                                                                                         }}
                                                                                     >
-                                                                                        {currentTrack?.id === track.id && isPlaying ? (
+                                                                                        {currentTrack && String(currentTrack.id) === String(track.id) && isPlaying ? (
                                                                                             <Pause className="h-2 w-2" />
                                                                                         ) : (
                                                                                             <Play className="h-2 w-2" />
