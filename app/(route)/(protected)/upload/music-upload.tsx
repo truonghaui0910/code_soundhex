@@ -291,7 +291,7 @@ export function MusicUpload() {
 
         // Convert SpotifyTrack to Track format similar to music/music-upload.tsx
         const trackToPlay = {
-            id: Number(track.id),
+            id: `spotify-${track.id}`,
             title: track.name,
             file_url: track.preview_url ? `/api/proxy-audio?url=${encodeURIComponent(track.preview_url)}` : "",
             duration: track.duration,
@@ -301,7 +301,7 @@ export function MusicUpload() {
                 name: track.artist,
             },
             album: {
-                id: Number(track.id),
+                id: `spotify-${track.id}`,
                 title: track.album,
                 cover_image_url: track.image,
             },
@@ -316,7 +316,7 @@ export function MusicUpload() {
             allTracks = spotifyData.data.tracks
                 .filter((t: SpotifyTrack) => t.preview_url)
                 .map((t: SpotifyTrack) => ({
-                    id: Number(t.id),
+                    id: `spotify-${t.id}`,
                     title: t.name,
                     file_url: t.preview_url ? `/api/proxy-audio?url=${encodeURIComponent(t.preview_url)}` : "",
                     duration: t.duration,
@@ -326,7 +326,7 @@ export function MusicUpload() {
                         name: t.artist,
                     },
                     album: {
-                        id: Number(t.id),
+                        id: `spotify-${t.id}`,
                         title: t.album,
                         cover_image_url: t.image,
                     },
@@ -339,7 +339,7 @@ export function MusicUpload() {
                         .filter((t: SpotifyTrack) => t.preview_url)
                         .forEach((t: SpotifyTrack) => {
                             allTracks.push({
-                                id: Number(t.id),
+                                id: `spotify-${t.id}`,
                                 title: t.name,
                                 file_url: t.preview_url ? `/api/proxy-audio?url=${encodeURIComponent(t.preview_url)}` : "",
                                 duration: t.duration,
@@ -349,7 +349,7 @@ export function MusicUpload() {
                                     name: t.artist,
                                 },
                                 album: {
-                                    id: Number(album.id),
+                                    id: `spotify-${album.id}`,
                                     title: album.name,
                                     cover_image_url: t.image || album.image,
                                 },
@@ -361,7 +361,7 @@ export function MusicUpload() {
 
         setTrackList(allTracks);
 
-        if (currentTrack?.id === Number(track.id) && isPlaying) {
+        if (currentTrack?.id === `spotify-${track.id}` && isPlaying) {
             togglePlayPause();
         } else {
             playTrack(trackToPlay);
@@ -520,7 +520,7 @@ export function MusicUpload() {
                                                             className="absolute bottom-2 right-2 w-8 h-8 rounded-full p-0"
                                                             onClick={() => handlePlayTrack(spotifyData.data)}
                                                         >
-                                                            {currentTrack?.id === spotifyData.data.id && isPlaying ? (
+                                                            {currentTrack?.id === `spotify-${spotifyData.data.id}` && isPlaying ? (
                                                                 <Pause className="h-3 w-3" />
                                                             ) : (
                                                                 <Play className="h-3 w-3" />
@@ -629,7 +629,7 @@ export function MusicUpload() {
                                                                             handlePlayTrack(track);
                                                                         }}
                                                                     >
-                                                                        {currentTrack?.id === Number(track.id) && isPlaying ? (
+                                                                        {currentTrack?.id === `spotify-${track.id}` && isPlaying ? (
                                                                             <Pause className="h-2 w-2" />
                                                                         ) : (
                                                                             <Play className="h-2 w-2" />
@@ -772,7 +772,7 @@ export function MusicUpload() {
                                                                                             handlePlayTrack(track);
                                                                                         }}
                                                                                     >
-                                                                                        {currentTrack?.id === Number(track.id) && isPlaying ? (
+                                                                                        {currentTrack?.id === `spotify-${track.id}` && isPlaying ? (
                                                                                             <Pause className="h-2 w-2" />
                                                                                         ) : (
                                                                                             <Play className="h-2 w-2" />
