@@ -334,14 +334,17 @@ export function MusicUpload() {
                 throw new Error(errorMessage);
             }
 
-            // Ensure we have valid results structure
-            const results = result?.results || { success: 0, failed: 0, errors: [] };
+            // Parse the results properly from the API response
+            
+            const successCount = result?.results?.success || 0;
+            const failedCount = result?.results?.failed || 0;
+            const totalTracks = tracksToImport.length;
             
             // Show beautiful notification after processing all tracks
             showImportSuccess({
-                totalTracks: tracksToImport.length,
-                successCount: results.success || 0,
-                failedCount: results.failed || 0,
+                totalTracks,
+                successCount,
+                failedCount,
                 albumName: spotifyData.type === "album" ? spotifyData.data.name : undefined,
                 artistName: spotifyData.type === "artist" ? spotifyData.data.name : undefined
             });
