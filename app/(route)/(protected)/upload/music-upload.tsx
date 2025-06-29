@@ -825,12 +825,12 @@ export function MusicUpload() {
                                                                     <Button
                                                                         variant="outline"
                                                                         size="sm"
-                                                                        onClick={()0 => {
+                                                                        onClick={() => {
                                                                             const allAlbumTrackIds = album.tracks.map((t: SpotifyTrack) => t.id);
                                                                             const allSelected = allAlbumTrackIds.every(id => selectedTracks.has(id));
 
                                                                             if (allSelected) {
-                                                                                // Deselect all tracks from thisalbum
+                                                                                // Deselect all tracks from this album
                                                                                 const newSelection = new Set(selectedTracks);
                                                                                 allAlbumTrackIds.forEach(id => newSelection.delete(id));
                                                                                 setSelectedTracks(newSelection);
