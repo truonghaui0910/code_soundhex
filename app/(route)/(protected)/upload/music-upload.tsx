@@ -825,7 +825,7 @@ export function MusicUpload() {
                                                                     <Button
                                                                         variant="outline"
                                                                         size="sm"
-                                                                        onClick={() => {
+                                                                        onClick={()0 => {
                                                                             const allAlbumTrackIds = album.tracks.map((t: SpotifyTrack) => t.id);
                                                                             const allSelected = allAlbumTrackIds.every(id => selectedTracks.has(id));
 
@@ -909,20 +909,72 @@ export function MusicUpload() {
                                     )}
 
                                     {/* Ownership Confirmation */}
-                                    <div className="border-t pt-6">
-                                        <div className="flex items-start space-x-3">
-                                            <input
-                                                type="checkbox"
-                                                id="ownership-confirmation"
-                                                checked={ownershipConfirmed}
-                                                onChange={(e) => setOwnershipConfirmed(e.target.checked)}
-                                                className="mt-1 h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
-                                            />
-                                            <label htmlFor="ownership-confirmation" className="text-sm text-gray-700 dark:text-gray-300">
-                                                <span className="font-medium">Ownership Confirmation:</span> I hereby confirm that I am the rightful owner or have proper authorization to upload and distribute the selected music tracks. I understand that uploading copyrighted material without permission is prohibited and may result in legal consequences. I take full responsibility for ensuring all uploaded content complies with copyright laws and licensing requirements.
-                                            </label>
-                                        </div>
+                    <div className="border-t pt-6">
+                        <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-800 dark:to-purple-900/20 rounded-xl p-6 border border-blue-200 dark:border-purple-700">
+                            <div className="flex items-start space-x-4">
+                                <div className="flex-shrink-0 mt-1">
+                                    <div className="relative">
+                                        <input
+                                            type="checkbox"
+                                            id="ownership-confirmation"
+                                            checked={ownershipConfirmed}
+                                            onChange={(e) => setOwnershipConfirmed(e.target.checked)}
+                                            className="sr-only"
+                                        />
+                                        <label
+                                            htmlFor="ownership-confirmation"
+                                            className={`flex items-center justify-center w-6 h-6 rounded-md border-2 cursor-pointer transition-all duration-200 ${
+                                                ownershipConfirmed
+                                                    ? 'bg-gradient-to-r from-purple-600 to-blue-600 border-purple-600 text-white shadow-lg'
+                                                    : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 hover:border-purple-400 dark:hover:border-purple-500'
+                                            }`}
+                                        >
+                                            {ownershipConfirmed && (
+                                                <Check className="h-4 w-4 text-white" />
+                                            )}
+                                        </label>
                                     </div>
+                                </div>
+                                <div className="flex-1">
+                                    <label htmlFor="ownership-confirmation" className="cursor-pointer">
+                                        <div className="flex items-center gap-2 mb-3">
+                                            <div className="w-6 h-6 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full flex items-center justify-center">
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                                </svg>
+                                            </div>
+                                            <span className="text-lg font-bold text-gray-900 dark:text-white">
+                                                Copyright & Ownership Declaration
+                                            </span>
+                                        </div>
+                                        <div className="bg-white/60 dark:bg-gray-800/60 rounded-lg p-4 backdrop-blur-sm">
+                                            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                                                By checking this box, I hereby confirm and declare that:
+                                            </p>
+                                            <ul className="mt-3 space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                                                <li className="flex items-start gap-2">
+                                                    <div className="w-1.5 h-1.5 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>
+                                                    <span>I am the rightful owner or have proper legal authorization to upload and distribute the selected music tracks</span>
+                                                </li>
+                                                <li className="flex items-start gap-2">
+                                                    <div className="w-1.5 h-1.5 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>
+                                                    <span>I understand that uploading copyrighted material without permission is strictly prohibited and may result in legal consequences</span>
+                                                </li>
+                                                <li className="flex items-start gap-2">
+                                                    <div className="w-1.5 h-1.5 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>
+                                                    <span>I take full responsibility for ensuring all uploaded content complies with copyright laws and licensing requirements</span>
+                                                </li>
+                                                <li className="flex items-start gap-2">
+                                                    <div className="w-1.5 h-1.5 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>
+                                                    <span>I acknowledge that false declarations may result in account suspension and legal action</span>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                                     {/* Submit Button */}
                                     <div className="flex justify-end pt-4">
