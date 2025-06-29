@@ -83,7 +83,7 @@ class NotificationService {
     };
 
     this.success({
-      title: '✅ Upload thành công!',
+      title: 'Upload thành công!',
       message: `${typeMap[type]} "${fileName}" đã được upload và xử lý thành công.`,
       duration: 5000,
     });
@@ -104,9 +104,9 @@ class NotificationService {
   // Agreement notifications
   agreementSuccess(action: 'created' | 'signed' | 'completed', agreementId?: number) {
     const messages = {
-      created: '📄 Agreement Created Successfully!',
-      signed: '✍️ Agreement Signed Successfully!',
-      completed: '🎉 Agreement Completed!'
+      created: 'Agreement Created Successfully!',
+      signed: 'Agreement Signed Successfully!',
+      completed: 'Agreement Completed!'
     };
 
     this.success({
@@ -119,9 +119,9 @@ class NotificationService {
   // Authentication notifications
   authSuccess(action: 'login' | 'register' | 'logout') {
     const messages = {
-      login: '👋 Welcome back!',
-      register: '🎉 Registration successful!',
-      logout: '👋 See you later!'
+      login: 'Welcome back!',
+      register: 'Registration successful!',
+      logout: 'See you later!'
     };
 
     this.success(messages[action]);
@@ -129,9 +129,9 @@ class NotificationService {
 
   authError(action: 'login' | 'register' | 'logout') {
     const messages = {
-      login: '❌ Login failed!',
-      register: '❌ Registration failed!',
-      logout: '❌ Logout failed!'
+      login: 'Login failed!',
+      register: 'Registration failed!',
+      logout: 'Logout failed!'
     };
 
     this.error(messages[action]);
@@ -207,21 +207,21 @@ export const showImportSuccess = (data: {
   if (failedCount === totalTracks) {
     // All tracks failed
     showWarning({
-      title: '⚠️ Import Skipped',
+      title: 'Import Skipped',
       message: `All ${totalTracks} track${totalTracks > 1 ? 's' : ''} already exist in your library${albumName ? ` for album "${albumName}"` : ''}${artistName ? ` by ${artistName}` : ''}. No new tracks were added.`,
       duration: 6000,
     });
   } else if (failedCount > 0) {
     // Some tracks failed
     showWarning({
-      title: '⚠️ Import Completed with Duplicates',
+      title: 'Import Completed with Duplicates',
       message: `${successCount}/${totalTracks} tracks imported successfully${albumName ? ` for album "${albumName}"` : ''}${artistName ? ` by ${artistName}` : ''}. ${failedCount} track${failedCount > 1 ? 's' : ''} already existed and were skipped.`,
       duration: 8000,
     });
   } else {
     // All successful
     showSuccess({
-      title: '🎉 Import Successful!',
+      title: 'Import Successful!',
       message: `Successfully imported ${successCount} track${successCount > 1 ? 's' : ''}${albumName ? ` for album "${albumName}"` : ''}${artistName ? ` by ${artistName}` : ''}. You can view them in your music library.`,
       duration: 6000,
     });
