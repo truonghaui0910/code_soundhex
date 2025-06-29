@@ -347,7 +347,7 @@ export function MusicUpload() {
             // Parse the results properly from the API response with defensive programming
             let successCount = 0;
             let failedCount = 0;
-            
+
             // Handle different possible response structures
             if (result?.results && typeof result.results === 'object') {
                 // Nested structure: {results: {success: 1, failed: 0}}
@@ -362,7 +362,7 @@ export function MusicUpload() {
                 // Fallback: assume all failed
                 failedCount = tracksToImport.length;
             }
-            
+
             const totalTracks = tracksToImport.length;
 
             console.log("Final parsed counts:", { successCount, failedCount, totalTracks });
@@ -830,7 +830,7 @@ export function MusicUpload() {
                                                                             const allSelected = allAlbumTrackIds.every(id => selectedTracks.has(id));
 
                                                                             if (allSelected) {
-                                                                                // Deselect all tracks from this album
+                                                                                // Deselect all tracks from thisalbum
                                                                                 const newSelection = new Set(selectedTracks);
                                                                                 allAlbumTrackIds.forEach(id => newSelection.delete(id));
                                                                                 setSelectedTracks(newSelection);
