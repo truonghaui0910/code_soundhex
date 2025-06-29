@@ -122,10 +122,11 @@
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.4) !important;
   border-radius: 12px !important;
   min-height: 60px !important;
-  padding: 16px !important;
+  padding: 16px 40px 16px 16px !important;
   opacity: 1 !important;
   font-size: 14px !important;
   font-weight: 500 !important;
+  position: relative !important;
 }
 
 /* Custom toast class styling */
@@ -137,10 +138,11 @@
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.4) !important;
   border-radius: 12px !important;
   min-height: 60px !important;
-  padding: 16px !important;
+  padding: 16px 40px 16px 16px !important;
   opacity: 1 !important;
   font-size: 14px !important;
   font-weight: 500 !important;
+  position: relative !important;
 }
 
 /* Success notification styling */
@@ -178,9 +180,45 @@
   margin-top: 4px !important;
 }
 
-/* Toast icon styling */
+/* Hide toast icons */
 [data-sonner-toast] [data-icon] {
-  margin-right: 8px !important;
+  display: none !important;
+}
+
+/* Close button styling */
+[data-sonner-toast] [data-close-button] {
+  position: absolute !important;
+  top: 8px !important;
+  right: 8px !important;
+  background: none !important;
+  border: none !important;
+  color: hsl(0 0% 70%) !important;
+  cursor: pointer !important;
+  padding: 4px !important;
+  width: 20px !important;
+  height: 20px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 14px !important;
+  line-height: 1 !important;
+  transition: color 0.2s ease !important;
+}
+
+[data-sonner-toast] [data-close-button]:hover {
+  color: hsl(0 0% 90%) !important;
+  background: hsl(220 15% 25%) !important;
+  border-radius: 4px !important;
+}
+
+/* Remove default close button circle */
+[data-sonner-toast] [data-close-button]::before {
+  content: none !important;
+}
+
+[data-sonner-toast] [data-close-button] svg {
+  width: 12px !important;
+  height: 12px !important;
 }
 
 @keyframes pulse-glow {
