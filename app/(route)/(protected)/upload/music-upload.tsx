@@ -328,9 +328,11 @@ export function MusicUpload() {
                 console.log("Response structure:", {
                     hasResults: !!result?.results,
                     resultsKeys: result?.results ? Object.keys(result.results) : "No results object",
-                    success: result?.results?.success,
-                    failed: result?.results?.failed,
-                    errors: result?.results?.errors
+                    directSuccess: result?.success,
+                    directFailed: result?.failed,
+                    nestedSuccess: result?.results?.success,
+                    nestedFailed: result?.results?.failed,
+                    errors: result?.results?.errors || result?.errors
                 });
             } catch (parseError) {
                 console.error("Failed to parse response:", parseError);
@@ -342,12 +344,28 @@ export function MusicUpload() {
                 throw new Error(errorMessage);
             }
 
-            // Parse the results properly from the API response
-            const successCount = result?.results?.success || 0;
-            const failedCount = result?.results?.failed || 0;
+            // Parse the results properly from the API response with defensive programming
+            let successCount = 0;
+            let failedCount = 0;
+            
+            // Handle different possible response structures
+            if (result?.results && typeof result.results === 'object') {
+                // Nested structure: {results: {success: 1, failed: 0}}
+                successCount = result.results.success || 0;
+                failedCount = result.results.failed || 0;
+            } else if (result && typeof result.success !== 'undefined') {
+                // Direct structure: {success: 1, failed: 0}
+                successCount = result.success || 0;
+                failedCount = result.failed || 0;
+            } else {
+                console.warn("Unexpected response structure:", result);
+                // Fallback: assume all failed
+                failedCount = tracksToImport.length;
+            }
+            
             const totalTracks = tracksToImport.length;
 
-            console.log("Parsed counts:", { successCount, failedCount, totalTracks });
+            console.log("Final parsed counts:", { successCount, failedCount, totalTracks });
 
             // Show beautiful notification after processing all tracks
             showImportSuccess({
