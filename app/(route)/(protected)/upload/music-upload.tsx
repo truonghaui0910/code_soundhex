@@ -28,7 +28,6 @@ import { toast } from "sonner";
 import { showImportSuccess, showError, showProcessing, dismissNotifications } from "@/lib/services/notification-service";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
@@ -115,7 +114,7 @@ export function MusicUpload() {
 
     const handleSpotifySubmit = async () => {
         if (!spotifyUrl.trim()) {
-            alert("Please enter a Spotify URL");
+            showError("📝 Vui lòng nhập URL Spotify");
             return;
         }
 
@@ -153,7 +152,10 @@ export function MusicUpload() {
             }
         } catch (error) {
             console.error("Error:", error);
-            alert("Failed to fetch Spotify data");
+            showError({
+                title: "❌ Lỗi lấy dữ liệu Spotify",
+                message: "Không thể lấy thông tin từ Spotify. Vui lòng kiểm tra URL và thử lại."
+            });
         } finally {
             setIsLoading(false);
         }
@@ -203,7 +205,10 @@ export function MusicUpload() {
             });
         } catch (error) {
             console.error("Error loading album tracks:", error);
-            alert("Failed to load album tracks");
+            showError({
+                title: "❌ Lỗi tải tracks album",
+                message: "Không thể tải danh sách bài hát trong album. Vui lòng thử lại."
+            });
         } finally {
             setLoadingAlbums((prev) => {
                 const newSet = new Set(prev);
@@ -249,16 +254,16 @@ export function MusicUpload() {
 
     const handleUploadSubmit = () => {
         if (!uploadForm.file || !uploadForm.title || !uploadForm.artist) {
-            alert("Please fill in all required fields");
+            showError("📝 Vui lòng điền đầy đủ các trường bắt buộc");
             return;
         }
         console.log("Upload form data:", uploadForm);
-        alert("Upload functionality will be implemented soon!");
+        showInfo("🚧 Tính năng upload file sẽ được triển khai sớm!");
     };
 
     const submitSpotifyTracks = async () => {
         if (selectedTracks.size === 0) {
-            alert("Please select at least one track");
+            showError("🎵 Vui lòng chọn ít nhất một bài hát để import");
             return;
         }
 
@@ -322,11 +327,14 @@ export function MusicUpload() {
                 throw new Error(result.error || "Failed to import tracks");
             }
 
-            alert(`Success! ${result.results.success} tracks imported successfully.${
-                result.results.failed > 0 
-                    ? ` ${result.results.failed} tracks failed to import.` 
-                    : ""
-            }`);
+            // Show beautiful notification
+            showImportSuccess({
+                totalTracks: tracksToImport.length,
+                successCount: result.results.success,
+                failedCount: result.results.failed,
+                albumName: spotifyData.type === "album" ? spotifyData.data.name : undefined,
+                artistName: spotifyData.type === "artist" ? spotifyData.data.name : undefined
+            });
 
             // Reset form
             setSpotifyData(null);
@@ -336,7 +344,10 @@ export function MusicUpload() {
 
         } catch (error) {
             console.error("Import error:", error);
-            alert(`Failed to import tracks: ${error instanceof Error ? error.message : "Unknown error"}`);
+            showError({
+                title: "❌ Lỗi import nhạc",
+                message: `Không thể import tracks: ${error instanceof Error ? error.message : "Lỗi không xác định"}`
+            });
         } finally {
             setIsLoading(false);
         }
@@ -344,7 +355,7 @@ export function MusicUpload() {
 
     const handlePlayTrack = (track: SpotifyTrack) => {
         if (!track.preview_url) {
-            alert('Preview not available for this track');
+            showError('🔇 Không có bản preview cho bài hát này');
             return;
         }
 
