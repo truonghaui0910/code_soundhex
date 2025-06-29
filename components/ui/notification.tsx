@@ -9,7 +9,7 @@ export function NotificationProvider() {
       expand={true}
       toastOptions={{
         style: {
-          background: 'hsl(var(--background))',
+          background: 'var(--notification-background)',
           border: '1px solid hsl(var(--border))',
           color: 'hsl(var(--foreground))',
           fontSize: '14px',
