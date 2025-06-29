@@ -1,7 +1,7 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { Toaster } from "sonner";
+import { NotificationProvider } from "@/components/ui/notification";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -42,21 +42,6 @@ export default function RootLayout({
         style={{ backgroundColor: "hsl(220 15% 12%)", color: "hsl(0 0% 85%)" }}
       >
         {children}
-        <Toaster 
-          richColors 
-          position="top-right"
-          expand={true}
-          visibleToasts={5}
-          closeButton
-          toastOptions={{
-            style: {
-              background: 'var(--background)',
-              color: 'var(--foreground)',
-              border: '1px solid var(--border)',
-            },
-            className: 'backdrop-blur-sm',
-          }}
-        />
       </body>
     </html>
   );

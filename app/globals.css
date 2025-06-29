@@ -188,21 +188,22 @@
 /* Close button styling */
 [data-sonner-toast] [data-close-button] {
   position: absolute !important;
-  top: 8px !important;
-  right: 8px !important;
+  top: 12px !important;
+  right: 12px !important;
   background: none !important;
   border: none !important;
-  color: hsl(0 0% 70%) !important;
+  color: hsl(0 0% 60%) !important;
   cursor: pointer !important;
-  padding: 4px !important;
-  width: 20px !important;
-  height: 20px !important;
+  padding: 2px !important;
+  width: 16px !important;
+  height: 16px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  font-size: 14px !important;
+  font-size: 12px !important;
   line-height: 1 !important;
-  transition: color 0.2s ease !important;
+  transition: all 0.2s ease !important;
+  z-index: 10 !important;
 }
 
 [data-sonner-toast] [data-close-button]:hover {
