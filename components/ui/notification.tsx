@@ -9,13 +9,16 @@ export function NotificationProvider() {
       expand={true}
       toastOptions={{
         style: {
-          background: 'var(--background)',
-          border: '1px solid var(--border)',
-          color: 'var(--foreground)',
+          background: 'hsl(var(--background))',
+          border: '1px solid hsl(var(--border))',
+          color: 'hsl(var(--foreground))',
           fontSize: '14px',
           fontWeight: '500',
-          backdropFilter: 'blur(8px)',
-          boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+          backdropFilter: 'blur(12px)',
+          boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.25), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+          borderRadius: '12px',
+          minHeight: '60px',
+          padding: '16px',
         },
         className: 'notification-toast',
         duration: 5000,

@@ -324,6 +324,14 @@ export function MusicUpload() {
             let result;
             try {
                 result = await response.json();
+                console.log("Raw API response:", result);
+                console.log("Response structure:", {
+                    hasResults: !!result?.results,
+                    resultsKeys: result?.results ? Object.keys(result.results) : "No results object",
+                    success: result?.results?.success,
+                    failed: result?.results?.failed,
+                    errors: result?.results?.errors
+                });
             } catch (parseError) {
                 console.error("Failed to parse response:", parseError);
                 throw new Error("Invalid server response");
@@ -335,11 +343,12 @@ export function MusicUpload() {
             }
 
             // Parse the results properly from the API response
-            
             const successCount = result?.results?.success || 0;
             const failedCount = result?.results?.failed || 0;
             const totalTracks = tracksToImport.length;
-            
+
+            console.log("Parsed counts:", { successCount, failedCount, totalTracks });
+
             // Show beautiful notification after processing all tracks
             showImportSuccess({
                 totalTracks,
