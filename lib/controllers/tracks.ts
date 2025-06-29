@@ -90,7 +90,9 @@ export class TracksController {
    * Lấy danh sách bài hát theo album
    */
   static async getTracksByAlbum(albumId: number): Promise<Track[]> {
+    console.log(`🎵 TracksController.getTracksByAlbum - Starting fetch for album ${albumId}`);
     const supabase = createServerComponentClient<Database>({ cookies });
+
     const { data, error } = await supabase
       .from("tracks")
       .select(`id, title, description, duration, file_url, created_at, album_id, artist_id, genre_id`)
@@ -146,7 +148,7 @@ export class TracksController {
     return tracksWithInfo;
   }
 
-  
+
 
   /**
    * Lấy danh sách bài hát theo thể loại

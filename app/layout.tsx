@@ -42,7 +42,21 @@ export default function RootLayout({
         style={{ backgroundColor: "hsl(220 15% 12%)", color: "hsl(0 0% 85%)" }}
       >
         {children}
-        <Toaster position="top-right" richColors />
+        <Toaster 
+          richColors 
+          position="top-right"
+          expand={true}
+          visibleToasts={5}
+          closeButton
+          toastOptions={{
+            style: {
+              background: 'var(--background)',
+              color: 'var(--foreground)',
+              border: '1px solid var(--border)',
+            },
+            className: 'backdrop-blur-sm',
+          }}
+        />
       </body>
     </html>
   );

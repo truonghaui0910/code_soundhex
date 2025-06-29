@@ -28,16 +28,23 @@ export class ArtistsController {
   }
 
   static async getAllArtists(): Promise<Artist[]> {
-    const supabase = createClientComponentClient<Database>();
+    console.log("🎤 ArtistsController.getAllArtists - Starting fetch");
+    const supabase = createServerComponentClient<Database>({ cookies });
     const { data, error } = await supabase
       .from("artists")
       .select("*")
       .order("created_at", { ascending: false });
 
     if (error) {
-      console.error("Error fetching artists:", error);
+      console.error("❌ Error fetching artists:", error);
       throw new Error(`Failed to fetch artists: ${error.message}`);
     }
+
+    console.log("✅ Artists fetched successfully:", {
+      count: data?.length || 0,
+      artistIds: data?.map(a => a.id) || [],
+      artistNames: data?.map(a => a.name) || []
+    });
 
     return data as Artist[];
   }

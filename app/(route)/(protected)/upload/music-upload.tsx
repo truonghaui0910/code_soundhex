@@ -24,8 +24,11 @@ import {
 } from "lucide-react";
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { showImportSuccess, showError, showProcessing, dismissNotifications } from "@/lib/services/notification-service";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
@@ -41,6 +44,10 @@ interface SpotifyTrack {
     image: string;
     isrc?: string | null;
     preview_url?: string;
+    artists?: {id: string, name: string}[];
+    album_id?: string;
+    artist_id?: string;
+    release_date?: string;
 }
 
 interface SpotifyAlbum {
@@ -249,38 +256,90 @@ export function MusicUpload() {
         alert("Upload functionality will be implemented soon!");
     };
 
-    const submitSpotifyTracks = () => {
+    const submitSpotifyTracks = async () => {
         if (selectedTracks.size === 0) {
             alert("Please select at least one track");
             return;
         }
 
-        // Get selected track data
-        const selectedTrackData: SpotifyTrack[] = [];
+        setIsLoading(true);
 
-        if (spotifyData.type === "track") {
-            selectedTrackData.push(spotifyData.data);
-        } else if (
-            spotifyData.type === "album" ||
-            spotifyData.type === "playlist"
-        ) {
-            spotifyData.data.tracks.forEach((track: SpotifyTrack) => {
-                if (selectedTracks.has(track.id)) {
-                    selectedTrackData.push(track);
-                }
-            });
-        } else if (spotifyData.type === "artist") {
-            spotifyData.data.albums.forEach((album: SpotifyAlbum) => {
-                album.tracks?.forEach((track: SpotifyTrack) => {
+        try {
+            // Get selected track data
+            const selectedTrackData: SpotifyTrack[] = [];
+
+            if (spotifyData.type === "track") {
+                selectedTrackData.push(spotifyData.data);
+            } else if (
+                spotifyData.type === "album" ||
+                spotifyData.type === "playlist"
+            ) {
+                spotifyData.data.tracks.forEach((track: SpotifyTrack) => {
                     if (selectedTracks.has(track.id)) {
                         selectedTrackData.push(track);
                     }
                 });
+            } else if (spotifyData.type === "artist") {
+                spotifyData.data.albums.forEach((album: SpotifyAlbum) => {
+                    album.tracks?.forEach((track: SpotifyTrack) => {
+                        if (selectedTracks.has(track.id)) {
+                            selectedTrackData.push(track);
+                        }
+                    });
+                });
+            }
+            const tracksToImport = selectedTrackData.map((track) => ({
+                                                        id: track.id,
+                                                        name: track.name,
+                                                        artist: track.artist,
+                                                        album: track.album,
+                                                        duration: track.duration,
+                                                        image: track.image,
+                                                        isrc: track.isrc,
+                                                        preview_url: track.preview_url,
+                                                        artists: track.artists || [{ 
+                                                            id: track.artist_id || `artist_${track.id}`,
+                                                            name: track.artist 
+                                                        }],
+                                                        album_data: {
+                                                            id: track.album_id || `album_${track.id}`,
+                                                            release_date: track.release_date,
+                                                            description: null,
+                                                        }
+                                                    }));
+            // Call import API
+            const response = await fetch("/api/import-music", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ tracks: tracksToImport }),
             });
-        }
 
-        console.log("Selected tracks data:", selectedTrackData);
-        alert(`${selectedTracks.size} track(s) will be processed for upload!`);
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.error || "Failed to import tracks");
+            }
+
+            alert(`Success! ${result.results.success} tracks imported successfully.${
+                result.results.failed > 0 
+                    ? ` ${result.results.failed} tracks failed to import.` 
+                    : ""
+            }`);
+
+            // Reset form
+            setSpotifyData(null);
+            setSelectedTracks(new Set());
+            setSpotifyUrl("");
+            setOwnershipConfirmed(false);
+
+        } catch (error) {
+            console.error("Import error:", error);
+            alert(`Failed to import tracks: ${error instanceof Error ? error.message : "Unknown error"}`);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const handlePlayTrack = (track: SpotifyTrack) => {
@@ -753,9 +812,7 @@ export function MusicUpload() {
                                                                                 ) : (
                                                                                     <span className="text-sm text-gray-400">{index + 1}</span>
                                                                                 )}
-                                                                            </div>
-
-                                                                            <div className="relative">
+                                                                            </div>                                                                            <div className="relative">
                                                                                 <Image
                                                                                     src={track.image || album.image || "/images/soundhex.png"}
                                                                                     alt={track.name}
@@ -820,13 +877,20 @@ export function MusicUpload() {
                                     <div className="flex justify-end pt-4">
                                         <Button
                                             onClick={submitSpotifyTracks}
-                                            disabled={selectedTracks.size === 0 || !ownershipConfirmed}
+                                            disabled={selectedTracks.size === 0 || !ownershipConfirmed || isLoading}
                                             className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
-                                            Import {selectedTracks.size} Track
-                                            {selectedTracks.size !== 1
-                                                ? "s"
-                                                : ""}
+                                            {isLoading ? (
+                                                <>
+                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                    Importing...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    Import {selectedTracks.size} Track
+                                                    {selectedTracks.size !== 1 ? "s" : ""}
+                                                </>
+                                            )}
                                         </Button>
                                     </div>
                                 </CardContent>

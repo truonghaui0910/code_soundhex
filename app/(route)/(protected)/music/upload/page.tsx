@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -20,14 +19,14 @@ export default function UploadPage() {
     const validateAgreements = async () => {
       try {
         const response = await fetch("/api/agreements/list");
-        
+
         if (!response.ok) {
           throw new Error("Failed to fetch agreements");
         }
 
         const data = await response.json();
         const agreements: Agreement[] = Array.isArray(data.data) ? data.data : Array.isArray(data) ? data : [];
-        
+
         // Check if there's at least one completed agreement
         const hasCompletedAgreement = agreements.some(
           agreement => agreement.status.toLowerCase() === 'completed'
