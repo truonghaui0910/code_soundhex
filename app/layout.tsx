@@ -42,6 +42,7 @@ export default function RootLayout({
         style={{ backgroundColor: "hsl(220 15% 12%)", color: "hsl(0 0% 85%)" }}
       >
         {children}
+        <NotificationProvider />
       </body>
     </html>
   );
