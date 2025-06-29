@@ -77,20 +77,20 @@ class NotificationService {
   }) {
     const { fileName, type } = data;
     const typeMap = {
-      track: 'bài hát',
+      track: 'track',
       album: 'album',
-      artist: 'nghệ sĩ'
+      artist: 'artist'
     };
 
     this.success({
-      title: 'Upload thành công!',
-      message: `${typeMap[type]} "${fileName}" đã được upload và xử lý thành công.`,
+      title: 'Upload Successful!',
+      message: `${typeMap[type]} "${fileName}" has been uploaded and processed successfully.`,
       duration: 5000,
     });
   }
 
   // Processing notification
-  processing(message: string = 'Đang xử lý...') {
+  processing(message: string = 'Processing...') {
     toast.loading(message, {
       duration: Infinity, // Keep showing until dismissed
     });
