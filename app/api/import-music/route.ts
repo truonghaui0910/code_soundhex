@@ -1,4 +1,3 @@
-
 import { NextRequest, NextResponse } from "next/server";
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
@@ -71,10 +70,10 @@ export async function POST(request: NextRequest) {
                     artist: track.artist,
                     album: track.album
                 });
-                
+
                 await importSingleTrack(supabase, track, session.user.id);
                 results.success++;
-                
+
                 console.log("✅ TRACK_IMPORTED_SUCCESS:", {
                     trackName: track.name,
                     trackId: track.id
@@ -130,7 +129,7 @@ async function importSingleTrack(
     // Extract genre from artist data if available
     const genreNames = trackData.artists?.[0]?.genres || [];
     console.log("🎭 GENRES_EXTRACTED:", { genreNames });
-    
+
     // 1. Create or get genres
     const genreIds: number[] = [];
     for (const genreName of genreNames) {
@@ -146,7 +145,7 @@ async function importSingleTrack(
     // 2. Create or get artist
     const artistSpotifyId = trackData.artists?.[0]?.id || `generated_artist_${trackData.id}`;
     console.log("🎤 ARTIST_SPOTIFY_ID:", { artistSpotifyId, artistName: trackData.artist });
-    
+
     const artist = await getOrCreateArtist(supabase, {
         name: trackData.artist,
         spotify_id: artistSpotifyId,
@@ -158,7 +157,7 @@ async function importSingleTrack(
     // 3. Create or get album
     const albumSpotifyId = trackData.album_data?.id || `generated_album_${trackData.id}`;
     console.log("💿 ALBUM_SPOTIFY_ID:", { albumSpotifyId, albumName: trackData.album });
-    
+
     const album = await getOrCreateAlbum(supabase, {
         title: trackData.album,
         spotify_id: albumSpotifyId,
@@ -217,7 +216,7 @@ async function importSingleTrack(
 
 async function getOrCreateGenre(supabase: any, name: string) {
     console.log("🎭 GET_OR_CREATE_GENRE:", { name });
-    
+
     // Check if genre exists
     const { data: existingGenre } = await supabase
         .from("genres")

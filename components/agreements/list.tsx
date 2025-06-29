@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { showError, showSuccess, showAgreementSuccess } from "@/lib/services/notification-service";
 import { FileText, Plus, RefreshCw, Download, Eye, Edit, Clock, CheckCircle, XCircle } from "lucide-react";
 
 // Types for API response
@@ -158,11 +159,14 @@ export default function AgreementsList() {
         // Fallback to audit_log_url if documents array doesn't have URL
         window.open(data.audit_log_url, '_blank');
       } else {
-        toast.error("Document not available");
+        showError("📄 Tài liệu không khả dụng");
       }
     } catch (error: any) {
       console.error("Error downloading document:", error);
-      toast.error(error.message || "Failed to download document");
+      showError({
+        title: "❌ Lỗi tải tài liệu", 
+        message: error.message || "Không thể tải tài liệu. Vui lòng thử lại."
+      });
     }
   };
 
@@ -345,7 +349,7 @@ export default function AgreementsList() {
                                       if (submitterSlug) {
                                         goToSignPage(submitterSlug);
                                       } else {
-                                        toast.error("No signing link found");
+                                        showError("❌ Không tìm thấy link ký hợp đồng");
                                       }
                                     }}
                                   >
