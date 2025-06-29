@@ -183,6 +183,10 @@ export async function POST(request: NextRequest) {
             image: albumInfoData.images?.[0]?.url || "",
             isrc: track.external_ids?.isrc || null,
             preview_url: track.preview_url,
+            artist_id: track.artists?.[0]?.id || albumInfoData.artists?.[0]?.id,
+            album_id: albumInfoData.id,
+            artists: track.artists || albumInfoData.artists || [],
+            release_date: albumInfoData.release_date,
           })) || [];
 
         data = {
@@ -213,8 +217,11 @@ export async function POST(request: NextRequest) {
             image: item.track.album.images[0]?.url || "",
             isrc: item.track.external_ids?.isrc || null,
             preview_url: item.track.preview_url,
+            artist_id: item.track.artists[0]?.id,
+            album_id: item.track.album.id,
             artists: item.track.artists,
             album_data: {
+              id: item.track.album.id,
               release_date: item.track.album.release_date,
               description: null,
             },

@@ -41,6 +41,10 @@ interface SpotifyTrack {
     image: string;
     isrc?: string | null;
     preview_url?: string;
+    artists?: {id: string, name: string}[];
+    album_id?: string;
+    artist_id?: string;
+    release_date?: string;
 }
 
 interface SpotifyAlbum {
@@ -281,14 +285,32 @@ export function MusicUpload() {
                     });
                 });
             }
-
+            const tracksToImport = selectedTrackData.map((track) => ({
+                                                        id: track.id,
+                                                        name: track.name,
+                                                        artist: track.artist,
+                                                        album: track.album,
+                                                        duration: track.duration,
+                                                        image: track.image,
+                                                        isrc: track.isrc,
+                                                        preview_url: track.preview_url,
+                                                        artists: track.artists || [{ 
+                                                            id: track.artist_id || `artist_${track.id}`,
+                                                            name: track.artist 
+                                                        }],
+                                                        album_data: {
+                                                            id: track.album_id || `album_${track.id}`,
+                                                            release_date: track.release_date,
+                                                            description: null,
+                                                        }
+                                                    }));
             // Call import API
             const response = await fetch("/api/import-music", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ tracks: selectedTrackData }),
+                body: JSON.stringify({ tracks: tracksToImport }),
             });
 
             const result = await response.json();
