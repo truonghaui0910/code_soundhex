@@ -81,13 +81,22 @@ class NotificationService {
   }) {
     const { totalTracks, successCount, failedCount, albumName, artistName } = data;
     
-    if (failedCount > 0) {
+    if (failedCount === totalTracks) {
+      // Tất cả tracks đều fail
+      this.error({
+        title: '❌ Import thất bại',
+        message: `Không thể import bất kỳ track nào${albumName ? ` từ album "${albumName}"` : ''}${artistName ? ` của ${artistName}` : ''}. Lý do: ${failedCount === totalTracks ? 'Tất cả tracks đã tồn tại trong hệ thống' : 'Lỗi không xác định'}.`,
+        duration: 8000,
+      });
+    } else if (failedCount > 0) {
+      // Một số tracks fail
       this.warning({
-        title: '🎵 Import hoàn tất với lỗi',
-        message: `${successCount}/${totalTracks} tracks đã được import thành công${albumName ? ` cho album "${albumName}"` : ''}${artistName ? ` của ${artistName}` : ''}. ${failedCount} tracks bị lỗi.`,
+        title: '⚠️ Import hoàn tất với lỗi',
+        message: `${successCount}/${totalTracks} tracks đã được import thành công${albumName ? ` cho album "${albumName}"` : ''}${artistName ? ` của ${artistName}` : ''}. ${failedCount} tracks bị lỗi (có thể đã tồn tại).`,
         duration: 8000,
       });
     } else {
+      // Tất cả thành công
       this.success({
         title: '🎉 Import thành công!',
         message: `Đã import ${successCount} tracks thành công${albumName ? ` cho album "${albumName}"` : ''}${artistName ? ` của ${artistName}` : ''}. Bạn có thể xem chúng trong thư viện nhạc.`,

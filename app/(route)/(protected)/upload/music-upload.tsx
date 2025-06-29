@@ -25,7 +25,7 @@ import {
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { showImportSuccess, showError, showProcessing, dismissNotifications } from "@/lib/services/notification-service";
+import { showImportSuccess, showError, showInfo, showProcessing, dismissNotifications } from "@/lib/services/notification-service";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
