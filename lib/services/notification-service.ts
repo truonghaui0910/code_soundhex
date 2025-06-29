@@ -1,4 +1,3 @@
-
 import { toast } from 'sonner';
 
 export interface NotificationOptions {
@@ -11,7 +10,7 @@ export interface NotificationOptions {
 
 class NotificationService {
   private static instance: NotificationService;
-  
+
   public static getInstance(): NotificationService {
     if (!NotificationService.instance) {
       NotificationService.instance = new NotificationService();
@@ -69,40 +68,6 @@ class NotificationService {
       description: options.message,
       duration: options.duration || 4000,
     });
-  }
-
-  // Import success notification - specialized for importing tracks
-  importSuccess(data: {
-    totalTracks: number;
-    successCount: number;
-    failedCount: number;
-    albumName?: string;
-    artistName?: string;
-  }) {
-    const { totalTracks, successCount, failedCount, albumName, artistName } = data;
-    
-    if (failedCount === totalTracks) {
-      // All tracks failed
-      this.warning({
-        title: '⚠️ Import Skipped',
-        message: `All ${totalTracks} track${totalTracks > 1 ? 's' : ''} already exist in your library${albumName ? ` for album "${albumName}"` : ''}${artistName ? ` by ${artistName}` : ''}. No new tracks were added.`,
-        duration: 6000,
-      });
-    } else if (failedCount > 0) {
-      // Some tracks failed
-      this.warning({
-        title: '⚠️ Import Completed with Duplicates',
-        message: `${successCount}/${totalTracks} tracks imported successfully${albumName ? ` for album "${albumName}"` : ''}${artistName ? ` by ${artistName}` : ''}. ${failedCount} track${failedCount > 1 ? 's' : ''} already existed and were skipped.`,
-        duration: 8000,
-      });
-    } else {
-      // All successful
-      this.success({
-        title: '🎉 Import Successful!',
-        message: `Successfully imported ${successCount} track${successCount > 1 ? 's' : ''}${albumName ? ` for album "${albumName}"` : ''}${artistName ? ` by ${artistName}` : ''}. You can view them in your music library.`,
-        duration: 6000,
-      });
-    }
   }
 
   // Upload success notification
@@ -176,17 +141,97 @@ class NotificationService {
 // Export singleton instance
 export const notificationService = NotificationService.getInstance();
 
+// Notification service functions
+export const showSuccess = (options: {
+  title: string;
+  message: string;
+  duration?: number;
+}) => {
+  toast.success(options.title, {
+    description: options.message,
+    duration: options.duration || 4000,
+  });
+};
+
+export const showError = (options: {
+  title: string;
+  message: string;
+  duration?: number;
+}) => {
+  toast.error(options.title, {
+    description: options.message,
+    duration: options.duration || 5000,
+  });
+};
+
+export const showWarning = (options: {
+  title: string;
+  message: string;
+  duration?: number;
+}) => {
+  toast.warning(options.title, {
+    description: options.message,
+    duration: options.duration || 5000,
+  });
+};
+
+export const showInfo = (options: {
+  title: string;
+  message: string;
+  duration?: number;
+}) => {
+  toast.info(options.title, {
+    description: options.message,
+    duration: options.duration || 4000,
+  });
+};
+
+export const showProcessing = (message: string) => {
+  return toast.loading(message);
+};
+
+export const dismissNotifications = () => {
+  toast.dismiss();
+};
+
+// Import success notification - specialized for importing tracks
+export const showImportSuccess = (data: {
+  totalTracks: number;
+  successCount: number;
+  failedCount: number;
+  albumName?: string;
+  artistName?: string;
+}) => {
+  const { totalTracks, successCount, failedCount, albumName, artistName } = data;
+
+  if (failedCount === totalTracks) {
+    // All tracks failed
+    showWarning({
+      title: '⚠️ Import Skipped',
+      message: `All ${totalTracks} track${totalTracks > 1 ? 's' : ''} already exist in your library${albumName ? ` for album "${albumName}"` : ''}${artistName ? ` by ${artistName}` : ''}. No new tracks were added.`,
+      duration: 6000,
+    });
+  } else if (failedCount > 0) {
+    // Some tracks failed
+    showWarning({
+      title: '⚠️ Import Completed with Duplicates',
+      message: `${successCount}/${totalTracks} tracks imported successfully${albumName ? ` for album "${albumName}"` : ''}${artistName ? ` by ${artistName}` : ''}. ${failedCount} track${failedCount > 1 ? 's' : ''} already existed and were skipped.`,
+      duration: 8000,
+    });
+  } else {
+    // All successful
+    showSuccess({
+      title: '🎉 Import Successful!',
+      message: `Successfully imported ${successCount} track${successCount > 1 ? 's' : ''}${albumName ? ` for album "${albumName}"` : ''}${artistName ? ` by ${artistName}` : ''}. You can view them in your music library.`,
+      duration: 6000,
+    });
+  }
+};
+
 // Export individual methods for convenience
 export const {
-  success: showSuccess,
-  error: showError,
-  warning: showWarning,
-  info: showInfo,
-  importSuccess: showImportSuccess,
-  uploadSuccess: showUploadSuccess,
-  processing: showProcessing,
-  dismissAll: dismissNotifications,
-  agreementSuccess: showAgreementSuccess,
-  authSuccess: showAuthSuccess,
-  authError: showAuthError,
+  success: showUploadSuccess,
+  error: showAgreementSuccess,
+  warning: showAuthSuccess,
+  info: showAuthError,
 } = notificationService;
