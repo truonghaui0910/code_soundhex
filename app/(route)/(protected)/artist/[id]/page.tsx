@@ -10,16 +10,26 @@ export default async function ArtistDetailPage({
   params: { id: string };
 }) {
   const artistId = Number(params.id);
+  console.log("🎤 ArtistDetailPage - Loading artist:", { artistId });
 
   if (!artistId) {
+    console.log("❌ Invalid artistId:", params.id);
     return notFound();
   }
 
   try {
     const artists = await ArtistsController.getAllArtists();
+    console.log("🎤 All artists fetched:", {
+      totalArtists: artists.length,
+      artistIds: artists.map(a => a.id),
+      lookingFor: artistId
+    });
+    
     const artist = artists.find((a) => a.id === artistId);
+    console.log("🎤 Artist found:", artist ? { id: artist.id, name: artist.name } : "NOT FOUND");
 
     if (!artist) {
+      console.log("❌ Artist not found with ID:", artistId);
       return notFound();
     }
 
