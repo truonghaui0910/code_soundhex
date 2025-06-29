@@ -1,5 +1,6 @@
 
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createClientComponentClient, createServerComponentClient } from "@supabase/auth-helpers-nextjs";
+import { cookies } from "next/headers";
 import { Database } from "@/types/supabase";
 
 export interface Album {
@@ -15,15 +16,22 @@ export interface Album {
 
 export class AlbumsController {
   static async getAllAlbums(): Promise<Album[]> {
-    const supabase = createClientComponentClient<Database>();
+    console.log("🎵 AlbumsController.getAllAlbums - Starting fetch");
+    const supabase = createServerComponentClient<Database>({ cookies });
     const { data, error } = await supabase
       .from("albums")
-      .select(`id, title, cover_image_url, release_date, created_at, artist_id`) 
+      .select(`id, title, cover_image_url, release_date, created_at, artist_id, user_id`) 
       .order("created_at", { ascending: false });
     if (error) {
-      console.error("Error fetching albums:", error);
+      console.error("❌ Error fetching albums:", error);
       throw new Error(`Failed to fetch albums: ${error.message}`);
     }
+
+    console.log("✅ Albums fetched successfully:", {
+      count: data?.length || 0,
+      albumIds: data?.map(a => a.id) || [],
+      userIds: data?.map(a => a.user_id) || []
+    });
 
     // Lấy danh sách artist_id duy nhất
     const artistIds = Array.from(new Set((data ?? []).map((album: any) => album.artist_id)));
