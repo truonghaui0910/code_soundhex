@@ -24,8 +24,11 @@ import {
 } from "lucide-react";
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { showImportSuccess, showError, showProcessing, dismissNotifications } from "@/lib/services/notification-service";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
@@ -809,9 +812,7 @@ export function MusicUpload() {
                                                                                 ) : (
                                                                                     <span className="text-sm text-gray-400">{index + 1}</span>
                                                                                 )}
-                                                                            </div>
-
-                                                                            <div className="relative">
+                                                                            </div>                                                                            <div className="relative">
                                                                                 <Image
                                                                                     src={track.image || album.image || "/images/soundhex.png"}
                                                                                     alt={track.name}
