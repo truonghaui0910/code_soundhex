@@ -937,12 +937,7 @@ export function MusicUpload() {
                                 </div>
                                 <div className="flex-1">
                                     <label htmlFor="ownership-confirmation" className="cursor-pointer">
-                                        <div className="flex items-center gap-2 mb-3">
-                                            <div className="w-6 h-6 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full flex items-center justify-center">
-                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                                                </svg>
-                                            </div>
+                                        <div className="mb-3">
                                             <span className="text-lg font-bold text-gray-900 dark:text-white">
                                                 Copyright & Ownership Declaration
                                             </span>
