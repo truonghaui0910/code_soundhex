@@ -113,7 +113,7 @@
   z-index: 9999 !important;
 }
 
-/* Base toast styling */
+/* Base toast styling with smooth animations */
 [data-sonner-toast] {
   background: hsl(220 15% 20%) !important;
   border: 1px solid hsl(220 15% 30%) !important;
@@ -127,6 +127,31 @@
   font-size: 14px !important;
   font-weight: 500 !important;
   position: relative !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transform: translateX(0) scale(1) !important;
+}
+
+/* Smooth exit animation */
+[data-sonner-toast][data-removed="true"] {
+  opacity: 0 !important;
+  transform: translateX(100%) scale(0.95) !important;
+  transition: all 0.25s ease-in !important;
+}
+
+/* Smooth entry animation */
+[data-sonner-toast][data-mounted="true"] {
+  animation: slideInFromRight 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(100%) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
 }
 
 /* Custom toast class styling */
@@ -185,7 +210,7 @@
   display: none !important;
 }
 
-/* Close button styling - Force position to top-right */
+/* Close button styling - Force position to top-right with smooth animations */
 [data-sonner-toast] button[data-close-button] {
   position: absolute !important;
   top: 8px !important;
@@ -203,16 +228,23 @@
   justify-content: center !important;
   font-size: 14px !important;
   line-height: 1 !important;
-  transition: all 0.2s ease !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
   z-index: 999 !important;
   margin: 0 !important;
-  transform: none !important;
+  transform: scale(1) !important;
+  border-radius: 4px !important;
 }
 
 [data-sonner-toast] button[data-close-button]:hover {
   color: hsl(0 0% 100%) !important;
-  background: rgba(255, 255, 255, 0.1) !important;
-  border-radius: 4px !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+  transform: scale(1.1) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+}
+
+[data-sonner-toast] button[data-close-button]:active {
+  transform: scale(0.95) !important;
+  transition: all 0.1s ease !important;
 }
 
 /* Additional override for any Sonner default positioning */
