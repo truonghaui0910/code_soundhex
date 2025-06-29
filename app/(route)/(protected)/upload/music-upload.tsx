@@ -114,7 +114,7 @@ export function MusicUpload() {
 
     const handleSpotifySubmit = async () => {
         if (!spotifyUrl.trim()) {
-            showError("📝 Vui lòng nhập URL Spotify");
+            showError("📝 Please enter a Spotify URL");
             return;
         }
 
@@ -153,8 +153,8 @@ export function MusicUpload() {
         } catch (error) {
             console.error("Error:", error);
             showError({
-                title: "❌ Lỗi lấy dữ liệu Spotify",
-                message: "Không thể lấy thông tin từ Spotify. Vui lòng kiểm tra URL và thử lại."
+                title: "❌ Spotify Data Error",
+                message: "Cannot fetch information from Spotify. Please check the URL and try again."
             });
         } finally {
             setIsLoading(false);
@@ -206,8 +206,8 @@ export function MusicUpload() {
         } catch (error) {
             console.error("Error loading album tracks:", error);
             showError({
-                title: "❌ Lỗi tải tracks album",
-                message: "Không thể tải danh sách bài hát trong album. Vui lòng thử lại."
+                title: "❌ Album Tracks Error",
+                message: "Cannot load track list from album. Please try again."
             });
         } finally {
             setLoadingAlbums((prev) => {
@@ -263,7 +263,7 @@ export function MusicUpload() {
 
     const submitSpotifyTracks = async () => {
         if (selectedTracks.size === 0) {
-            showError("🎵 Vui lòng chọn ít nhất một bài hát để import");
+            showError("🎵 Please select at least one song to import");
             return;
         }
 
@@ -321,17 +321,27 @@ export function MusicUpload() {
                 body: JSON.stringify({ tracks: tracksToImport }),
             });
 
-            const result = await response.json();
-
-            if (!response.ok) {
-                throw new Error(result.error || "Failed to import tracks");
+            let result;
+            try {
+                result = await response.json();
+            } catch (parseError) {
+                console.error("Failed to parse response:", parseError);
+                throw new Error("Invalid server response");
             }
 
-            // Show beautiful notification
+            if (!response.ok) {
+                const errorMessage = result?.error || result?.message || "Failed to import tracks";
+                throw new Error(errorMessage);
+            }
+
+            // Ensure we have valid results structure
+            const results = result?.results || { success: 0, failed: 0, errors: [] };
+            
+            // Show beautiful notification after processing all tracks
             showImportSuccess({
                 totalTracks: tracksToImport.length,
-                successCount: result.results.success,
-                failedCount: result.results.failed,
+                successCount: results.success || 0,
+                failedCount: results.failed || 0,
                 albumName: spotifyData.type === "album" ? spotifyData.data.name : undefined,
                 artistName: spotifyData.type === "artist" ? spotifyData.data.name : undefined
             });
@@ -345,8 +355,8 @@ export function MusicUpload() {
         } catch (error) {
             console.error("Import error:", error);
             showError({
-                title: "❌ Lỗi import nhạc",
-                message: `Không thể import tracks: ${error instanceof Error ? error.message : "Lỗi không xác định"}`
+                title: "❌ Import Failed",
+                message: `Cannot import tracks: ${error instanceof Error ? error.message : "Unknown error"}`
             });
         } finally {
             setIsLoading(false);

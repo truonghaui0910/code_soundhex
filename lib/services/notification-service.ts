@@ -71,7 +71,7 @@ class NotificationService {
     });
   }
 
-  // Import success notification - chuyên dụng cho import tracks
+  // Import success notification - specialized for importing tracks
   importSuccess(data: {
     totalTracks: number;
     successCount: number;
@@ -82,24 +82,24 @@ class NotificationService {
     const { totalTracks, successCount, failedCount, albumName, artistName } = data;
     
     if (failedCount === totalTracks) {
-      // Tất cả tracks đều fail
+      // All tracks failed
       this.error({
-        title: '❌ Import thất bại',
-        message: `Không thể import bất kỳ track nào${albumName ? ` từ album "${albumName}"` : ''}${artistName ? ` của ${artistName}` : ''}. Lý do: ${failedCount === totalTracks ? 'Tất cả tracks đã tồn tại trong hệ thống' : 'Lỗi không xác định'}.`,
+        title: '❌ Import Failed',
+        message: `Could not import any tracks${albumName ? ` from album "${albumName}"` : ''}${artistName ? ` by ${artistName}` : ''}. Reason: ${failedCount === totalTracks ? 'All tracks already exist in the system' : 'Unknown error'}.`,
         duration: 8000,
       });
     } else if (failedCount > 0) {
-      // Một số tracks fail
+      // Some tracks failed
       this.warning({
-        title: '⚠️ Import hoàn tất với lỗi',
-        message: `${successCount}/${totalTracks} tracks đã được import thành công${albumName ? ` cho album "${albumName}"` : ''}${artistName ? ` của ${artistName}` : ''}. ${failedCount} tracks bị lỗi (có thể đã tồn tại).`,
+        title: '⚠️ Import Completed with Errors',
+        message: `${successCount}/${totalTracks} tracks imported successfully${albumName ? ` for album "${albumName}"` : ''}${artistName ? ` by ${artistName}` : ''}. ${failedCount} tracks failed (may already exist).`,
         duration: 8000,
       });
     } else {
-      // Tất cả thành công
+      // All successful
       this.success({
-        title: '🎉 Import thành công!',
-        message: `Đã import ${successCount} tracks thành công${albumName ? ` cho album "${albumName}"` : ''}${artistName ? ` của ${artistName}` : ''}. Bạn có thể xem chúng trong thư viện nhạc.`,
+        title: '🎉 Import Successful!',
+        message: `Successfully imported ${successCount} tracks${albumName ? ` for album "${albumName}"` : ''}${artistName ? ` by ${artistName}` : ''}. You can view them in your music library.`,
         duration: 6000,
       });
     }
@@ -139,14 +139,14 @@ class NotificationService {
   // Agreement notifications
   agreementSuccess(action: 'created' | 'signed' | 'completed', agreementId?: number) {
     const messages = {
-      created: '📄 Hợp đồng đã được tạo thành công!',
-      signed: '✍️ Hợp đồng đã được ký thành công!',
-      completed: '🎉 Hợp đồng đã hoàn tất!'
+      created: '📄 Agreement Created Successfully!',
+      signed: '✍️ Agreement Signed Successfully!',
+      completed: '🎉 Agreement Completed!'
     };
 
     this.success({
       title: messages[action],
-      message: agreementId ? `ID hợp đồng: ${agreementId}` : undefined,
+      message: agreementId ? `Agreement ID: ${agreementId}` : undefined,
       duration: 5000,
     });
   }
@@ -154,9 +154,9 @@ class NotificationService {
   // Authentication notifications
   authSuccess(action: 'login' | 'register' | 'logout') {
     const messages = {
-      login: '👋 Chào mừng bạn trở lại!',
-      register: '🎉 Đăng ký thành công!',
-      logout: '👋 Hẹn gặp lại!'
+      login: '👋 Welcome back!',
+      register: '🎉 Registration successful!',
+      logout: '👋 See you later!'
     };
 
     this.success(messages[action]);
@@ -164,9 +164,9 @@ class NotificationService {
 
   authError(action: 'login' | 'register' | 'logout') {
     const messages = {
-      login: '❌ Đăng nhập thất bại!',
-      register: '❌ Đăng ký thất bại!',
-      logout: '❌ Đăng xuất thất bại!'
+      login: '❌ Login failed!',
+      register: '❌ Registration failed!',
+      logout: '❌ Logout failed!'
     };
 
     this.error(messages[action]);
