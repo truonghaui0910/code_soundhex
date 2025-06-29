@@ -83,23 +83,23 @@ class NotificationService {
     
     if (failedCount === totalTracks) {
       // All tracks failed
-      this.error({
-        title: '❌ Import Failed',
-        message: `Could not import any tracks${albumName ? ` from album "${albumName}"` : ''}${artistName ? ` by ${artistName}` : ''}. Reason: ${failedCount === totalTracks ? 'All tracks already exist in the system' : 'Unknown error'}.`,
-        duration: 8000,
+      this.warning({
+        title: '⚠️ Import Skipped',
+        message: `All ${totalTracks} track${totalTracks > 1 ? 's' : ''} already exist in your library${albumName ? ` for album "${albumName}"` : ''}${artistName ? ` by ${artistName}` : ''}. No new tracks were added.`,
+        duration: 6000,
       });
     } else if (failedCount > 0) {
       // Some tracks failed
       this.warning({
-        title: '⚠️ Import Completed with Errors',
-        message: `${successCount}/${totalTracks} tracks imported successfully${albumName ? ` for album "${albumName}"` : ''}${artistName ? ` by ${artistName}` : ''}. ${failedCount} tracks failed (may already exist).`,
+        title: '⚠️ Import Completed with Duplicates',
+        message: `${successCount}/${totalTracks} tracks imported successfully${albumName ? ` for album "${albumName}"` : ''}${artistName ? ` by ${artistName}` : ''}. ${failedCount} track${failedCount > 1 ? 's' : ''} already existed and were skipped.`,
         duration: 8000,
       });
     } else {
       // All successful
       this.success({
         title: '🎉 Import Successful!',
-        message: `Successfully imported ${successCount} tracks${albumName ? ` for album "${albumName}"` : ''}${artistName ? ` by ${artistName}` : ''}. You can view them in your music library.`,
+        message: `Successfully imported ${successCount} track${successCount > 1 ? 's' : ''}${albumName ? ` for album "${albumName}"` : ''}${artistName ? ` by ${artistName}` : ''}. You can view them in your music library.`,
         duration: 6000,
       });
     }
