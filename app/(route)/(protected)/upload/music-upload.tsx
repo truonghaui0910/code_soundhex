@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import {
     Upload,
@@ -21,6 +22,8 @@ import {
     HardDrive,
     ChevronRight,
     ChevronDown,
+    ChevronUp,
+    ImageIcon,
 } from "lucide-react";
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 import { Input } from "@/components/ui/input";
@@ -71,13 +74,33 @@ interface SpotifyArtist {
     albums: SpotifyAlbum[];
 }
 
-interface UploadFormData {
+interface UserAlbum {
+    id: number;
     title: string;
-    artist: string;
-    album: string;
+    cover_image_url: string | null;
+    artist: {
+        id: number;
+        name: string;
+    };
+}
+
+interface UserArtist {
+    id: number;
+    name: string;
+    profile_image_url: string | null;
+}
+
+interface FileUploadData {
+    title: string;
     genre: string;
+    album: string;
+    artist: string;
     description: string;
-    file: File | null;
+    file: File;
+    isNewAlbum: boolean;
+    isNewArtist: boolean;
+    albumImage?: File;
+    artistImage?: File;
 }
 
 export function MusicUpload() {
@@ -92,15 +115,16 @@ export function MusicUpload() {
         new Set(),
     );
     const [loadingAlbums, setLoadingAlbums] = useState<Set<string>>(new Set());
-    const [uploadForm, setUploadForm] = useState<UploadFormData>({
-        title: "",
-        artist: "",
-        album: "",
-        genre: "",
-        description: "",
-        file: null,
-    });
+    
+    // Multiple file upload state
+    const [uploadFiles, setUploadFiles] = useState<FileUploadData[]>([]);
+    const [userAlbums, setUserAlbums] = useState<UserAlbum[]>([]);
+    const [userArtists, setUserArtists] = useState<UserArtist[]>([]);
+    const [loadingUserData, setLoadingUserData] = useState(false);
+    
     const [fileInputRef] = useState<any>(useRef(null));
+    const [albumImageInputRef] = useState<any>(useRef(null));
+    const [artistImageInputRef] = useState<any>(useRef(null));
     const [ownershipConfirmed, setOwnershipConfirmed] = useState(false);
 
     // Audio player context
@@ -112,10 +136,107 @@ export function MusicUpload() {
         setTrackList,
     } = useAudioPlayer();
 
+    // Load user albums and artists when upload tab is active
+    useEffect(() => {
+        if (activeTab === "upload") {
+            loadUserData();
+        }
+    }, [activeTab]);
+
+    const loadUserData = async () => {
+        setLoadingUserData(true);
+        try {
+            // Load user albums
+            const albumsResponse = await fetch("/api/albums");
+            if (albumsResponse.ok) {
+                const albumsData = await albumsResponse.json();
+                setUserAlbums(albumsData.filter((album: any) => !album.from_spotify));
+            }
+
+            // Load user artists
+            const artistsResponse = await fetch("/api/artists");
+            if (artistsResponse.ok) {
+                const artistsData = await artistsResponse.json();
+                setUserArtists(artistsData.filter((artist: any) => !artist.from_spotify));
+            }
+        } catch (error) {
+            console.error("Error loading user data:", error);
+            showError("Failed to load albums and artists");
+        } finally {
+            setLoadingUserData(false);
+        }
+    };
+
     const formatDuration = (seconds: number) => {
         const mins = Math.floor(seconds / 60);
         const secs = seconds % 60;
         return `${mins}:${secs.toString().padStart(2, "0")}`;
+    };
+
+    const validateImage = (file: File): boolean => {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.onload = () => {
+                if (img.width === 1400 && img.height === 1400) {
+                    resolve(true);
+                } else {
+                    showError("Image must be exactly 1400x1400 pixels");
+                    resolve(false);
+                }
+            };
+            img.onerror = () => {
+                showError("Invalid image file");
+                resolve(false);
+            };
+            img.src = URL.createObjectURL(file);
+        });
+    };
+
+    const handleMultipleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const files = event.target.files;
+        if (files && files.length > 0) {
+            const newUploadFiles: FileUploadData[] = Array.from(files).map(file => ({
+                title: file.name.replace(/\.[^/.]+$/, ""), // Remove file extension
+                genre: "",
+                album: "",
+                artist: "",
+                description: "",
+                file: file,
+                isNewAlbum: false,
+                isNewArtist: false,
+            }));
+            setUploadFiles(prev => [...prev, ...newUploadFiles]);
+        }
+    };
+
+    const updateFileData = (index: number, field: keyof FileUploadData, value: any) => {
+        setUploadFiles(prev => prev.map((item, i) => 
+            i === index ? { ...item, [field]: value } : item
+        ));
+    };
+
+    const removeFile = (index: number) => {
+        setUploadFiles(prev => prev.filter((_, i) => i !== index));
+    };
+
+    const handleAlbumImageUpload = async (event: React.ChangeEvent<HTMLInputElement>, fileIndex: number) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            const isValid = await validateImage(file);
+            if (isValid) {
+                updateFileData(fileIndex, 'albumImage', file);
+            }
+        }
+    };
+
+    const handleArtistImageUpload = async (event: React.ChangeEvent<HTMLInputElement>, fileIndex: number) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            const isValid = await validateImage(file);
+            if (isValid) {
+                updateFileData(fileIndex, 'artistImage', file);
+            }
+        }
     };
 
     const handleSpotifySubmit = async () => {
@@ -252,20 +373,78 @@ export function MusicUpload() {
         setExpandedAlbums(newExpanded);
     };
 
-    const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (file) {
-            setUploadForm({ ...uploadForm, file });
-        }
-    };
-
-    const handleUploadSubmit = () => {
-        if (!uploadForm.file || !uploadForm.title || !uploadForm.artist) {
-            showError("📝 Vui lòng điền đầy đủ các trường bắt buộc");
+    const handleUploadSubmit = async () => {
+        if (uploadFiles.length === 0) {
+            showError("📝 Please select at least one audio file");
             return;
         }
-        console.log("Upload form data:", uploadForm);
-        showInfo("🚧 Tính năng upload file sẽ được triển khai sớm!");
+
+        // Validate required fields for all files
+        for (let i = 0; i < uploadFiles.length; i++) {
+            const file = uploadFiles[i];
+            if (!file.title || !file.genre || !file.album || !file.artist) {
+                showError(`📝 Please fill all required fields for file ${i + 1}: ${file.file.name}`);
+                return;
+            }
+            
+            if (file.isNewAlbum && !file.albumImage) {
+                showError(`📝 Please upload album image for file ${i + 1}: ${file.file.name}`);
+                return;
+            }
+            
+            if (file.isNewArtist && !file.artistImage) {
+                showError(`📝 Please upload artist image for file ${i + 1}: ${file.file.name}`);
+                return;
+            }
+        }
+
+        setIsLoading(true);
+        showProcessing("Uploading your music files...");
+
+        try {
+            for (const fileData of uploadFiles) {
+                const formData = new FormData();
+                formData.append('audioFile', fileData.file);
+                formData.append('title', fileData.title);
+                formData.append('genre', fileData.genre);
+                formData.append('album', fileData.album);
+                formData.append('artist', fileData.artist);
+                formData.append('description', fileData.description);
+                formData.append('isNewAlbum', fileData.isNewAlbum.toString());
+                formData.append('isNewArtist', fileData.isNewArtist.toString());
+                
+                if (fileData.albumImage) {
+                    formData.append('albumImage', fileData.albumImage);
+                }
+                
+                if (fileData.artistImage) {
+                    formData.append('artistImage', fileData.artistImage);
+                }
+
+                const response = await fetch('/api/upload-music', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Failed to upload ${fileData.file.name}`);
+                }
+            }
+
+            dismissNotifications();
+            showInfo("🎉 All music files uploaded successfully!");
+            setUploadFiles([]);
+            setOwnershipConfirmed(false);
+        } catch (error) {
+            dismissNotifications();
+            console.error("Upload error:", error);
+            showError({
+                title: "❌ Upload Failed",
+                message: `Cannot upload files: ${error instanceof Error ? error.message : "Unknown error"}`,
+            });
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const submitSpotifyTracks = async () => {
@@ -415,6 +594,7 @@ export function MusicUpload() {
             setIsLoading(false);
         }
     };
+    
     const stringToHash = (str: string): number => {
         let hash = 0;
         for (let i = 0; i < str.length; i++) {
@@ -424,6 +604,7 @@ export function MusicUpload() {
         }
         return Math.abs(hash);
     };
+    
     const handlePlayTrack = (track: SpotifyTrack) => {
         if (!track.preview_url) {
             showError("🔇 Không có bản preview cho bài hát này");
@@ -1437,13 +1618,13 @@ export function MusicUpload() {
                                 <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full flex items-center justify-center">
                                     <Upload className="h-4 w-4 text-white" />
                                 </div>
-                                Upload Music File
+                                Upload Music Files
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-6">
-                            {/* File Upload */}
+                            {/* Multiple File Upload */}
                             <div className="space-y-2">
-                                <Label htmlFor="music-file">Audio File *</Label>
+                                <Label htmlFor="music-files">Audio Files *</Label>
                                 <div
                                     className="border-2 border-dashed border-purple-300 dark:border-purple-600 rounded-xl p-8 hover:border-purple-400 transition-colors bg-purple-50/50 dark:bg-purple-900/20 cursor-pointer"
                                     onClick={() =>
@@ -1454,153 +1635,342 @@ export function MusicUpload() {
                                         <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto">
                                             <Upload className="h-8 w-8 text-white" />
                                         </div>
-                                        {uploadForm.file ? (
-                                            <div>
-                                                <p className="font-semibold text-green-600 dark:text-green-400">
-                                                    {uploadForm.file.name}
-                                                </p>
-                                                <p className="text-sm text-gray-500">
-                                                    {(
-                                                        uploadForm.file.size /
-                                                        (1024 * 1024)
-                                                    ).toFixed(2)}{" "}
-                                                    MB
-                                                </p>
-                                            </div>
-                                        ) : (
-                                            <div>
-                                                <p className="font-semibold">
-                                                    Drop your music file here
-                                                </p>
-                                                <p className="text-gray-600 dark:text-gray-400">
-                                                    Supports MP3, WAV, FLAC
-                                                    formats
-                                                </p>
-                                            </div>
-                                        )}
+                                        <div>
+                                            <p className="font-semibold">
+                                                Drop your music files here or click to browse
+                                            </p>
+                                            <p className="text-gray-600 dark:text-gray-400">
+                                                Supports MP3, WAV, FLAC formats • Multiple files allowed
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                                 <input
                                     ref={fileInputRef}
                                     type="file"
                                     accept="audio/*"
-                                    onChange={handleFileUpload}
+                                    multiple
+                                    onChange={handleMultipleFileUpload}
                                     className="hidden"
                                 />
                             </div>
 
-                            <Separator />
+                            {uploadFiles.length > 0 && (
+                                <>
+                                    <Separator />
+                                    
+                                    {/* Uploaded Files List */}
+                                    <div className="space-y-4">
+                                        <div className="flex items-center justify-between">
+                                            <h3 className="text-lg font-semibold">
+                                                Uploaded Files ({uploadFiles.length})
+                                            </h3>
+                                            {loadingUserData && (
+                                                <div className="flex items-center gap-2 text-sm text-gray-500">
+                                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                                    Loading albums & artists...
+                                                </div>
+                                            )}
+                                        </div>
 
-                            {/* Track Information */}
-                            <div className="grid md:grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <Label htmlFor="title">Track Title *</Label>
-                                    <Input
-                                        id="title"
-                                        placeholder="Enter track title"
-                                        value={uploadForm.title}
-                                        onChange={(e) =>
-                                            setUploadForm({
-                                                ...uploadForm,
-                                                title: e.target.value,
-                                            })
-                                        }
-                                    />
-                                </div>
+                                        {uploadFiles.map((fileData, index) => (
+                                            <div key={index} className="border rounded-lg p-6 bg-gray-50 dark:bg-gray-800/50">
+                                                <div className="flex items-start justify-between mb-4">
+                                                    <div className="flex items-center gap-3">
+                                                        <Music className="h-5 w-5 text-purple-600" />
+                                                        <div>
+                                                            <h4 className="font-medium">{fileData.file.name}</h4>
+                                                            <p className="text-sm text-gray-500">
+                                                                {(fileData.file.size / (1024 * 1024)).toFixed(2)} MB
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        onClick={() => removeFile(index)}
+                                                        className="text-red-500 hover:text-red-600"
+                                                    >
+                                                        <X className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
 
-                                <div className="space-y-2">
-                                    <Label htmlFor="artist">
-                                        Artist Name *
-                                    </Label>
-                                    <Input
-                                        id="artist"
-                                        placeholder="Enter artist name"
-                                        value={uploadForm.artist}
-                                        onChange={(e) =>
-                                            setUploadForm({
-                                                ...uploadForm,
-                                                artist: e.target.value,
-                                            })
-                                        }
-                                    />
-                                </div>
+                                                <div className="grid md:grid-cols-2 gap-4">
+                                                    {/* Track Title */}
+                                                    <div className="space-y-2">
+                                                        <Label htmlFor={`title-${index}`}>Track Title *</Label>
+                                                        <Input
+                                                            id={`title-${index}`}
+                                                            placeholder="Enter track title"
+                                                            value={fileData.title}
+                                                            onChange={(e) =>
+                                                                updateFileData(index, 'title', e.target.value)
+                                                            }
+                                                        />
+                                                    </div>
 
-                                <div className="space-y-2">
-                                    <Label htmlFor="album">Album</Label>
-                                    <Input
-                                        id="album"
-                                        placeholder="Enter album name"
-                                        value={uploadForm.album}
-                                        onChange={(e) =>
-                                            setUploadForm({
-                                                ...uploadForm,
-                                                album: e.target.value,
-                                            })
-                                        }
-                                    />
-                                </div>
+                                                    {/* Genre */}
+                                                    <div className="space-y-2">
+                                                        <Label htmlFor={`genre-${index}`}>Genre *</Label>
+                                                        <select
+                                                            id={`genre-${index}`}
+                                                            value={fileData.genre}
+                                                            onChange={(e) =>
+                                                                updateFileData(index, 'genre', e.target.value)
+                                                            }
+                                                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800"
+                                                        >
+                                                            <option value="">Select genre</option>
+                                                            <option value="pop">Pop</option>
+                                                            <option value="rock">Rock</option>
+                                                            <option value="hip-hop">Hip Hop</option>
+                                                            <option value="electronic">Electronic</option>
+                                                            <option value="jazz">Jazz</option>
+                                                            <option value="classical">Classical</option>
+                                                            <option value="country">Country</option>
+                                                            <option value="r&b">R&B</option>
+                                                            <option value="reggae">Reggae</option>
+                                                            <option value="blues">Blues</option>
+                                                            <option value="folk">Folk</option>
+                                                            <option value="indie">Indie</option>
+                                                            <option value="alternative">Alternative</option>
+                                                            <option value="metal">Metal</option>
+                                                            <option value="punk">Punk</option>
+                                                            <option value="disco">Disco</option>
+                                                            <option value="funk">Funk</option>
+                                                            <option value="soul">Soul</option>
+                                                            <option value="gospel">Gospel</option>
+                                                        </select>
+                                                    </div>
 
-                                <div className="space-y-2">
-                                    <Label htmlFor="genre">Genre</Label>
-                                    <select
-                                        id="genre"
-                                        value={uploadForm.genre}
-                                        onChange={(e) =>
-                                            setUploadForm({
-                                                ...uploadForm,
-                                                genre: e.target.value,
-                                            })
-                                        }
-                                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800"
-                                    >
-                                        <option value="">Select genre</option>
-                                        <option value="pop">Pop</option>
-                                        <option value="rock">Rock</option>
-                                        <option value="hip-hop">Hip Hop</option>
-                                        <option value="electronic">
-                                            Electronic
-                                        </option>
-                                        <option value="jazz">Jazz</option>
-                                        <option value="classical">
-                                            Classical
-                                        </option>
-                                        <option value="country">Country</option>
-                                        <option value="r&b">R&B</option>
-                                    </select>
-                                </div>
-                            </div>
+                                                    {/* Album */}
+                                                    <div className="space-y-2">
+                                                        <Label htmlFor={`album-${index}`}>Album *</Label>
+                                                        <div className="space-y-2">
+                                                            <select
+                                                                id={`album-${index}`}
+                                                                value={fileData.isNewAlbum ? 'new' : fileData.album}
+                                                                onChange={(e) => {
+                                                                    if (e.target.value === 'new') {
+                                                                        updateFileData(index, 'isNewAlbum', true);
+                                                                        updateFileData(index, 'album', '');
+                                                                    } else {
+                                                                        updateFileData(index, 'isNewAlbum', false);
+                                                                        updateFileData(index, 'album', e.target.value);
+                                                                    }
+                                                                }}
+                                                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800"
+                                                            >
+                                                                <option value="">Select existing album</option>
+                                                                {userAlbums.map((album) => (
+                                                                    <option key={album.id} value={album.title}>
+                                                                        {album.title} - {album.artist.name}
+                                                                    </option>
+                                                                ))}
+                                                                <option value="new">+ Create new album</option>
+                                                            </select>
+                                                            
+                                                            {fileData.isNewAlbum && (
+                                                                <div className="space-y-3">
+                                                                    <Input
+                                                                        placeholder="Enter new album name"
+                                                                        value={fileData.album}
+                                                                        onChange={(e) =>
+                                                                            updateFileData(index, 'album', e.target.value)
+                                                                        }
+                                                                    />
+                                                                    <div className="space-y-2">
+                                                                        <Label>Album Cover (1400x1400px) *</Label>
+                                                                        <div className="flex items-center gap-3">
+                                                                            <Button
+                                                                                type="button"
+                                                                                variant="outline"
+                                                                                size="sm"
+                                                                                onClick={() => albumImageInputRef.current?.click()}
+                                                                            >
+                                                                                <ImageIcon className="h-4 w-4 mr-2" />
+                                                                                Choose Image
+                                                                            </Button>
+                                                                            {fileData.albumImage && (
+                                                                                <span className="text-sm text-green-600">
+                                                                                    {fileData.albumImage.name}
+                                                                                </span>
+                                                                            )}
+                                                                        </div>
+                                                                        <input
+                                                                            ref={albumImageInputRef}
+                                                                            type="file"
+                                                                            accept="image/*"
+                                                                            onChange={(e) => handleAlbumImageUpload(e, index)}
+                                                                            className="hidden"
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="description">Description</Label>
-                                <Textarea
-                                    id="description"
-                                    placeholder="Tell us about your track..."
-                                    rows={4}
-                                    value={uploadForm.description}
-                                    onChange={(e) =>
-                                        setUploadForm({
-                                            ...uploadForm,
-                                            description: e.target.value,
-                                        })
-                                    }
-                                />
-                            </div>
+                                                    {/* Artist */}
+                                                    <div className="space-y-2">
+                                                        <Label htmlFor={`artist-${index}`}>Artist *</Label>
+                                                        <div className="space-y-2">
+                                                            <select
+                                                                id={`artist-${index}`}
+                                                                value={fileData.isNewArtist ? 'new' : fileData.artist}
+                                                                onChange={(e) => {
+                                                                    if (e.target.value === 'new') {
+                                                                        updateFileData(index, 'isNewArtist', true);
+                                                                        updateFileData(index, 'artist', '');
+                                                                    } else {
+                                                                        updateFileData(index, 'isNewArtist', false);
+                                                                        updateFileData(index, 'artist', e.target.value);
+                                                                    }
+                                                                }}
+                                                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800"
+                                                            >
+                                                                <option value="">Select existing artist</option>
+                                                                {userArtists.map((artist) => (
+                                                                    <option key={artist.id} value={artist.name}>
+                                                                        {artist.name}
+                                                                    </option>
+                                                                ))}
+                                                                <option value="new">+ Create new artist</option>
+                                                            </select>
+                                                            
+                                                            {fileData.isNewArtist && (
+                                                                <div className="space-y-3">
+                                                                    <Input
+                                                                        placeholder="Enter new artist name"
+                                                                        value={fileData.artist}
+                                                                        onChange={(e) =>
+                                                                            updateFileData(index, 'artist', e.target.value)
+                                                                        }
+                                                                    />
+                                                                    <div className="space-y-2">
+                                                                        <Label>Artist Photo (1400x1400px) *</Label>
+                                                                        <div className="flex items-center gap-3">
+                                                                            <Button
+                                                                                type="button"
+                                                                                variant="outline"
+                                                                                size="sm"
+                                                                                onClick={() => artistImageInputRef.current?.click()}
+                                                                            >
+                                                                                <ImageIcon className="h-4 w-4 mr-2" />
+                                                                                Choose Image
+                                                                            </Button>
+                                                                            {fileData.artistImage && (
+                                                                                <span className="text-sm text-green-600">
+                                                                                    {fileData.artistImage.name}
+                                                                                </span>
+                                                                            )}
+                                                                        </div>
+                                                                        <input
+                                                                            ref={artistImageInputRef}
+                                                                            type="file"
+                                                                            accept="image/*"
+                                                                            onChange={(e) => handleArtistImageUpload(e, index)}
+                                                                            className="hidden"
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
 
-                            {/* Upload Button */}
-                            <div className="flex justify-end pt-4">
-                                <Button
-                                    onClick={handleUploadSubmit}
-                                    disabled={
-                                        !uploadForm.file ||
-                                        !uploadForm.title ||
-                                        !uploadForm.artist
-                                    }
-                                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
-                                >
-                                    <Upload className="mr-2 h-4 w-4" />
-                                    Upload Track
-                                </Button>
-                            </div>
+                                                {/* Description */}
+                                                <div className="mt-4 space-y-2">
+                                                    <Label htmlFor={`description-${index}`}>Description</Label>
+                                                    <Textarea
+                                                        id={`description-${index}`}
+                                                        placeholder="Tell us about your track..."
+                                                        rows={3}
+                                                        value={fileData.description}
+                                                        onChange={(e) =>
+                                                            updateFileData(index, 'description', e.target.value)
+                                                        }
+                                                    />
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    <Separator />
+
+                                    {/* Ownership Confirmation */}
+                                    <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-800 dark:to-purple-900/20 rounded-xl p-6 border border-blue-200 dark:border-purple-700">
+                                        <div className="flex items-start space-x-4">
+                                            <div className="flex-shrink-0 mt-1">
+                                                <div className="relative">
+                                                    <input
+                                                        type="checkbox"
+                                                        id="upload-ownership-confirmation"
+                                                        checked={ownershipConfirmed}
+                                                        onChange={(e) =>
+                                                            setOwnershipConfirmed(e.target.checked)
+                                                        }
+                                                        className="sr-only"
+                                                    />
+                                                    <label
+                                                        htmlFor="upload-ownership-confirmation"
+                                                        className={`flex items-center justify-center w-6 h-6 rounded-md border-2 cursor-pointer transition-all duration-200 ${
+                                                            ownershipConfirmed
+                                                                ? "bg-gradient-to-r from-purple-600 to-blue-600 border-purple-600 text-white shadow-lg"
+                                                                : "bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 hover:border-purple-400 dark:hover:border-purple-500"
+                                                        }`}
+                                                    >
+                                                        {ownershipConfirmed && (
+                                                            <Check className="h-4 w-4 text-white" />
+                                                        )}
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div className="flex-1">
+                                                <label
+                                                    htmlFor="upload-ownership-confirmation"
+                                                    className="cursor-pointer"
+                                                >
+                                                    <div className="mb-3">
+                                                        <span className="text-lg font-bold text-gray-900 dark:text-white">
+                                                            Copyright & Ownership Declaration
+                                                        </span>
+                                                    </div>
+                                                    <div className="bg-white/60 dark:bg-gray-800/60 rounded-lg p-4 backdrop-blur-sm">
+                                                        <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                                                            By checking this box, I confirm that I own all rights to the uploaded music files.
+                                                        </p>
+                                                    </div>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Upload Button */}
+                                    <div className="flex justify-end pt-4">
+                                        <Button
+                                            onClick={handleUploadSubmit}
+                                            disabled={
+                                                uploadFiles.length === 0 ||
+                                                !ownershipConfirmed ||
+                                                isLoading
+                                            }
+                                            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+                                        >
+                                            {isLoading ? (
+                                                <>
+                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                    Uploading...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Upload className="mr-2 h-4 w-4" />
+                                                    Upload {uploadFiles.length} Track{uploadFiles.length !== 1 ? 's' : ''}
+                                                </>
+                                            )}
+                                        </Button>
+                                    </div>
+                                </>
+                            )}
                         </CardContent>
                     </Card>
                 )}
