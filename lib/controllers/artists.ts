@@ -49,3 +49,53 @@ export class ArtistsController {
     return data as Artist[];
   }
 }
+import {
+  createClientComponentClient,
+  createServerComponentClient,
+} from "@supabase/auth-helpers-nextjs";
+import { cookies } from "next/headers";
+import { Database } from "@/types/supabase";
+
+export interface Artist {
+  id: number;
+  name: string;
+  image_url: string | null;
+}
+
+export class ArtistsController {
+  static async getUserArtists(userId: string): Promise<Artist[]> {
+    console.log("🎤 ArtistsController.getUserArtists - Starting fetch for user:", userId);
+    const supabase = createClientComponentClient<Database>();
+    
+    const { data, error } = await supabase
+      .from("artists")
+      .select(`id, name, image_url`)
+      .eq('user_id', userId)
+      .eq('import_source', 'direct') // Chỉ lấy artists được tạo direct, không phải import từ Spotify
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("❌ Error fetching user artists:", error);
+      throw new Error(`Failed to fetch user artists: ${error.message}`);
+    }
+
+    return data ?? [];
+  }
+
+  static async getAllArtists(): Promise<Artist[]> {
+    console.log("🎤 ArtistsController.getAllArtists - Starting fetch");
+    const supabase = createServerComponentClient<Database>({ cookies });
+    
+    const { data, error } = await supabase
+      .from("artists")
+      .select(`id, name, image_url`)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("❌ Error fetching artists:", error);
+      throw new Error(`Failed to fetch artists: ${error.message}`);
+    }
+
+    return data ?? [];
+  }
+}

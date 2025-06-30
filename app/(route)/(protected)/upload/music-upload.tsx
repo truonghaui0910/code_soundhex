@@ -146,14 +146,14 @@ export function MusicUpload() {
         setLoadingUserData(true);
         try {
             // Load user albums
-            const albumsResponse = await fetch("/api/albums");
+            const albumsResponse = await fetch("/api/albums/user");
             if (albumsResponse.ok) {
                 const albumsData = await albumsResponse.json();
                 setUserAlbums(albumsData.filter((album: any) => !album.from_spotify));
             }
 
             // Load user artists
-            const artistsResponse = await fetch("/api/artists");
+            const artistsResponse = await fetch("/api/artists/user");
             if (artistsResponse.ok) {
                 const artistsData = await artistsResponse.json();
                 setUserArtists(artistsData.filter((artist: any) => !artist.from_spotify));
@@ -172,10 +172,11 @@ export function MusicUpload() {
         return `${mins}:${secs.toString().padStart(2, "0")}`;
     };
 
-    const validateImage = (file: File): boolean => {
+    const validateImage = (file: File): Promise<boolean> => {
         return new Promise((resolve) => {
-            const img = new Image();
+            const img = document.createElement('img');
             img.onload = () => {
+                URL.revokeObjectURL(img.src);
                 if (img.width === 1400 && img.height === 1400) {
                     resolve(true);
                 } else {
@@ -184,6 +185,7 @@ export function MusicUpload() {
                 }
             };
             img.onerror = () => {
+                URL.revokeObjectURL(img.src);
                 showError("Invalid image file");
                 resolve(false);
             };
@@ -1741,7 +1743,7 @@ export function MusicUpload() {
                                                         </select>
                                                     </div>
 
-                                                    
+
                                     {/* Album */}
                                     <div className="space-y-2">
                                         <Label htmlFor={`album-${index}`}>Album *</Label>
@@ -1827,44 +1829,29 @@ export function MusicUpload() {
                                                     {/* Album Cover Upload */}
                                                     <div className="space-y-3">
                                                         <Label>Album Cover (1400x1400px) *</Label>
-                                                        <div className="flex items-start gap-4">
-                                                            {/* Image Preview */}
-                                                            <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 border-2 border-dashed border-gray-300 dark:border-gray-600">
-                                                                {fileData.albumImage ? (
-                                                                    <Image
-                                                                        src={URL.createObjectURL(fileData.albumImage)}
-                                                                        alt="Album cover preview"
-                                                                        width={96}
-                                                                        height={96}
-                                                                        className="w-full h-full object-cover"
-                                                                    />
-                                                                ) : (
-                                                                    <div className="w-full h-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-                                                                        <ImageIcon className="h-8 w-8 text-gray-400" />
-                                                                    </div>
-                                                                )}
-                                                            </div>
-
-                                                            {/* Upload Button */}
-                                                            <div className="flex-1 space-y-2">
-                                                                <Button
-                                                                    type="button"
-                                                                    variant="outline"
-                                                                    onClick={() => albumImageInputRef.current?.click()}
-                                                                    className="w-full justify-start"
-                                                                >
-                                                                    <ImageIcon className="h-4 w-4 mr-2" />
-                                                                    {fileData.albumImage ? 'Change Image' : 'Choose Album Cover'}
-                                                                </Button>
-                                                                {fileData.albumImage && (
-                                                                    <p className="text-sm text-green-600 font-medium">
-                                                                        ✓ {fileData.albumImage.name}
+                                                        <div 
+                                                            className="w-32 h-32 rounded-lg overflow-hidden border-2 border-dashed border-purple-300 dark:border-purple-600 bg-purple-50 dark:bg-purple-900/20 cursor-pointer hover:border-purple-400 dark:hover:border-purple-500 transition-colors mx-auto"
+                                                            onClick={() => albumImageInputRef.current?.click()}
+                                                        >
+                                                            {fileData.albumImage ? (
+                                                                <Image
+                                                                    src={URL.createObjectURL(fileData.albumImage)}
+                                                                    alt="Album cover preview"
+                                                                    width={128}
+                                                                    height={128}
+                                                                    className="w-full h-full object-cover"
+                                                                />
+                                                            ) : (
+                                                                <div className="w-full h-full flex flex-col items-center justify-center text-center p-4">
+                                                                    <ImageIcon className="h-8 w-8 text-purple-400 mb-2" />
+                                                                    <p className="text-xs text-purple-600 dark:text-purple-400 font-medium">
+                                                                        Click to upload
                                                                     </p>
-                                                                )}
-                                                                <p className="text-xs text-gray-500">
-                                                                    Square image recommended (1400x1400px)
-                                                                </p>
-                                                            </div>
+                                                                    <p className="text-xs text-gray-500">
+                                                                        1400x1400px
+                                                                    </p>
+                                                                </div>
+                                                            )}
                                                         </div>
                                                         <input
                                                             ref={albumImageInputRef}
@@ -1879,7 +1866,7 @@ export function MusicUpload() {
                                         </div>
                                     </div>
 
-                                    
+
                                     {/* Artist */}
                                     <div className="space-y-2">
                                         <Label htmlFor={`artist-${index}`}>Artist *</Label>
@@ -1965,44 +1952,29 @@ export function MusicUpload() {
                                                     {/* Artist Photo Upload */}
                                                     <div className="space-y-3">
                                                         <Label>Artist Photo (1400x1400px) *</Label>
-                                                        <div className="flex items-start gap-4">
-                                                            {/* Image Preview */}
-                                                            <div className="w-24 h-24 rounded-full overflow-hidden flex-shrink-0 border-2 border-dashed border-gray-300 dark:border-gray-600">
-                                                                {fileData.artistImage ? (
-                                                                    <Image
-                                                                        src={URL.createObjectURL(fileData.artistImage)}
-                                                                        alt="Artist photo preview"
-                                                                        width={96}
-                                                                        height={96}
-                                                                        className="w-full h-full object-cover"
-                                                                    />
-                                                                ) : (
-                                                                    <div className="w-full h-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-                                                                        <Users className="h-8 w-8 text-gray-400" />
-                                                                    </div>
-                                                                )}
-                                                            </div>
-
-                                                            {/* Upload Button */}
-                                                            <div className="flex-1 space-y-2">
-                                                                <Button
-                                                                    type="button"
-                                                                    variant="outline"
-                                                                    onClick={() => artistImageInputRef.current?.click()}
-                                                                    className="w-full justify-start"
-                                                                >
-                                                                    <Users className="h-4 w-4 mr-2" />
-                                                                    {fileData.artistImage ? 'Change Photo' : 'Choose Artist Photo'}
-                                                                </Button>
-                                                                {fileData.artistImage && (
-                                                                    <p className="text-sm text-green-600 font-medium">
-                                                                        ✓ {fileData.artistImage.name}
+                                                        <div 
+                                                            className="w-32 h-32 rounded-full overflow-hidden border-2 border-dashed border-blue-300 dark:border-blue-600 bg-blue-50 dark:bg-blue-900/20 cursor-pointer hover:border-blue-400 dark:hover:border-blue-500 transition-colors mx-auto"
+                                                            onClick={() => artistImageInputRef.current?.click()}
+                                                        >
+                                                            {fileData.artistImage ? (
+                                                                <Image
+                                                                    src={URL.createObjectURL(fileData.artistImage)}
+                                                                    alt="Artist photo preview"
+                                                                    width={128}
+                                                                    height={128}
+                                                                    className="w-full h-full object-cover"
+                                                                />
+                                                            ) : (
+                                                                <div className="w-full h-full flex flex-col items-center justify-center text-center p-4">
+                                                                    <Users className="h-8 w-8 text-blue-400 mb-2" />
+                                                                    <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+                                                                        Click to upload
                                                                     </p>
-                                                                )}
-                                                                <p className="text-xs text-gray-500">
-                                                                    Square image recommended (1400x1400px)
-                                                                </p>
-                                                            </div>
+                                                                    <p className="text-xs text-gray-500">
+                                                                        1400x1400px
+                                                                    </p>
+                                                                </div>
+                                                            )}
                                                         </div>
                                                         <input
                                                             ref={artistImageInputRef}
