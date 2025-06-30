@@ -146,14 +146,14 @@ export function MusicUpload() {
         setLoadingUserData(true);
         try {
             // Load user albums
-            const albumsResponse = await fetch("/api/albums");
+            const albumsResponse = await fetch("/api/albums/user");
             if (albumsResponse.ok) {
                 const albumsData = await albumsResponse.json();
                 setUserAlbums(albumsData.filter((album: any) => !album.from_spotify));
             }
 
             // Load user artists
-            const artistsResponse = await fetch("/api/artists");
+            const artistsResponse = await fetch("/api/artists/user");
             if (artistsResponse.ok) {
                 const artistsData = await artistsResponse.json();
                 setUserArtists(artistsData.filter((artist: any) => !artist.from_spotify));
@@ -1743,7 +1743,7 @@ export function MusicUpload() {
                                                         </select>
                                                     </div>
 
-                                                    
+
                                     {/* Album */}
                                     <div className="space-y-2">
                                         <Label htmlFor={`album-${index}`}>Album *</Label>
@@ -1866,7 +1866,7 @@ export function MusicUpload() {
                                         </div>
                                     </div>
 
-                                    
+
                                     {/* Artist */}
                                     <div className="space-y-2">
                                         <Label htmlFor={`artist-${index}`}>Artist *</Label>
