@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, useEffect } from "react";
@@ -115,13 +114,13 @@ export function MusicUpload() {
         new Set(),
     );
     const [loadingAlbums, setLoadingAlbums] = useState<Set<string>>(new Set());
-    
+
     // Multiple file upload state
     const [uploadFiles, setUploadFiles] = useState<FileUploadData[]>([]);
     const [userAlbums, setUserAlbums] = useState<UserAlbum[]>([]);
     const [userArtists, setUserArtists] = useState<UserArtist[]>([]);
     const [loadingUserData, setLoadingUserData] = useState(false);
-    
+
     const [fileInputRef] = useState<any>(useRef(null));
     const [albumImageInputRef] = useState<any>(useRef(null));
     const [artistImageInputRef] = useState<any>(useRef(null));
@@ -386,12 +385,12 @@ export function MusicUpload() {
                 showError(`📝 Please fill all required fields for file ${i + 1}: ${file.file.name}`);
                 return;
             }
-            
+
             if (file.isNewAlbum && !file.albumImage) {
                 showError(`📝 Please upload album image for file ${i + 1}: ${file.file.name}`);
                 return;
             }
-            
+
             if (file.isNewArtist && !file.artistImage) {
                 showError(`📝 Please upload artist image for file ${i + 1}: ${file.file.name}`);
                 return;
@@ -412,11 +411,11 @@ export function MusicUpload() {
                 formData.append('description', fileData.description);
                 formData.append('isNewAlbum', fileData.isNewAlbum.toString());
                 formData.append('isNewArtist', fileData.isNewArtist.toString());
-                
+
                 if (fileData.albumImage) {
                     formData.append('albumImage', fileData.albumImage);
                 }
-                
+
                 if (fileData.artistImage) {
                     formData.append('artistImage', fileData.artistImage);
                 }
@@ -594,7 +593,7 @@ export function MusicUpload() {
             setIsLoading(false);
         }
     };
-    
+
     const stringToHash = (str: string): number => {
         let hash = 0;
         for (let i = 0; i < str.length; i++) {
@@ -604,7 +603,7 @@ export function MusicUpload() {
         }
         return Math.abs(hash);
     };
-    
+
     const handlePlayTrack = (track: SpotifyTrack) => {
         if (!track.preview_url) {
             showError("🔇 Không có bản preview cho bài hát này");
@@ -959,8 +958,8 @@ export function MusicUpload() {
                                                         variant="outline"
                                                         className="mb-2"
                                                     >
-                                                        {spotifyData.type ===
-                                                        "album"
+                                                        {spotifyData.type ===```python
+"album"
                                                             ? "Album"
                                                             : "Playlist"}
                                                     </Badge>
@@ -1658,7 +1657,7 @@ export function MusicUpload() {
                             {uploadFiles.length > 0 && (
                                 <>
                                     <Separator />
-                                    
+
                                     {/* Uploaded Files List */}
                                     <div className="space-y-4">
                                         <div className="flex items-center justify-between">
@@ -1743,139 +1742,281 @@ export function MusicUpload() {
                                                         </select>
                                                     </div>
 
-                                                    {/* Album */}
-                                                    <div className="space-y-2">
-                                                        <Label htmlFor={`album-${index}`}>Album *</Label>
-                                                        <div className="space-y-2">
-                                                            <select
-                                                                id={`album-${index}`}
-                                                                value={fileData.isNewAlbum ? 'new' : fileData.album}
-                                                                onChange={(e) => {
-                                                                    if (e.target.value === 'new') {
-                                                                        updateFileData(index, 'isNewAlbum', true);
-                                                                        updateFileData(index, 'album', '');
-                                                                    } else {
-                                                                        updateFileData(index, 'isNewAlbum', false);
-                                                                        updateFileData(index, 'album', e.target.value);
-                                                                    }
-                                                                }}
-                                                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800"
-                                                            >
-                                                                <option value="">Select existing album</option>
-                                                                {userAlbums.map((album) => (
-                                                                    <option key={album.id} value={album.title}>
-                                                                        {album.title} - {album.artist.name}
-                                                                    </option>
-                                                                ))}
-                                                                <option value="new">+ Create new album</option>
-                                                            </select>
-                                                            
-                                                            {fileData.isNewAlbum && (
-                                                                <div className="space-y-3">
-                                                                    <Input
-                                                                        placeholder="Enter new album name"
-                                                                        value={fileData.album}
-                                                                        onChange={(e) =>
-                                                                            updateFileData(index, 'album', e.target.value)
-                                                                        }
+                                                    
+                                    {/* Album */}
+                                    <div className="space-y-2">
+                                        <Label htmlFor={`album-${index}`}>Album *</Label>
+                                        <div className="space-y-3">
+                                            {/* Custom Album Selector */}
+                                            <div className="space-y-2">
+                                                <Label className="text-sm text-gray-600 dark:text-gray-400">Select existing album:</Label>
+                                                <div className="grid grid-cols-1 gap-2 max-h-40 overflow-y-auto border rounded-lg p-2 bg-gray-50 dark:bg-gray-800/50">
+                                                    {userAlbums.map((album) => (
+                                                        <div
+                                                            key={album.id}
+                                                            className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors ${
+                                                                !fileData.isNewAlbum && fileData.album === album.title
+                                                                    ? 'bg-purple-100 dark:bg-purple-900/30 border border-purple-300 dark:border-purple-600'
+                                                                    : 'hover:bg-white dark:hover:bg-gray-700 border border-transparent'
+                                                            }`}
+                                                            onClick={() => {
+                                                                updateFileData(index, 'isNewAlbum', false);
+                                                                updateFileData(index, 'album', album.title);
+                                                            }}
+                                                        >
+                                                            <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
+                                                                {album.cover_image_url ? (
+                                                                    <Image
+                                                                        src={album.cover_image_url}
+                                                                        alt={album.title}
+                                                                        width={40}
+                                                                        height={40}
+                                                                        className="w-full h-full object-cover"
                                                                     />
-                                                                    <div className="space-y-2">
-                                                                        <Label>Album Cover (1400x1400px) *</Label>
-                                                                        <div className="flex items-center gap-3">
-                                                                            <Button
-                                                                                type="button"
-                                                                                variant="outline"
-                                                                                size="sm"
-                                                                                onClick={() => albumImageInputRef.current?.click()}
-                                                                            >
-                                                                                <ImageIcon className="h-4 w-4 mr-2" />
-                                                                                Choose Image
-                                                                            </Button>
-                                                                            {fileData.albumImage && (
-                                                                                <span className="text-sm text-green-600">
-                                                                                    {fileData.albumImage.name}
-                                                                                </span>
-                                                                            )}
-                                                                        </div>
-                                                                        <input
-                                                                            ref={albumImageInputRef}
-                                                                            type="file"
-                                                                            accept="image/*"
-                                                                            onChange={(e) => handleAlbumImageUpload(e, index)}
-                                                                            className="hidden"
-                                                                        />
+                                                                ) : (
+                                                                    <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
+                                                                        <Album className="h-4 w-4 text-white" />
                                                                     </div>
-                                                                </div>
+                                                                )}
+                                                            </div>
+                                                            <div className="flex-1 min-w-0">
+                                                                <p className="font-medium text-sm truncate">{album.title}</p>
+                                                                <p className="text-xs text-gray-500 truncate">{album.artist.name}</p>
+                                                            </div>
+                                                            {!fileData.isNewAlbum && fileData.album === album.title && (
+                                                                <Check className="h-4 w-4 text-purple-600" />
                                                             )}
                                                         </div>
-                                                    </div>
+                                                    ))}
+                                                </div>
+                                            </div>
 
-                                                    {/* Artist */}
-                                                    <div className="space-y-2">
-                                                        <Label htmlFor={`artist-${index}`}>Artist *</Label>
-                                                        <div className="space-y-2">
-                                                            <select
-                                                                id={`artist-${index}`}
-                                                                value={fileData.isNewArtist ? 'new' : fileData.artist}
-                                                                onChange={(e) => {
-                                                                    if (e.target.value === 'new') {
-                                                                        updateFileData(index, 'isNewArtist', true);
-                                                                        updateFileData(index, 'artist', '');
-                                                                    } else {
-                                                                        updateFileData(index, 'isNewArtist', false);
-                                                                        updateFileData(index, 'artist', e.target.value);
-                                                                    }
-                                                                }}
-                                                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800"
-                                                            >
-                                                                <option value="">Select existing artist</option>
-                                                                {userArtists.map((artist) => (
-                                                                    <option key={artist.id} value={artist.name}>
-                                                                        {artist.name}
-                                                                    </option>
-                                                                ))}
-                                                                <option value="new">+ Create new artist</option>
-                                                            </select>
-                                                            
-                                                            {fileData.isNewArtist && (
-                                                                <div className="space-y-3">
-                                                                    <Input
-                                                                        placeholder="Enter new artist name"
-                                                                        value={fileData.artist}
-                                                                        onChange={(e) =>
-                                                                            updateFileData(index, 'artist', e.target.value)
-                                                                        }
+                                            {/* Create New Album Option */}
+                                            <div
+                                                className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors border-2 border-dashed ${
+                                                    fileData.isNewAlbum
+                                                        ? 'border-purple-300 dark:border-purple-600 bg-purple-50 dark:bg-purple-900/20'
+                                                        : 'border-gray-300 dark:border-gray-600 hover:border-purple-300 dark:hover:border-purple-600'
+                                                }`}
+                                                onClick={() => {
+                                                    updateFileData(index, 'isNewAlbum', true);
+                                                    updateFileData(index, 'album', '');
+                                                }}
+                                            >
+                                                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-gray-400 to-gray-500 flex items-center justify-center flex-shrink-0">
+                                                    <Plus className="h-4 w-4 text-white" />
+                                                </div>
+                                                <div className="flex-1">
+                                                    <p className="font-medium text-sm">Create new album</p>
+                                                    <p className="text-xs text-gray-500">Add a new album to your library</p>
+                                                </div>
+                                                {fileData.isNewAlbum && (
+                                                    <Check className="h-4 w-4 text-purple-600" />
+                                                )}
+                                            </div>
+
+                                            {fileData.isNewAlbum && (
+                                                <div className="space-y-4 p-4 bg-white dark:bg-gray-800 rounded-lg border">
+                                                    <Input
+                                                        placeholder="Enter new album name"
+                                                        value={fileData.album}
+                                                        onChange={(e) =>
+                                                            updateFileData(index, 'album', e.target.value)
+                                                        }
+                                                    />
+
+                                                    {/* Album Cover Upload */}
+                                                    <div className="space-y-3">
+                                                        <Label>Album Cover (1400x1400px) *</Label>
+                                                        <div className="flex items-start gap-4">
+                                                            {/* Image Preview */}
+                                                            <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 border-2 border-dashed border-gray-300 dark:border-gray-600">
+                                                                {fileData.albumImage ? (
+                                                                    <Image
+                                                                        src={URL.createObjectURL(fileData.albumImage)}
+                                                                        alt="Album cover preview"
+                                                                        width={96}
+                                                                        height={96}
+                                                                        className="w-full h-full object-cover"
                                                                     />
-                                                                    <div className="space-y-2">
-                                                                        <Label>Artist Photo (1400x1400px) *</Label>
-                                                                        <div className="flex items-center gap-3">
-                                                                            <Button
-                                                                                type="button"
-                                                                                variant="outline"
-                                                                                size="sm"
-                                                                                onClick={() => artistImageInputRef.current?.click()}
-                                                                            >
-                                                                                <ImageIcon className="h-4 w-4 mr-2" />
-                                                                                Choose Image
-                                                                            </Button>
-                                                                            {fileData.artistImage && (
-                                                                                <span className="text-sm text-green-600">
-                                                                                    {fileData.artistImage.name}
-                                                                                </span>
-                                                                            )}
-                                                                        </div>
-                                                                        <input
-                                                                            ref={artistImageInputRef}
-                                                                            type="file"
-                                                                            accept="image/*"
-                                                                            onChange={(e) => handleArtistImageUpload(e, index)}
-                                                                            className="hidden"
-                                                                        />
+                                                                ) : (
+                                                                    <div className="w-full h-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                                                                        <ImageIcon className="h-8 w-8 text-gray-400" />
                                                                     </div>
-                                                                </div>
+                                                                )}
+                                                            </div>
+
+                                                            {/* Upload Button */}
+                                                            <div className="flex-1 space-y-2">
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="outline"
+                                                                    onClick={() => albumImageInputRef.current?.click()}
+                                                                    className="w-full justify-start"
+                                                                >
+                                                                    <ImageIcon className="h-4 w-4 mr-2" />
+                                                                    {fileData.albumImage ? 'Change Image' : 'Choose Album Cover'}
+                                                                </Button>
+                                                                {fileData.albumImage && (
+                                                                    <p className="text-sm text-green-600 font-medium">
+                                                                        ✓ {fileData.albumImage.name}
+                                                                    </p>
+                                                                )}
+                                                                <p className="text-xs text-gray-500">
+                                                                    Square image recommended (1400x1400px)
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        <input
+                                                            ref={albumImageInputRef}
+                                                            type="file"
+                                                            accept="image/*"
+                                                            onChange={(e) => handleAlbumImageUpload(e, index)}
+                                                            className="hidden"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    
+                                    {/* Artist */}
+                                    <div className="space-y-2">
+                                        <Label htmlFor={`artist-${index}`}>Artist *</Label>
+                                        <div className="space-y-3">
+                                            {/* Custom Artist Selector */}
+                                            <div className="space-y-2">
+                                                <Label className="text-sm text-gray-600 dark:text-gray-400">Select existing artist:</Label>
+                                                <div className="grid grid-cols-1 gap-2 max-h-40 overflow-y-auto border rounded-lg p-2 bg-gray-50 dark:bg-gray-800/50">
+                                                    {userArtists.map((artist) => (
+                                                        <div
+                                                            key={artist.id}
+                                                            className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors ${
+                                                                !fileData.isNewArtist && fileData.artist === artist.name
+                                                                    ? 'bg-blue-100 dark:bg-blue-900/30 border border-blue-300 dark:border-blue-600'
+                                                                    : 'hover:bg-white dark:hover:bg-gray-700 border border-transparent'
+                                                            }`}
+                                                            onClick={() => {
+                                                                updateFileData(index, 'isNewArtist', false);
+                                                                updateFileData(index, 'artist', artist.name);
+                                                            }}
+                                                        >
+                                                            <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+                                                                {artist.profile_image_url ? (
+                                                                    <Image
+                                                                        src={artist.profile_image_url}
+                                                                        alt={artist.name}
+                                                                        width={40}
+                                                                        height={40}
+                                                                        className="w-full h-full object-cover"
+                                                                    />
+                                                                ) : (
+                                                                    <div className="w-full h-full bg-gradient-to-br from-blue-400 to-indigo-400 flex items-center justify-center">
+                                                                        <Users className="h-4 w-4 text-white" />
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            <div className="flex-1 min-w-0">
+                                                                <p className="font-medium text-sm truncate">{artist.name}</p>
+                                                                <p className="text-xs text-gray-500">Artist</p>
+                                                            </div>
+                                                            {!fileData.isNewArtist && fileData.artist === artist.name && (
+                                                                <Check className="h-4 w-4 text-blue-600" />
                                                             )}
                                                         </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            {/* Create New Artist Option */}
+                                            <div
+                                                className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors border-2 border-dashed ${
+                                                    fileData.isNewArtist
+                                                        ? 'border-blue-300 dark:border-blue-600 bg-blue-50 dark:bg-blue-900/20'
+                                                        : 'border-gray-300 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-600'
+                                                }`}
+                                                onClick={() => {
+                                                    updateFileData(index, 'isNewArtist', true);
+                                                    updateFileData(index, 'artist', '');
+                                                }}
+                                            >
+                                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-400 to-gray-500 flex items-center justify-center flex-shrink-0">
+                                                    <Plus className="h-4 w-4 text-white" />
+                                                </div>
+                                                <div className="flex-1">
+                                                    <p className="font-medium text-sm">Create new artist</p>
+                                                    <p className="text-xs text-gray-500">Add a new artist to your library</p>
+                                                </div>
+                                                {fileData.isNewArtist && (
+                                                    <Check className="h-4 w-4 text-blue-600" />
+                                                )}
+                                            </div>
+
+                                            {fileData.isNewArtist && (
+                                                <div className="space-y-4 p-4 bg-white dark:bg-gray-800 rounded-lg border">
+                                                    <Input
+                                                        placeholder="Enter new artist name"
+                                                        value={fileData.artist}
+                                                        onChange={(e) =>
+                                                            updateFileData(index, 'artist', e.target.value)
+                                                        }
+                                                    />
+
+                                                    {/* Artist Photo Upload */}
+                                                    <div className="space-y-3">
+                                                        <Label>Artist Photo (1400x1400px) *</Label>
+                                                        <div className="flex items-start gap-4">
+                                                            {/* Image Preview */}
+                                                            <div className="w-24 h-24 rounded-full overflow-hidden flex-shrink-0 border-2 border-dashed border-gray-300 dark:border-gray-600">
+                                                                {fileData.artistImage ? (
+                                                                    <Image
+                                                                        src={URL.createObjectURL(fileData.artistImage)}
+                                                                        alt="Artist photo preview"
+                                                                        width={96}
+                                                                        height={96}
+                                                                        className="w-full h-full object-cover"
+                                                                    />
+                                                                ) : (
+                                                                    <div className="w-full h-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                                                                        <Users className="h-8 w-8 text-gray-400" />
+                                                                    </div>
+                                                                )}
+                                                            </div>
+
+                                                            {/* Upload Button */}
+                                                            <div className="flex-1 space-y-2">
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="outline"
+                                                                    onClick={() => artistImageInputRef.current?.click()}
+                                                                    className="w-full justify-start"
+                                                                >
+                                                                    <Users className="h-4 w-4 mr-2" />
+                                                                    {fileData.artistImage ? 'Change Photo' : 'Choose Artist Photo'}
+                                                                </Button>
+                                                                {fileData.artistImage && (
+                                                                    <p className="text-sm text-green-600 font-medium">
+                                                                        ✓ {fileData.artistImage.name}
+                                                                    </p>
+                                                                )}
+                                                                <p className="text-xs text-gray-500">
+                                                                    Square image recommended (1400x1400px)
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        <input
+                                                            ref={artistImageInputRef}
+                                                            type="file"
+                                                            accept="image/*"
+                                                            onChange={(e) => handleArtistImageUpload(e, index)}
+                                                            className="hidden"
+                                                        />
                                                     </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
                                                 </div>
 
                                                 {/* Description */}
