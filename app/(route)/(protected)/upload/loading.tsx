@@ -16,15 +16,15 @@ export default function UploadLoading() {
             <div className="h-12 md:h-16 bg-white/20 rounded-lg mb-6 animate-pulse"></div>
             <div className="h-6 md:h-8 bg-white/20 rounded-lg mb-8 w-3/4 mx-auto animate-pulse"></div>
 
-            {/* Tab Buttons */}
+            {/* Tab Buttons Skeleton */}
             <div className="flex gap-4 justify-center">
-              <div className="h-12 px-6 bg-white/90 text-purple-600 rounded-lg flex items-center gap-2">
-                <Globe className="h-5 w-5" />
-                Spotify Import
+              <div className="h-12 px-6 bg-white/20 rounded-lg animate-pulse flex items-center gap-2">
+                <Globe className="h-5 w-5 text-white/40" />
+                <div className="h-4 w-24 bg-white/20 rounded animate-pulse"></div>
               </div>
-              <div className="h-12 px-6 bg-white/20 text-white rounded-lg flex items-center gap-2 opacity-50">
-                <HardDrive className="h-5 w-5" />
-                File Upload
+              <div className="h-12 px-6 bg-white/20 rounded-lg animate-pulse flex items-center gap-2">
+                <HardDrive className="h-5 w-5 text-white/40" />
+                <div className="h-4 w-20 bg-white/20 rounded animate-pulse"></div>
               </div>
             </div>
           </div>

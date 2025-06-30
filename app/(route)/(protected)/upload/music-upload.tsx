@@ -956,7 +956,8 @@ export function MusicUpload() {
                                                     src={
                                                         spotifyData.data
                                                             .image ||
-                                                        "/images/soundhex.png"
+                                                        ```python
+"/images/soundhex.png"
                                                     }
                                                     alt={spotifyData.data.name}
                                                     width={160}
@@ -1632,9 +1633,9 @@ export function MusicUpload() {
                         <CardContent className="space-y-6">
                             {/* Multiple File Upload */}
                             <div className="space-y-2">
-                                <Label htmlFor="music-files">Audio Files *</Label>
+                                <Label htmlFor="music-files">Audio Files <span className="text-red-500">*</span></Label>
                                 <div
-                                    className="border-2 border-dashed border-purple-300 dark:border-purple-600 rounded-xl p-8 hover:border-purple-400 transition-colors bg-purple-50/50 dark:bg-purple-900/20 cursor-pointer"
+                                    className="border border-dashed border-purple-300 dark:border-purple-600 rounded-xl p-8 hover:border-purple-400 transition-colors bg-purple-50/50 dark:bg-purple-900/20 cursor-pointer"
                                     onClick={() =>
                                         fileInputRef.current?.click()
                                     }
@@ -1706,7 +1707,7 @@ export function MusicUpload() {
                                                 <div className="grid md:grid-cols-2 gap-4">
                                                     {/* Track Title */}
                                                     <div className="space-y-2">
-                                                        <Label htmlFor={`title-${index}`}>Track Title *</Label>
+                                                        <Label htmlFor={`title-${index}`}>Track Title <span className="text-red-500">*</span></Label>
                                                         <Input
                                                             id={`title-${index}`}
                                                             placeholder="Enter track title"
@@ -1719,7 +1720,7 @@ export function MusicUpload() {
 
                                                     {/* Genre */}
                                                     <div className="space-y-2">
-                                                        <Label htmlFor={`genre-${index}`}>Genre *</Label>
+                                                        <Label htmlFor={`genre-${index}`}>Genre <span className="text-red-500">*</span></Label>
                                                         <select
                                                             id={`genre-${index}`}
                                                             value={fileData.genre}
@@ -1740,7 +1741,7 @@ export function MusicUpload() {
 
                                     {/* Album */}
                                     <div className="space-y-2">
-                                        <Label htmlFor={`album-${index}`}>Album *</Label>
+                                        <Label htmlFor={`album-${index}`}>Album <span className="text-red-500">*</span></Label>
                                         <div className="space-y-3">
                                             {/* Custom Album Selector */}
                                             <div className="space-y-2">
@@ -1788,7 +1789,7 @@ export function MusicUpload() {
 
                                             {/* Create New Album Option */}
                                             <div
-                                                className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors border-2 border-dashed ${
+                                                className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors border border-dashed ${
                                                     fileData.isNewAlbum
                                                         ? 'border-purple-300 dark:border-purple-600 bg-purple-50 dark:bg-purple-900/20'
                                                         : 'border-gray-300 dark:border-gray-600 hover:border-purple-300 dark:hover:border-purple-600'
@@ -1822,9 +1823,9 @@ export function MusicUpload() {
 
                                                     {/* Album Cover Upload */}
                                                     <div className="space-y-3">
-                                                        <Label>Album Cover (1400x1400px) *</Label>
+                                                        <Label>Album Cover (1400x1400px) <span className="text-red-500">*</span></Label>
                                                         <div 
-                                                            className="w-32 h-32 rounded-lg overflow-hidden border-2 border-dashed border-purple-300 dark:border-purple-600 bg-purple-50 dark:bg-purple-900/20 cursor-pointer hover:border-purple-400 dark:hover:border-purple-500 transition-colors mx-auto"
+                                                                            className="w-32 h-32 rounded-lg overflow-hidden border border-dashed border-purple-300 dark:border-purple-600 bg-purple-50 dark:bg-purple-900/20 cursor-pointer hover:border-purple-400 dark:hover:border-purple-500 transition-colors mx-auto"
                                                             onClick={() => albumImageInputRef.current?.click()}
                                                         >
                                                             {fileData.albumImage ? (
@@ -1863,7 +1864,7 @@ export function MusicUpload() {
 
                                     {/* Artist */}
                                     <div className="space-y-2">
-                                        <Label htmlFor={`artist-${index}`}>Artist *</Label>
+                                        <Label htmlFor={`artist-${index}`}>Artist <span className="text-red-500">*</span></Label>
                                         <div className="space-y-3">
                                             {/* Custom Artist Selector */}
                                             <div className="space-y-2">
@@ -1911,7 +1912,7 @@ export function MusicUpload() {
 
                                             {/* Create New Artist Option */}
                                             <div
-                                                className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors border-2 border-dashed ${
+                                                className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors border border-dashed ${
                                                     fileData.isNewArtist
                                                         ? 'border-blue-300 dark:border-blue-600 bg-blue-50 dark:bg-blue-900/20'
                                                         : 'border-gray-300 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-600'
@@ -1945,9 +1946,9 @@ export function MusicUpload() {
 
                                                     {/* Artist Photo Upload */}
                                                     <div className="space-y-3">
-                                                        <Label>Artist Photo (1400x1400px) *</Label>
+                                                        <Label>Artist Photo (1400x1400px) <span className="text-red-500">*</span></Label>
                                                         <div 
-                                                            className="w-32 h-32 rounded-full overflow-hidden border-2 border-dashed border-blue-300 dark:border-blue-600 bg-blue-50 dark:bg-blue-900/20 cursor-pointer hover:border-blue-400 dark:hover:border-blue-500 transition-colors mx-auto"
+                                                            className="w-32 h-32 rounded-full overflow-hidden border border-dashed border-blue-300 dark:border-blue-600 bg-blue-50 dark:bg-blue-900/20 cursor-pointer hover:border-blue-400 dark:hover:border-blue-500 transition-colors mx-auto"
                                                             onClick={() => artistImageInputRef.current?.click()}
                                                         >
                                                             {fileData.artistImage ? (
