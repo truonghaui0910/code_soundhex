@@ -958,8 +958,7 @@ export function MusicUpload() {
                                                         variant="outline"
                                                         className="mb-2"
                                                     >
-                                                        {spotifyData.type ===```python
-"album"
+                                                        {spotifyData.type === "album"
                                                             ? "Album"
                                                             : "Playlist"}
                                                     </Badge>
