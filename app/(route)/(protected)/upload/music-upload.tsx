@@ -25,7 +25,13 @@ import {
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { showImportSuccess, showError, showInfo, showProcessing, dismissNotifications } from "@/lib/services/notification-service";
+import {
+    showImportSuccess,
+    showError,
+    showInfo,
+    showProcessing,
+    dismissNotifications,
+} from "@/lib/services/notification-service";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -43,7 +49,7 @@ interface SpotifyTrack {
     image: string;
     isrc?: string | null;
     preview_url?: string;
-    artists?: {id: string, name: string}[];
+    artists?: { id: string; name: string }[];
     album_id?: string;
     artist_id?: string;
     release_date?: string;
@@ -154,7 +160,8 @@ export function MusicUpload() {
             console.error("Error:", error);
             showError({
                 title: "❌ Spotify Data Error",
-                message: "Cannot fetch information from Spotify. Please check the URL and try again."
+                message:
+                    "Cannot fetch information from Spotify. Please check the URL and try again.",
             });
         } finally {
             setIsLoading(false);
@@ -207,7 +214,7 @@ export function MusicUpload() {
             console.error("Error loading album tracks:", error);
             showError({
                 title: "❌ Album Tracks Error",
-                message: "Cannot load track list from album. Please try again."
+                message: "Cannot load track list from album. Please try again.",
             });
         } finally {
             setLoadingAlbums((prev) => {
@@ -294,24 +301,26 @@ export function MusicUpload() {
                 });
             }
             const tracksToImport = selectedTrackData.map((track) => ({
-                                                        id: track.id,
-                                                        name: track.name,
-                                                        artist: track.artist,
-                                                        album: track.album,
-                                                        duration: track.duration,
-                                                        image: track.image,
-                                                        isrc: track.isrc,
-                                                        preview_url: track.preview_url,
-                                                        artists: track.artists || [{ 
-                                                            id: track.artist_id || `artist_${track.id}`,
-                                                            name: track.artist 
-                                                        }],
-                                                        album_data: {
-                                                            id: track.album_id || `album_${track.id}`,
-                                                            release_date: track.release_date,
-                                                            description: null,
-                                                        }
-                                                    }));
+                id: track.id,
+                name: track.name,
+                artist: track.artist,
+                album: track.album,
+                duration: track.duration,
+                image: track.image,
+                isrc: track.isrc,
+                preview_url: track.preview_url,
+                artists: track.artists || [
+                    {
+                        id: track.artist_id || `artist_${track.id}`,
+                        name: track.artist,
+                    },
+                ],
+                album_data: {
+                    id: track.album_id || `album_${track.id}`,
+                    release_date: track.release_date,
+                    description: null,
+                },
+            }));
             // Call import API
             const response = await fetch("/api/import-music", {
                 method: "POST",
@@ -327,12 +336,14 @@ export function MusicUpload() {
                 console.log("Raw API response:", result);
                 console.log("Response structure:", {
                     hasResults: !!result?.results,
-                    resultsKeys: result?.results ? Object.keys(result.results) : "No results object",
+                    resultsKeys: result?.results
+                        ? Object.keys(result.results)
+                        : "No results object",
                     directSuccess: result?.success,
                     directFailed: result?.failed,
                     nestedSuccess: result?.results?.success,
                     nestedFailed: result?.results?.failed,
-                    errors: result?.results?.errors || result?.errors
+                    errors: result?.results?.errors || result?.errors,
                 });
             } catch (parseError) {
                 console.error("Failed to parse response:", parseError);
@@ -340,7 +351,10 @@ export function MusicUpload() {
             }
 
             if (!response.ok) {
-                const errorMessage = result?.error || result?.message || "Failed to import tracks";
+                const errorMessage =
+                    result?.error ||
+                    result?.message ||
+                    "Failed to import tracks";
                 throw new Error(errorMessage);
             }
 
@@ -349,11 +363,11 @@ export function MusicUpload() {
             let failedCount = 0;
 
             // Handle different possible response structures
-            if (result?.results && typeof result.results === 'object') {
+            if (result?.results && typeof result.results === "object") {
                 // Nested structure: {results: {success: 1, failed: 0}}
                 successCount = result.results.success || 0;
                 failedCount = result.results.failed || 0;
-            } else if (result && typeof result.success !== 'undefined') {
+            } else if (result && typeof result.success !== "undefined") {
                 // Direct structure: {success: 1, failed: 0}
                 successCount = result.success || 0;
                 failedCount = result.failed || 0;
@@ -365,15 +379,25 @@ export function MusicUpload() {
 
             const totalTracks = tracksToImport.length;
 
-            console.log("Final parsed counts:", { successCount, failedCount, totalTracks });
+            console.log("Final parsed counts:", {
+                successCount,
+                failedCount,
+                totalTracks,
+            });
 
             // Show beautiful notification after processing all tracks
             showImportSuccess({
                 totalTracks,
                 successCount,
                 failedCount,
-                albumName: spotifyData.type === "album" ? spotifyData.data.name : undefined,
-                artistName: spotifyData.type === "artist" ? spotifyData.data.name : undefined
+                albumName:
+                    spotifyData.type === "album"
+                        ? spotifyData.data.name
+                        : undefined,
+                artistName:
+                    spotifyData.type === "artist"
+                        ? spotifyData.data.name
+                        : undefined,
             });
 
             // Reset form
@@ -381,37 +405,48 @@ export function MusicUpload() {
             setSelectedTracks(new Set());
             setSpotifyUrl("");
             setOwnershipConfirmed(false);
-
         } catch (error) {
             console.error("Import error:", error);
             showError({
                 title: "❌ Import Failed",
-                message: `Cannot import tracks: ${error instanceof Error ? error.message : "Unknown error"}`
+                message: `Cannot import tracks: ${error instanceof Error ? error.message : "Unknown error"}`,
             });
         } finally {
             setIsLoading(false);
         }
     };
-
+    const stringToHash = (str: string): number => {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            const char = str.charCodeAt(i);
+            hash = (hash << 5) - hash + char;
+            hash = hash & hash; // Convert to 32bit integer
+        }
+        return Math.abs(hash);
+    };
     const handlePlayTrack = (track: SpotifyTrack) => {
         if (!track.preview_url) {
-            showError('🔇 Không có bản preview cho bài hát này');
+            showError("🔇 Không có bản preview cho bài hát này");
             return;
         }
 
         // Convert SpotifyTrack to Track format similar to music/music-upload.tsx
         const trackToPlay = {
-            id: `spotify-${track.id}`,
+            id: stringToHash(`spotify-${track.id}`),
             title: track.name,
-            file_url: track.preview_url ? `/api/proxy-audio?url=${encodeURIComponent(track.preview_url)}` : "",
+            file_url: track.preview_url
+                ? `/api/proxy-audio?url=${encodeURIComponent(track.preview_url)}`
+                : "",
             duration: track.duration,
-            audio_file_url: track.preview_url ? `/api/proxy-audio?url=${encodeURIComponent(track.preview_url)}` : "",
+            audio_file_url: track.preview_url
+                ? `/api/proxy-audio?url=${encodeURIComponent(track.preview_url)}`
+                : "",
             artist: {
                 id: "spotify-artist",
                 name: track.artist,
             },
             album: {
-                id: `spotify-${track.id}`,
+                id: stringToHash(track.id),
                 title: track.album,
                 cover_image_url: track.image,
             },
@@ -422,15 +457,22 @@ export function MusicUpload() {
 
         if (spotifyData?.type === "track") {
             allTracks = [trackToPlay];
-        } else if (spotifyData?.type === "album" || spotifyData?.type === "playlist") {
+        } else if (
+            spotifyData?.type === "album" ||
+            spotifyData?.type === "playlist"
+        ) {
             allTracks = spotifyData.data.tracks
                 .filter((t: SpotifyTrack) => t.preview_url)
                 .map((t: SpotifyTrack) => ({
                     id: `spotify-${t.id}`,
                     title: t.name,
-                    file_url: t.preview_url ? `/api/proxy-audio?url=${encodeURIComponent(t.preview_url)}` : "",
+                    file_url: t.preview_url
+                        ? `/api/proxy-audio?url=${encodeURIComponent(t.preview_url)}`
+                        : "",
                     duration: t.duration,
-                    audio_file_url: t.preview_url ? `/api/proxy-audio?url=${encodeURIComponent(t.preview_url)}` : "",
+                    audio_file_url: t.preview_url
+                        ? `/api/proxy-audio?url=${encodeURIComponent(t.preview_url)}`
+                        : "",
                     artist: {
                         id: "spotify-artist",
                         name: t.artist,
@@ -451,9 +493,13 @@ export function MusicUpload() {
                             allTracks.push({
                                 id: `spotify-${t.id}`,
                                 title: t.name,
-                                file_url: t.preview_url ? `/api/proxy-audio?url=${encodeURIComponent(t.preview_url)}` : "",
+                                file_url: t.preview_url
+                                    ? `/api/proxy-audio?url=${encodeURIComponent(t.preview_url)}`
+                                    : "",
                                 duration: t.duration,
-                                audio_file_url: t.preview_url ? `/api/proxy-audio?url=${encodeURIComponent(t.preview_url)}` : "",
+                                audio_file_url: t.preview_url
+                                    ? `/api/proxy-audio?url=${encodeURIComponent(t.preview_url)}`
+                                    : "",
                                 artist: {
                                     id: "spotify-artist",
                                     name: t.artist,
@@ -470,8 +516,9 @@ export function MusicUpload() {
         }
 
         setTrackList(allTracks);
-
-        if (currentTrack?.id === `spotify-${track.id}` && isPlaying) {
+        const currentTrackId = currentTrack?.id;
+        const newTrackId = stringToHash(`spotify-${track.id}`);
+        if (currentTrackId === newTrackId && isPlaying) {
             togglePlayPause();
         } else {
             playTrack(trackToPlay);
@@ -618,19 +665,35 @@ export function MusicUpload() {
                                             <div className="flex items-center gap-4 p-4 border rounded-lg bg-gray-50 dark:bg-gray-800/50">
                                                 <div className="relative">
                                                     <Image
-                                                        src={spotifyData.data.image || "/images/soundhex.png"}
-                                                        alt={spotifyData.data.name}
+                                                        src={
+                                                            spotifyData.data
+                                                                .image ||
+                                                            "/images/soundhex.png"
+                                                        }
+                                                        alt={
+                                                            spotifyData.data
+                                                                .name
+                                                        }
                                                         width={80}
                                                         height={80}
                                                         className="rounded-lg object-cover"
                                                     />
-                                                    {spotifyData.data.preview_url && (
+                                                    {spotifyData.data
+                                                        .preview_url && (
                                                         <Button
                                                             size="sm"
                                                             className="absolute bottom-2 right-2 w-8 h-8 rounded-full p-0"
-                                                            onClick={() => handlePlayTrack(spotifyData.data)}
+                                                            onClick={() =>
+                                                                handlePlayTrack(
+                                                                    spotifyData.data,
+                                                                )
+                                                            }
                                                         >
-                                                            {currentTrack?.id === `spotify-${spotifyData.data.id}` && isPlaying ? (
+                                                            {currentTrack?.id ===
+                                                                stringToHash(
+                                                                    `spotify-${spotifyData.data.id}`,
+                                                                ) &&
+                                                            isPlaying ? (
                                                                 <Pause className="h-3 w-3" />
                                                             ) : (
                                                                 <Play className="h-3 w-3" />
@@ -639,17 +702,54 @@ export function MusicUpload() {
                                                     )}
                                                 </div>
                                                 <div className="flex-1">
-                                                    <h3 className="font-semibold">{spotifyData.data.name}</h3>
-                                                    <p className="text-gray-600 dark:text-gray-400">{spotifyData.data.artist}</p>
-                                                    <p className="text-sm text-gray-500">{spotifyData.data.album}</p>
+                                                    <h3 className="font-semibold">
+                                                        {spotifyData.data.name}
+                                                    </h3>
+                                                    <p className="text-gray-600 dark:text-gray-400">
+                                                        {
+                                                            spotifyData.data
+                                                                .artist
+                                                        }
+                                                    </p>
+                                                    <p className="text-sm text-gray-500">
+                                                        {spotifyData.data.album}
+                                                    </p>
                                                     <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
-                                                        <span>{formatDuration(spotifyData.data.duration)}</span>
-                                                        {spotifyData.data.isrc && <span>ISRC: {spotifyData.data.isrc}</span>}
+                                                        <span>
+                                                            {formatDuration(
+                                                                spotifyData.data
+                                                                    .duration,
+                                                            )}
+                                                        </span>
+                                                        {spotifyData.data
+                                                            .isrc && (
+                                                            <span>
+                                                                ISRC:{" "}
+                                                                {
+                                                                    spotifyData
+                                                                        .data
+                                                                        .isrc
+                                                                }
+                                                            </span>
+                                                        )}
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-2">
-                                                    <Badge variant={selectedTracks.has(spotifyData.data.id) ? "default" : "secondary"}>
-                                                        {selectedTracks.has(spotifyData.data.id) ? "Selected" : "Not Selected"}
+                                                    <Badge
+                                                        variant={
+                                                            selectedTracks.has(
+                                                                spotifyData.data
+                                                                    .id,
+                                                            )
+                                                                ? "default"
+                                                                : "secondary"
+                                                        }
+                                                    >
+                                                        {selectedTracks.has(
+                                                            spotifyData.data.id,
+                                                        )
+                                                            ? "Selected"
+                                                            : "Not Selected"}
                                                     </Badge>
                                                 </div>
                                             </div>
@@ -657,27 +757,56 @@ export function MusicUpload() {
                                     )}
 
                                     {/* Album or Playlist */}
-                                    {(spotifyData.type === "album" || spotifyData.type === "playlist") && (
+                                    {(spotifyData.type === "album" ||
+                                        spotifyData.type === "playlist") && (
                                         <div className="space-y-6">
                                             {/* Album/Playlist Header */}
                                             <div className="flex items-start gap-6">
                                                 <Image
-                                                    src={spotifyData.data.image || "/images/soundhex.png"}
+                                                    src={
+                                                        spotifyData.data
+                                                            .image ||
+                                                        "/images/soundhex.png"
+                                                    }
                                                     alt={spotifyData.data.name}
                                                     width={160}
                                                     height={160}
                                                     className="rounded-lg shadow-lg object-cover"
                                                 />
                                                 <div className="flex-1 space-y-2">
-                                                    <Badge variant="outline" className="mb-2">
-                                                        {spotifyData.type === "album" ? "Album" : "Playlist"}
+                                                    <Badge
+                                                        variant="outline"
+                                                        className="mb-2"
+                                                    >
+                                                        {spotifyData.type ===
+                                                        "album"
+                                                            ? "Album"
+                                                            : "Playlist"}
                                                     </Badge>
-                                                    <h3 className="text-2xl font-bold">{spotifyData.data.name}</h3>
-                                                    <p className="text-lg text-gray-600 dark:text-gray-400">{spotifyData.data.artist}</p>
-                                                    {spotifyData.data.release_date && (
-                                                        <p className="text-sm text-gray-500">Released: {spotifyData.data.release_date}</p>
+                                                    <h3 className="text-2xl font-bold">
+                                                        {spotifyData.data.name}
+                                                    </h3>
+                                                    <p className="text-lg text-gray-600 dark:text-gray-400">
+                                                        {
+                                                            spotifyData.data
+                                                                .artist
+                                                        }
+                                                    </p>
+                                                    {spotifyData.data
+                                                        .release_date && (
+                                                        <p className="text-sm text-gray-500">
+                                                            Released:{" "}
+                                                            {
+                                                                spotifyData.data
+                                                                    .release_date
+                                                            }
+                                                        </p>
                                                     )}
-                                                    <p className="text-sm text-gray-500">{spotifyData.data.tracks?.length || 0} tracks</p>
+                                                    <p className="text-sm text-gray-500">
+                                                        {spotifyData.data.tracks
+                                                            ?.length || 0}{" "}
+                                                        tracks
+                                                    </p>
                                                 </div>
                                             </div>
 
@@ -686,78 +815,146 @@ export function MusicUpload() {
                                             {/* Track Selection */}
                                             <div className="space-y-4">
                                                 <div className="flex items-center justify-between">
-                                                    <h4 className="font-semibold">Select tracks to import:</h4>
+                                                    <h4 className="font-semibold">
+                                                        Select tracks to import:
+                                                    </h4>
                                                     <Button
                                                         variant="outline"
                                                         size="sm"
                                                         onClick={() => {
-                                                            const allTrackIds = spotifyData.data.tracks.map((t: SpotifyTrack) => t.id);
-                                                            if (selectedTracks.size === allTrackIds.length) {
-                                                                setSelectedTracks(new Set());
+                                                            const allTrackIds =
+                                                                spotifyData.data.tracks.map(
+                                                                    (
+                                                                        t: SpotifyTrack,
+                                                                    ) => t.id,
+                                                                );
+                                                            if (
+                                                                selectedTracks.size ===
+                                                                allTrackIds.length
+                                                            ) {
+                                                                setSelectedTracks(
+                                                                    new Set(),
+                                                                );
                                                             } else {
-                                                                setSelectedTracks(new Set(allTrackIds));
+                                                                setSelectedTracks(
+                                                                    new Set(
+                                                                        allTrackIds,
+                                                                    ),
+                                                                );
                                                             }
                                                         }}
                                                     >
-                                                        {selectedTracks.size === spotifyData.data.tracks?.length ? "Deselect All" : "Select All"}
+                                                        {selectedTracks.size ===
+                                                        spotifyData.data.tracks
+                                                            ?.length
+                                                            ? "Deselect All"
+                                                            : "Select All"}
                                                     </Button>
                                                 </div>
 
                                                 <div className="space-y-2 max-h-96 overflow-y-auto">
-                                                    {spotifyData.data.tracks?.map((track: SpotifyTrack, index: number) => (
-                                                        <div
-                                                            key={track.id}
-                                                            className={`flex items-center gap-4 p-3 rounded-lg border cursor-pointer transition-colors ${
-                                                                selectedTracks.has(track.id)
-                                                                    ? "bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-700"
-                                                                    : "bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800"
-                                                            }`}
-                                                            onClick={() => toggleTrackSelection(track.id)}
-                                                        >
-                                                            <div className="w-6 h-6 flex items-center justify-center">
-                                                                {selectedTracks.has(track.id) ? (
-                                                                    <Check className="h-4 w-4 text-purple-600" />
-                                                                ) : (
-                                                                    <span className="text-sm text-gray-400">{index + 1}</span>
-                                                                )}
-                                                            </div>
+                                                    {spotifyData.data.tracks?.map(
+                                                        (
+                                                            track: SpotifyTrack,
+                                                            index: number,
+                                                        ) => (
+                                                            <div
+                                                                key={track.id}
+                                                                className={`flex items-center gap-4 p-3 rounded-lg border cursor-pointer transition-colors ${
+                                                                    selectedTracks.has(
+                                                                        track.id,
+                                                                    )
+                                                                        ? "bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-700"
+                                                                        : "bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800"
+                                                                }`}
+                                                                onClick={() =>
+                                                                    toggleTrackSelection(
+                                                                        track.id,
+                                                                    )
+                                                                }
+                                                            >
+                                                                <div className="w-6 h-6 flex items-center justify-center">
+                                                                    {selectedTracks.has(
+                                                                        track.id,
+                                                                    ) ? (
+                                                                        <Check className="h-4 w-4 text-purple-600" />
+                                                                    ) : (
+                                                                        <span className="text-sm text-gray-400">
+                                                                            {index +
+                                                                                1}
+                                                                        </span>
+                                                                    )}
+                                                                </div>
 
-                                                            <div className="relative">
-                                                                <Image
-                                                                    src={track.image || spotifyData.data.image || "/images/soundhex.png"}
-                                                                    alt={track.name}
-                                                                    width={48}
-                                                                    height={48}
-                                                                    className="rounded object-cover"
-                                                                />
-                                                                {track.preview_url && (
-                                                                    <Button
-                                                                        size="sm"
-                                                                        className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full p-0"
-                                                                        onClick={(e) => {
-                                                                            e.stopPropagation();
-                                                                            handlePlayTrack(track);
-                                                                        }}
-                                                                    >
-                                                                        {currentTrack?.id === `spotify-${track.id}` && isPlaying ? (
-                                                                            <Pause className="h-2 w-2" />
-                                                                        ) : (
-                                                                            <Play className="h-2 w-2" />
+                                                                <div className="relative">
+                                                                    <Image
+                                                                        src={
+                                                                            track.image ||
+                                                                            spotifyData
+                                                                                .data
+                                                                                .image ||
+                                                                            "/images/soundhex.png"
+                                                                        }
+                                                                        alt={
+                                                                            track.name
+                                                                        }
+                                                                        width={
+                                                                            48
+                                                                        }
+                                                                        height={
+                                                                            48
+                                                                        }
+                                                                        className="rounded object-cover"
+                                                                    />
+                                                                    {track.preview_url && (
+                                                                        <Button
+                                                                            size="sm"
+                                                                            className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full p-0"
+                                                                            onClick={(
+                                                                                e,
+                                                                            ) => {
+                                                                                e.stopPropagation();
+                                                                                handlePlayTrack(
+                                                                                    track,
+                                                                                );
+                                                                            }}
+                                                                        >
+                                                                            {currentTrack?.id ===
+                                                                                stringToHash(
+                                                                                    `spotify-${spotifyData.data.id}`,
+                                                                                ) &&
+                                                                            isPlaying ? (
+                                                                                <Pause className="h-2 w-2" />
+                                                                            ) : (
+                                                                                <Play className="h-2 w-2" />
+                                                                            )}
+                                                                        </Button>
+                                                                    )}
+                                                                </div>
+
+                                                                <div className="flex-1 min-w-0">
+                                                                    <p className="font-medium truncate">
+                                                                        {
+                                                                            track.name
+                                                                        }
+                                                                    </p>
+                                                                    <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                                                                        {
+                                                                            track.artist
+                                                                        }
+                                                                    </p>
+                                                                </div>
+
+                                                                <div className="flex items-center gap-4 text-sm text-gray-500">
+                                                                    <span>
+                                                                        {formatDuration(
+                                                                            track.duration,
                                                                         )}
-                                                                    </Button>
-                                                                )}
+                                                                    </span>
+                                                                </div>
                                                             </div>
-
-                                                            <div className="flex-1 min-w-0">
-                                                                <p className="font-medium truncate">{track.name}</p>
-                                                                <p className="text-sm text-gray-600 dark:text-gray-400 truncate">{track.artist}</p>
-                                                            </div>
-
-                                                            <div className="flex items-center gap-4 text-sm text-gray-500">
-                                                                <span>{formatDuration(track.duration)}</span>
-                                                            </div>
-                                                        </div>
-                                                    ))}
+                                                        ),
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
@@ -769,16 +966,31 @@ export function MusicUpload() {
                                             {/* Artist Header */}
                                             <div className="flex items-start gap-6">
                                                 <Image
-                                                    src={spotifyData.data.image || "/images/soundhex.png"}
+                                                    src={
+                                                        spotifyData.data
+                                                            .image ||
+                                                        "/images/soundhex.png"
+                                                    }
                                                     alt={spotifyData.data.name}
                                                     width={160}
                                                     height={160}
                                                     className="rounded-lg shadow-lg object-cover"
                                                 />
                                                 <div className="flex-1 space-y-2">
-                                                    <Badge variant="outline" className="mb-2">Artist</Badge>
-                                                    <h3 className="text-2xl font-bold">{spotifyData.data.name}</h3>
-                                                    <p className="text-sm text-gray-500">{spotifyData.data.albums?.length || 0} albums</p>
+                                                    <Badge
+                                                        variant="outline"
+                                                        className="mb-2"
+                                                    >
+                                                        Artist
+                                                    </Badge>
+                                                    <h3 className="text-2xl font-bold">
+                                                        {spotifyData.data.name}
+                                                    </h3>
+                                                    <p className="text-sm text-gray-500">
+                                                        {spotifyData.data.albums
+                                                            ?.length || 0}{" "}
+                                                        albums
+                                                    </p>
                                                 </div>
                                             </div>
 
@@ -786,196 +998,414 @@ export function MusicUpload() {
 
                                             {/* Albums List */}
                                             <div className="space-y-4">
-                                                <h4 className="font-semibold">Select albums to import:</h4>
-                                                {spotifyData.data.albums.map((album: SpotifyAlbum) => (
-                                                    <div key={album.id} className="border rounded-lg p-4">
+                                                <h4 className="font-semibold">
+                                                    Select albums to import:
+                                                </h4>
+                                                {spotifyData.data.albums.map(
+                                                    (album: SpotifyAlbum) => (
                                                         <div
-                                                            className="flex items-center gap-4 cursor-pointer"
-                                                            onClick={() => toggleAlbumExpansion(album.id)}
+                                                            key={album.id}
+                                                            className="border rounded-lg p-4"
                                                         >
-                                                            <Image
-                                                                src={album.image || "/images/soundhex.png"}
-                                                                alt={album.name}
-                                                                width={64}
-                                                                height={64}
-                                                                className="rounded object-cover"
-                                                            />
-                                                            <div className="flex-1">
-                                                                <h5 className="font-medium">{album.name}</h5>
-                                                                <p className="text-sm text-gray-600 dark:text-gray-400">{album.artist}</p>
-                                                                <p className="text-xs text-gray-500">{album.release_date}</p>
-                                                            </div>
-                                                            <div className="flex items-center gap-2">
-                                                                {loadingAlbums.has(album.id) ? (
-                                                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                                                ) : expandedAlbums.has(album.id) ? (
-                                                                    <ChevronDown className="h-4 w-4" />
-                                                                ) : (
-                                                                    <ChevronRight className="h-4 w-4" />
-                                                                )}
-                                                            </div>
-                                                        </div>
-
-                                                        {expandedAlbums.has(album.id) && album.tracks && album.tracks.length > 0 && (
-                                                            <div className="mt-4 space-y-2">
-                                                                <div className="flex items-center justify-between mb-2">
-                                                                    <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                                                                        Select tracks from this album:
-                                                                    </span>
-                                                                    <Button
-                                                                        variant="outline"
-                                                                        size="sm"
-                                                                        onClick={() => {
-                                                                            const allAlbumTrackIds = album.tracks.map((t: SpotifyTrack) => t.id);
-                                                                            const allSelected = allAlbumTrackIds.every(id => selectedTracks.has(id));
-
-                                                                            if (allSelected) {
-                                                                                // Deselect all tracks from this album
-                                                                                const newSelection = new Set(selectedTracks);
-                                                                                allAlbumTrackIds.forEach(id => newSelection.delete(id));
-                                                                                setSelectedTracks(newSelection);
-                                                                            } else {
-                                                                                // Select all tracks from this album
-                                                                                const newSelection = new Set(selectedTracks);
-                                                                                allAlbumTrackIds.forEach(id => newSelection.add(id));
-                                                                                setSelectedTracks(newSelection);
-                                                                            }
-                                                                        }}
-                                                                    >
-                                                                        {album.tracks.every((t: SpotifyTrack) => selectedTracks.has(t.id)) ? "Deselect All" : "Select All"}
-                                                                    </Button>
+                                                            <div
+                                                                className="flex items-center gap-4 cursor-pointer"
+                                                                onClick={() =>
+                                                                    toggleAlbumExpansion(
+                                                                        album.id,
+                                                                    )
+                                                                }
+                                                            >
+                                                                <Image
+                                                                    src={
+                                                                        album.image ||
+                                                                        "/images/soundhex.png"
+                                                                    }
+                                                                    alt={
+                                                                        album.name
+                                                                    }
+                                                                    width={64}
+                                                                    height={64}
+                                                                    className="rounded object-cover"
+                                                                />
+                                                                <div className="flex-1">
+                                                                    <h5 className="font-medium">
+                                                                        {
+                                                                            album.name
+                                                                        }
+                                                                    </h5>
+                                                                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                                                                        {
+                                                                            album.artist
+                                                                        }
+                                                                    </p>
+                                                                    <p className="text-xs text-gray-500">
+                                                                        {
+                                                                            album.release_date
+                                                                        }
+                                                                    </p>
                                                                 </div>
+                                                                <div className="flex items-center gap-2">
+                                                                    {loadingAlbums.has(
+                                                                        album.id,
+                                                                    ) ? (
+                                                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                                                    ) : expandedAlbums.has(
+                                                                          album.id,
+                                                                      ) ? (
+                                                                        <ChevronDown className="h-4 w-4" />
+                                                                    ) : (
+                                                                        <ChevronRight className="h-4 w-4" />
+                                                                    )}
+                                                                </div>
+                                                            </div>
 
-                                                                <div className="space-y-2 max-h-64 overflow-y-auto pl-4 border-l-2 border-gray-200 dark:border-gray-700">
-                                                                    {album.tracks.map((track: SpotifyTrack, index: number) => (
-                                                                        <div
-                                                                            key={track.id}
-                                                                            className={`flex items-center gap-4 p-3 rounded-lg border cursor-pointer transition-colors ${
-                                                                                selectedTracks.has(track.id)
-                                                                                    ? "bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-700"
-                                                                                    : "bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800"
-                                                                            }`}
-                                                                            onClick={() => toggleTrackSelection(track.id)}
-                                                                        >
-                                                                            <div className="w-6 h-6 flex items-center justify-center">
-                                                                                {selectedTracks.has(track.id) ? (
-                                                                                    <Check className="h-4 w-4 text-purple-600" />
-                                                                                ) : (
-                                                                                    <span className="text-sm text-gray-400">{index + 1}</span>
-                                                                                )}
-                                                                            </div>                                                                            <div className="relative">
-                                                                                <Image
-                                                                                    src={track.image || album.image || "/images/soundhex.png"}
-                                                                                    alt={track.name}
-                                                                                    width={48}
-                                                                                    height={48}
-                                                                                    className="rounded object-cover"
-                                                                                />
-                                                                                {track.preview_url && (
-                                                                                    <Button
-                                                                                        size="sm"
-                                                                                        className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full p-0"
-                                                                                        onClick={(e) => {
-                                                                                            e.stopPropagation();
-                                                                                            handlePlayTrack(track);
-                                                                                        }}
-                                                                                    >
-                                                                                        {currentTrack?.id === `spotify-${track.id}` && isPlaying ? (
-                                                                                            <Pause className="h-2 w-2" />
-                                                                                        ) : (
-                                                                                            <Play className="h-2 w-2" />
-                                                                                        )}
-                                                                                    </Button>
-                                                                                )}
-                                                                            </div>
+                                                            {expandedAlbums.has(
+                                                                album.id,
+                                                            ) &&
+                                                                album.tracks &&
+                                                                album.tracks
+                                                                    .length >
+                                                                    0 && (
+                                                                    <div className="mt-4 space-y-2">
+                                                                        <div className="flex items-center justify-between mb-2">
+                                                                            <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                                                                                Select
+                                                                                tracks
+                                                                                from
+                                                                                this
+                                                                                album:
+                                                                            </span>
+                                                                            <Button
+                                                                                variant="outline"
+                                                                                size="sm"
+                                                                                onClick={() => {
+                                                                                    const allAlbumTrackIds =
+                                                                                        album.tracks.map(
+                                                                                            (
+                                                                                                t: SpotifyTrack,
+                                                                                            ) =>
+                                                                                                t.id,
+                                                                                        );
+                                                                                    const allSelected =
+                                                                                        allAlbumTrackIds.every(
+                                                                                            (
+                                                                                                id,
+                                                                                            ) =>
+                                                                                                selectedTracks.has(
+                                                                                                    id,
+                                                                                                ),
+                                                                                        );
 
-                                                                            <div className="flex-1 min-w-0">
-                                                                                <p className="font-medium truncate">{track.name}</p>
-                                                                                <p className="text-sm text-gray-600 dark:text-gray-400 truncate">{track.artist}</p>
-                                                                            </div>
-
-                                                                            <div className="flex items-center gap-4 text-sm text-gray-500">
-                                                                                <span>{formatDuration(track.duration)}</span>
-                                                                            </div>
+                                                                                    if (
+                                                                                        allSelected
+                                                                                    ) {
+                                                                                        // Deselect all tracks from this album
+                                                                                        const newSelection =
+                                                                                            new Set(
+                                                                                                selectedTracks,
+                                                                                            );
+                                                                                        allAlbumTrackIds.forEach(
+                                                                                            (
+                                                                                                id,
+                                                                                            ) =>
+                                                                                                newSelection.delete(
+                                                                                                    id,
+                                                                                                ),
+                                                                                        );
+                                                                                        setSelectedTracks(
+                                                                                            newSelection,
+                                                                                        );
+                                                                                    } else {
+                                                                                        // Select all tracks from this album
+                                                                                        const newSelection =
+                                                                                            new Set(
+                                                                                                selectedTracks,
+                                                                                            );
+                                                                                        allAlbumTrackIds.forEach(
+                                                                                            (
+                                                                                                id,
+                                                                                            ) =>
+                                                                                                newSelection.add(
+                                                                                                    id,
+                                                                                                ),
+                                                                                        );
+                                                                                        setSelectedTracks(
+                                                                                            newSelection,
+                                                                                        );
+                                                                                    }
+                                                                                }}
+                                                                            >
+                                                                                {album.tracks.every(
+                                                                                    (
+                                                                                        t: SpotifyTrack,
+                                                                                    ) =>
+                                                                                        selectedTracks.has(
+                                                                                            t.id,
+                                                                                        ),
+                                                                                )
+                                                                                    ? "Deselect All"
+                                                                                    : "Select All"}
+                                                                            </Button>
                                                                         </div>
-                                                                    ))}
-                                                                </div>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                ))}
+
+                                                                        <div className="space-y-2 max-h-64 overflow-y-auto pl-4 border-l-2 border-gray-200 dark:border-gray-700">
+                                                                            {album.tracks.map(
+                                                                                (
+                                                                                    track: SpotifyTrack,
+                                                                                    index: number,
+                                                                                ) => (
+                                                                                    <div
+                                                                                        key={
+                                                                                            track.id
+                                                                                        }
+                                                                                        className={`flex items-center gap-4 p-3 rounded-lg border cursor-pointer transition-colors ${
+                                                                                            selectedTracks.has(
+                                                                                                track.id,
+                                                                                            )
+                                                                                                ? "bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-700"
+                                                                                                : "bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800"
+                                                                                        }`}
+                                                                                        onClick={() =>
+                                                                                            toggleTrackSelection(
+                                                                                                track.id,
+                                                                                            )
+                                                                                        }
+                                                                                    >
+                                                                                        <div className="w-6 h-6 flex items-center justify-center">
+                                                                                            {selectedTracks.has(
+                                                                                                track.id,
+                                                                                            ) ? (
+                                                                                                <Check className="h-4 w-4 text-purple-600" />
+                                                                                            ) : (
+                                                                                                <span className="text-sm text-gray-400">
+                                                                                                    {index +
+                                                                                                        1}
+                                                                                                </span>
+                                                                                            )}
+                                                                                        </div>{" "}
+                                                                                        <div className="relative">
+                                                                                            <Image
+                                                                                                src={
+                                                                                                    track.image ||
+                                                                                                    album.image ||
+                                                                                                    "/images/soundhex.png"
+                                                                                                }
+                                                                                                alt={
+                                                                                                    track.name
+                                                                                                }
+                                                                                                width={
+                                                                                                    48
+                                                                                                }
+                                                                                                height={
+                                                                                                    48
+                                                                                                }
+                                                                                                className="rounded object-cover"
+                                                                                            />
+                                                                                            {track.preview_url && (
+                                                                                                <Button
+                                                                                                    size="sm"
+                                                                                                    className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full p-0"
+                                                                                                    onClick={(
+                                                                                                        e,
+                                                                                                    ) => {
+                                                                                                        e.stopPropagation();
+                                                                                                        handlePlayTrack(
+                                                                                                            track,
+                                                                                                        );
+                                                                                                    }}
+                                                                                                >
+                                                                                                    {currentTrack?.id ===
+                                                                                                        stringToHash(
+                                                                                                            `spotify-${spotifyData.data.id}`,
+                                                                                                        ) &&
+                                                                                                    isPlaying ? (
+                                                                                                        <Pause className="h-2 w-2" />
+                                                                                                    ) : (
+                                                                                                        <Play className="h-2 w-2" />
+                                                                                                    )}
+                                                                                                </Button>
+                                                                                            )}
+                                                                                        </div>
+                                                                                        <div className="flex-1 min-w-0">
+                                                                                            <p className="font-medium truncate">
+                                                                                                {
+                                                                                                    track.name
+                                                                                                }
+                                                                                            </p>
+                                                                                            <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                                                                                                {
+                                                                                                    track.artist
+                                                                                                }
+                                                                                            </p>
+                                                                                        </div>
+                                                                                        <div className="flex items-center gap-4 text-sm text-gray-500">
+                                                                                            <span>
+                                                                                                {formatDuration(
+                                                                                                    track.duration,
+                                                                                                )}
+                                                                                            </span>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                ),
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+                                                        </div>
+                                                    ),
+                                                )}
                                             </div>
                                         </div>
                                     )}
 
                                     {/* Ownership Confirmation */}
-                    <div className="border-t pt-6">
-                        <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-800 dark:to-purple-900/20 rounded-xl p-6 border border-blue-200 dark:border-purple-700">
-                            <div className="flex items-start space-x-4">
-                                <div className="flex-shrink-0 mt-1">
-                                    <div className="relative">
-                                        <input
-                                            type="checkbox"
-                                            id="ownership-confirmation"
-                                            checked={ownershipConfirmed}
-                                            onChange={(e) => setOwnershipConfirmed(e.target.checked)}
-                                            className="sr-only"
-                                        />
-                                        <label
-                                            htmlFor="ownership-confirmation"
-                                            className={`flex items-center justify-center w-6 h-6 rounded-md border-2 cursor-pointer transition-all duration-200 ${
-                                                ownershipConfirmed
-                                                    ? 'bg-gradient-to-r from-purple-600 to-blue-600 border-purple-600 text-white shadow-lg'
-                                                    : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 hover:border-purple-400 dark:hover:border-purple-500'
-                                            }`}
-                                        >
-                                            {ownershipConfirmed && (
-                                                <Check className="h-4 w-4 text-white" />
-                                            )}
-                                        </label>
+                                    <div className="border-t pt-6">
+                                        <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-800 dark:to-purple-900/20 rounded-xl p-6 border border-blue-200 dark:border-purple-700">
+                                            <div className="flex items-start space-x-4">
+                                                <div className="flex-shrink-0 mt-1">
+                                                    <div className="relative">
+                                                        <input
+                                                            type="checkbox"
+                                                            id="ownership-confirmation"
+                                                            checked={
+                                                                ownershipConfirmed
+                                                            }
+                                                            onChange={(e) =>
+                                                                setOwnershipConfirmed(
+                                                                    e.target
+                                                                        .checked,
+                                                                )
+                                                            }
+                                                            className="sr-only"
+                                                        />
+                                                        <label
+                                                            htmlFor="ownership-confirmation"
+                                                            className={`flex items-center justify-center w-6 h-6 rounded-md border-2 cursor-pointer transition-all duration-200 ${
+                                                                ownershipConfirmed
+                                                                    ? "bg-gradient-to-r from-purple-600 to-blue-600 border-purple-600 text-white shadow-lg"
+                                                                    : "bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 hover:border-purple-400 dark:hover:border-purple-500"
+                                                            }`}
+                                                        >
+                                                            {ownershipConfirmed && (
+                                                                <Check className="h-4 w-4 text-white" />
+                                                            )}
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div className="flex-1">
+                                                    <label
+                                                        htmlFor="ownership-confirmation"
+                                                        className="cursor-pointer"
+                                                    >
+                                                        <div className="mb-3">
+                                                            <span className="text-lg font-bold text-gray-900 dark:text-white">
+                                                                Copyright &
+                                                                Ownership
+                                                                Declaration
+                                                            </span>
+                                                        </div>
+                                                        <div className="bg-white/60 dark:bg-gray-800/60 rounded-lg p-4 backdrop-blur-sm">
+                                                            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                                                                By checking this
+                                                                box, I hereby
+                                                                confirm and
+                                                                declare that:
+                                                            </p>
+                                                            <ul className="mt-3 space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                                                                <li className="flex items-start gap-2">
+                                                                    <div className="w-1.5 h-1.5 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>
+                                                                    <span>
+                                                                        I am the
+                                                                        rightful
+                                                                        owner or
+                                                                        have
+                                                                        proper
+                                                                        legal
+                                                                        authorization
+                                                                        to
+                                                                        upload
+                                                                        and
+                                                                        distribute
+                                                                        the
+                                                                        selected
+                                                                        music
+                                                                        tracks
+                                                                    </span>
+                                                                </li>
+                                                                <li className="flex items-start gap-2">
+                                                                    <div className="w-1.5 h-1.5 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>
+                                                                    <span>
+                                                                        I
+                                                                        understand
+                                                                        that
+                                                                        uploading
+                                                                        copyrighted
+                                                                        material
+                                                                        without
+                                                                        permission
+                                                                        is
+                                                                        strictly
+                                                                        prohibited
+                                                                        and may
+                                                                        result
+                                                                        in legal
+                                                                        consequences
+                                                                    </span>
+                                                                </li>
+                                                                <li className="flex items-start gap-2">
+                                                                    <div className="w-1.5 h-1.5 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>
+                                                                    <span>
+                                                                        I take
+                                                                        full
+                                                                        responsibility
+                                                                        for
+                                                                        ensuring
+                                                                        all
+                                                                        uploaded
+                                                                        content
+                                                                        complies
+                                                                        with
+                                                                        copyright
+                                                                        laws and
+                                                                        licensing
+                                                                        requirements
+                                                                    </span>
+                                                                </li>
+                                                                <li className="flex items-start gap-2">
+                                                                    <div className="w-1.5 h-1.5 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>
+                                                                    <span>
+                                                                        I
+                                                                        acknowledge
+                                                                        that
+                                                                        false
+                                                                        declarations
+                                                                        may
+                                                                        result
+                                                                        in
+                                                                        account
+                                                                        suspension
+                                                                        and
+                                                                        legal
+                                                                        action
+                                                                    </span>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="flex-1">
-                                    <label htmlFor="ownership-confirmation" className="cursor-pointer">
-                                        <div className="mb-3">
-                                            <span className="text-lg font-bold text-gray-900 dark:text-white">
-                                                Copyright & Ownership Declaration
-                                            </span>
-                                        </div>
-                                        <div className="bg-white/60 dark:bg-gray-800/60 rounded-lg p-4 backdrop-blur-sm">
-                                            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-                                                By checking this box, I hereby confirm and declare that:
-                                            </p>
-                                            <ul className="mt-3 space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                                                <li className="flex items-start gap-2">
-                                                    <div className="w-1.5 h-1.5 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>
-                                                    <span>I am the rightful owner or have proper legal authorization to upload and distribute the selected music tracks</span>
-                                                </li>
-                                                <li className="flex items-start gap-2">
-                                                    <div className="w-1.5 h-1.5 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>
-                                                    <span>I understand that uploading copyrighted material without permission is strictly prohibited and may result in legal consequences</span>
-                                                </li>
-                                                <li className="flex items-start gap-2">
-                                                    <div className="w-1.5 h-1.5 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>
-                                                    <span>I take full responsibility for ensuring all uploaded content complies with copyright laws and licensing requirements</span>
-                                                </li>
-                                                <li className="flex items-start gap-2">
-                                                    <div className="w-1.5 h-1.5 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>
-                                                    <span>I acknowledge that false declarations may result in account suspension and legal action</span>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
                                     {/* Submit Button */}
                                     <div className="flex justify-end pt-4">
                                         <Button
                                             onClick={submitSpotifyTracks}
-                                            disabled={selectedTracks.size === 0 || !ownershipConfirmed || isLoading}
+                                            disabled={
+                                                selectedTracks.size === 0 ||
+                                                !ownershipConfirmed ||
+                                                isLoading
+                                            }
                                             className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
                                             {isLoading ? (
@@ -985,8 +1415,11 @@ export function MusicUpload() {
                                                 </>
                                             ) : (
                                                 <>
-                                                    Import {selectedTracks.size} Track
-                                                    {selectedTracks.size !== 1 ? "s" : ""}
+                                                    Import {selectedTracks.size}{" "}
+                                                    Track
+                                                    {selectedTracks.size !== 1
+                                                        ? "s"
+                                                        : ""}
                                                 </>
                                             )}
                                         </Button>
