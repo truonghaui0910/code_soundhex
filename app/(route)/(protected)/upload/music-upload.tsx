@@ -956,8 +956,7 @@ export function MusicUpload() {
                                                     src={
                                                         spotifyData.data
                                                             .image ||
-                                                        ```python
-"/images/soundhex.png"
+                                                        "/images/soundhex.png"
                                                     }
                                                     alt={spotifyData.data.name}
                                                     width={160}
@@ -1825,7 +1824,8 @@ export function MusicUpload() {
                                                     <div className="space-y-3">
                                                         <Label>Album Cover (1400x1400px) <span className="text-red-500">*</span></Label>
                                                         <div 
-                                                                            className="w-32 h-32 rounded-lg overflow-hidden border border-dashed border-purple-300 dark:border-purple-600 bg-purple-50 dark:bg-purple-900/20 cursor-pointer hover:border-purple-400 dark:hover:border-purple-500 transition-colors mx-auto"
+                                                                            ```
+                                                            className="w-32 h-32 rounded-lg overflow-hidden border border-dashed border-purple-300 dark:border-purple-600 bg-purple-50 dark:bg-purple-900/20 cursor-pointer hover:border-purple-400 dark:hover:border-purple-500 transition-colors mx-auto"
                                                             onClick={() => albumImageInputRef.current?.click()}
                                                         >
                                                             {fileData.albumImage ? (
