@@ -1,9 +1,9 @@
-
 import { NextRequest, NextResponse } from "next/server";
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { Database } from "@/types/supabase";
 import { AWSHelper } from "@/lib/services/aws-helper";
+import { AudioMetadataService } from "@/lib/services/audio-metadata-service";
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     }
 
     const formData = await request.formData();
-    
+
     // Extract form data
     const audioFile = formData.get('audioFile') as File;
     const title = formData.get('title') as string;
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
           const timestamp = Date.now();
           const artistImageFilename = `${timestamp}_${artistImage.name}`;
           const artistImageBuffer = Buffer.from(await artistImage.arrayBuffer());
-          
+
           artistImageUrl = await AWSHelper.uploadFile(
             artistImageBuffer,
             artistImageFilename,
@@ -142,7 +142,7 @@ export async function POST(request: NextRequest) {
           const timestamp = Date.now();
           const albumImageFilename = `${timestamp}_${albumImage.name}`;
           const albumImageBuffer = Buffer.from(await albumImage.arrayBuffer());
-          
+
           albumImageUrl = await AWSHelper.uploadFile(
             albumImageBuffer,
             albumImageFilename,
@@ -201,7 +201,7 @@ export async function POST(request: NextRequest) {
       const timestamp = Date.now();
       const audioFilename = `${timestamp}_${audioFile.name}`;
       const audioBuffer = Buffer.from(await audioFile.arrayBuffer());
-      
+
       audioFileUrl = await AWSHelper.uploadFile(
         audioBuffer,
         audioFilename,
@@ -215,13 +215,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Extract audio duration
+    let duration = 0;
+    try {
+      duration = await AudioMetadataService.getAudioDuration(audioFile);
+    } catch (error) {
+      console.error("Error extracting audio duration:", error);
+      // Optionally, don't fail the entire upload if duration extraction fails.
+      // You might want to set a default duration or handle the error differently.
+    }
+
     // 5. Create track record
     const { data: newTrack, error: trackError } = await supabase
       .from("tracks")
       .insert({
         title: title,
         description: description || null,
-        duration: 0, // You might want to calculate this from the audio file
+        duration: duration,
         file_url: audioFileUrl,
         artist_id: artistRecord.id,
         album_id: albumRecord.id,
