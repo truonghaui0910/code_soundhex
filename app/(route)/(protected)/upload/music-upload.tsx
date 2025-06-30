@@ -119,6 +119,7 @@ export function MusicUpload() {
     const [uploadFiles, setUploadFiles] = useState<FileUploadData[]>([]);
     const [userAlbums, setUserAlbums] = useState<UserAlbum[]>([]);
     const [userArtists, setUserArtists] = useState<UserArtist[]>([]);
+    const [genres, setGenres] = useState<{id: number; name: string}[]>([]);
     const [loadingUserData, setLoadingUserData] = useState(false);
 
     const [fileInputRef] = useState<any>(useRef(null));
@@ -158,9 +159,16 @@ export function MusicUpload() {
                 const artistsData = await artistsResponse.json();
                 setUserArtists(artistsData.filter((artist: any) => !artist.from_spotify));
             }
+
+            // Load genres
+            const genresResponse = await fetch("/api/genres");
+            if (genresResponse.ok) {
+                const genresData = await genresResponse.json();
+                setGenres(genresData);
+            }
         } catch (error) {
             console.error("Error loading user data:", error);
-            showError("Failed to load albums and artists");
+            showError("Failed to load albums, artists and genres");
         } finally {
             setLoadingUserData(false);
         }
@@ -1721,25 +1729,11 @@ export function MusicUpload() {
                                                             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800"
                                                         >
                                                             <option value="">Select genre</option>
-                                                            <option value="pop">Pop</option>
-                                                            <option value="rock">Rock</option>
-                                                            <option value="hip-hop">Hip Hop</option>
-                                                            <option value="electronic">Electronic</option>
-                                                            <option value="jazz">Jazz</option>
-                                                            <option value="classical">Classical</option>
-                                                            <option value="country">Country</option>
-                                                            <option value="r&b">R&B</option>
-                                                            <option value="reggae">Reggae</option>
-                                                            <option value="blues">Blues</option>
-                                                            <option value="folk">Folk</option>
-                                                            <option value="indie">Indie</option>
-                                                            <option value="alternative">Alternative</option>
-                                                            <option value="metal">Metal</option>
-                                                            <option value="punk">Punk</option>
-                                                            <option value="disco">Disco</option>
-                                                            <option value="funk">Funk</option>
-                                                            <option value="soul">Soul</option>
-                                                            <option value="gospel">Gospel</option>
+                                                            {genres.map((genre) => (
+                                                                <option key={genre.id} value={genre.name}>
+                                                                    {genre.name}
+                                                                </option>
+                                                            ))}
                                                         </select>
                                                     </div>
 

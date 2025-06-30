@@ -54,31 +54,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 1. Handle Genre
-    let genreRecord = null;
-    const { data: existingGenre } = await supabase
+    // 1. Handle Genre - only find existing genre
+    const { data: genreRecord, error: genreError } = await supabase
       .from("genres")
       .select("*")
       .eq("name", genre)
       .single();
 
-    if (existingGenre) {
-      genreRecord = existingGenre;
-    } else {
-      const { data: newGenre, error: genreError } = await supabase
-        .from("genres")
-        .insert({ name: genre })
-        .select()
-        .single();
-
-      if (genreError) {
-        console.error("Error creating genre:", genreError);
-        return NextResponse.json(
-          { error: "Failed to create genre" },
-          { status: 500 }
-        );
-      }
-      genreRecord = newGenre;
+    if (genreError || !genreRecord) {
+      console.error("Error finding genre:", genreError);
+      return NextResponse.json(
+        { error: "Genre not found" },
+        { status: 400 }
+      );
     }
 
     // 2. Handle Artist
