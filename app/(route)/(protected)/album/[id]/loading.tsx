@@ -1,4 +1,3 @@
-
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -16,17 +15,17 @@ export default function AlbumDetailLoading() {
             <div className="w-48 h-48 md:w-64 md:h-64 rounded-xl overflow-hidden bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-2xl animate-pulse">
               <Music className="h-20 w-20 text-white/40" />
             </div>
-            
+
             <div className="flex-1 flex flex-col gap-4 text-center md:text-left">
               {/* Badge Skeleton */}
               <div className="w-20 h-6 bg-white/20 rounded-full mx-auto md:mx-0 animate-pulse"></div>
-              
+
               {/* Title Skeleton */}
               <div className="space-y-2">
                 <div className="h-12 md:h-16 bg-white/20 rounded-lg animate-pulse"></div>
                 <div className="h-8 bg-white/20 rounded-lg w-3/4 mx-auto md:mx-0 animate-pulse"></div>
               </div>
-              
+
               {/* Info Skeleton */}
               <div className="flex items-center gap-3 text-lg text-purple-100 justify-center md:justify-start">
                 <div className="h-6 w-32 bg-white/20 rounded animate-pulse"></div>
@@ -35,7 +34,7 @@ export default function AlbumDetailLoading() {
                 <span>•</span>
                 <div className="h-6 w-20 bg-white/20 rounded animate-pulse"></div>
               </div>
-              
+
               {/* Buttons Skeleton */}
               <div className="flex gap-4 justify-center md:justify-start mt-4">
                 <div className="h-12 w-32 bg-white/20 rounded-lg animate-pulse"></div>
@@ -107,17 +106,8 @@ export default function AlbumDetailLoading() {
         </Card>
       </div>
 
-      {/* Loading Message */}
-      <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2">
-        <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full px-6 py-3 shadow-lg border border-gray-200/50 dark:border-gray-700/50">
-          <div className="flex items-center gap-3">
-            <div className="w-5 h-5 border-2 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Loading album details...
-            </span>
-          </div>
-        </div>
-      </div>
+      {/* Music Player Space */}
+      <div className="pb-32"></div>
     </div>
   );
 }
