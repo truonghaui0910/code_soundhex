@@ -25,7 +25,7 @@ export class AlbumsController {
       .from("albums")
       .select(`id, title, cover_image_url, release_date, created_at, artist_id, user_id`)
       .eq('user_id', userId)
-      .eq('import_source', 'direct') // Chỉ lấy albums được tạo direct, không phải import từ Spotify
+      // .eq('import_source', 'direct') // Chỉ lấy albums được tạo direct, không phải import từ Spotify
       .order("created_at", { ascending: false });
 
     if (error) {

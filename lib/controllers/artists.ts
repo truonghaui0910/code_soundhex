@@ -8,7 +8,7 @@ import { Database } from "@/types/supabase";
 export interface Artist {
   id: number;
   name: string;
-  image_url: string | null;
+  profile_image_url: string | null;
 }
 
 export class ArtistsController {
@@ -18,9 +18,9 @@ export class ArtistsController {
 
     const { data, error } = await supabase
       .from("artists")
-      .select(`id, name, image_url`)
+      .select(`id, name, profile_image_url`)
       .eq('user_id', userId)
-      .eq('import_source', 'direct') // Chỉ lấy artists được tạo direct, không phải import từ Spotify
+      // .eq('import_source', 'direct') // Chỉ lấy artists được tạo direct, không phải import từ Spotify
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -37,7 +37,7 @@ export class ArtistsController {
 
     const { data, error } = await supabase
       .from("artists")
-      .select(`id, name, image_url`)
+      .select(`id, name, profile_image_url`)
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -52,7 +52,7 @@ export class ArtistsController {
     const supabase = createServerComponentClient<Database>({ cookies });
     const { data, error } = await supabase
       .from("artists")
-      .select("id, name, image_url")
+      .select("id, name, profile_image_url")
       .eq("id", id)
       .single();
 
