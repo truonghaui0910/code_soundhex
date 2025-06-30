@@ -223,18 +223,6 @@ export default function DashboardLoading() {
         </div>
       </div>
 
-      {/* Loading Message */}
-      <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2">
-        <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full px-6 py-3 shadow-lg border border-gray-200/50 dark:border-gray-700/50">
-          <div className="flex items-center gap-3">
-            <div className="w-5 h-5 border-2 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Loading dashboard...
-            </span>
-          </div>
-        </div>
-      </div>
-
       {/* Music Player Space */}
       <div className="pb-32"></div>
     </div>

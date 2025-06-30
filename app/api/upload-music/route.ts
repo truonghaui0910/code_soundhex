@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { Database } from "@/types/supabase";
+import { AWSHelper } from "@/lib/services/aws-helper";
 
 export async function POST(request: NextRequest) {
   try {
@@ -75,24 +76,23 @@ export async function POST(request: NextRequest) {
       // Upload artist image if provided
       let artistImageUrl = null;
       if (artistImage) {
-        const artistImagePath = `artists/${session.user.id}/${Date.now()}_${artistImage.name}`;
-        const { data: artistImageUpload, error: artistImageError } = await supabase.storage
-          .from('music-files')
-          .upload(artistImagePath, artistImage);
-
-        if (artistImageError) {
-          console.error("Error uploading artist image:", artistImageError);
+        try {
+          const timestamp = Date.now();
+          const artistImageFilename = `${timestamp}_${artistImage.name}`;
+          const artistImageBuffer = Buffer.from(await artistImage.arrayBuffer());
+          
+          artistImageUrl = await AWSHelper.uploadFile(
+            artistImageBuffer,
+            artistImageFilename,
+            'artists'
+          );
+        } catch (error) {
+          console.error("Error uploading artist image:", error);
           return NextResponse.json(
             { error: "Failed to upload artist image" },
             { status: 500 }
           );
         }
-
-        const { data: artistImagePublic } = supabase.storage
-          .from('music-files')
-          .getPublicUrl(artistImagePath);
-        
-        artistImageUrl = artistImagePublic.publicUrl;
       }
 
       // Create new artist
@@ -138,24 +138,23 @@ export async function POST(request: NextRequest) {
       // Upload album image if provided
       let albumImageUrl = null;
       if (albumImage) {
-        const albumImagePath = `albums/${session.user.id}/${Date.now()}_${albumImage.name}`;
-        const { data: albumImageUpload, error: albumImageError } = await supabase.storage
-          .from('music-files')
-          .upload(albumImagePath, albumImage);
-
-        if (albumImageError) {
-          console.error("Error uploading album image:", albumImageError);
+        try {
+          const timestamp = Date.now();
+          const albumImageFilename = `${timestamp}_${albumImage.name}`;
+          const albumImageBuffer = Buffer.from(await albumImage.arrayBuffer());
+          
+          albumImageUrl = await AWSHelper.uploadFile(
+            albumImageBuffer,
+            albumImageFilename,
+            'albums'
+          );
+        } catch (error) {
+          console.error("Error uploading album image:", error);
           return NextResponse.json(
             { error: "Failed to upload album image" },
             { status: 500 }
           );
         }
-
-        const { data: albumImagePublic } = supabase.storage
-          .from('music-files')
-          .getPublicUrl(albumImagePath);
-        
-        albumImageUrl = albumImagePublic.publicUrl;
       }
 
       // Create new album
@@ -197,22 +196,24 @@ export async function POST(request: NextRequest) {
     }
 
     // 4. Upload audio file
-    const audioFilePath = `tracks/${session.user.id}/${Date.now()}_${audioFile.name}`;
-    const { data: audioUpload, error: audioError } = await supabase.storage
-      .from('music-files')
-      .upload(audioFilePath, audioFile);
-
-    if (audioError) {
-      console.error("Error uploading audio file:", audioError);
+    let audioFileUrl: string;
+    try {
+      const timestamp = Date.now();
+      const audioFilename = `${timestamp}_${audioFile.name}`;
+      const audioBuffer = Buffer.from(await audioFile.arrayBuffer());
+      
+      audioFileUrl = await AWSHelper.uploadFile(
+        audioBuffer,
+        audioFilename,
+        'tracks'
+      );
+    } catch (error) {
+      console.error("Error uploading audio file:", error);
       return NextResponse.json(
         { error: "Failed to upload audio file" },
         { status: 500 }
       );
     }
-
-    const { data: audioPublic } = supabase.storage
-      .from('music-files')
-      .getPublicUrl(audioFilePath);
 
     // 5. Create track record
     const { data: newTrack, error: trackError } = await supabase
@@ -221,7 +222,7 @@ export async function POST(request: NextRequest) {
         title: title,
         description: description || null,
         duration: 0, // You might want to calculate this from the audio file
-        file_url: audioPublic.publicUrl,
+        file_url: audioFileUrl,
         artist_id: artistRecord.id,
         album_id: albumRecord.id,
         genre_id: genreRecord.id,
