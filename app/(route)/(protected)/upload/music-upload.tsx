@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import {
     Upload,
@@ -21,11 +21,19 @@ import {
     HardDrive,
     ChevronRight,
     ChevronDown,
+    ChevronUp,
+    ImageIcon,
 } from "lucide-react";
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { showImportSuccess, showError, showInfo, showProcessing, dismissNotifications } from "@/lib/services/notification-service";
+import {
+    showImportSuccess,
+    showError,
+    showInfo,
+    showProcessing,
+    dismissNotifications,
+} from "@/lib/services/notification-service";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -43,7 +51,7 @@ interface SpotifyTrack {
     image: string;
     isrc?: string | null;
     preview_url?: string;
-    artists?: {id: string, name: string}[];
+    artists?: { id: string; name: string }[];
     album_id?: string;
     artist_id?: string;
     release_date?: string;
@@ -65,13 +73,33 @@ interface SpotifyArtist {
     albums: SpotifyAlbum[];
 }
 
-interface UploadFormData {
+interface UserAlbum {
+    id: number;
     title: string;
-    artist: string;
-    album: string;
+    cover_image_url: string | null;
+    artist: {
+        id: number;
+        name: string;
+    };
+}
+
+interface UserArtist {
+    id: number;
+    name: string;
+    profile_image_url: string | null;
+}
+
+interface FileUploadData {
+    title: string;
     genre: string;
+    album: string;
+    artist: string;
     description: string;
-    file: File | null;
+    file: File;
+    isNewAlbum: boolean;
+    isNewArtist: boolean;
+    albumImage?: File;
+    artistImage?: File;
 }
 
 export function MusicUpload() {
@@ -86,15 +114,16 @@ export function MusicUpload() {
         new Set(),
     );
     const [loadingAlbums, setLoadingAlbums] = useState<Set<string>>(new Set());
-    const [uploadForm, setUploadForm] = useState<UploadFormData>({
-        title: "",
-        artist: "",
-        album: "",
-        genre: "",
-        description: "",
-        file: null,
-    });
+
+    // Multiple file upload state
+    const [uploadFiles, setUploadFiles] = useState<FileUploadData[]>([]);
+    const [userAlbums, setUserAlbums] = useState<UserAlbum[]>([]);
+    const [userArtists, setUserArtists] = useState<UserArtist[]>([]);
+    const [loadingUserData, setLoadingUserData] = useState(false);
+
     const [fileInputRef] = useState<any>(useRef(null));
+    const [albumImageInputRef] = useState<any>(useRef(null));
+    const [artistImageInputRef] = useState<any>(useRef(null));
     const [ownershipConfirmed, setOwnershipConfirmed] = useState(false);
 
     // Audio player context
@@ -106,10 +135,107 @@ export function MusicUpload() {
         setTrackList,
     } = useAudioPlayer();
 
+    // Load user albums and artists when upload tab is active
+    useEffect(() => {
+        if (activeTab === "upload") {
+            loadUserData();
+        }
+    }, [activeTab]);
+
+    const loadUserData = async () => {
+        setLoadingUserData(true);
+        try {
+            // Load user albums
+            const albumsResponse = await fetch("/api/albums");
+            if (albumsResponse.ok) {
+                const albumsData = await albumsResponse.json();
+                setUserAlbums(albumsData.filter((album: any) => !album.from_spotify));
+            }
+
+            // Load user artists
+            const artistsResponse = await fetch("/api/artists");
+            if (artistsResponse.ok) {
+                const artistsData = await artistsResponse.json();
+                setUserArtists(artistsData.filter((artist: any) => !artist.from_spotify));
+            }
+        } catch (error) {
+            console.error("Error loading user data:", error);
+            showError("Failed to load albums and artists");
+        } finally {
+            setLoadingUserData(false);
+        }
+    };
+
     const formatDuration = (seconds: number) => {
         const mins = Math.floor(seconds / 60);
         const secs = seconds % 60;
         return `${mins}:${secs.toString().padStart(2, "0")}`;
+    };
+
+    const validateImage = (file: File): boolean => {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.onload = () => {
+                if (img.width === 1400 && img.height === 1400) {
+                    resolve(true);
+                } else {
+                    showError("Image must be exactly 1400x1400 pixels");
+                    resolve(false);
+                }
+            };
+            img.onerror = () => {
+                showError("Invalid image file");
+                resolve(false);
+            };
+            img.src = URL.createObjectURL(file);
+        });
+    };
+
+    const handleMultipleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const files = event.target.files;
+        if (files && files.length > 0) {
+            const newUploadFiles: FileUploadData[] = Array.from(files).map(file => ({
+                title: file.name.replace(/\.[^/.]+$/, ""), // Remove file extension
+                genre: "",
+                album: "",
+                artist: "",
+                description: "",
+                file: file,
+                isNewAlbum: false,
+                isNewArtist: false,
+            }));
+            setUploadFiles(prev => [...prev, ...newUploadFiles]);
+        }
+    };
+
+    const updateFileData = (index: number, field: keyof FileUploadData, value: any) => {
+        setUploadFiles(prev => prev.map((item, i) => 
+            i === index ? { ...item, [field]: value } : item
+        ));
+    };
+
+    const removeFile = (index: number) => {
+        setUploadFiles(prev => prev.filter((_, i) => i !== index));
+    };
+
+    const handleAlbumImageUpload = async (event: React.ChangeEvent<HTMLInputElement>, fileIndex: number) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            const isValid = await validateImage(file);
+            if (isValid) {
+                updateFileData(fileIndex, 'albumImage', file);
+            }
+        }
+    };
+
+    const handleArtistImageUpload = async (event: React.ChangeEvent<HTMLInputElement>, fileIndex: number) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            const isValid = await validateImage(file);
+            if (isValid) {
+                updateFileData(fileIndex, 'artistImage', file);
+            }
+        }
     };
 
     const handleSpotifySubmit = async () => {
@@ -154,7 +280,8 @@ export function MusicUpload() {
             console.error("Error:", error);
             showError({
                 title: "❌ Spotify Data Error",
-                message: "Cannot fetch information from Spotify. Please check the URL and try again."
+                message:
+                    "Cannot fetch information from Spotify. Please check the URL and try again.",
             });
         } finally {
             setIsLoading(false);
@@ -207,7 +334,7 @@ export function MusicUpload() {
             console.error("Error loading album tracks:", error);
             showError({
                 title: "❌ Album Tracks Error",
-                message: "Cannot load track list from album. Please try again."
+                message: "Cannot load track list from album. Please try again.",
             });
         } finally {
             setLoadingAlbums((prev) => {
@@ -245,20 +372,78 @@ export function MusicUpload() {
         setExpandedAlbums(newExpanded);
     };
 
-    const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (file) {
-            setUploadForm({ ...uploadForm, file });
-        }
-    };
-
-    const handleUploadSubmit = () => {
-        if (!uploadForm.file || !uploadForm.title || !uploadForm.artist) {
-            showError("📝 Vui lòng điền đầy đủ các trường bắt buộc");
+    const handleUploadSubmit = async () => {
+        if (uploadFiles.length === 0) {
+            showError("📝 Please select at least one audio file");
             return;
         }
-        console.log("Upload form data:", uploadForm);
-        showInfo("🚧 Tính năng upload file sẽ được triển khai sớm!");
+
+        // Validate required fields for all files
+        for (let i = 0; i < uploadFiles.length; i++) {
+            const file = uploadFiles[i];
+            if (!file.title || !file.genre || !file.album || !file.artist) {
+                showError(`📝 Please fill all required fields for file ${i + 1}: ${file.file.name}`);
+                return;
+            }
+
+            if (file.isNewAlbum && !file.albumImage) {
+                showError(`📝 Please upload album image for file ${i + 1}: ${file.file.name}`);
+                return;
+            }
+
+            if (file.isNewArtist && !file.artistImage) {
+                showError(`📝 Please upload artist image for file ${i + 1}: ${file.file.name}`);
+                return;
+            }
+        }
+
+        setIsLoading(true);
+        showProcessing("Uploading your music files...");
+
+        try {
+            for (const fileData of uploadFiles) {
+                const formData = new FormData();
+                formData.append('audioFile', fileData.file);
+                formData.append('title', fileData.title);
+                formData.append('genre', fileData.genre);
+                formData.append('album', fileData.album);
+                formData.append('artist', fileData.artist);
+                formData.append('description', fileData.description);
+                formData.append('isNewAlbum', fileData.isNewAlbum.toString());
+                formData.append('isNewArtist', fileData.isNewArtist.toString());
+
+                if (fileData.albumImage) {
+                    formData.append('albumImage', fileData.albumImage);
+                }
+
+                if (fileData.artistImage) {
+                    formData.append('artistImage', fileData.artistImage);
+                }
+
+                const response = await fetch('/api/upload-music', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Failed to upload ${fileData.file.name}`);
+                }
+            }
+
+            dismissNotifications();
+            showInfo("🎉 All music files uploaded successfully!");
+            setUploadFiles([]);
+            setOwnershipConfirmed(false);
+        } catch (error) {
+            dismissNotifications();
+            console.error("Upload error:", error);
+            showError({
+                title: "❌ Upload Failed",
+                message: `Cannot upload files: ${error instanceof Error ? error.message : "Unknown error"}`,
+            });
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const submitSpotifyTracks = async () => {
@@ -294,24 +479,26 @@ export function MusicUpload() {
                 });
             }
             const tracksToImport = selectedTrackData.map((track) => ({
-                                                        id: track.id,
-                                                        name: track.name,
-                                                        artist: track.artist,
-                                                        album: track.album,
-                                                        duration: track.duration,
-                                                        image: track.image,
-                                                        isrc: track.isrc,
-                                                        preview_url: track.preview_url,
-                                                        artists: track.artists || [{ 
-                                                            id: track.artist_id || `artist_${track.id}`,
-                                                            name: track.artist 
-                                                        }],
-                                                        album_data: {
-                                                            id: track.album_id || `album_${track.id}`,
-                                                            release_date: track.release_date,
-                                                            description: null,
-                                                        }
-                                                    }));
+                id: track.id,
+                name: track.name,
+                artist: track.artist,
+                album: track.album,
+                duration: track.duration,
+                image: track.image,
+                isrc: track.isrc,
+                preview_url: track.preview_url,
+                artists: track.artists || [
+                    {
+                        id: track.artist_id || `artist_${track.id}`,
+                        name: track.artist,
+                    },
+                ],
+                album_data: {
+                    id: track.album_id || `album_${track.id}`,
+                    release_date: track.release_date,
+                    description: null,
+                },
+            }));
             // Call import API
             const response = await fetch("/api/import-music", {
                 method: "POST",
@@ -327,12 +514,14 @@ export function MusicUpload() {
                 console.log("Raw API response:", result);
                 console.log("Response structure:", {
                     hasResults: !!result?.results,
-                    resultsKeys: result?.results ? Object.keys(result.results) : "No results object",
+                    resultsKeys: result?.results
+                        ? Object.keys(result.results)
+                        : "No results object",
                     directSuccess: result?.success,
                     directFailed: result?.failed,
                     nestedSuccess: result?.results?.success,
                     nestedFailed: result?.results?.failed,
-                    errors: result?.results?.errors || result?.errors
+                    errors: result?.results?.errors || result?.errors,
                 });
             } catch (parseError) {
                 console.error("Failed to parse response:", parseError);
@@ -340,7 +529,10 @@ export function MusicUpload() {
             }
 
             if (!response.ok) {
-                const errorMessage = result?.error || result?.message || "Failed to import tracks";
+                const errorMessage =
+                    result?.error ||
+                    result?.message ||
+                    "Failed to import tracks";
                 throw new Error(errorMessage);
             }
 
@@ -349,11 +541,11 @@ export function MusicUpload() {
             let failedCount = 0;
 
             // Handle different possible response structures
-            if (result?.results && typeof result.results === 'object') {
+            if (result?.results && typeof result.results === "object") {
                 // Nested structure: {results: {success: 1, failed: 0}}
                 successCount = result.results.success || 0;
                 failedCount = result.results.failed || 0;
-            } else if (result && typeof result.success !== 'undefined') {
+            } else if (result && typeof result.success !== "undefined") {
                 // Direct structure: {success: 1, failed: 0}
                 successCount = result.success || 0;
                 failedCount = result.failed || 0;
@@ -365,15 +557,25 @@ export function MusicUpload() {
 
             const totalTracks = tracksToImport.length;
 
-            console.log("Final parsed counts:", { successCount, failedCount, totalTracks });
+            console.log("Final parsed counts:", {
+                successCount,
+                failedCount,
+                totalTracks,
+            });
 
             // Show beautiful notification after processing all tracks
             showImportSuccess({
                 totalTracks,
                 successCount,
                 failedCount,
-                albumName: spotifyData.type === "album" ? spotifyData.data.name : undefined,
-                artistName: spotifyData.type === "artist" ? spotifyData.data.name : undefined
+                albumName:
+                    spotifyData.type === "album"
+                        ? spotifyData.data.name
+                        : undefined,
+                artistName:
+                    spotifyData.type === "artist"
+                        ? spotifyData.data.name
+                        : undefined,
             });
 
             // Reset form
@@ -381,37 +583,50 @@ export function MusicUpload() {
             setSelectedTracks(new Set());
             setSpotifyUrl("");
             setOwnershipConfirmed(false);
-
         } catch (error) {
             console.error("Import error:", error);
             showError({
                 title: "❌ Import Failed",
-                message: `Cannot import tracks: ${error instanceof Error ? error.message : "Unknown error"}`
+                message: `Cannot import tracks: ${error instanceof Error ? error.message : "Unknown error"}`,
             });
         } finally {
             setIsLoading(false);
         }
     };
 
+    const stringToHash = (str: string): number => {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            const char = str.charCodeAt(i);
+            hash = (hash << 5) - hash + char;
+            hash = hash & hash; // Convert to 32bit integer
+        }
+        return Math.abs(hash);
+    };
+
     const handlePlayTrack = (track: SpotifyTrack) => {
         if (!track.preview_url) {
-            showError('🔇 Không có bản preview cho bài hát này');
+            showError("🔇 Không có bản preview cho bài hát này");
             return;
         }
 
         // Convert SpotifyTrack to Track format similar to music/music-upload.tsx
         const trackToPlay = {
-            id: `spotify-${track.id}`,
+            id: stringToHash(`spotify-${track.id}`),
             title: track.name,
-            file_url: track.preview_url ? `/api/proxy-audio?url=${encodeURIComponent(track.preview_url)}` : "",
+            file_url: track.preview_url
+                ? `/api/proxy-audio?url=${encodeURIComponent(track.preview_url)}`
+                : "",
             duration: track.duration,
-            audio_file_url: track.preview_url ? `/api/proxy-audio?url=${encodeURIComponent(track.preview_url)}` : "",
+            audio_file_url: track.preview_url
+                ? `/api/proxy-audio?url=${encodeURIComponent(track.preview_url)}`
+                : "",
             artist: {
                 id: "spotify-artist",
                 name: track.artist,
             },
             album: {
-                id: `spotify-${track.id}`,
+                id: stringToHash(track.id),
                 title: track.album,
                 cover_image_url: track.image,
             },
@@ -422,15 +637,22 @@ export function MusicUpload() {
 
         if (spotifyData?.type === "track") {
             allTracks = [trackToPlay];
-        } else if (spotifyData?.type === "album" || spotifyData?.type === "playlist") {
+        } else if (
+            spotifyData?.type === "album" ||
+            spotifyData?.type === "playlist"
+        ) {
             allTracks = spotifyData.data.tracks
                 .filter((t: SpotifyTrack) => t.preview_url)
                 .map((t: SpotifyTrack) => ({
                     id: `spotify-${t.id}`,
                     title: t.name,
-                    file_url: t.preview_url ? `/api/proxy-audio?url=${encodeURIComponent(t.preview_url)}` : "",
+                    file_url: t.preview_url
+                        ? `/api/proxy-audio?url=${encodeURIComponent(t.preview_url)}`
+                        : "",
                     duration: t.duration,
-                    audio_file_url: t.preview_url ? `/api/proxy-audio?url=${encodeURIComponent(t.preview_url)}` : "",
+                    audio_file_url: t.preview_url
+                        ? `/api/proxy-audio?url=${encodeURIComponent(t.preview_url)}`
+                        : "",
                     artist: {
                         id: "spotify-artist",
                         name: t.artist,
@@ -451,9 +673,13 @@ export function MusicUpload() {
                             allTracks.push({
                                 id: `spotify-${t.id}`,
                                 title: t.name,
-                                file_url: t.preview_url ? `/api/proxy-audio?url=${encodeURIComponent(t.preview_url)}` : "",
+                                file_url: t.preview_url
+                                    ? `/api/proxy-audio?url=${encodeURIComponent(t.preview_url)}`
+                                    : "",
                                 duration: t.duration,
-                                audio_file_url: t.preview_url ? `/api/proxy-audio?url=${encodeURIComponent(t.preview_url)}` : "",
+                                audio_file_url: t.preview_url
+                                    ? `/api/proxy-audio?url=${encodeURIComponent(t.preview_url)}`
+                                    : "",
                                 artist: {
                                     id: "spotify-artist",
                                     name: t.artist,
@@ -470,8 +696,9 @@ export function MusicUpload() {
         }
 
         setTrackList(allTracks);
-
-        if (currentTrack?.id === `spotify-${track.id}` && isPlaying) {
+        const currentTrackId = currentTrack?.id;
+        const newTrackId = stringToHash(`spotify-${track.id}`);
+        if (currentTrackId === newTrackId && isPlaying) {
             togglePlayPause();
         } else {
             playTrack(trackToPlay);
@@ -618,19 +845,35 @@ export function MusicUpload() {
                                             <div className="flex items-center gap-4 p-4 border rounded-lg bg-gray-50 dark:bg-gray-800/50">
                                                 <div className="relative">
                                                     <Image
-                                                        src={spotifyData.data.image || "/images/soundhex.png"}
-                                                        alt={spotifyData.data.name}
+                                                        src={
+                                                            spotifyData.data
+                                                                .image ||
+                                                            "/images/soundhex.png"
+                                                        }
+                                                        alt={
+                                                            spotifyData.data
+                                                                .name
+                                                        }
                                                         width={80}
                                                         height={80}
                                                         className="rounded-lg object-cover"
                                                     />
-                                                    {spotifyData.data.preview_url && (
+                                                    {spotifyData.data
+                                                        .preview_url && (
                                                         <Button
                                                             size="sm"
                                                             className="absolute bottom-2 right-2 w-8 h-8 rounded-full p-0"
-                                                            onClick={() => handlePlayTrack(spotifyData.data)}
+                                                            onClick={() =>
+                                                                handlePlayTrack(
+                                                                    spotifyData.data,
+                                                                )
+                                                            }
                                                         >
-                                                            {currentTrack?.id === `spotify-${spotifyData.data.id}` && isPlaying ? (
+                                                            {currentTrack?.id ===
+                                                                stringToHash(
+                                                                    `spotify-${spotifyData.data.id}`,
+                                                                ) &&
+                                                            isPlaying ? (
                                                                 <Pause className="h-3 w-3" />
                                                             ) : (
                                                                 <Play className="h-3 w-3" />
@@ -639,17 +882,54 @@ export function MusicUpload() {
                                                     )}
                                                 </div>
                                                 <div className="flex-1">
-                                                    <h3 className="font-semibold">{spotifyData.data.name}</h3>
-                                                    <p className="text-gray-600 dark:text-gray-400">{spotifyData.data.artist}</p>
-                                                    <p className="text-sm text-gray-500">{spotifyData.data.album}</p>
+                                                    <h3 className="font-semibold">
+                                                        {spotifyData.data.name}
+                                                    </h3>
+                                                    <p className="text-gray-600 dark:text-gray-400">
+                                                        {
+                                                            spotifyData.data
+                                                                .artist
+                                                        }
+                                                    </p>
+                                                    <p className="text-sm text-gray-500">
+                                                        {spotifyData.data.album}
+                                                    </p>
                                                     <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
-                                                        <span>{formatDuration(spotifyData.data.duration)}</span>
-                                                        {spotifyData.data.isrc && <span>ISRC: {spotifyData.data.isrc}</span>}
+                                                        <span>
+                                                            {formatDuration(
+                                                                spotifyData.data
+                                                                    .duration,
+                                                            )}
+                                                        </span>
+                                                        {spotifyData.data
+                                                            .isrc && (
+                                                            <span>
+                                                                ISRC:{" "}
+                                                                {
+                                                                    spotifyData
+                                                                        .data
+                                                                        .isrc
+                                                                }
+                                                            </span>
+                                                        )}
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-2">
-                                                    <Badge variant={selectedTracks.has(spotifyData.data.id) ? "default" : "secondary"}>
-                                                        {selectedTracks.has(spotifyData.data.id) ? "Selected" : "Not Selected"}
+                                                    <Badge
+                                                        variant={
+                                                            selectedTracks.has(
+                                                                spotifyData.data
+                                                                    .id,
+                                                            )
+                                                                ? "default"
+                                                                : "secondary"
+                                                        }
+                                                    >
+                                                        {selectedTracks.has(
+                                                            spotifyData.data.id,
+                                                        )
+                                                            ? "Selected"
+                                                            : "Not Selected"}
                                                     </Badge>
                                                 </div>
                                             </div>
@@ -657,27 +937,56 @@ export function MusicUpload() {
                                     )}
 
                                     {/* Album or Playlist */}
-                                    {(spotifyData.type === "album" || spotifyData.type === "playlist") && (
+                                    {(spotifyData.type === "album" ||
+                                        spotifyData.type === "playlist") && (
                                         <div className="space-y-6">
                                             {/* Album/Playlist Header */}
                                             <div className="flex items-start gap-6">
                                                 <Image
-                                                    src={spotifyData.data.image || "/images/soundhex.png"}
+                                                    src={
+                                                        spotifyData.data
+                                                            .image ||
+                                                        "/images/soundhex.png"
+                                                    }
                                                     alt={spotifyData.data.name}
                                                     width={160}
                                                     height={160}
                                                     className="rounded-lg shadow-lg object-cover"
                                                 />
                                                 <div className="flex-1 space-y-2">
-                                                    <Badge variant="outline" className="mb-2">
-                                                        {spotifyData.type === "album" ? "Album" : "Playlist"}
+                                                    <Badge
+                                                        variant="outline"
+                                                        className="mb-2"
+                                                    >
+                                                        {spotifyData.type ===```python
+"album"
+                                                            ? "Album"
+                                                            : "Playlist"}
                                                     </Badge>
-                                                    <h3 className="text-2xl font-bold">{spotifyData.data.name}</h3>
-                                                    <p className="text-lg text-gray-600 dark:text-gray-400">{spotifyData.data.artist}</p>
-                                                    {spotifyData.data.release_date && (
-                                                        <p className="text-sm text-gray-500">Released: {spotifyData.data.release_date}</p>
+                                                    <h3 className="text-2xl font-bold">
+                                                        {spotifyData.data.name}
+                                                    </h3>
+                                                    <p className="text-lg text-gray-600 dark:text-gray-400">
+                                                        {
+                                                            spotifyData.data
+                                                                .artist
+                                                        }
+                                                    </p>
+                                                    {spotifyData.data
+                                                        .release_date && (
+                                                        <p className="text-sm text-gray-500">
+                                                            Released:{" "}
+                                                            {
+                                                                spotifyData.data
+                                                                    .release_date
+                                                            }
+                                                        </p>
                                                     )}
-                                                    <p className="text-sm text-gray-500">{spotifyData.data.tracks?.length || 0} tracks</p>
+                                                    <p className="text-sm text-gray-500">
+                                                        {spotifyData.data.tracks
+                                                            ?.length || 0}{" "}
+                                                        tracks
+                                                    </p>
                                                 </div>
                                             </div>
 
@@ -686,78 +995,146 @@ export function MusicUpload() {
                                             {/* Track Selection */}
                                             <div className="space-y-4">
                                                 <div className="flex items-center justify-between">
-                                                    <h4 className="font-semibold">Select tracks to import:</h4>
+                                                    <h4 className="font-semibold">
+                                                        Select tracks to import:
+                                                    </h4>
                                                     <Button
                                                         variant="outline"
                                                         size="sm"
                                                         onClick={() => {
-                                                            const allTrackIds = spotifyData.data.tracks.map((t: SpotifyTrack) => t.id);
-                                                            if (selectedTracks.size === allTrackIds.length) {
-                                                                setSelectedTracks(new Set());
+                                                            const allTrackIds =
+                                                                spotifyData.data.tracks.map(
+                                                                    (
+                                                                        t: SpotifyTrack,
+                                                                    ) => t.id,
+                                                                );
+                                                            if (
+                                                                selectedTracks.size ===
+                                                                allTrackIds.length
+                                                            ) {
+                                                                setSelectedTracks(
+                                                                    new Set(),
+                                                                );
                                                             } else {
-                                                                setSelectedTracks(new Set(allTrackIds));
+                                                                setSelectedTracks(
+                                                                    new Set(
+                                                                        allTrackIds,
+                                                                    ),
+                                                                );
                                                             }
                                                         }}
                                                     >
-                                                        {selectedTracks.size === spotifyData.data.tracks?.length ? "Deselect All" : "Select All"}
+                                                        {selectedTracks.size ===
+                                                        spotifyData.data.tracks
+                                                            ?.length
+                                                            ? "Deselect All"
+                                                            : "Select All"}
                                                     </Button>
                                                 </div>
 
                                                 <div className="space-y-2 max-h-96 overflow-y-auto">
-                                                    {spotifyData.data.tracks?.map((track: SpotifyTrack, index: number) => (
-                                                        <div
-                                                            key={track.id}
-                                                            className={`flex items-center gap-4 p-3 rounded-lg border cursor-pointer transition-colors ${
-                                                                selectedTracks.has(track.id)
-                                                                    ? "bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-700"
-                                                                    : "bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800"
-                                                            }`}
-                                                            onClick={() => toggleTrackSelection(track.id)}
-                                                        >
-                                                            <div className="w-6 h-6 flex items-center justify-center">
-                                                                {selectedTracks.has(track.id) ? (
-                                                                    <Check className="h-4 w-4 text-purple-600" />
-                                                                ) : (
-                                                                    <span className="text-sm text-gray-400">{index + 1}</span>
-                                                                )}
-                                                            </div>
+                                                    {spotifyData.data.tracks?.map(
+                                                        (
+                                                            track: SpotifyTrack,
+                                                            index: number,
+                                                        ) => (
+                                                            <div
+                                                                key={track.id}
+                                                                className={`flex items-center gap-4 p-3 rounded-lg border cursor-pointer transition-colors ${
+                                                                    selectedTracks.has(
+                                                                        track.id,
+                                                                    )
+                                                                        ? "bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-700"
+                                                                        : "bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800"
+                                                                }`}
+                                                                onClick={() =>
+                                                                    toggleTrackSelection(
+                                                                        track.id,
+                                                                    )
+                                                                }
+                                                            >
+                                                                <div className="w-6 h-6 flex items-center justify-center">
+                                                                    {selectedTracks.has(
+                                                                        track.id,
+                                                                    ) ? (
+                                                                        <Check className="h-4 w-4 text-purple-600" />
+                                                                    ) : (
+                                                                        <span className="text-sm text-gray-400">
+                                                                            {index +
+                                                                                1}
+                                                                        </span>
+                                                                    )}
+                                                                </div>
 
-                                                            <div className="relative">
-                                                                <Image
-                                                                    src={track.image || spotifyData.data.image || "/images/soundhex.png"}
-                                                                    alt={track.name}
-                                                                    width={48}
-                                                                    height={48}
-                                                                    className="rounded object-cover"
-                                                                />
-                                                                {track.preview_url && (
-                                                                    <Button
-                                                                        size="sm"
-                                                                        className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full p-0"
-                                                                        onClick={(e) => {
-                                                                            e.stopPropagation();
-                                                                            handlePlayTrack(track);
-                                                                        }}
-                                                                    >
-                                                                        {currentTrack?.id === `spotify-${track.id}` && isPlaying ? (
-                                                                            <Pause className="h-2 w-2" />
-                                                                        ) : (
-                                                                            <Play className="h-2 w-2" />
+                                                                <div className="relative">
+                                                                    <Image
+                                                                        src={
+                                                                            track.image ||
+                                                                            spotifyData
+                                                                                .data
+                                                                                .image ||
+                                                                            "/images/soundhex.png"
+                                                                        }
+                                                                        alt={
+                                                                            track.name
+                                                                        }
+                                                                        width={
+                                                                            48
+                                                                        }
+                                                                        height={
+                                                                            48
+                                                                        }
+                                                                        className="rounded object-cover"
+                                                                    />
+                                                                    {track.preview_url && (
+                                                                        <Button
+                                                                            size="sm"
+                                                                            className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full p-0"
+                                                                            onClick={(
+                                                                                e,
+                                                                            ) => {
+                                                                                e.stopPropagation();
+                                                                                handlePlayTrack(
+                                                                                    track,
+                                                                                );
+                                                                            }}
+                                                                        >
+                                                                            {currentTrack?.id ===
+                                                                                stringToHash(
+                                                                                    `spotify-${spotifyData.data.id}`,
+                                                                                ) &&
+                                                                            isPlaying ? (
+                                                                                <Pause className="h-2 w-2" />
+                                                                            ) : (
+                                                                                <Play className="h-2 w-2" />
+                                                                            )}
+                                                                        </Button>
+                                                                    )}
+                                                                </div>
+
+                                                                <div className="flex-1 min-w-0">
+                                                                    <p className="font-medium truncate">
+                                                                        {
+                                                                            track.name
+                                                                        }
+                                                                    </p>
+                                                                    <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                                                                        {
+                                                                            track.artist
+                                                                        }
+                                                                    </p>
+                                                                </div>
+
+                                                                <div className="flex items-center gap-4 text-sm text-gray-500">
+                                                                    <span>
+                                                                        {formatDuration(
+                                                                            track.duration,
                                                                         )}
-                                                                    </Button>
-                                                                )}
+                                                                    </span>
+                                                                </div>
                                                             </div>
-
-                                                            <div className="flex-1 min-w-0">
-                                                                <p className="font-medium truncate">{track.name}</p>
-                                                                <p className="text-sm text-gray-600 dark:text-gray-400 truncate">{track.artist}</p>
-                                                            </div>
-
-                                                            <div className="flex items-center gap-4 text-sm text-gray-500">
-                                                                <span>{formatDuration(track.duration)}</span>
-                                                            </div>
-                                                        </div>
-                                                    ))}
+                                                        ),
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
@@ -769,16 +1146,31 @@ export function MusicUpload() {
                                             {/* Artist Header */}
                                             <div className="flex items-start gap-6">
                                                 <Image
-                                                    src={spotifyData.data.image || "/images/soundhex.png"}
+                                                    src={
+                                                        spotifyData.data
+                                                            .image ||
+                                                        "/images/soundhex.png"
+                                                    }
                                                     alt={spotifyData.data.name}
                                                     width={160}
                                                     height={160}
                                                     className="rounded-lg shadow-lg object-cover"
                                                 />
                                                 <div className="flex-1 space-y-2">
-                                                    <Badge variant="outline" className="mb-2">Artist</Badge>
-                                                    <h3 className="text-2xl font-bold">{spotifyData.data.name}</h3>
-                                                    <p className="text-sm text-gray-500">{spotifyData.data.albums?.length || 0} albums</p>
+                                                    <Badge
+                                                        variant="outline"
+                                                        className="mb-2"
+                                                    >
+                                                        Artist
+                                                    </Badge>
+                                                    <h3 className="text-2xl font-bold">
+                                                        {spotifyData.data.name}
+                                                    </h3>
+                                                    <p className="text-sm text-gray-500">
+                                                        {spotifyData.data.albums
+                                                            ?.length || 0}{" "}
+                                                        albums
+                                                    </p>
                                                 </div>
                                             </div>
 
@@ -786,201 +1178,414 @@ export function MusicUpload() {
 
                                             {/* Albums List */}
                                             <div className="space-y-4">
-                                                <h4 className="font-semibold">Select albums to import:</h4>
-                                                {spotifyData.data.albums.map((album: SpotifyAlbum) => (
-                                                    <div key={album.id} className="border rounded-lg p-4">
+                                                <h4 className="font-semibold">
+                                                    Select albums to import:
+                                                </h4>
+                                                {spotifyData.data.albums.map(
+                                                    (album: SpotifyAlbum) => (
                                                         <div
-                                                            className="flex items-center gap-4 cursor-pointer"
-                                                            onClick={() => toggleAlbumExpansion(album.id)}
+                                                            key={album.id}
+                                                            className="border rounded-lg p-4"
                                                         >
-                                                            <Image
-                                                                src={album.image || "/images/soundhex.png"}
-                                                                alt={album.name}
-                                                                width={64}
-                                                                height={64}
-                                                                className="rounded object-cover"
-                                                            />
-                                                            <div className="flex-1">
-                                                                <h5 className="font-medium">{album.name}</h5>
-                                                                <p className="text-sm text-gray-600 dark:text-gray-400">{album.artist}</p>
-                                                                <p className="text-xs text-gray-500">{album.release_date}</p>
-                                                            </div>
-                                                            <div className="flex items-center gap-2">
-                                                                {loadingAlbums.has(album.id) ? (
-                                                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                                                ) : expandedAlbums.has(album.id) ? (
-                                                                    <ChevronDown className="h-4 w-4" />
-                                                                ) : (
-                                                                    <ChevronRight className="h-4 w-4" />
-                                                                )}
-                                                            </div>
-                                                        </div>
-
-                                                        {expandedAlbums.has(album.id) && album.tracks && album.tracks.length > 0 && (
-                                                            <div className="mt-4 space-y-2">
-                                                                <div className="flex items-center justify-between mb-2">
-                                                                    <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                                                                        Select tracks from this album:
-                                                                    </span>
-                                                                    <Button
-                                                                        variant="outline"
-                                                                        size="sm"
-                                                                        onClick={()0 => {
-                                                                            const allAlbumTrackIds = album.tracks.map((t: SpotifyTrack) => t.id);
-                                                                            const allSelected = allAlbumTrackIds.every(id => selectedTracks.has(id));
-
-                                                                            if (allSelected) {
-                                                                                // Deselect all tracks from thisalbum
-                                                                                const newSelection = new Set(selectedTracks);
-                                                                                allAlbumTrackIds.forEach(id => newSelection.delete(id));
-                                                                                setSelectedTracks(newSelection);
-                                                                            } else {
-                                                                                // Select all tracks from this album
-                                                                                const newSelection = new Set(selectedTracks);
-                                                                                allAlbumTrackIds.forEach(id => newSelection.add(id));
-                                                                                setSelectedTracks(newSelection);
-                                                                            }
-                                                                        }}
-                                                                    >
-                                                                        {album.tracks.every((t: SpotifyTrack) => selectedTracks.has(t.id)) ? "Deselect All" : "Select All"}
-                                                                    </Button>
+                                                            <div
+                                                                className="flex items-center gap-4 cursor-pointer"
+                                                                onClick={() =>
+                                                                    toggleAlbumExpansion(
+                                                                        album.id,
+                                                                    )
+                                                                }
+                                                            >
+                                                                <Image
+                                                                    src={
+                                                                        album.image ||
+                                                                        "/images/soundhex.png"
+                                                                    }
+                                                                    alt={
+                                                                        album.name
+                                                                    }
+                                                                    width={64}
+                                                                    height={64}
+                                                                    className="rounded object-cover"
+                                                                />
+                                                                <div className="flex-1">
+                                                                    <h5 className="font-medium">
+                                                                        {
+                                                                            album.name
+                                                                        }
+                                                                    </h5>
+                                                                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                                                                        {
+                                                                            album.artist
+                                                                        }
+                                                                    </p>
+                                                                    <p className="text-xs text-gray-500">
+                                                                        {
+                                                                            album.release_date
+                                                                        }
+                                                                    </p>
                                                                 </div>
+                                                                <div className="flex items-center gap-2">
+                                                                    {loadingAlbums.has(
+                                                                        album.id,
+                                                                    ) ? (
+                                                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                                                    ) : expandedAlbums.has(
+                                                                          album.id,
+                                                                      ) ? (
+                                                                        <ChevronDown className="h-4 w-4" />
+                                                                    ) : (
+                                                                        <ChevronRight className="h-4 w-4" />
+                                                                    )}
+                                                                </div>
+                                                            </div>
 
-                                                                <div className="space-y-2 max-h-64 overflow-y-auto pl-4 border-l-2 border-gray-200 dark:border-gray-700">
-                                                                    {album.tracks.map((track: SpotifyTrack, index: number) => (
-                                                                        <div
-                                                                            key={track.id}
-                                                                            className={`flex items-center gap-4 p-3 rounded-lg border cursor-pointer transition-colors ${
-                                                                                selectedTracks.has(track.id)
-                                                                                    ? "bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-700"
-                                                                                    : "bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800"
-                                                                            }`}
-                                                                            onClick={() => toggleTrackSelection(track.id)}
-                                                                        >
-                                                                            <div className="w-6 h-6 flex items-center justify-center">
-                                                                                {selectedTracks.has(track.id) ? (
-                                                                                    <Check className="h-4 w-4 text-purple-600" />
-                                                                                ) : (
-                                                                                    <span className="text-sm text-gray-400">{index + 1}</span>
-                                                                                )}
-                                                                            </div>                                                                            <div className="relative">
-                                                                                <Image
-                                                                                    src={track.image || album.image || "/images/soundhex.png"}
-                                                                                    alt={track.name}
-                                                                                    width={48}
-                                                                                    height={48}
-                                                                                    className="rounded object-cover"
-                                                                                />
-                                                                                {track.preview_url && (
-                                                                                    <Button
-                                                                                        size="sm"
-                                                                                        className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full p-0"
-                                                                                        onClick={(e) => {
-                                                                                            e.stopPropagation();
-                                                                                            handlePlayTrack(track);
-                                                                                        }}
-                                                                                    >
-                                                                                        {currentTrack?.id === `spotify-${track.id}` && isPlaying ? (
-                                                                                            <Pause className="h-2 w-2" />
-                                                                                        ) : (
-                                                                                            <Play className="h-2 w-2" />
-                                                                                        )}
-                                                                                    </Button>
-                                                                                )}
-                                                                            </div>
+                                                            {expandedAlbums.has(
+                                                                album.id,
+                                                            ) &&
+                                                                album.tracks &&
+                                                                album.tracks
+                                                                    .length >
+                                                                    0 && (
+                                                                    <div className="mt-4 space-y-2">
+                                                                        <div className="flex items-center justify-between mb-2">
+                                                                            <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                                                                                Select
+                                                                                tracks
+                                                                                from
+                                                                                this
+                                                                                album:
+                                                                            </span>
+                                                                            <Button
+                                                                                variant="outline"
+                                                                                size="sm"
+                                                                                onClick={() => {
+                                                                                    const allAlbumTrackIds =
+                                                                                        album.tracks.map(
+                                                                                            (
+                                                                                                t: SpotifyTrack,
+                                                                                            ) =>
+                                                                                                t.id,
+                                                                                        );
+                                                                                    const allSelected =
+                                                                                        allAlbumTrackIds.every(
+                                                                                            (
+                                                                                                id,
+                                                                                            ) =>
+                                                                                                selectedTracks.has(
+                                                                                                    id,
+                                                                                                ),
+                                                                                        );
 
-                                                                            <div className="flex-1 min-w-0">
-                                                                                <p className="font-medium truncate">{track.name}</p>
-                                                                                <p className="text-sm text-gray-600 dark:text-gray-400 truncate">{track.artist}</p>
-                                                                            </div>
-
-                                                                            <div className="flex items-center gap-4 text-sm text-gray-500">
-                                                                                <span>{formatDuration(track.duration)}</span>
-                                                                            </div>
+                                                                                    if (
+                                                                                        allSelected
+                                                                                    ) {
+                                                                                        // Deselect all tracks from this album
+                                                                                        const newSelection =
+                                                                                            new Set(
+                                                                                                selectedTracks,
+                                                                                            );
+                                                                                        allAlbumTrackIds.forEach(
+                                                                                            (
+                                                                                                id,
+                                                                                            ) =>
+                                                                                                newSelection.delete(
+                                                                                                    id,
+                                                                                                ),
+                                                                                        );
+                                                                                        setSelectedTracks(
+                                                                                            newSelection,
+                                                                                        );
+                                                                                    } else {
+                                                                                        // Select all tracks from this album
+                                                                                        const newSelection =
+                                                                                            new Set(
+                                                                                                selectedTracks,
+                                                                                            );
+                                                                                        allAlbumTrackIds.forEach(
+                                                                                            (
+                                                                                                id,
+                                                                                            ) =>
+                                                                                                newSelection.add(
+                                                                                                    id,
+                                                                                                ),
+                                                                                        );
+                                                                                        setSelectedTracks(
+                                                                                            newSelection,
+                                                                                        );
+                                                                                    }
+                                                                                }}
+                                                                            >
+                                                                                {album.tracks.every(
+                                                                                    (
+                                                                                        t: SpotifyTrack,
+                                                                                    ) =>
+                                                                                        selectedTracks.has(
+                                                                                            t.id,
+                                                                                        ),
+                                                                                )
+                                                                                    ? "Deselect All"
+                                                                                    : "Select All"}
+                                                                            </Button>
                                                                         </div>
-                                                                    ))}
-                                                                </div>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                ))}
+
+                                                                        <div className="space-y-2 max-h-64 overflow-y-auto pl-4 border-l-2 border-gray-200 dark:border-gray-700">
+                                                                            {album.tracks.map(
+                                                                                (
+                                                                                    track: SpotifyTrack,
+                                                                                    index: number,
+                                                                                ) => (
+                                                                                    <div
+                                                                                        key={
+                                                                                            track.id
+                                                                                        }
+                                                                                        className={`flex items-center gap-4 p-3 rounded-lg border cursor-pointer transition-colors ${
+                                                                                            selectedTracks.has(
+                                                                                                track.id,
+                                                                                            )
+                                                                                                ? "bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-700"
+                                                                                                : "bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800"
+                                                                                        }`}
+                                                                                        onClick={() =>
+                                                                                            toggleTrackSelection(
+                                                                                                track.id,
+                                                                                            )
+                                                                                        }
+                                                                                    >
+                                                                                        <div className="w-6 h-6 flex items-center justify-center">
+                                                                                            {selectedTracks.has(
+                                                                                                track.id,
+                                                                                            ) ? (
+                                                                                                <Check className="h-4 w-4 text-purple-600" />
+                                                                                            ) : (
+                                                                                                <span className="text-sm text-gray-400">
+                                                                                                    {index +
+                                                                                                        1}
+                                                                                                </span>
+                                                                                            )}
+                                                                                        </div>{" "}
+                                                                                        <div className="relative">
+                                                                                            <Image
+                                                                                                src={
+                                                                                                    track.image ||
+                                                                                                    album.image ||
+                                                                                                    "/images/soundhex.png"
+                                                                                                }
+                                                                                                alt={
+                                                                                                    track.name
+                                                                                                }
+                                                                                                width={
+                                                                                                    48
+                                                                                                }
+                                                                                                height={
+                                                                                                    48
+                                                                                                }
+                                                                                                className="rounded object-cover"
+                                                                                            />
+                                                                                            {track.preview_url && (
+                                                                                                <Button
+                                                                                                    size="sm"
+                                                                                                    className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full p-0"
+                                                                                                    onClick={(
+                                                                                                        e,
+                                                                                                    ) => {
+                                                                                                        e.stopPropagation();
+                                                                                                        handlePlayTrack(
+                                                                                                            track,
+                                                                                                        );
+                                                                                                    }}
+                                                                                                >
+                                                                                                    {currentTrack?.id ===
+                                                                                                        stringToHash(
+                                                                                                            `spotify-${spotifyData.data.id}`,
+                                                                                                        ) &&
+                                                                                                    isPlaying ? (
+                                                                                                        <Pause className="h-2 w-2" />
+                                                                                                    ) : (
+                                                                                                        <Play className="h-2 w-2" />
+                                                                                                    )}
+                                                                                                </Button>
+                                                                                            )}
+                                                                                        </div>
+                                                                                        <div className="flex-1 min-w-0">
+                                                                                            <p className="font-medium truncate">
+                                                                                                {
+                                                                                                    track.name
+                                                                                                }
+                                                                                            </p>
+                                                                                            <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                                                                                                {
+                                                                                                    track.artist
+                                                                                                }
+                                                                                            </p>
+                                                                                        </div>
+                                                                                        <div className="flex items-center gap-4 text-sm text-gray-500">
+                                                                                            <span>
+                                                                                                {formatDuration(
+                                                                                                    track.duration,
+                                                                                                )}
+                                                                                            </span>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                ),
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+                                                        </div>
+                                                    ),
+                                                )}
                                             </div>
                                         </div>
                                     )}
 
                                     {/* Ownership Confirmation */}
-                    <div className="border-t pt-6">
-                        <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-800 dark:to-purple-900/20 rounded-xl p-6 border border-blue-200 dark:border-purple-700">
-                            <div className="flex items-start space-x-4">
-                                <div className="flex-shrink-0 mt-1">
-                                    <div className="relative">
-                                        <input
-                                            type="checkbox"
-                                            id="ownership-confirmation"
-                                            checked={ownershipConfirmed}
-                                            onChange={(e) => setOwnershipConfirmed(e.target.checked)}
-                                            className="sr-only"
-                                        />
-                                        <label
-                                            htmlFor="ownership-confirmation"
-                                            className={`flex items-center justify-center w-6 h-6 rounded-md border-2 cursor-pointer transition-all duration-200 ${
-                                                ownershipConfirmed
-                                                    ? 'bg-gradient-to-r from-purple-600 to-blue-600 border-purple-600 text-white shadow-lg'
-                                                    : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 hover:border-purple-400 dark:hover:border-purple-500'
-                                            }`}
-                                        >
-                                            {ownershipConfirmed && (
-                                                <Check className="h-4 w-4 text-white" />
-                                            )}
-                                        </label>
-                                    </div>
-                                </div>
-                                <div className="flex-1">
-                                    <label htmlFor="ownership-confirmation" className="cursor-pointer">
-                                        <div className="flex items-center gap-2 mb-3">
-                                            <div className="w-6 h-6 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full flex items-center justify-center">
-                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                                                </svg>
+                                    <div className="border-t pt-6">
+                                        <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-800 dark:to-purple-900/20 rounded-xl p-6 border border-blue-200 dark:border-purple-700">
+                                            <div className="flex items-start space-x-4">
+                                                <div className="flex-shrink-0 mt-1">
+                                                    <div className="relative">
+                                                        <input
+                                                            type="checkbox"
+                                                            id="ownership-confirmation"
+                                                            checked={
+                                                                ownershipConfirmed
+                                                            }
+                                                            onChange={(e) =>
+                                                                setOwnershipConfirmed(
+                                                                    e.target
+                                                                        .checked,
+                                                                )
+                                                            }
+                                                            className="sr-only"
+                                                        />
+                                                        <label
+                                                            htmlFor="ownership-confirmation"
+                                                            className={`flex items-center justify-center w-6 h-6 rounded-md border-2 cursor-pointer transition-all duration-200 ${
+                                                                ownershipConfirmed
+                                                                    ? "bg-gradient-to-r from-purple-600 to-blue-600 border-purple-600 text-white shadow-lg"
+                                                                    : "bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 hover:border-purple-400 dark:hover:border-purple-500"
+                                                            }`}
+                                                        >
+                                                            {ownershipConfirmed && (
+                                                                <Check className="h-4 w-4 text-white" />
+                                                            )}
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div className="flex-1">
+                                                    <label
+                                                        htmlFor="ownership-confirmation"
+                                                        className="cursor-pointer"
+                                                    >
+                                                        <div className="mb-3">
+                                                            <span className="text-lg font-bold text-gray-900 dark:text-white">
+                                                                Copyright &
+                                                                Ownership
+                                                                Declaration
+                                                            </span>
+                                                        </div>
+                                                        <div className="bg-white/60 dark:bg-gray-800/60 rounded-lg p-4 backdrop-blur-sm">
+                                                            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                                                                By checking this
+                                                                box, I hereby
+                                                                confirm and
+                                                                declare that:
+                                                            </p>
+                                                            <ul className="mt-3 space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                                                                <li className="flex items-start gap-2">
+                                                                    <div className="w-1.5 h-1.5 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>
+                                                                    <span>
+                                                                        I am the
+                                                                        rightful
+                                                                        owner or
+                                                                        have
+                                                                        proper
+                                                                        legal
+                                                                        authorization
+                                                                        to
+                                                                        upload
+                                                                        and
+                                                                        distribute
+                                                                        the
+                                                                        selected
+                                                                        music
+                                                                        tracks
+                                                                    </span>
+                                                                </li>
+                                                                <li className="flex items-start gap-2">
+                                                                    <div className="w-1.5 h-1.5 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>
+                                                                    <span>
+                                                                        I
+                                                                        understand
+                                                                        that
+                                                                        uploading
+                                                                        copyrighted
+                                                                        material
+                                                                        without
+                                                                        permission
+                                                                        is
+                                                                        strictly
+                                                                        prohibited
+                                                                        and may
+                                                                        result
+                                                                        in legal
+                                                                        consequences
+                                                                    </span>
+                                                                </li>
+                                                                <li className="flex items-start gap-2">
+                                                                    <div className="w-1.5 h-1.5 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>
+                                                                    <span>
+                                                                        I take
+                                                                        full
+                                                                        responsibility
+                                                                        for
+                                                                        ensuring
+                                                                        all
+                                                                        uploaded
+                                                                        content
+                                                                        complies
+                                                                        with
+                                                                        copyright
+                                                                        laws and
+                                                                        licensing
+                                                                        requirements
+                                                                    </span>
+                                                                </li>
+                                                                <li className="flex items-start gap-2">
+                                                                    <div className="w-1.5 h-1.5 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>
+                                                                    <span>
+                                                                        I
+                                                                        acknowledge
+                                                                        that
+                                                                        false
+                                                                        declarations
+                                                                        may
+                                                                        result
+                                                                        in
+                                                                        account
+                                                                        suspension
+                                                                        and
+                                                                        legal
+                                                                        action
+                                                                    </span>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    </label>
+                                                </div>
                                             </div>
-                                            <span className="text-lg font-bold text-gray-900 dark:text-white">
-                                                Copyright & Ownership Declaration
-                                            </span>
                                         </div>
-                                        <div className="bg-white/60 dark:bg-gray-800/60 rounded-lg p-4 backdrop-blur-sm">
-                                            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-                                                By checking this box, I hereby confirm and declare that:
-                                            </p>
-                                            <ul className="mt-3 space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                                                <li className="flex items-start gap-2">
-                                                    <div className="w-1.5 h-1.5 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>
-                                                    <span>I am the rightful owner or have proper legal authorization to upload and distribute the selected music tracks</span>
-                                                </li>
-                                                <li className="flex items-start gap-2">
-                                                    <div className="w-1.5 h-1.5 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>
-                                                    <span>I understand that uploading copyrighted material without permission is strictly prohibited and may result in legal consequences</span>
-                                                </li>
-                                                <li className="flex items-start gap-2">
-                                                    <div className="w-1.5 h-1.5 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>
-                                                    <span>I take full responsibility for ensuring all uploaded content complies with copyright laws and licensing requirements</span>
-                                                </li>
-                                                <li className="flex items-start gap-2">
-                                                    <div className="w-1.5 h-1.5 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>
-                                                    <span>I acknowledge that false declarations may result in account suspension and legal action</span>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                                    </div>
 
                                     {/* Submit Button */}
                                     <div className="flex justify-end pt-4">
                                         <Button
                                             onClick={submitSpotifyTracks}
-                                            disabled={selectedTracks.size === 0 || !ownershipConfirmed || isLoading}
+                                            disabled={
+                                                selectedTracks.size === 0 ||
+                                                !ownershipConfirmed ||
+                                                isLoading
+                                            }
                                             className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
                                             {isLoading ? (
@@ -990,8 +1595,11 @@ export function MusicUpload() {
                                                 </>
                                             ) : (
                                                 <>
-                                                    Import {selectedTracks.size} Track
-                                                    {selectedTracks.size !== 1 ? "s" : ""}
+                                                    Import {selectedTracks.size}{" "}
+                                                    Track
+                                                    {selectedTracks.size !== 1
+                                                        ? "s"
+                                                        : ""}
                                                 </>
                                             )}
                                         </Button>
@@ -1009,13 +1617,13 @@ export function MusicUpload() {
                                 <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full flex items-center justify-center">
                                     <Upload className="h-4 w-4 text-white" />
                                 </div>
-                                Upload Music File
+                                Upload Music Files
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-6">
-                            {/* File Upload */}
+                            {/* Multiple File Upload */}
                             <div className="space-y-2">
-                                <Label htmlFor="music-file">Audio File *</Label>
+                                <Label htmlFor="music-files">Audio Files *</Label>
                                 <div
                                     className="border-2 border-dashed border-purple-300 dark:border-purple-600 rounded-xl p-8 hover:border-purple-400 transition-colors bg-purple-50/50 dark:bg-purple-900/20 cursor-pointer"
                                     onClick={() =>
@@ -1026,153 +1634,484 @@ export function MusicUpload() {
                                         <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto">
                                             <Upload className="h-8 w-8 text-white" />
                                         </div>
-                                        {uploadForm.file ? (
-                                            <div>
-                                                <p className="font-semibold text-green-600 dark:text-green-400">
-                                                    {uploadForm.file.name}
-                                                </p>
-                                                <p className="text-sm text-gray-500">
-                                                    {(
-                                                        uploadForm.file.size /
-                                                        (1024 * 1024)
-                                                    ).toFixed(2)}{" "}
-                                                    MB
-                                                </p>
-                                            </div>
-                                        ) : (
-                                            <div>
-                                                <p className="font-semibold">
-                                                    Drop your music file here
-                                                </p>
-                                                <p className="text-gray-600 dark:text-gray-400">
-                                                    Supports MP3, WAV, FLAC
-                                                    formats
-                                                </p>
-                                            </div>
-                                        )}
+                                        <div>
+                                            <p className="font-semibold">
+                                                Drop your music files here or click to browse
+                                            </p>
+                                            <p className="text-gray-600 dark:text-gray-400">
+                                                Supports MP3, WAV, FLAC formats • Multiple files allowed
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                                 <input
                                     ref={fileInputRef}
                                     type="file"
                                     accept="audio/*"
-                                    onChange={handleFileUpload}
+                                    multiple
+                                    onChange={handleMultipleFileUpload}
                                     className="hidden"
                                 />
                             </div>
 
-                            <Separator />
+                            {uploadFiles.length > 0 && (
+                                <>
+                                    <Separator />
 
-                            {/* Track Information */}
-                            <div className="grid md:grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <Label htmlFor="title">Track Title *</Label>
-                                    <Input
-                                        id="title"
-                                        placeholder="Enter track title"
-                                        value={uploadForm.title}
-                                        onChange={(e) =>
-                                            setUploadForm({
-                                                ...uploadForm,
-                                                title: e.target.value,
-                                            })
-                                        }
-                                    />
-                                </div>
+                                    {/* Uploaded Files List */}
+                                    <div className="space-y-4">
+                                        <div className="flex items-center justify-between">
+                                            <h3 className="text-lg font-semibold">
+                                                Uploaded Files ({uploadFiles.length})
+                                            </h3>
+                                            {loadingUserData && (
+                                                <div className="flex items-center gap-2 text-sm text-gray-500">
+                                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                                    Loading albums & artists...
+                                                </div>
+                                            )}
+                                        </div>
 
-                                <div className="space-y-2">
-                                    <Label htmlFor="artist">
-                                        Artist Name *
-                                    </Label>
-                                    <Input
-                                        id="artist"
-                                        placeholder="Enter artist name"
-                                        value={uploadForm.artist}
-                                        onChange={(e) =>
-                                            setUploadForm({
-                                                ...uploadForm,
-                                                artist: e.target.value,
-                                            })
-                                        }
-                                    />
-                                </div>
+                                        {uploadFiles.map((fileData, index) => (
+                                            <div key={index} className="border rounded-lg p-6 bg-gray-50 dark:bg-gray-800/50">
+                                                <div className="flex items-start justify-between mb-4">
+                                                    <div className="flex items-center gap-3">
+                                                        <Music className="h-5 w-5 text-purple-600" />
+                                                        <div>
+                                                            <h4 className="font-medium">{fileData.file.name}</h4>
+                                                            <p className="text-sm text-gray-500">
+                                                                {(fileData.file.size / (1024 * 1024)).toFixed(2)} MB
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        onClick={() => removeFile(index)}
+                                                        className="text-red-500 hover:text-red-600"
+                                                    >
+                                                        <X className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
 
-                                <div className="space-y-2">
-                                    <Label htmlFor="album">Album</Label>
-                                    <Input
-                                        id="album"
-                                        placeholder="Enter album name"
-                                        value={uploadForm.album}
-                                        onChange={(e) =>
-                                            setUploadForm({
-                                                ...uploadForm,
-                                                album: e.target.value,
-                                            })
-                                        }
-                                    />
-                                </div>
+                                                <div className="grid md:grid-cols-2 gap-4">
+                                                    {/* Track Title */}
+                                                    <div className="space-y-2">
+                                                        <Label htmlFor={`title-${index}`}>Track Title *</Label>
+                                                        <Input
+                                                            id={`title-${index}`}
+                                                            placeholder="Enter track title"
+                                                            value={fileData.title}
+                                                            onChange={(e) =>
+                                                                updateFileData(index, 'title', e.target.value)
+                                                            }
+                                                        />
+                                                    </div>
 
-                                <div className="space-y-2">
-                                    <Label htmlFor="genre">Genre</Label>
-                                    <select
-                                        id="genre"
-                                        value={uploadForm.genre}
-                                        onChange={(e) =>
-                                            setUploadForm({
-                                                ...uploadForm,
-                                                genre: e.target.value,
-                                            })
-                                        }
-                                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800"
-                                    >
-                                        <option value="">Select genre</option>
-                                        <option value="pop">Pop</option>
-                                        <option value="rock">Rock</option>
-                                        <option value="hip-hop">Hip Hop</option>
-                                        <option value="electronic">
-                                            Electronic
-                                        </option>
-                                        <option value="jazz">Jazz</option>
-                                        <option value="classical">
-                                            Classical
-                                        </option>
-                                        <option value="country">Country</option>
-                                        <option value="r&b">R&B</option>
-                                    </select>
-                                </div>
-                            </div>
+                                                    {/* Genre */}
+                                                    <div className="space-y-2">
+                                                        <Label htmlFor={`genre-${index}`}>Genre *</Label>
+                                                        <select
+                                                            id={`genre-${index}`}
+                                                            value={fileData.genre}
+                                                            onChange={(e) =>
+                                                                updateFileData(index, 'genre', e.target.value)
+                                                            }
+                                                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800"
+                                                        >
+                                                            <option value="">Select genre</option>
+                                                            <option value="pop">Pop</option>
+                                                            <option value="rock">Rock</option>
+                                                            <option value="hip-hop">Hip Hop</option>
+                                                            <option value="electronic">Electronic</option>
+                                                            <option value="jazz">Jazz</option>
+                                                            <option value="classical">Classical</option>
+                                                            <option value="country">Country</option>
+                                                            <option value="r&b">R&B</option>
+                                                            <option value="reggae">Reggae</option>
+                                                            <option value="blues">Blues</option>
+                                                            <option value="folk">Folk</option>
+                                                            <option value="indie">Indie</option>
+                                                            <option value="alternative">Alternative</option>
+                                                            <option value="metal">Metal</option>
+                                                            <option value="punk">Punk</option>
+                                                            <option value="disco">Disco</option>
+                                                            <option value="funk">Funk</option>
+                                                            <option value="soul">Soul</option>
+                                                            <option value="gospel">Gospel</option>
+                                                        </select>
+                                                    </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="description">Description</Label>
-                                <Textarea
-                                    id="description"
-                                    placeholder="Tell us about your track..."
-                                    rows={4}
-                                    value={uploadForm.description}
-                                    onChange={(e) =>
-                                        setUploadForm({
-                                            ...uploadForm,
-                                            description: e.target.value,
-                                        })
-                                    }
-                                />
-                            </div>
+                                                    
+                                    {/* Album */}
+                                    <div className="space-y-2">
+                                        <Label htmlFor={`album-${index}`}>Album *</Label>
+                                        <div className="space-y-3">
+                                            {/* Custom Album Selector */}
+                                            <div className="space-y-2">
+                                                <Label className="text-sm text-gray-600 dark:text-gray-400">Select existing album:</Label>
+                                                <div className="grid grid-cols-1 gap-2 max-h-40 overflow-y-auto border rounded-lg p-2 bg-gray-50 dark:bg-gray-800/50">
+                                                    {userAlbums.map((album) => (
+                                                        <div
+                                                            key={album.id}
+                                                            className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors ${
+                                                                !fileData.isNewAlbum && fileData.album === album.title
+                                                                    ? 'bg-purple-100 dark:bg-purple-900/30 border border-purple-300 dark:border-purple-600'
+                                                                    : 'hover:bg-white dark:hover:bg-gray-700 border border-transparent'
+                                                            }`}
+                                                            onClick={() => {
+                                                                updateFileData(index, 'isNewAlbum', false);
+                                                                updateFileData(index, 'album', album.title);
+                                                            }}
+                                                        >
+                                                            <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
+                                                                {album.cover_image_url ? (
+                                                                    <Image
+                                                                        src={album.cover_image_url}
+                                                                        alt={album.title}
+                                                                        width={40}
+                                                                        height={40}
+                                                                        className="w-full h-full object-cover"
+                                                                    />
+                                                                ) : (
+                                                                    <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
+                                                                        <Album className="h-4 w-4 text-white" />
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            <div className="flex-1 min-w-0">
+                                                                <p className="font-medium text-sm truncate">{album.title}</p>
+                                                                <p className="text-xs text-gray-500 truncate">{album.artist.name}</p>
+                                                            </div>
+                                                            {!fileData.isNewAlbum && fileData.album === album.title && (
+                                                                <Check className="h-4 w-4 text-purple-600" />
+                                                            )}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
 
-                            {/* Upload Button */}
-                            <div className="flex justify-end pt-4">
-                                <Button
-                                    onClick={handleUploadSubmit}
-                                    disabled={
-                                        !uploadForm.file ||
-                                        !uploadForm.title ||
-                                        !uploadForm.artist
-                                    }
-                                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
-                                >
-                                    <Upload className="mr-2 h-4 w-4" />
-                                    Upload Track
-                                </Button>
-                            </div>
+                                            {/* Create New Album Option */}
+                                            <div
+                                                className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors border-2 border-dashed ${
+                                                    fileData.isNewAlbum
+                                                        ? 'border-purple-300 dark:border-purple-600 bg-purple-50 dark:bg-purple-900/20'
+                                                        : 'border-gray-300 dark:border-gray-600 hover:border-purple-300 dark:hover:border-purple-600'
+                                                }`}
+                                                onClick={() => {
+                                                    updateFileData(index, 'isNewAlbum', true);
+                                                    updateFileData(index, 'album', '');
+                                                }}
+                                            >
+                                                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-gray-400 to-gray-500 flex items-center justify-center flex-shrink-0">
+                                                    <Plus className="h-4 w-4 text-white" />
+                                                </div>
+                                                <div className="flex-1">
+                                                    <p className="font-medium text-sm">Create new album</p>
+                                                    <p className="text-xs text-gray-500">Add a new album to your library</p>
+                                                </div>
+                                                {fileData.isNewAlbum && (
+                                                    <Check className="h-4 w-4 text-purple-600" />
+                                                )}
+                                            </div>
+
+                                            {fileData.isNewAlbum && (
+                                                <div className="space-y-4 p-4 bg-white dark:bg-gray-800 rounded-lg border">
+                                                    <Input
+                                                        placeholder="Enter new album name"
+                                                        value={fileData.album}
+                                                        onChange={(e) =>
+                                                            updateFileData(index, 'album', e.target.value)
+                                                        }
+                                                    />
+
+                                                    {/* Album Cover Upload */}
+                                                    <div className="space-y-3">
+                                                        <Label>Album Cover (1400x1400px) *</Label>
+                                                        <div className="flex items-start gap-4">
+                                                            {/* Image Preview */}
+                                                            <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 border-2 border-dashed border-gray-300 dark:border-gray-600">
+                                                                {fileData.albumImage ? (
+                                                                    <Image
+                                                                        src={URL.createObjectURL(fileData.albumImage)}
+                                                                        alt="Album cover preview"
+                                                                        width={96}
+                                                                        height={96}
+                                                                        className="w-full h-full object-cover"
+                                                                    />
+                                                                ) : (
+                                                                    <div className="w-full h-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                                                                        <ImageIcon className="h-8 w-8 text-gray-400" />
+                                                                    </div>
+                                                                )}
+                                                            </div>
+
+                                                            {/* Upload Button */}
+                                                            <div className="flex-1 space-y-2">
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="outline"
+                                                                    onClick={() => albumImageInputRef.current?.click()}
+                                                                    className="w-full justify-start"
+                                                                >
+                                                                    <ImageIcon className="h-4 w-4 mr-2" />
+                                                                    {fileData.albumImage ? 'Change Image' : 'Choose Album Cover'}
+                                                                </Button>
+                                                                {fileData.albumImage && (
+                                                                    <p className="text-sm text-green-600 font-medium">
+                                                                        ✓ {fileData.albumImage.name}
+                                                                    </p>
+                                                                )}
+                                                                <p className="text-xs text-gray-500">
+                                                                    Square image recommended (1400x1400px)
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        <input
+                                                            ref={albumImageInputRef}
+                                                            type="file"
+                                                            accept="image/*"
+                                                            onChange={(e) => handleAlbumImageUpload(e, index)}
+                                                            className="hidden"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    
+                                    {/* Artist */}
+                                    <div className="space-y-2">
+                                        <Label htmlFor={`artist-${index}`}>Artist *</Label>
+                                        <div className="space-y-3">
+                                            {/* Custom Artist Selector */}
+                                            <div className="space-y-2">
+                                                <Label className="text-sm text-gray-600 dark:text-gray-400">Select existing artist:</Label>
+                                                <div className="grid grid-cols-1 gap-2 max-h-40 overflow-y-auto border rounded-lg p-2 bg-gray-50 dark:bg-gray-800/50">
+                                                    {userArtists.map((artist) => (
+                                                        <div
+                                                            key={artist.id}
+                                                            className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors ${
+                                                                !fileData.isNewArtist && fileData.artist === artist.name
+                                                                    ? 'bg-blue-100 dark:bg-blue-900/30 border border-blue-300 dark:border-blue-600'
+                                                                    : 'hover:bg-white dark:hover:bg-gray-700 border border-transparent'
+                                                            }`}
+                                                            onClick={() => {
+                                                                updateFileData(index, 'isNewArtist', false);
+                                                                updateFileData(index, 'artist', artist.name);
+                                                            }}
+                                                        >
+                                                            <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+                                                                {artist.profile_image_url ? (
+                                                                    <Image
+                                                                        src={artist.profile_image_url}
+                                                                        alt={artist.name}
+                                                                        width={40}
+                                                                        height={40}
+                                                                        className="w-full h-full object-cover"
+                                                                    />
+                                                                ) : (
+                                                                    <div className="w-full h-full bg-gradient-to-br from-blue-400 to-indigo-400 flex items-center justify-center">
+                                                                        <Users className="h-4 w-4 text-white" />
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            <div className="flex-1 min-w-0">
+                                                                <p className="font-medium text-sm truncate">{artist.name}</p>
+                                                                <p className="text-xs text-gray-500">Artist</p>
+                                                            </div>
+                                                            {!fileData.isNewArtist && fileData.artist === artist.name && (
+                                                                <Check className="h-4 w-4 text-blue-600" />
+                                                            )}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            {/* Create New Artist Option */}
+                                            <div
+                                                className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors border-2 border-dashed ${
+                                                    fileData.isNewArtist
+                                                        ? 'border-blue-300 dark:border-blue-600 bg-blue-50 dark:bg-blue-900/20'
+                                                        : 'border-gray-300 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-600'
+                                                }`}
+                                                onClick={() => {
+                                                    updateFileData(index, 'isNewArtist', true);
+                                                    updateFileData(index, 'artist', '');
+                                                }}
+                                            >
+                                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-400 to-gray-500 flex items-center justify-center flex-shrink-0">
+                                                    <Plus className="h-4 w-4 text-white" />
+                                                </div>
+                                                <div className="flex-1">
+                                                    <p className="font-medium text-sm">Create new artist</p>
+                                                    <p className="text-xs text-gray-500">Add a new artist to your library</p>
+                                                </div>
+                                                {fileData.isNewArtist && (
+                                                    <Check className="h-4 w-4 text-blue-600" />
+                                                )}
+                                            </div>
+
+                                            {fileData.isNewArtist && (
+                                                <div className="space-y-4 p-4 bg-white dark:bg-gray-800 rounded-lg border">
+                                                    <Input
+                                                        placeholder="Enter new artist name"
+                                                        value={fileData.artist}
+                                                        onChange={(e) =>
+                                                            updateFileData(index, 'artist', e.target.value)
+                                                        }
+                                                    />
+
+                                                    {/* Artist Photo Upload */}
+                                                    <div className="space-y-3">
+                                                        <Label>Artist Photo (1400x1400px) *</Label>
+                                                        <div className="flex items-start gap-4">
+                                                            {/* Image Preview */}
+                                                            <div className="w-24 h-24 rounded-full overflow-hidden flex-shrink-0 border-2 border-dashed border-gray-300 dark:border-gray-600">
+                                                                {fileData.artistImage ? (
+                                                                    <Image
+                                                                        src={URL.createObjectURL(fileData.artistImage)}
+                                                                        alt="Artist photo preview"
+                                                                        width={96}
+                                                                        height={96}
+                                                                        className="w-full h-full object-cover"
+                                                                    />
+                                                                ) : (
+                                                                    <div className="w-full h-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                                                                        <Users className="h-8 w-8 text-gray-400" />
+                                                                    </div>
+                                                                )}
+                                                            </div>
+
+                                                            {/* Upload Button */}
+                                                            <div className="flex-1 space-y-2">
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="outline"
+                                                                    onClick={() => artistImageInputRef.current?.click()}
+                                                                    className="w-full justify-start"
+                                                                >
+                                                                    <Users className="h-4 w-4 mr-2" />
+                                                                    {fileData.artistImage ? 'Change Photo' : 'Choose Artist Photo'}
+                                                                </Button>
+                                                                {fileData.artistImage && (
+                                                                    <p className="text-sm text-green-600 font-medium">
+                                                                        ✓ {fileData.artistImage.name}
+                                                                    </p>
+                                                                )}
+                                                                <p className="text-xs text-gray-500">
+                                                                    Square image recommended (1400x1400px)
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        <input
+                                                            ref={artistImageInputRef}
+                                                            type="file"
+                                                            accept="image/*"
+                                                            onChange={(e) => handleArtistImageUpload(e, index)}
+                                                            className="hidden"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                                </div>
+
+                                                {/* Description */}
+                                                <div className="mt-4 space-y-2">
+                                                    <Label htmlFor={`description-${index}`}>Description</Label>
+                                                    <Textarea
+                                                        id={`description-${index}`}
+                                                        placeholder="Tell us about your track..."
+                                                        rows={3}
+                                                        value={fileData.description}
+                                                        onChange={(e) =>
+                                                            updateFileData(index, 'description', e.target.value)
+                                                        }
+                                                    />
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    <Separator />
+
+                                    {/* Ownership Confirmation */}
+                                    <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-800 dark:to-purple-900/20 rounded-xl p-6 border border-blue-200 dark:border-purple-700">
+                                        <div className="flex items-start space-x-4">
+                                            <div className="flex-shrink-0 mt-1">
+                                                <div className="relative">
+                                                    <input
+                                                        type="checkbox"
+                                                        id="upload-ownership-confirmation"
+                                                        checked={ownershipConfirmed}
+                                                        onChange={(e) =>
+                                                            setOwnershipConfirmed(e.target.checked)
+                                                        }
+                                                        className="sr-only"
+                                                    />
+                                                    <label
+                                                        htmlFor="upload-ownership-confirmation"
+                                                        className={`flex items-center justify-center w-6 h-6 rounded-md border-2 cursor-pointer transition-all duration-200 ${
+                                                            ownershipConfirmed
+                                                                ? "bg-gradient-to-r from-purple-600 to-blue-600 border-purple-600 text-white shadow-lg"
+                                                                : "bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 hover:border-purple-400 dark:hover:border-purple-500"
+                                                        }`}
+                                                    >
+                                                        {ownershipConfirmed && (
+                                                            <Check className="h-4 w-4 text-white" />
+                                                        )}
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div className="flex-1">
+                                                <label
+                                                    htmlFor="upload-ownership-confirmation"
+                                                    className="cursor-pointer"
+                                                >
+                                                    <div className="mb-3">
+                                                        <span className="text-lg font-bold text-gray-900 dark:text-white">
+                                                            Copyright & Ownership Declaration
+                                                        </span>
+                                                    </div>
+                                                    <div className="bg-white/60 dark:bg-gray-800/60 rounded-lg p-4 backdrop-blur-sm">
+                                                        <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                                                            By checking this box, I confirm that I own all rights to the uploaded music files.
+                                                        </p>
+                                                    </div>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Upload Button */}
+                                    <div className="flex justify-end pt-4">
+                                        <Button
+                                            onClick={handleUploadSubmit}
+                                            disabled={
+                                                uploadFiles.length === 0 ||
+                                                !ownershipConfirmed ||
+                                                isLoading
+                                            }
+                                            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+                                        >
+                                            {isLoading ? (
+                                                <>
+                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                    Uploading...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Upload className="mr-2 h-4 w-4" />
+                                                    Upload {uploadFiles.length} Track{uploadFiles.length !== 1 ? 's' : ''}
+                                                </>
+                                            )}
+                                        </Button>
+                                    </div>
+                                </>
+                            )}
                         </CardContent>
                     </Card>
                 )}

@@ -6,7 +6,7 @@ import { cookies } from "next/headers";
 interface SpotifyTrack {
   id: string;
   name: string;
-  artists: Array<{ name: string }>;
+  artists: Array<{ name: string; id?: string }>;
   album: {
     name: string;
     images: Array<{ url: string }>;
@@ -22,7 +22,7 @@ interface SpotifyTrack {
 interface SpotifyAlbum {
   id: string;
   name: string;
-  artists: Array<{ name: string }>;
+  artists: Array<{ name: string; id?: string }>;
   images: Array<{ url: string }>;
   release_date: string;
   tracks?: {
@@ -39,7 +39,7 @@ interface SpotifyArtist {
 interface AlbumInfoResponse {
   id: string;
   name: string;
-  artists: Array<{ name: string }>;
+  artists: Array<{ name: string; id?: string }>;
   images: Array<{ url: string }>;
   release_date: string;
   tracks: {

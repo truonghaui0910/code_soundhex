@@ -1,5 +1,7 @@
-
-import { createClientComponentClient, createServerComponentClient } from "@supabase/auth-helpers-nextjs";
+import {
+  createClientComponentClient,
+  createServerComponentClient,
+} from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { Database } from "@/types/supabase";
 
@@ -20,21 +22,25 @@ export class AlbumsController {
     const supabase = createServerComponentClient<Database>({ cookies });
     const { data, error } = await supabase
       .from("albums")
-      .select(`id, title, cover_image_url, release_date, created_at, artist_id, user_id`) 
+      .select(
+        `id, title, cover_image_url, release_date, created_at, artist_id, user_id`,
+      )
       .order("created_at", { ascending: false });
     if (error) {
       console.error("❌ Error fetching albums:", error);
       throw new Error(`Failed to fetch albums: ${error.message}`);
     }
 
-    console.log("✅ Albums fetched successfully:", {
-      count: data?.length || 0,
-      albumIds: data?.map(a => a.id) || [],
-      userIds: data?.map(a => a.user_id) || []
-    });
+    // console.log("✅ Albums fetched successfully:", {
+    //   count: data?.length || 0,
+    //   albumIds: data?.map(a => a.id) || [],
+    //   userIds: data?.map(a => a.user_id) || []
+    // });
 
     // Lấy danh sách artist_id duy nhất
-    const artistIds = Array.from(new Set((data ?? []).map((album: any) => album.artist_id)));
+    const artistIds = Array.from(
+      new Set((data ?? []).map((album: any) => album.artist_id)),
+    );
     let artistsMap: Record<number, { id: number; name: string }> = {};
     if (artistIds.length > 0) {
       const { data: artistsData, error: artistError } = await supabase
@@ -51,7 +57,10 @@ export class AlbumsController {
     // Gán thông tin artist vào album
     const albumsWithArtist = (data ?? []).map((album: any) => ({
       ...album,
-      artist: artistsMap[album.artist_id] || { id: album.artist_id, name: "Unknown Artist" },
+      artist: artistsMap[album.artist_id] || {
+        id: album.artist_id,
+        name: "Unknown Artist",
+      },
     }));
     return albumsWithArtist;
   }
