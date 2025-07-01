@@ -159,7 +159,7 @@ export function showSuccess(
   input: string | { title: string; message: string; duration?: number },
 ): void {
   if (typeof input === "string") {
-    toast.success("Success", {
+    toast.success("", {
       description: input,
       duration: 4000,
     });
@@ -182,7 +182,7 @@ export function showError(
   input: string | { title: string; message: string; duration?: number },
 ): void {
   if (typeof input === "string") {
-    toast.error("Error", {
+    toast.error("", {
       description: input,
       duration: 5000,
     });
@@ -205,7 +205,7 @@ export function showWarning(
   input: string | { title: string; message: string; duration?: number },
 ): void {
   if (typeof input === "string") {
-    toast.warning("Warning", {
+    toast.warning("", {
       description: input,
       duration: 5000,
     });
@@ -228,7 +228,7 @@ export function showInfo(
   input: string | { title: string; message: string; duration?: number },
 ): void {
   if (typeof input === "string") {
-    toast.info("Info", {
+    toast.info("", {
       description: input,
       duration: 4000,
     });
