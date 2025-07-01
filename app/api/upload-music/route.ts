@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { Database } from "@/types/supabase";
 import { AWSHelper } from "@/lib/services/aws-helper";
 import { AudioMetadataService } from "@/lib/services/audio-metadata-service";
+import { FileHashService } from "@/lib/services/file-hash-service";
 
 export async function POST(request: NextRequest) {
   try {
@@ -191,12 +192,52 @@ export async function POST(request: NextRequest) {
       albumRecord = existingAlbum;
     }
 
-    // 4. Upload audio file
+    // 4. Check for duplicate files using MD5 hash (system-wide)
+    let audioBuffer: Buffer;
+    let fileHash: string;
+    try {
+      audioBuffer = Buffer.from(await audioFile.arrayBuffer());
+      fileHash = FileHashService.calculateMD5(audioBuffer);
+      
+      // Check if file with same hash already exists in the entire system
+      const { data: existingTrack, error: duplicateError } = await supabase
+        .from("tracks")
+        .select("id, title, artist:artist_id(name), user_id")
+        .eq("file_hash", fileHash)
+        .single();
+
+      if (existingTrack) {
+        console.log("🔄 DUPLICATE_FILE_DETECTED:", {
+          existingTrackId: existingTrack.id,
+          existingTitle: existingTrack.title,
+          existingUserId: existingTrack.user_id,
+          newTitle: title,
+          newUserId: session.user.id,
+          fileHash: fileHash
+        });
+        
+        return NextResponse.json(
+          { 
+            error: "This audio file already exists in the system",
+            duplicate: {
+              id: existingTrack.id,
+              title: existingTrack.title,
+              artist: existingTrack.artist?.name || "Unknown"
+            }
+          },
+          { status: 409 }
+        );
+      }
+    } catch (error) {
+      console.error("Error checking for duplicate files:", error);
+      // Continue with upload if hash check fails
+    }
+
+    // 5. Upload audio file
     let audioFileUrl: string;
     try {
       const timestamp = Date.now();
       const audioFilename = `${timestamp}_${audioFile.name}`;
-      const audioBuffer = Buffer.from(await audioFile.arrayBuffer());
 
       audioFileUrl = await AWSHelper.uploadFile(
         audioBuffer,
@@ -221,7 +262,7 @@ export async function POST(request: NextRequest) {
       // You might want to set a default duration or handle the error differently.
     }
 
-    // 5. Create track record
+    // 6. Create track record
     const { data: newTrack, error: trackError } = await supabase
       .from("tracks")
       .insert({
@@ -229,6 +270,7 @@ export async function POST(request: NextRequest) {
         description: description || null,
         duration: duration,
         file_url: audioFileUrl,
+        file_hash: fileHash,
         artist_id: artistRecord.id,
         album_id: albumRecord.id,
         genre_id: genreRecord.id,

@@ -212,7 +212,7 @@ export function MusicUpload() {
         if (files && files.length > 0) {
             const validFiles: File[] = [];
             const invalidFiles: string[] = [];
-            
+
             Array.from(files).forEach((file) => {
                 // Validate file type
                 if (file.type.startsWith('audio/')) {
@@ -221,12 +221,12 @@ export function MusicUpload() {
                     invalidFiles.push(file.name);
                 }
             });
-            
+
             // Show error for invalid files
             if (invalidFiles.length > 0) {
                 showError(`🚫 Invalid file types: ${invalidFiles.join(', ')}. Please select audio files only.`);
             }
-            
+
             // Add valid files
             if (validFiles.length > 0) {
                 const newUploadFiles: FileUploadData[] = validFiles.map(
@@ -242,7 +242,7 @@ export function MusicUpload() {
                     }),
                 );
                 setUploadFiles((prev) => [...prev, ...newUploadFiles]);
-                
+
                 if (validFiles.length > 0) {
                     showInfo(`📁 Added ${validFiles.length} audio file${validFiles.length > 1 ? 's' : ''} for upload`);
                 }
@@ -486,8 +486,21 @@ export function MusicUpload() {
                 });
 
                 if (!response.ok) {
-                    throw new Error(`Failed to upload ${fileData.file.name}`);
+                    const errorData = await response.json();
+
+                    // Handle duplicate file error specifically
+                    if (response.status === 409 && errorData.duplicate) {
+                        toast.error("Duplicate File Detected", {
+                            description: `This audio file is already uploaded as "${errorData.duplicate.title}" by ${errorData.duplicate.artist}`,
+                            duration: 8000,
+                        });
+                        return; // Don't continue with upload
+                    }
+
+                    throw new Error(errorData.error || "Upload failed");
                 }
+
+                const result = await response.json();
             }
 
             dismissNotifications();
