@@ -121,6 +121,9 @@ export function MusicUpload() {
     const [userArtists, setUserArtists] = useState<UserArtist[]>([]);
     const [genres, setGenres] = useState<{ id: number; name: string }[]>([]);
     const [loadingUserData, setLoadingUserData] = useState(false);
+    
+    // Recently uploaded tracks state
+    const [recentlyUploaded, setRecentlyUploaded] = useState<any[]>([]);
 
     const [fileInputRef] = useState<any>(useRef(null));
     const [albumImageInputRef] = useState<any>(useRef(null));
@@ -465,6 +468,8 @@ export function MusicUpload() {
         // showProcessing("Uploading your music files...");
 
         try {
+            const uploadedTracks: any[] = [];
+            
             for (const fileData of uploadFiles) {
                 const formData = new FormData();
                 formData.append("audioFile", fileData.file);
@@ -505,10 +510,32 @@ export function MusicUpload() {
                 }
 
                 const result = await response.json();
+                if (result.track) {
+                    uploadedTracks.push(result.track);
+                }
             }
 
             dismissNotifications();
             showInfo("All music files uploaded successfully!");
+            
+            // Load complete track info for recently uploaded tracks
+            if (uploadedTracks.length > 0) {
+                const trackIds = uploadedTracks.map(track => track.id);
+                try {
+                    const tracksResponse = await fetch(`/api/tracks?ids=${trackIds.join(',')}`);
+                    if (tracksResponse.ok) {
+                        const completeTracksData = await tracksResponse.json();
+                        setRecentlyUploaded(completeTracksData);
+                    } else {
+                        // Fallback to basic track info if detailed fetch fails
+                        setRecentlyUploaded(uploadedTracks);
+                    }
+                } catch (error) {
+                    console.error("Error fetching complete track data:", error);
+                    setRecentlyUploaded(uploadedTracks);
+                }
+            }
+            
             setUploadFiles([]);
             setOwnershipConfirmed(false);
         } catch (error) {
@@ -2433,6 +2460,108 @@ export function MusicUpload() {
                                     </div>
                                 </>
                             )}
+                        </CardContent>
+                    </Card>
+                )}
+
+                {/* Recently Uploaded Tracks */}
+                {recentlyUploaded.length > 0 && (
+                    <Card className="border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm shadow-xl">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-3">
+                                <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
+                                    <Music className="h-4 w-4 text-white" />
+                                </div>
+                                Recently Uploaded Tracks
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="grid gap-4">
+                                {recentlyUploaded.map((track, index) => (
+                                    <div
+                                        key={track.id || index}
+                                        className="flex items-center gap-4 p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50 border"
+                                    >
+                                        <div className="relative">
+                                            <div className="w-16 h-16 rounded-lg overflow-hidden">
+                                                {track.album?.cover_image_url ? (
+                                                    <Image
+                                                        src={track.album.cover_image_url}
+                                                        alt={track.album.title || "Album cover"}
+                                                        width={64}
+                                                        height={64}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                ) : (
+                                                    <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
+                                                        <Album className="h-6 w-6 text-white" />
+                                                    </div>
+                                                )}
+                                            </div>
+                                            {track.file_url && (
+                                                <Button
+                                                    size="sm"
+                                                    className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full p-0"
+                                                    onClick={() => {
+                                                        const trackToPlay = {
+                                                            id: track.id,
+                                                            title: track.title,
+                                                            file_url: track.file_url,
+                                                            duration: track.duration,
+                                                            audio_file_url: track.file_url,
+                                                            artist: track.artist || { id: 0, name: "Unknown Artist" },
+                                                            album: track.album || { id: 0, title: "Unknown Album", cover_image_url: null },
+                                                        };
+                                                        
+                                                        setTrackList([trackToPlay]);
+                                                        const currentTrackId = currentTrack?.id;
+                                                        if (currentTrackId === track.id && isPlaying) {
+                                                            togglePlayPause();
+                                                        } else {
+                                                            playTrack(trackToPlay);
+                                                        }
+                                                    }}
+                                                >
+                                                    {currentTrack?.id === track.id && isPlaying ? (
+                                                        <Pause className="h-3 w-3" />
+                                                    ) : (
+                                                        <Play className="h-3 w-3" />
+                                                    )}
+                                                </Button>
+                                            )}
+                                        </div>
+                                        
+                                        <div className="flex-1 min-w-0">
+                                            <h4 className="font-semibold truncate">
+                                                {track.title || "Unknown Title"}
+                                            </h4>
+                                            <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                                                {track.artist?.name || "Unknown Artist"}
+                                            </p>
+                                            <p className="text-xs text-gray-500 truncate">
+                                                {track.album?.title || "Unknown Album"}
+                                            </p>
+                                        </div>
+                                        
+                                        <div className="flex items-center gap-4 text-sm text-gray-500">
+                                            <span>{formatDuration(track.duration)}</span>
+                                            <Badge variant="outline" className="text-xs">
+                                                Just uploaded
+                                            </Badge>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            
+                            <div className="flex justify-center pt-4">
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setRecentlyUploaded([])}
+                                    className="text-sm"
+                                >
+                                    Clear List
+                                </Button>
+                            </div>
                         </CardContent>
                     </Card>
                 )}

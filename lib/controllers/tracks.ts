@@ -205,4 +205,29 @@ export class TracksController {
 
     return data as unknown as Track[];
   }
+
+  /**
+   * Lấy danh sách bài hát theo IDs
+   */
+  static async getTracksByIds(trackIds: number[]): Promise<Track[]> {
+    const supabase = createServerComponentClient<Database>({ cookies });
+
+    const { data, error } = await supabase
+      .from("tracks")
+      .select(`
+        *,
+        artist:artist_id(id, name, profile_image_url),
+        album:album_id(id, title, cover_image_url),
+        genre:genre_id(id, name)
+      `)
+      .in("id", trackIds)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error(`Error fetching tracks by IDs:`, error);
+      throw new Error(`Failed to fetch tracks: ${error.message}`);
+    }
+
+    return data as unknown as Track[];
+  }
 }

@@ -32,3 +32,29 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+import { NextRequest, NextResponse } from "next/server";
+import { TracksController } from "@/lib/controllers/tracks";
+
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const ids = searchParams.get('ids');
+    
+    if (ids) {
+      // Fetch specific tracks by IDs
+      const trackIds = ids.split(',').map(id => parseInt(id.trim())).filter(id => !isNaN(id));
+      const tracks = await TracksController.getTracksByIds(trackIds);
+      return NextResponse.json(tracks);
+    } else {
+      // Fetch all tracks
+      const tracks = await TracksController.getAllTracks();
+      return NextResponse.json(tracks);
+    }
+  } catch (error) {
+    console.error("Error fetching tracks:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch tracks" },
+      { status: 500 }
+    );
+  }
+}
