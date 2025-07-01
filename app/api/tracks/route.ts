@@ -1,27 +1,38 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { TracksController } from "@/lib/controllers/tracks";
-import { NextRequest } from "next/server";
 
 // Declare this route as dynamic since it uses search params
 export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   try {
-    // Use request.nextUrl.searchParams instead of new URL(request.url)
-    const { searchParams } = request.nextUrl;
+    const { searchParams } = new URL(request.url);
+    const ids = searchParams.get('ids');
     const albumId = searchParams.get("albumId");
     const artistId = searchParams.get("artistId");
 
+    // If specific track IDs are requested
+    if (ids) {
+      const trackIds = ids.split(',').map(id => parseInt(id.trim())).filter(id => !isNaN(id));
+      if (trackIds.length > 0) {
+        const tracks = await TracksController.getTracksByIds(trackIds);
+        return NextResponse.json(tracks);
+      }
+    }
+
+    // If album ID is specified
     if (albumId) {
       const tracks = await TracksController.getTracksByAlbum(Number(albumId));
       return NextResponse.json(tracks);
     }
 
+    // If artist ID is specified
     if (artistId) {
       const tracks = await TracksController.getTracksByArtist(Number(artistId));
       return NextResponse.json(tracks);
     }
 
+    // Default: get all tracks
     const tracks = await TracksController.getAllTracks();
     return NextResponse.json(tracks);
   } catch (error) {
@@ -29,32 +40,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       { error: "Failed to fetch tracks" },
       { status: 500 },
-    );
-  }
-}
-import { NextRequest, NextResponse } from "next/server";
-import { TracksController } from "@/lib/controllers/tracks";
-
-export async function GET(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const ids = searchParams.get('ids');
-    
-    if (ids) {
-      // Fetch specific tracks by IDs
-      const trackIds = ids.split(',').map(id => parseInt(id.trim())).filter(id => !isNaN(id));
-      const tracks = await TracksController.getTracksByIds(trackIds);
-      return NextResponse.json(tracks);
-    } else {
-      // Fetch all tracks
-      const tracks = await TracksController.getAllTracks();
-      return NextResponse.json(tracks);
-    }
-  } catch (error) {
-    console.error("Error fetching tracks:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch tracks" },
-      { status: 500 }
     );
   }
 }

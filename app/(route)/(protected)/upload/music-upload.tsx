@@ -536,6 +536,9 @@ export function MusicUpload() {
                 }
             }
             
+            // Reload albums and artists lists
+            await loadUserData();
+            
             setUploadFiles([]);
             setOwnershipConfirmed(false);
         } catch (error) {
