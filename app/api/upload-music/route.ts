@@ -19,23 +19,23 @@ export async function POST(request: NextRequest) {
       console.error("🔒 AUTH_ERROR:", authError);
       return NextResponse.json(
         { error: "Authentication required" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     const formData = await request.formData();
 
     // Extract form data
-    const audioFile = formData.get('audioFile') as File;
-    const title = formData.get('title') as string;
-    const genre = formData.get('genre') as string;
-    const album = formData.get('album') as string;
-    const artist = formData.get('artist') as string;
-    const description = formData.get('description') as string;
-    const isNewAlbum = formData.get('isNewAlbum') === 'true';
-    const isNewArtist = formData.get('isNewArtist') === 'true';
-    const albumImage = formData.get('albumImage') as File | null;
-    const artistImage = formData.get('artistImage') as File | null;
+    const audioFile = formData.get("audioFile") as File;
+    const title = formData.get("title") as string;
+    const genre = formData.get("genre") as string;
+    const album = formData.get("album") as string;
+    const artist = formData.get("artist") as string;
+    const description = formData.get("description") as string;
+    const isNewAlbum = formData.get("isNewAlbum") === "true";
+    const isNewArtist = formData.get("isNewArtist") === "true";
+    const albumImage = formData.get("albumImage") as File | null;
+    const artistImage = formData.get("artistImage") as File | null;
 
     console.log("🎵 UPLOAD_MUSIC_START:", {
       userEmail: session.user.email,
@@ -44,14 +44,14 @@ export async function POST(request: NextRequest) {
       album,
       artist,
       isNewAlbum,
-      isNewArtist
+      isNewArtist,
     });
 
     // Validate required fields
     if (!audioFile || !title || !genre || !album || !artist) {
       return NextResponse.json(
         { error: "Missing required fields" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -64,10 +64,7 @@ export async function POST(request: NextRequest) {
 
     if (genreError || !genreRecord) {
       console.error("Error finding genre:", genreError);
-      return NextResponse.json(
-        { error: "Genre not found" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Genre not found" }, { status: 400 });
     }
 
     // 2. Handle Artist
@@ -79,18 +76,20 @@ export async function POST(request: NextRequest) {
         try {
           const timestamp = Date.now();
           const artistImageFilename = `${timestamp}_${artistImage.name}`;
-          const artistImageBuffer = Buffer.from(await artistImage.arrayBuffer());
+          const artistImageBuffer = Buffer.from(
+            await artistImage.arrayBuffer(),
+          );
 
           artistImageUrl = await AWSHelper.uploadFile(
             artistImageBuffer,
             artistImageFilename,
-            'artists'
+            "artists",
           );
         } catch (error) {
           console.error("Error uploading artist image:", error);
           return NextResponse.json(
             { error: "Failed to upload artist image" },
-            { status: 500 }
+            { status: 500 },
           );
         }
       }
@@ -110,7 +109,7 @@ export async function POST(request: NextRequest) {
         console.error("Error creating artist:", artistError);
         return NextResponse.json(
           { error: "Failed to create artist" },
-          { status: 500 }
+          { status: 500 },
         );
       }
       artistRecord = newArtist;
@@ -126,7 +125,7 @@ export async function POST(request: NextRequest) {
       if (!existingArtist) {
         return NextResponse.json(
           { error: "Artist not found" },
-          { status: 404 }
+          { status: 404 },
         );
       }
       artistRecord = existingArtist;
@@ -146,13 +145,13 @@ export async function POST(request: NextRequest) {
           albumImageUrl = await AWSHelper.uploadFile(
             albumImageBuffer,
             albumImageFilename,
-            'albums'
+            "albums",
           );
         } catch (error) {
           console.error("Error uploading album image:", error);
           return NextResponse.json(
             { error: "Failed to upload album image" },
-            { status: 500 }
+            { status: 500 },
           );
         }
       }
@@ -173,7 +172,7 @@ export async function POST(request: NextRequest) {
         console.error("Error creating album:", albumError);
         return NextResponse.json(
           { error: "Failed to create album" },
-          { status: 500 }
+          { status: 500 },
         );
       }
       albumRecord = newAlbum;
@@ -187,10 +186,7 @@ export async function POST(request: NextRequest) {
         .single();
 
       if (!existingAlbum) {
-        return NextResponse.json(
-          { error: "Album not found" },
-          { status: 404 }
-        );
+        return NextResponse.json({ error: "Album not found" }, { status: 404 });
       }
       albumRecord = existingAlbum;
     }
@@ -205,13 +201,13 @@ export async function POST(request: NextRequest) {
       audioFileUrl = await AWSHelper.uploadFile(
         audioBuffer,
         audioFilename,
-        'tracks'
+        "tracks",
       );
     } catch (error) {
       console.error("Error uploading audio file:", error);
       return NextResponse.json(
         { error: "Failed to upload audio file" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -246,26 +242,24 @@ export async function POST(request: NextRequest) {
       console.error("Error creating track:", trackError);
       return NextResponse.json(
         { error: "Failed to create track" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
     console.log("✅ TRACK_UPLOADED_SUCCESS:", {
       trackId: newTrack.id,
-      title: newTrack.title
+      title: newTrack.title,
     });
 
     return NextResponse.json({
       message: "Track uploaded successfully",
       track: newTrack,
     });
-
   } catch (error) {
     console.error("💥 UPLOAD_MUSIC_ERROR:", error);
     return NextResponse.json(
       { error: "Failed to upload music" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
-```
