@@ -176,10 +176,46 @@
   border-left: 4px solid hsl(142 76% 36%) !important;
 }
 
+/* Add check icon for success notifications */
+[data-sonner-toast][data-type="success"]::before {
+  content: "✓" !important;
+  position: absolute !important;
+  left: 16px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  color: hsl(142 76% 36%) !important;
+  font-size: 18px !important;
+  font-weight: bold !important;
+  z-index: 10 !important;
+}
+
+/* Adjust padding for success notifications to make room for icon */
+[data-sonner-toast][data-type="success"] {
+  padding-left: 48px !important;
+}
+
 /* Error notification styling */
 [data-sonner-toast][data-type="error"] {
   background: hsl(220 15% 20%) !important;
   border-left: 4px solid hsl(0 84% 60%) !important;
+}
+
+/* Add error icon for error notifications */
+[data-sonner-toast][data-type="error"]::before {
+  content: "✕" !important;
+  position: absolute !important;
+  left: 16px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  color: hsl(0 84% 60%) !important;
+  font-size: 18px !important;
+  font-weight: bold !important;
+  z-index: 10 !important;
+}
+
+/* Adjust padding for error notifications to make room for icon */
+[data-sonner-toast][data-type="error"] {
+  padding-left: 48px !important;
 }
 
 /* Warning notification styling */
@@ -188,10 +224,46 @@
   border-left: 4px solid hsl(38 92% 50%) !important;
 }
 
+/* Add warning icon for warning notifications */
+[data-sonner-toast][data-type="warning"]::before {
+  content: "⚠" !important;
+  position: absolute !important;
+  left: 16px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  color: hsl(38 92% 50%) !important;
+  font-size: 18px !important;
+  font-weight: bold !important;
+  z-index: 10 !important;
+}
+
+/* Adjust padding for warning notifications to make room for icon */
+[data-sonner-toast][data-type="warning"] {
+  padding-left: 48px !important;
+}
+
 /* Info notification styling */
 [data-sonner-toast][data-type="info"] {
   background: hsl(220 15% 20%) !important;
   border-left: 4px solid hsl(217 91% 60%) !important;
+}
+
+/* Add info icon for info notifications */
+[data-sonner-toast][data-type="info"]::before {
+  content: "ℹ" !important;
+  position: absolute !important;
+  left: 16px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  color: hsl(217 91% 60%) !important;
+  font-size: 18px !important;
+  font-weight: bold !important;
+  z-index: 10 !important;
+}
+
+/* Adjust padding for info notifications to make room for icon */
+[data-sonner-toast][data-type="info"] {
+  padding-left: 48px !important;
 }
 
 /* Toast title and description styling */
