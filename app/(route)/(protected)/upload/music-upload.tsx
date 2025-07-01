@@ -215,7 +215,7 @@ export function MusicUpload() {
 
             Array.from(files).forEach((file) => {
                 // Validate file type
-                if (file.type.startsWith('audio/')) {
+                if (file.type.startsWith("audio/")) {
                     validFiles.push(file);
                 } else {
                     invalidFiles.push(file.name);
@@ -224,7 +224,9 @@ export function MusicUpload() {
 
             // Show error for invalid files
             if (invalidFiles.length > 0) {
-                showError(`🚫 Invalid file types: ${invalidFiles.join(', ')}. Please select audio files only.`);
+                showError(
+                    `🚫 Invalid file types: ${invalidFiles.join(", ")}. Please select audio files only.`,
+                );
             }
 
             // Add valid files
@@ -244,7 +246,9 @@ export function MusicUpload() {
                 setUploadFiles((prev) => [...prev, ...newUploadFiles]);
 
                 if (validFiles.length > 0) {
-                    showInfo(`📁 Added ${validFiles.length} audio file${validFiles.length > 1 ? 's' : ''} for upload`);
+                    showInfo(
+                        `📁 Added ${validFiles.length} audio file${validFiles.length > 1 ? "s" : ""} for upload`,
+                    );
                 }
             }
         }
@@ -458,7 +462,7 @@ export function MusicUpload() {
         }
 
         setIsLoading(true);
-        showProcessing("Uploading your music files...");
+        // showProcessing("Uploading your music files...");
 
         try {
             for (const fileData of uploadFiles) {

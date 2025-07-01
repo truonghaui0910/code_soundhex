@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     } = await supabase.auth.getSession();
 
     if (authError || !session) {
-      console.error("🔒 AUTH_ERROR:", authError);
+      console.error("AUTH_ERROR:", authError);
       return NextResponse.json(
         { error: "Authentication required" },
         { status: 401 },
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     const albumImage = formData.get("albumImage") as File | null;
     const artistImage = formData.get("artistImage") as File | null;
 
-    console.log("🎵 UPLOAD_MUSIC_START:", {
+    console.log("UPLOAD_MUSIC_START:", {
       userEmail: session.user.email,
       title,
       genre,
@@ -207,7 +207,7 @@ export async function POST(request: NextRequest) {
         .single();
 
       if (existingTrack) {
-        console.log("🔄 DUPLICATE_FILE_DETECTED:", {
+        console.log("DUPLICATE_FILE_DETECTED:", {
           existingTrackId: existingTrack.id,
           existingTitle: existingTrack.title,
           existingUserId: existingTrack.user_id,
@@ -288,7 +288,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log("✅ TRACK_UPLOADED_SUCCESS:", {
+    console.log("TRACK_UPLOADED_SUCCESS:", {
       trackId: newTrack.id,
       title: newTrack.title,
     });
@@ -298,7 +298,7 @@ export async function POST(request: NextRequest) {
       track: newTrack,
     });
   } catch (error) {
-    console.error("💥 UPLOAD_MUSIC_ERROR:", error);
+    console.error("UPLOAD_MUSIC_ERROR:", error);
     return NextResponse.json(
       { error: "Failed to upload music" },
       { status: 500 },

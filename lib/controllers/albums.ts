@@ -18,7 +18,7 @@ export interface Album {
 
 export class AlbumsController {
   static async getUserAlbums(userId: string): Promise<Album[]> {
-    console.log("🎵 AlbumsController.getUserAlbums - Starting fetch for user:", userId);
+    console.log("AlbumsController.getUserAlbums - Starting fetch for user:", userId);
     const supabase = createClientComponentClient<Database>();
     
     const { data, error } = await supabase
