@@ -192,18 +192,17 @@ export async function POST(request: NextRequest) {
       albumRecord = existingAlbum;
     }
 
-    // 4. Check for duplicate files using MD5 hash
+    // 4. Check for duplicate files using MD5 hash (system-wide)
     let audioBuffer: Buffer;
     let fileHash: string;
     try {
       audioBuffer = Buffer.from(await audioFile.arrayBuffer());
       fileHash = FileHashService.calculateMD5(audioBuffer);
       
-      // Check if file with same hash already exists for this user
+      // Check if file with same hash already exists in the entire system
       const { data: existingTrack, error: duplicateError } = await supabase
         .from("tracks")
-        .select("id, title, artist:artist_id(name)")
-        .eq("user_id", session.user.id)
+        .select("id, title, artist:artist_id(name), user_id")
         .eq("file_hash", fileHash)
         .single();
 
@@ -211,13 +210,15 @@ export async function POST(request: NextRequest) {
         console.log("🔄 DUPLICATE_FILE_DETECTED:", {
           existingTrackId: existingTrack.id,
           existingTitle: existingTrack.title,
+          existingUserId: existingTrack.user_id,
           newTitle: title,
+          newUserId: session.user.id,
           fileHash: fileHash
         });
         
         return NextResponse.json(
           { 
-            error: "This audio file has already been uploaded",
+            error: "This audio file already exists in the system",
             duplicate: {
               id: existingTrack.id,
               title: existingTrack.title,

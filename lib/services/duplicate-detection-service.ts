@@ -15,7 +15,7 @@ export class DuplicateDetectionService {
   private static supabase = createClientComponentClient<Database>();
 
   /**
-   * Check if file already exists for current user
+   * Check if file already exists in the system (system-wide check)
    */
   static async checkDuplicate(file: File, userId: string): Promise<DuplicateInfo> {
     try {
@@ -27,9 +27,9 @@ export class DuplicateDetectionService {
           id, 
           title, 
           file_hash,
+          user_id,
           artist:artist_id(name)
         `)
-        .eq("user_id", userId)
         .eq("file_hash", fileHash)
         .single();
 
