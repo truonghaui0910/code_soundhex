@@ -525,14 +525,15 @@ export function MusicUpload() {
                     const tracksResponse = await fetch(`/api/tracks?ids=${trackIds.join(',')}`);
                     if (tracksResponse.ok) {
                         const completeTracksData = await tracksResponse.json();
-                        setRecentlyUploaded(completeTracksData);
+                        // Append new tracks to existing recently uploaded list
+                        setRecentlyUploaded(prev => [...prev, ...completeTracksData]);
                     } else {
                         // Fallback to basic track info if detailed fetch fails
-                        setRecentlyUploaded(uploadedTracks);
+                        setRecentlyUploaded(prev => [...prev, ...uploadedTracks]);
                     }
                 } catch (error) {
                     console.error("Error fetching complete track data:", error);
-                    setRecentlyUploaded(uploadedTracks);
+                    setRecentlyUploaded(prev => [...prev, ...uploadedTracks]);
                 }
             }
             
