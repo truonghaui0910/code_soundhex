@@ -225,7 +225,7 @@ export function MusicUpload() {
             // Show error for invalid files
             if (invalidFiles.length > 0) {
                 showError(
-                    `🚫 Invalid file types: ${invalidFiles.join(", ")}. Please select audio files only.`,
+                    `Invalid file types: ${invalidFiles.join(", ")}. Please select audio files only.`,
                 );
             }
 
@@ -247,7 +247,7 @@ export function MusicUpload() {
 
                 if (validFiles.length > 0) {
                     showInfo(
-                        `📁 Added ${validFiles.length} audio file${validFiles.length > 1 ? "s" : ""} for upload`,
+                        `Added ${validFiles.length} audio file${validFiles.length > 1 ? "s" : ""} for upload`,
                     );
                 }
             }
@@ -298,7 +298,7 @@ export function MusicUpload() {
 
     const handleSpotifySubmit = async () => {
         if (!spotifyUrl.trim()) {
-            showError("📝 Please enter a Spotify URL");
+            showError("Please enter a Spotify URL");
             return;
         }
 
@@ -337,7 +337,7 @@ export function MusicUpload() {
         } catch (error) {
             console.error("Error:", error);
             showError({
-                title: "❌ Spotify Data Error",
+                title: "Spotify Data Error",
                 message:
                     "Cannot fetch information from Spotify. Please check the URL and try again.",
             });
@@ -391,7 +391,7 @@ export function MusicUpload() {
         } catch (error) {
             console.error("Error loading album tracks:", error);
             showError({
-                title: "❌ Album Tracks Error",
+                title: "Album Tracks Error",
                 message: "Cannot load track list from album. Please try again.",
             });
         } finally {
@@ -432,7 +432,7 @@ export function MusicUpload() {
 
     const handleUploadSubmit = async () => {
         if (uploadFiles.length === 0) {
-            showError("📝 Please select at least one audio file");
+            showError("Please select at least one audio file");
             return;
         }
 
@@ -441,21 +441,21 @@ export function MusicUpload() {
             const file = uploadFiles[i];
             if (!file.title || !file.genre || !file.album || !file.artist) {
                 showError(
-                    `📝 Please fill all required fields for file ${i + 1}: ${file.file.name}`,
+                    `Please fill all required fields for file ${i + 1}: ${file.file.name}`,
                 );
                 return;
             }
 
             if (file.isNewAlbum && !file.albumImage) {
                 showError(
-                    `📝 Please upload album image for file ${i + 1}: ${file.file.name}`,
+                    `Please upload album image for file ${i + 1}: ${file.file.name}`,
                 );
                 return;
             }
 
             if (file.isNewArtist && !file.artistImage) {
                 showError(
-                    `📝 Please upload artist image for file ${i + 1}: ${file.file.name}`,
+                    `Please upload artist image for file ${i + 1}: ${file.file.name}`,
                 );
                 return;
             }
@@ -508,14 +508,14 @@ export function MusicUpload() {
             }
 
             dismissNotifications();
-            showInfo("🎉 All music files uploaded successfully!");
+            showInfo("All music files uploaded successfully!");
             setUploadFiles([]);
             setOwnershipConfirmed(false);
         } catch (error) {
             dismissNotifications();
             console.error("Upload error:", error);
             showError({
-                title: "❌ Upload Failed",
+                title: "Upload Failed",
                 message: `Cannot upload files: ${error instanceof Error ? error.message : "Unknown error"}`,
             });
         } finally {
@@ -525,7 +525,7 @@ export function MusicUpload() {
 
     const submitSpotifyTracks = async () => {
         if (selectedTracks.size === 0) {
-            showError("🎵 Please select at least one song to import");
+            showError("Please select at least one song to import");
             return;
         }
 
@@ -663,7 +663,7 @@ export function MusicUpload() {
         } catch (error) {
             console.error("Import error:", error);
             showError({
-                title: "❌ Import Failed",
+                title: "Import Failed",
                 message: `Cannot import tracks: ${error instanceof Error ? error.message : "Unknown error"}`,
             });
         } finally {
@@ -683,7 +683,7 @@ export function MusicUpload() {
 
     const handlePlayTrack = (track: SpotifyTrack) => {
         if (!track.preview_url) {
-            showError("🔇 Không có bản preview cho bài hát này");
+            showError("Không có bản preview cho bài hát này");
             return;
         }
 
