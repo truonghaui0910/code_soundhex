@@ -118,8 +118,21 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    const updateData = await updateResponse.json();
-    console.log('Update data:', updateData);
+    // Handle empty or non-JSON response
+    let updateData = null;
+    const responseText = await updateResponse.text();
+    if (responseText.trim()) {
+      try {
+        updateData = JSON.parse(responseText);
+        console.log('Update data:', updateData);
+      } catch (parseError) {
+        console.warn('Response is not valid JSON, treating as success:', responseText);
+        updateData = { success: true, rawResponse: responseText };
+      }
+    } else {
+      console.log('Empty response from update API, treating as success');
+      updateData = { success: true };
+    }
     
     // Return success response
     return NextResponse.json({
