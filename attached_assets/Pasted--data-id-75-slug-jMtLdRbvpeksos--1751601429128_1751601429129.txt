@@ -1,0 +1,219 @@
+{
+    "data": [
+        {
+            "id": 75,
+            "slug": "jMtLdRbvpeksos",
+            "source": "api",
+            "submitters_order": "preserved",
+            "expire_at": null,
+            "created_at": "2025-07-04T03:53:47.487Z",
+            "updated_at": "2025-07-04T03:53:47.487Z",
+            "archived_at": null,
+            "audit_log_url": null,
+            "combined_document_url": null,
+            "submitters": [
+                {
+                    "id": 80,
+                    "slug": "gKFRbWDs4QReKP",
+                    "uuid": "021c4851-1a41-40f0-ae31-0db420d1bdf4",
+                    "name": null,
+                    "email": "truongpv0910@gmail.com",
+                    "phone": null,
+                    "completed_at": null,
+                    "declined_at": null,
+                    "external_id": null,
+                    "submission_id": 75,
+                    "metadata": {},
+                    "opened_at": null,
+                    "sent_at": null,
+                    "created_at": "2025-07-04T03:53:47.492Z",
+                    "updated_at": "2025-07-04T03:53:47.492Z",
+                    "status": "awaiting",
+                    "application_key": null,
+                    "preferences": {
+                        "send_email": true,
+                        "send_sms": false
+                    },
+                    "role": "SoundHex"
+                },
+                {
+                    "id": 79,
+                    "slug": "56TpFvkpXWK3cu",
+                    "uuid": "20b4e1e8-c59c-423a-beef-ff0f664338d3",
+                    "name": "John",
+                    "email": "truonghaui0910@gmail.com",
+                    "phone": null,
+                    "completed_at": null,
+                    "declined_at": null,
+                    "external_id": null,
+                    "submission_id": 75,
+                    "metadata": {},
+                    "opened_at": "2025-07-04T03:54:29.537Z",
+                    "sent_at": "2025-07-04T03:53:47.485Z",
+                    "created_at": "2025-07-04T03:53:47.490Z",
+                    "updated_at": "2025-07-04T03:54:50.004Z",
+                    "status": "opened",
+                    "application_key": null,
+                    "preferences": {
+                        "send_email": true,
+                        "send_sms": false
+                    },
+                    "role": "Artist"
+                }
+            ],
+            "template": {
+                "id": 3,
+                "name": "(clone) - Digital Music and Media Services Agreement",
+                "external_id": null,
+                "created_at": "2025-04-11T04:34:15.721Z",
+                "updated_at": "2025-07-03T10:56:45.004Z",
+                "folder_name": "Default"
+            },
+            "created_by_user": {
+                "id": 1,
+                "email": "noreply@360digital.fm",
+                "first_name": "360",
+                "last_name": "Digital"
+            },
+            "status": "pending",
+            "completed_at": null
+        },
+        {
+            "id": 72,
+            "slug": "oZszgs2DZ1VxX5",
+            "source": "api",
+            "submitters_order": "preserved",
+            "expire_at": null,
+            "created_at": "2025-07-03T10:27:15.152Z",
+            "updated_at": "2025-07-03T10:51:49.162Z",
+            "archived_at": null,
+            "audit_log_url": "https://docs.360digital.fm/file/WyI1MDIzY2I2Mi0wMjIyLTQzMjItYTM4Ni1mNjE1NWRiNjA3NGEiLCJibG9iIl0--cbd146108fbdbf9b60fb1be818fa34ac8f715800cc35097b8470cd6da8c99cdb/Audit%20Log%20-%20(clone)%20-%20Digital%20Music%20and%20Media%20Services%20Agreement.pdf",
+            "combined_document_url": null,
+            "submitters": [
+                {
+                    "id": 74,
+                    "slug": "enqr2XkjMV8Hkh",
+                    "uuid": "021c4851-1a41-40f0-ae31-0db420d1bdf4",
+                    "name": null,
+                    "email": "truongpv0910@gmail.com",
+                    "phone": null,
+                    "completed_at": "2025-07-03T10:51:48.604Z",
+                    "declined_at": null,
+                    "external_id": null,
+                    "submission_id": 72,
+                    "metadata": {},
+                    "opened_at": "2025-07-03T10:51:39.678Z",
+                    "sent_at": "2025-07-03T10:31:36.972Z",
+                    "created_at": "2025-07-03T10:27:15.155Z",
+                    "updated_at": "2025-07-03T10:51:48.606Z",
+                    "status": "completed",
+                    "application_key": null,
+                    "preferences": {
+                        "send_email": true,
+                        "send_sms": false
+                    },
+                    "role": "SoundHex"
+                },
+                {
+                    "id": 73,
+                    "slug": "FBjasGteqzyU68",
+                    "uuid": "20b4e1e8-c59c-423a-beef-ff0f664338d3",
+                    "name": "John Doe",
+                    "email": "truonghaui0910@gmail.com",
+                    "phone": null,
+                    "completed_at": "2025-07-03T10:31:35.510Z",
+                    "declined_at": null,
+                    "external_id": null,
+                    "submission_id": 72,
+                    "metadata": {},
+                    "opened_at": "2025-07-03T17:35:32.376Z",
+                    "sent_at": "2025-07-03T10:27:15.147Z",
+                    "created_at": "2025-07-03T10:27:15.154Z",
+                    "updated_at": "2025-07-03T17:35:32.378Z",
+                    "status": "completed",
+                    "application_key": null,
+                    "preferences": {
+                        "send_email": true,
+                        "send_sms": false
+                    },
+                    "role": "Artist"
+                }
+            ],
+            "template": {
+                "id": 3,
+                "name": "(clone) - Digital Music and Media Services Agreement",
+                "external_id": null,
+                "created_at": "2025-04-11T04:34:15.721Z",
+                "updated_at": "2025-07-03T10:56:45.004Z",
+                "folder_name": "Default"
+            },
+            "created_by_user": {
+                "id": 1,
+                "email": "noreply@360digital.fm",
+                "first_name": "360",
+                "last_name": "Digital"
+            },
+            "status": "completed",
+            "completed_at": "2025-07-03T10:51:48.604Z"
+        },
+        {
+            "id": 55,
+            "slug": "vnjdHSehBGRgT1",
+            "source": "api",
+            "submitters_order": "random",
+            "expire_at": null,
+            "created_at": "2025-04-15T03:37:49.032Z",
+            "updated_at": "2025-04-15T03:38:40.995Z",
+            "archived_at": null,
+            "audit_log_url": "https://docs.360digital.fm/file/WyI2ZTYxNGNmMC01NWQ5LTQxOWYtYjNjZC1jZjg5YmMwNDQ0Y2IiLCJibG9iIl0--b81cfec65338987504b1ac0314b4eec66076c72bb1aefd49f11b3f2474cf5f7d/Audit%20Log%20-%20(clone)%20-%20Digital%20Music%20and%20Media%20Services%20Agreement.pdf",
+            "combined_document_url": null,
+            "submitters": [
+                {
+                    "id": 55,
+                    "slug": "5uh1czNoWPdS78",
+                    "uuid": "20b4e1e8-c59c-423a-beef-ff0f664338d3",
+                    "name": null,
+                    "email": "truonghaui0910@gmail.com",
+                    "phone": null,
+                    "completed_at": "2025-04-15T03:38:40.133Z",
+                    "declined_at": null,
+                    "external_id": null,
+                    "submission_id": 55,
+                    "metadata": {},
+                    "opened_at": "2025-04-15T03:37:59.737Z",
+                    "sent_at": "2025-04-15T03:37:49.029Z",
+                    "created_at": "2025-04-15T03:37:49.034Z",
+                    "updated_at": "2025-04-15T03:38:40.136Z",
+                    "status": "completed",
+                    "application_key": null,
+                    "preferences": {
+                        "send_email": true,
+                        "send_sms": false
+                    },
+                    "role": "Artist"
+                }
+            ],
+            "template": {
+                "id": 3,
+                "name": "(clone) - Digital Music and Media Services Agreement",
+                "external_id": null,
+                "created_at": "2025-04-11T04:34:15.721Z",
+                "updated_at": "2025-07-03T10:56:45.004Z",
+                "folder_name": "Default"
+            },
+            "created_by_user": {
+                "id": 1,
+                "email": "noreply@360digital.fm",
+                "first_name": "360",
+                "last_name": "Digital"
+            },
+            "status": "completed",
+            "completed_at": "2025-04-15T03:38:40.133Z"
+        }
+    ],
+    "pagination": {
+        "count": 3,
+        "next": 55,
+        "prev": 75
+    }
+}
