@@ -154,19 +154,11 @@ export default function AgreementsList() {
           displayText: "Completed"
         };
       case "waiting_for_other_party":
-        // Find the role of the person who hasn't signed yet
-        let waitingForRole = "other party";
-        if (agreement?.submitters) {
-          const pendingSubmitter = agreement.submitters.find(s => s.status?.toLowerCase() === 'pending');
-          if (pendingSubmitter?.role) {
-            waitingForRole = pendingSubmitter.role;
-          }
-        }
         return {
           color:
             "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-700",
           icon: Clock,
-          displayText: `Waiting for ${waitingForRole}`
+          displayText: "Waiting for SoundHex"
         };
       case "pending":
         return {
