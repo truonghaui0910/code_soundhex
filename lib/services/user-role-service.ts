@@ -26,11 +26,21 @@ export class UserRoleService {
         .eq('email', email)
         .single();
 
-      if (error || !data) {
-        console.log('No role found for email:', email);
+      if (error) {
+        if (error.code === 'PGRST116') {
+          console.log(`No role record found for email: ${email}, using default 'user' role`);
+        } else {
+          console.error('Error getting user role:', error);
+        }
         return 'user'; // Default role
       }
 
+      if (!data) {
+        console.log(`No role data found for email: ${email}, using default 'user' role`);
+        return 'user';
+      }
+
+      console.log(`Found role '${data.role}' for email: ${email}`);
       return data.role as UserRole;
     } catch (error) {
       console.error('Error getting user role:', error);
@@ -70,16 +80,48 @@ export class UserRoleService {
     try {
       const supabase = createRouteHandlerClient({ cookies });
       
-      const { error } = await supabase
+      // First check if user exists
+      const { data: existingUser, error: checkError } = await supabase
         .from('user_roles')
-        .update({ role: newRole, updated_at: new Date().toISOString() })
-        .eq('email', email);
+        .select('id')
+        .eq('email', email)
+        .single();
 
-      if (error) {
-        console.error('Error updating user role:', error);
+      if (checkError && checkError.code !== 'PGRST116') {
+        console.error('Error checking user existence:', checkError);
         return false;
       }
 
+      if (existingUser) {
+        // User exists, update role
+        const { error } = await supabase
+          .from('user_roles')
+          .update({ role: newRole, updated_at: new Date().toISOString() })
+          .eq('email', email);
+
+        if (error) {
+          console.error('Error updating user role:', error);
+          return false;
+        }
+      } else {
+        // User doesn't exist, insert new record
+        const { error } = await supabase
+          .from('user_roles')
+          .insert({
+            email: email,
+            role: newRole,
+            user_id: email, // Use email as user_id temporarily
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          });
+
+        if (error) {
+          console.error('Error creating user role:', error);
+          return false;
+        }
+      }
+
+      console.log(`Successfully updated/created role ${newRole} for ${email}`);
       return true;
     } catch (error) {
       console.error('Error updating user role:', error);
