@@ -72,85 +72,7 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // Step 1: Call the first API to get the submission_id
-    const submissionApiStart = Date.now();
-    const submissionRequestBody = {
-      template_id: 3,
-      emails: userEmail
-    };
-    
-    agreementLogger.logInfo('AGREEMENT_CREATE_API1_START', {
-      userEmail,
-      requestData: submissionRequestBody,
-      duration: Date.now() - startTime
-    });
-
-    const submissionResponse = await fetch('https://docs.360digital.fm/api/submissions/emails', {
-      method: 'POST',
-      headers: {
-        'X-Auth-Token': process.env.FORM_SUBMISSION_API_TOKEN!,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(submissionRequestBody)
-    });
-    
-    if (!submissionResponse.ok) {
-      const errorText = await submissionResponse.text();
-      apiCalls.push({
-        url: 'https://docs.360digital.fm/api/submissions/emails',
-        method: 'POST',
-        status: submissionResponse.status,
-        response: errorText,
-        duration: Date.now() - submissionApiStart
-      });
-      
-      agreementLogger.logError('AGREEMENT_CREATE_API1_ERROR', `Submission API error: ${submissionResponse.status}`, {
-        userEmail,
-        requestData: submissionRequestBody,
-        responseData: errorText,
-        apiCalls,
-        duration: Date.now() - startTime
-      });
-      
-      return NextResponse.json(
-        { error: `Failed to create submission: ${submissionResponse.status}` },
-        { status: 500 }
-      );
-    }
-    
-    const submissionData = await submissionResponse.json();
-    
-    apiCalls.push({
-      url: 'https://docs.360digital.fm/api/submissions/emails',
-      method: 'POST',
-      status: submissionResponse.status,
-      response: submissionData,
-      duration: Date.now() - submissionApiStart
-    });
-    
-    agreementLogger.logInfo('AGREEMENT_CREATE_API1_SUCCESS', {
-      userEmail,
-      requestData: submissionRequestBody,
-      responseData: submissionData,
-      duration: Date.now() - startTime
-    });
-    
-    if (!submissionData || !submissionData[0] || !submissionData[0].submission_id) {
-      agreementLogger.logError('AGREEMENT_CREATE_INVALID_SUBMISSION_DATA', 'Invalid submission data received', {
-        userEmail,
-        responseData: submissionData,
-        apiCalls,
-        duration: Date.now() - startTime
-      });
-      return NextResponse.json(
-        { error: "Invalid submission data received" },
-        { status: 500 }
-      );
-    }
-    
-    submissionId = submissionData[0].submission_id;
-    
-    // Step 2: Prepare the values for the PATCH request
+    // Step 1: Prepare the values for the request
     const values: { [key: string]: string | boolean } = {};
     
     // Add checkbox values
@@ -167,98 +89,101 @@ export async function POST(request: NextRequest) {
       }
     });
     
-    agreementLogger.logInfo('AGREEMENT_CREATE_VALUES_PREPARED', {
-      userEmail,
-      submissionId,
-      requestData: values,
-      duration: Date.now() - startTime
-    });
-    
-    // Step 3: Call the second API to update the submitter with the values
-    const updateApiStart = Date.now();
-    const updateRequestBody = {
-      values: JSON.stringify(values)
+    // Step 2: Call the API to create submission
+    const submissionApiStart = Date.now();
+    const submissionRequestBody = {
+      template_id: 3,
+      submitters: [
+        {
+          name: userEmail,
+          role: "Artist",
+          email: userEmail,
+          values: values
+        },
+        {
+          role: "Soundhex",
+          email: process.env.AGREEMENT_EMAIL_ADMIN!
+        }
+      ]
     };
     
-    agreementLogger.logInfo('AGREEMENT_CREATE_API2_START', {
+    agreementLogger.logInfo('AGREEMENT_CREATE_API_START', {
       userEmail,
-      submissionId,
-      requestData: updateRequestBody,
+      requestData: submissionRequestBody,
       duration: Date.now() - startTime
     });
 
-    const updateResponse = await fetch(`http://178.156.150.2:8083/items/submitters/${submissionId}`, {
-      method: 'PATCH',
+    const submissionResponse = await fetch('https://docs.360digital.fm/api/submissions', {
+      method: 'POST',
       headers: {
-        'Authorization': `Bearer ${process.env.TEMPLATES_API_BEARER_TOKEN!}`,
+        'X-Auth-Token': process.env.FORM_SUBMISSION_API_TOKEN!,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(updateRequestBody)
+      body: JSON.stringify(submissionRequestBody)
     });
     
-    if (!updateResponse.ok) {
-      const errorText = await updateResponse.text();
+    if (!submissionResponse.ok) {
+      const errorText = await submissionResponse.text();
       apiCalls.push({
-        url: `http://178.156.150.2:8083/items/submitters/${submissionId}`,
-        method: 'PATCH',
-        status: updateResponse.status,
+        url: 'https://docs.360digital.fm/api/submissions',
+        method: 'POST',
+        status: submissionResponse.status,
         response: errorText,
-        duration: Date.now() - updateApiStart
+        duration: Date.now() - submissionApiStart
       });
       
-      agreementLogger.logError('AGREEMENT_CREATE_API2_ERROR', `Update API error: ${updateResponse.status}`, {
+      agreementLogger.logError('AGREEMENT_CREATE_API_ERROR', `Submission API error: ${submissionResponse.status}`, {
         userEmail,
-        submissionId,
-        requestData: updateRequestBody,
+        requestData: submissionRequestBody,
         responseData: errorText,
         apiCalls,
         duration: Date.now() - startTime
       });
       
       return NextResponse.json(
-        { error: `Failed to update submission: ${updateResponse.status}` },
+        { error: `Failed to create submission: ${submissionResponse.status}` },
         { status: 500 }
       );
     }
     
-    // Handle empty or non-JSON response
-    let updateData = null;
-    const responseText = await updateResponse.text();
-    if (responseText.trim()) {
-      try {
-        updateData = JSON.parse(responseText);
-      } catch (parseError) {
-        updateData = { success: true, rawResponse: responseText };
-        agreementLogger.logWarn('AGREEMENT_CREATE_API2_NON_JSON', {
-          userEmail,
-          submissionId,
-          responseData: responseText,
-          duration: Date.now() - startTime
-        });
-      }
-    } else {
-      updateData = { success: true };
-      agreementLogger.logWarn('AGREEMENT_CREATE_API2_EMPTY_RESPONSE', {
-        userEmail,
-        submissionId,
-        duration: Date.now() - startTime
-      });
-    }
+    const submissionData = await submissionResponse.json();
     
     apiCalls.push({
-      url: `http://178.156.150.2:8083/items/submitters/${submissionId}`,
-      method: 'PATCH',
-      status: updateResponse.status,
-      response: updateData,
-      duration: Date.now() - updateApiStart
+      url: 'https://docs.360digital.fm/api/submissions',
+      method: 'POST',
+      status: submissionResponse.status,
+      response: submissionData,
+      duration: Date.now() - submissionApiStart
     });
+    
+    agreementLogger.logInfo('AGREEMENT_CREATE_API_SUCCESS', {
+      userEmail,
+      requestData: submissionRequestBody,
+      responseData: submissionData,
+      duration: Date.now() - startTime
+    });
+    
+    if (!submissionData || !submissionData.id) {
+      agreementLogger.logError('AGREEMENT_CREATE_INVALID_SUBMISSION_DATA', 'Invalid submission data received', {
+        userEmail,
+        responseData: submissionData,
+        apiCalls,
+        duration: Date.now() - startTime
+      });
+      return NextResponse.json(
+        { error: "Invalid submission data received" },
+        { status: 500 }
+      );
+    }
+    
+    submissionId = submissionData.id;
     
     const finalResponse = {
       success: true,
       message: "Agreement saved successfully",
       data: {
         submissionId,
-        values
+        submissionData
       }
     };
     
