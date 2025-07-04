@@ -89,9 +89,6 @@ export async function POST(request: NextRequest) {
       }
     });
     
-    // Add current date
-    values["sign-date"] = new Date().toISOString().split('T')[0];
-    
     // Step 2: Call the API to create submission
     const submissionApiStart = Date.now();
     const submissionRequestBody = {
