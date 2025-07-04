@@ -21,7 +21,6 @@ export async function POST(request: NextRequest) {
   let userEmail: string | undefined;
   let requestBody: SaveAgreementRequest | undefined;
   let submissionId: string | undefined;
-  const apiCalls: any[] = [];
 
   try {
     // Get the current user's email
@@ -119,19 +118,11 @@ export async function POST(request: NextRequest) {
     
     if (!submissionResponse.ok) {
       const errorText = await submissionResponse.text();
-      apiCalls.push({
-        url: 'https://docs.360digital.fm/api/submissions',
-        method: 'POST',
-        status: submissionResponse.status,
-        response: errorText,
-        duration: Date.now() - submissionApiStart
-      });
       
       agreementLogger.logError('AGREEMENT_CREATE_API_ERROR', `Submission API error: ${submissionResponse.status}`, {
         userEmail,
         requestData: submissionRequestBody,
         responseData: errorText,
-        apiCalls,
         duration: Date.now() - startTime
       });
       
@@ -142,14 +133,6 @@ export async function POST(request: NextRequest) {
     }
     
     const submissionData = await submissionResponse.json();
-    
-    apiCalls.push({
-      url: 'https://docs.360digital.fm/api/submissions',
-      method: 'POST',
-      status: submissionResponse.status,
-      response: submissionData,
-      duration: Date.now() - submissionApiStart
-    });
     
     agreementLogger.logInfo('AGREEMENT_CREATE_API_SUCCESS', {
       userEmail,
@@ -163,7 +146,6 @@ export async function POST(request: NextRequest) {
       agreementLogger.logError('AGREEMENT_CREATE_INVALID_SUBMISSION_DATA', 'Invalid submission data received', {
         userEmail,
         responseData: submissionData,
-        apiCalls,
         duration: Date.now() - startTime
       });
       return NextResponse.json(
@@ -188,7 +170,6 @@ export async function POST(request: NextRequest) {
       submissionId,
       requestData: requestBody,
       responseData: finalResponse,
-      apiCalls,
       duration: Date.now() - startTime
     });
     
@@ -202,7 +183,6 @@ export async function POST(request: NextRequest) {
       userEmail,
       submissionId,
       requestData: requestBody,
-      apiCalls,
       duration: Date.now() - startTime
     });
     
