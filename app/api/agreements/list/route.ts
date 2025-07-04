@@ -46,6 +46,12 @@ export async function GET(request: NextRequest) {
     
     const data = await response.json();
     
+    // Validate data is array before filtering
+    if (!Array.isArray(data)) {
+      console.log("API response is not an array:", data);
+      return NextResponse.json([]);
+    }
+    
     // Filter sensitive data for security
     const filteredData = data.map((agreement: any) => ({
       id: agreement.id,
