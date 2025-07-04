@@ -25,10 +25,20 @@ export async function GET(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    // Import UserRoleService to check role
+    const { UserRoleService } = await import("@/lib/services/user-role-service");
+    const userRole = await UserRoleService.getUserRoleByEmail(userEmail);
+    
+    // Use admin email for admin users, regular email for others
+    const queryEmail = userRole === 'admin' 
+      ? (process.env.AGREEMENT_EMAIL_ADMIN || userEmail)
+      : userEmail;
     
     // Call the external API to get agreements
+    const apiBaseUrl = process.env.FORM_SUBMISSION_API_BASE_URL || 'https://docs.360digital.fm/api';
     const response = await fetch(
-      `https://docs.360digital.fm/api/submissions?q=${encodeURIComponent(userEmail)}&limit=100`,
+      `${apiBaseUrl}/submissions?q=${encodeURIComponent(queryEmail)}&limit=100`,
       {
         headers: {
           'X-Auth-Token': process.env.FORM_SUBMISSION_API_TOKEN!
@@ -46,8 +56,64 @@ export async function GET(request: NextRequest) {
     
     const data = await response.json();
     
-    // Return the data
-    return NextResponse.json(data);
+    // Handle API response structure - data is wrapped in data property
+    let agreementsArray = data;
+    
+    // Check if data has nested data property (API returns { data: [...], pagination: {...} })
+    if (data && data.data && Array.isArray(data.data)) {
+      agreementsArray = data.data;
+    } else if (!Array.isArray(data)) {
+      console.log("API response is not an array:", data);
+      return NextResponse.json([]);
+    }
+    
+    // Filter sensitive data for security and update status logic
+    const filteredData = agreementsArray.map((agreement: any) => {
+      // Find current user's submitter
+      const currentUserSubmitter = agreement.submitters.find((s: any) => s.email === userEmail);
+      
+      // Determine display status based on current user's submission status
+      let displayStatus = agreement.status;
+      let userHasCompleted = false;
+      
+      if (currentUserSubmitter) {
+        userHasCompleted = currentUserSubmitter.status?.toLowerCase() === 'completed';
+        
+        // If current user has completed but overall status is still pending
+        // it means they're waiting for the other party to sign
+        if (userHasCompleted && agreement.status?.toLowerCase() === 'pending') {
+          displayStatus = 'waiting_for_other_party';
+        }
+      }
+      
+      return {
+        id: agreement.id,
+        created_at: agreement.created_at,
+        updated_at: agreement.updated_at,
+        status: displayStatus,
+        completed_at: agreement.completed_at,
+        audit_log_url: agreement.audit_log_url,
+        combined_document_url: agreement.combined_document_url,
+        template: agreement.template,
+        created_by_user: agreement.created_by_user,
+        // Add user completion status for frontend logic
+        user_has_completed: userHasCompleted,
+        // Filter submitters to only include slug for current user
+        submitters: agreement.submitters.map((submitter: any) => ({
+          id: submitter.id,
+          email: submitter.email,
+          status: submitter.status,
+          completed_at: submitter.completed_at,
+          role: submitter.role,
+          // Only include slug for current user, remove for others
+          ...(submitter.email === userEmail ? { slug: submitter.slug } : {})
+          // Remove sensitive fields: uuid, name for all users
+        }))
+      };
+    });
+    
+    // Return the filtered data
+    return NextResponse.json(filteredData);
     
   } catch (err) {
     console.error("Error fetching agreements:", err);
