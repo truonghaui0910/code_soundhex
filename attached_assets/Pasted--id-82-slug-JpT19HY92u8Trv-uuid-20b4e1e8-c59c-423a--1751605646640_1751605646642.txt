@@ -1,0 +1,147 @@
+[
+    {
+        "id": 82,
+        "slug": "JpT19HY92u8Trv",
+        "uuid": "20b4e1e8-c59c-423a-beef-ff0f664338d3",
+        "name": "John",
+        "email": "truonghaui0910@gmail.com",
+        "phone": null,
+        "completed_at": null,
+        "declined_at": null,
+        "external_id": null,
+        "submission_id": 77,
+        "metadata": {},
+        "opened_at": null,
+        "sent_at": "2025-07-04T04:28:26.419Z",
+        "created_at": "2025-07-04T04:28:26.424Z",
+        "updated_at": "2025-07-04T04:28:26.428Z",
+        "status": "sent",
+        "application_key": null,
+        "values": [
+            {
+                "field": "DSP Distribution",
+                "value": false
+            },
+            {
+                "field": "UGC Royalties",
+                "value": true
+            },
+            {
+                "field": "Channel Network Promo",
+                "value": true
+            },
+            {
+                "field": "Licensing Services SoundHex",
+                "value": true
+            },
+            {
+                "field": "Licensing Services Magazine/Blog PR",
+                "value": true
+            },
+            {
+                "field": "Licensing Services Radio Promotion",
+                "value": true
+            },
+            {
+                "field": "Content Hosting Services (Required)",
+                "value": true
+            },
+            {
+                "field": "Licensing Services",
+                "value": true
+            },
+            {
+                "field": "Marketing and Promotion",
+                "value": true
+            },
+            {
+                "field": "Digital Distribution",
+                "value": true
+            },
+            {
+                "field": "Publishing Administration",
+                "value": true
+            },
+            {
+                "field": "User-Generated Content Monetization",
+                "value": true
+            },
+            {
+                "field": "Channel and Social Media Management",
+                "value": true
+            },
+            {
+                "field": "Publishing Royalties",
+                "value": true
+            },
+            {
+                "field": "Youtube Artist Channel Management",
+                "value": true
+            },
+            {
+                "field": "Meta Social Media Profile Management",
+                "value": true
+            },
+            {
+                "field": "Video Content Creation",
+                "value": true
+            },
+            {
+                "field": "Content Hosting Services",
+                "value": true
+            },
+            {
+                "field": "Your Name",
+                "value": "name"
+            },
+            {
+                "field": "Your Full Name",
+                "value": "ful name"
+            },
+            {
+                "field": "Title",
+                "value": "title"
+            },
+            {
+                "field": "Sign Date",
+                "value": "2025-07-04"
+            },
+            {
+                "field": "Signature",
+                "value": "https://docs.360digital.fm/file/WyI4NzcwY2U4ZS1jODVhLTQxODQtYjIyNi1mNzhiYThjYjRjNzciLCJibG9iIl0--a1bfe214f68be0e0049b9cdb71f582bb92e1a0fe4d45c1610e3430601c42a715/signature.png"
+            }
+        ],
+        "preferences": {
+            "send_email": true,
+            "send_sms": false
+        },
+        "role": "Artist",
+        "embed_src": "https://docs.360digital.fm/s/JpT19HY92u8Trv"
+    },
+    {
+        "id": 83,
+        "slug": "ygyicFGcPBPbXW",
+        "uuid": "021c4851-1a41-40f0-ae31-0db420d1bdf4",
+        "name": null,
+        "email": "truongpv0910@gmail.com",
+        "phone": null,
+        "completed_at": null,
+        "declined_at": null,
+        "external_id": null,
+        "submission_id": 77,
+        "metadata": {},
+        "opened_at": null,
+        "sent_at": null,
+        "created_at": "2025-07-04T04:28:26.425Z",
+        "updated_at": "2025-07-04T04:28:26.425Z",
+        "status": "awaiting",
+        "application_key": null,
+        "values": [],
+        "preferences": {
+            "send_email": true,
+            "send_sms": false
+        },
+        "role": "SoundHex",
+        "embed_src": "https://docs.360digital.fm/s/ygyicFGcPBPbXW"
+    }
+]
