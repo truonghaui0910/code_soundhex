@@ -46,14 +46,19 @@ export async function GET(request: NextRequest) {
     
     const data = await response.json();
     
-    // Validate data is array before filtering
-    if (!Array.isArray(data)) {
+    // Handle API response structure - data is wrapped in data property
+    let agreementsArray = data;
+    
+    // Check if data has nested data property (API returns { data: [...], pagination: {...} })
+    if (data && data.data && Array.isArray(data.data)) {
+      agreementsArray = data.data;
+    } else if (!Array.isArray(data)) {
       console.log("API response is not an array:", data);
       return NextResponse.json([]);
     }
     
     // Filter sensitive data for security
-    const filteredData = data.map((agreement: any) => ({
+    const filteredData = agreementsArray.map((agreement: any) => ({
       id: agreement.id,
       created_at: agreement.created_at,
       updated_at: agreement.updated_at,
