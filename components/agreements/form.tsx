@@ -170,6 +170,11 @@ export default function AgreementForm() {
   
   // Handle save
   const handleSave = async () => {
+    // Prevent multiple submissions
+    if (isSaving) {
+      return;
+    }
+    
     // Validate at least one option is selected
     if (!rightOptions.some(option => option.checked)) {
       toast.error("Please select at least one right option");
@@ -396,7 +401,7 @@ export default function AgreementForm() {
               onClick={handleSave} 
               disabled={isSaving || isLoading}
               size="lg"
-              className="px-8 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+              className="px-8 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSaving ? (
                 <>
