@@ -156,12 +156,27 @@ export async function POST(request: NextRequest) {
     
     submissionId = submissionData[0].submission_id;
     
+    // Filter to only return the current user's submitter data for security
+    const userSubmitter = submissionData.find(submitter => submitter.email === userEmail);
+    
+    if (!userSubmitter) {
+      agreementLogger.logError('AGREEMENT_CREATE_USER_SUBMITTER_NOT_FOUND', 'User submitter not found in response', {
+        userEmail,
+        responseData: submissionData,
+        duration: Date.now() - startTime
+      });
+      return NextResponse.json(
+        { error: "User submitter not found" },
+        { status: 500 }
+      );
+    }
+    
     const finalResponse = {
       success: true,
       message: "Agreement saved successfully",
       data: {
         submissionId,
-        submitters: submissionData
+        submitter: userSubmitter
       }
     };
     
