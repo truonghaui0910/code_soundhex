@@ -144,7 +144,7 @@ export default function AgreementsList() {
   };
 
   // Get status badge color and icon
-  const getStatusInfo = (status: string) => {
+  const getStatusInfo = (status: string, submitter?: Submitter, agreement?: Agreement) => {
     switch (status.toLowerCase()) {
       case "completed":
         return {
@@ -154,11 +154,19 @@ export default function AgreementsList() {
           displayText: "Completed"
         };
       case "waiting_for_other_party":
+        // Find the role of the person who hasn't signed yet
+        let waitingForRole = "other party";
+        if (agreement?.submitters) {
+          const pendingSubmitter = agreement.submitters.find(s => s.status?.toLowerCase() === 'pending');
+          if (pendingSubmitter?.role) {
+            waitingForRole = pendingSubmitter.role;
+          }
+        }
         return {
           color:
             "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-700",
           icon: Clock,
-          displayText: "Waiting for Soundhex"
+          displayText: `Waiting for ${waitingForRole}`
         };
       case "pending":
         return {
@@ -177,7 +185,7 @@ export default function AgreementsList() {
       default:
         return {
           color:
-            "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600",
+            "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-800 dark:text-gray-600",
           icon: Clock,
           displayText: status
         };
@@ -402,7 +410,7 @@ export default function AgreementsList() {
                     </TableHeader>
                     <TableBody>
                       {agreements.map((agreement) => {
-                        const statusInfo = getStatusInfo(agreement.status);
+                        const statusInfo = getStatusInfo(agreement.status, undefined, agreement);
                         const StatusIcon = statusInfo.icon;
                         return (
                           <TableRow
@@ -518,9 +526,9 @@ export default function AgreementsList() {
                       Status
                     </h3>
                     <Badge
-                      className={getStatusInfo(selectedAgreement.status).color}
+                      className={getStatusInfo(selectedAgreement.status, undefined, selectedAgreement).color}
                     >
-                      {selectedAgreement.status}
+                      {getStatusInfo(selectedAgreement.status, undefined, selectedAgreement).displayText}
                     </Badge>
                   </div>
                 </div>
@@ -542,8 +550,8 @@ export default function AgreementsList() {
                   </h3>
                   <div className="space-y-3">
                     {selectedAgreement.submitters.map((submitter) => {
-                      const statusInfo = getStatusInfo(submitter.status);
-                      const StatusIcon = statusInfo.icon;
+                      const submitterStatusInfo = getStatusInfo(submitter.status, submitter, selectedAgreement);
+                      const StatusIcon = submitterStatusInfo.icon;
                       return (
                         <div
                           key={submitter.id}
@@ -553,9 +561,9 @@ export default function AgreementsList() {
                             <span className="font-medium">
                               {submitter.email}
                             </span>
-                            <Badge className={statusInfo.color}>
+                            <Badge className={submitterStatusInfo.color}>
                               <StatusIcon className="mr-1 h-3 w-3" />
-                              {submitter.status}
+                              {submitterStatusInfo.displayText}
                             </Badge>
                           </div>
                           <div className="text-sm text-gray-500 dark:text-gray-400 space-y-1">
