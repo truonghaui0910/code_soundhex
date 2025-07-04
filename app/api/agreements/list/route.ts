@@ -46,8 +46,30 @@ export async function GET(request: NextRequest) {
     
     const data = await response.json();
     
-    // Return the data
-    return NextResponse.json(data);
+    // Filter sensitive data for security
+    const filteredData = data.map((agreement: any) => ({
+      id: agreement.id,
+      created_at: agreement.created_at,
+      updated_at: agreement.updated_at,
+      status: agreement.status,
+      completed_at: agreement.completed_at,
+      audit_log_url: agreement.audit_log_url,
+      combined_document_url: agreement.combined_document_url,
+      template: agreement.template,
+      created_by_user: agreement.created_by_user,
+      // Only include essential submitter info for current user
+      submitters: agreement.submitters.map((submitter: any) => ({
+        id: submitter.id,
+        email: submitter.email,
+        status: submitter.status,
+        completed_at: submitter.completed_at,
+        role: submitter.role
+        // Remove sensitive fields: slug, uuid, name
+      }))
+    }));
+    
+    // Return the filtered data
+    return NextResponse.json(filteredData);
     
   } catch (err) {
     console.error("Error fetching agreements:", err);
