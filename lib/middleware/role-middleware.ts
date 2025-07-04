@@ -18,36 +18,10 @@ export async function checkRoutePermission(
   pathname: string, 
   userEmail: string
 ): Promise<{ allowed: boolean; userRole: UserRole; redirectTo?: string }> {
-  // Get user role
+  // Get user role from database (no automatic update)
   const userRole = await UserRoleService.getUserRoleByEmail(userEmail);
   
-  // Check and update role if user has completed agreements
-  if (userRole === 'user') {
-    await UserRoleService.checkAndUpdateMusicProviderRole(userEmail);
-    // Re-get role after potential update
-    const updatedRole = await UserRoleService.getUserRoleByEmail(userEmail);
-    
-    // Check if user now has permission
-    const requiredPermission = ROUTE_PERMISSIONS.find(perm => 
-      pathname.startsWith(perm.path)
-    );
-
-    if (requiredPermission) {
-      const hasPermission = UserRoleService.hasPermission(updatedRole, requiredPermission.requiredRole);
-      
-      if (!hasPermission) {
-        return {
-          allowed: false,
-          userRole: updatedRole,
-          redirectTo: updatedRole === 'user' ? '/music' : '/dashboard'
-        };
-      }
-    }
-
-    return { allowed: true, userRole: updatedRole };
-  }
-
-  // Check permissions for existing roles
+  // Check permissions for the route
   const requiredPermission = ROUTE_PERMISSIONS.find(perm => 
     pathname.startsWith(perm.path)
   );

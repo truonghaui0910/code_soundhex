@@ -87,7 +87,7 @@ export class UserRoleService {
     }
   }
 
-  // Check if user has completed agreements (for auto role upgrade)
+  // Check if user has completed agreements (will be called when admin signs agreement)
   static async checkAndUpdateMusicProviderRole(email: string): Promise<void> {
     try {
       // Call external API to check if user has completed agreements

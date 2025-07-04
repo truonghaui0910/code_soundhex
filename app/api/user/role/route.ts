@@ -17,18 +17,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Simply get user role from database (no automatic checking/updating)
     const userRole = await UserRoleService.getUserRoleByEmail(session.user.email);
-    
-    // Check and update role if user has completed agreements
-    if (userRole === 'user') {
-      await UserRoleService.checkAndUpdateMusicProviderRole(session.user.email);
-      const updatedRole = await UserRoleService.getUserRoleByEmail(session.user.email);
-      
-      return NextResponse.json({ 
-        role: updatedRole,
-        email: session.user.email 
-      });
-    }
 
     return NextResponse.json({ 
       role: userRole,

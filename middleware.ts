@@ -128,6 +128,17 @@ export async function middleware(req: NextRequest) {
     const permissionCheck = await checkRoutePermission(req.nextUrl.pathname, session.user.email);
     
     if (!permissionCheck.allowed && permissionCheck.redirectTo) {
+      // Get Vietnam time for logging
+      const now = new Date();
+      const vietnamTime = new Date(now.getTime() + 7 * 60 * 60 * 1000);
+      const year = vietnamTime.getFullYear();
+      const month = String(vietnamTime.getMonth() + 1).padStart(2, "0");
+      const day = String(vietnamTime.getDate()).padStart(2, "0");
+      const hours = String(vietnamTime.getHours()).padStart(2, "0");
+      const minutes = String(vietnamTime.getMinutes()).padStart(2, "0");
+      const seconds = String(vietnamTime.getSeconds()).padStart(2, "0");
+      const timestamp = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+      
       console.log(
         `[${timestamp}] 🚫 Access denied for role ${permissionCheck.userRole}:`,
         req.nextUrl.pathname,
