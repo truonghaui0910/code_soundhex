@@ -322,7 +322,9 @@ export async function GET(request: NextRequest) {
         completed_at: submitter.completed_at,
         role: submitter.role,
         // Only include slug for current user, remove for others
-        ...(submitter.email === userEmail ? { slug: submitter.slug } : {})
+        ...(submitter.email === userEmail ? { slug: submitter.slug } : {}),
+        // Include documents for download functionality
+        documents: submitter.documents || []
         // Remove sensitive fields: uuid, name for all users
       })) || []
     };
