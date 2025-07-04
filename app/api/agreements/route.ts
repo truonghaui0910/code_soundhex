@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     // Get the current user's email
     const supabase = createRouteHandlerClient({ cookies });
     const { data: { session } } = await supabase.auth.getSession();
-    
+
     if (!session) {
       agreementLogger.logError('AGREEMENT_CREATE_UNAUTHORIZED', 'No session found', {
         duration: Date.now() - startTime
@@ -36,9 +36,9 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       );
     }
-    
+
     userEmail = session.user.email;
-    
+
     if (!userEmail) {
       agreementLogger.logError('AGREEMENT_CREATE_NO_EMAIL', 'User email not available', {
         duration: Date.now() - startTime
@@ -48,16 +48,16 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    
+
     // Parse the JSON body
     requestBody = await request.json();
-    
+
     agreementLogger.logInfo('AGREEMENT_CREATE_START', {
       userEmail,
       requestData: requestBody,
       duration: Date.now() - startTime
     });
-    
+
     // Validate data
     if (!requestBody.selectedRights || requestBody.selectedRights.length === 0) {
       return NextResponse.json(
@@ -65,24 +65,24 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    
+
     // Step 1: Prepare the values for the request
     const values: { [key: string]: string | boolean } = {};
-    
+
     // Add checkbox values
     requestBody.selectedRights.forEach(right => {
       if (right.checked) {
         values[right.id] = true;
       }
     });
-    
+
     // Add text field values
     requestBody.formFields.forEach(field => {
       if (field.value.trim()) {
         values[field.id] = field.value;
       }
     });
-    
+
     // Step 2: Call the API to create submission
     const submissionApiStart = Date.now();
     const submissionRequestBody = {
@@ -100,14 +100,15 @@ export async function POST(request: NextRequest) {
         }
       ]
     };
-    
+
     agreementLogger.logInfo('AGREEMENT_CREATE_API_START', {
       userEmail,
       requestData: submissionRequestBody,
       duration: Date.now() - startTime
     });
 
-    const submissionResponse = await fetch('https://docs.360digital.fm/api/submissions', {
+    const apiBaseUrl = process.env.FORM_SUBMISSION_API_BASE_URL || 'https://docs.360digital.fm/api';
+    const submissionResponse = await fetch(`${apiBaseUrl}/submissions`, {
       method: 'POST',
       headers: {
         'X-Auth-Token': process.env.FORM_SUBMISSION_API_TOKEN!,
@@ -115,32 +116,32 @@ export async function POST(request: NextRequest) {
       },
       body: JSON.stringify(submissionRequestBody)
     });
-    
+
     if (!submissionResponse.ok) {
       const errorText = await submissionResponse.text();
-      
+
       agreementLogger.logError('AGREEMENT_CREATE_API_ERROR', `Submission API error: ${submissionResponse.status}`, {
         userEmail,
         requestData: submissionRequestBody,
         responseData: errorText,
         duration: Date.now() - startTime
       });
-      
+
       return NextResponse.json(
         { error: `Failed to create submission: ${submissionResponse.status}` },
         { status: 500 }
       );
     }
-    
+
     const submissionData = await submissionResponse.json();
-    
+
     agreementLogger.logInfo('AGREEMENT_CREATE_API_SUCCESS', {
       userEmail,
       requestData: submissionRequestBody,
       responseData: submissionData,
       duration: Date.now() - startTime
     });
-    
+
     // API returns array of submitters, get submission_id from first submitter
     if (!Array.isArray(submissionData) || submissionData.length === 0 || !submissionData[0].submission_id) {
       agreementLogger.logError('AGREEMENT_CREATE_INVALID_SUBMISSION_DATA', 'Invalid submission data received', {
@@ -153,12 +154,12 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
-    
+
     submissionId = submissionData[0].submission_id;
-    
+
     // Filter to only return the current user's submitter data for security
     const userSubmitter = submissionData.find(submitter => submitter.email === userEmail);
-    
+
     if (!userSubmitter) {
       agreementLogger.logError('AGREEMENT_CREATE_USER_SUBMITTER_NOT_FOUND', 'User submitter not found in response', {
         userEmail,
@@ -170,7 +171,7 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
-    
+
     const finalResponse = {
       success: true,
       message: "Agreement saved successfully",
@@ -179,7 +180,7 @@ export async function POST(request: NextRequest) {
         submitter: userSubmitter
       }
     };
-    
+
     agreementLogger.logInfo('AGREEMENT_CREATE_SUCCESS', {
       userEmail,
       submissionId,
@@ -187,20 +188,20 @@ export async function POST(request: NextRequest) {
       responseData: finalResponse,
       duration: Date.now() - startTime
     });
-    
+
     // Return success response
     return NextResponse.json(finalResponse);
-    
+
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : "Unknown error";
-    
+
     agreementLogger.logError('AGREEMENT_CREATE_EXCEPTION', errorMessage, {
       userEmail,
       submissionId,
       requestData: requestBody,
       duration: Date.now() - startTime
     });
-    
+
     return NextResponse.json(
       { error: "Failed to save agreement", message: errorMessage },
       { status: 500 }
@@ -217,7 +218,7 @@ export async function GET(request: NextRequest) {
     // Get the current user's session
     const supabase = createRouteHandlerClient({ cookies });
     const { data: { session } } = await supabase.auth.getSession();
-    
+
     if (!session) {
       agreementLogger.logError('AGREEMENT_GET_UNAUTHORIZED', 'No session found', {
         duration: Date.now() - startTime
@@ -227,13 +228,13 @@ export async function GET(request: NextRequest) {
         { status: 401 }
       );
     }
-    
+
     userEmail = session.user.email;
-    
+
     // Get submission ID from URL params
     const { searchParams } = new URL(request.url);
     submissionId = searchParams.get('id');
-    
+
     if (!submissionId) {
       agreementLogger.logError('AGREEMENT_GET_NO_ID', 'Submission ID is required', {
         userEmail,
@@ -244,24 +245,26 @@ export async function GET(request: NextRequest) {
         { status: 400 }
       );
     }
-    
+
     agreementLogger.logInfo('AGREEMENT_GET_START', {
       userEmail,
       submissionId,
       duration: Date.now() - startTime
     });
-    
+
     // Call the external API to get submission details
     const apiStart = Date.now();
+    const apiBaseUrl = process.env.FORM_SUBMISSION_API_BASE_URL || 'https://docs.360digital.fm/api';
+    const apiUrl = `${apiBaseUrl}/submissions/${submissionId}`;
     const response = await fetch(
-      `https://docs.360digital.fm/api/submissions/${submissionId}`,
+      apiUrl,
       {
         headers: {
           'X-Auth-Token': process.env.FORM_SUBMISSION_API_TOKEN!
         }
       }
     );
-    
+
     if (!response.ok) {
       const errorText = await response.text();
       agreementLogger.logError('AGREEMENT_GET_API_ERROR', `API error: ${response.status}`, {
@@ -269,7 +272,7 @@ export async function GET(request: NextRequest) {
         submissionId,
         responseData: errorText,
         apiCalls: [{
-          url: `https://docs.360digital.fm/api/submissions/${submissionId}`,
+          url: apiUrl,
           method: 'GET',
           status: response.status,
           response: errorText,
@@ -277,21 +280,21 @@ export async function GET(request: NextRequest) {
         }],
         duration: Date.now() - startTime
       });
-      
+
       return NextResponse.json(
         { error: `Failed to fetch submission details: ${response.status}` },
         { status: 500 }
       );
     }
-    
+
     const data = await response.json();
-    
+
     agreementLogger.logInfo('AGREEMENT_GET_SUCCESS', {
       userEmail,
       submissionId,
       responseData: data,
       apiCalls: [{
-        url: `https://docs.360digital.fm/api/submissions/${submissionId}`,
+        url: apiUrl,
         method: 'GET',
         status: response.status,
         response: data,
@@ -299,7 +302,7 @@ export async function GET(request: NextRequest) {
       }],
       duration: Date.now() - startTime
     });
-    
+
     // Filter sensitive data for security
     const filteredData = {
       id: data.id,
@@ -323,19 +326,19 @@ export async function GET(request: NextRequest) {
         // Remove sensitive fields: uuid, name for all users
       })) || []
     };
-    
+
     // Return the filtered data
     return NextResponse.json(filteredData);
-    
+
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : "Unknown error";
-    
+
     agreementLogger.logError('AGREEMENT_GET_EXCEPTION', errorMessage, {
       userEmail,
       submissionId,
       duration: Date.now() - startTime
     });
-    
+
     return NextResponse.json(
       { error: "Failed to fetch submission details", message: errorMessage },
       { status: 500 }

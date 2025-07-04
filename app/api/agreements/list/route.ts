@@ -27,8 +27,9 @@ export async function GET(request: NextRequest) {
     }
     
     // Call the external API to get agreements
+    const apiBaseUrl = process.env.FORM_SUBMISSION_API_BASE_URL || 'https://docs.360digital.fm/api';
     const response = await fetch(
-      `https://docs.360digital.fm/api/submissions?q=${encodeURIComponent(userEmail)}&limit=100`,
+      `${apiBaseUrl}/submissions?q=${encodeURIComponent(userEmail)}&limit=100`,
       {
         headers: {
           'X-Auth-Token': process.env.FORM_SUBMISSION_API_TOKEN!
