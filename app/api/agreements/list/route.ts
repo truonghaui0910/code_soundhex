@@ -57,29 +57,50 @@ export async function GET(request: NextRequest) {
       return NextResponse.json([]);
     }
     
-    // Filter sensitive data for security
-    const filteredData = agreementsArray.map((agreement: any) => ({
-      id: agreement.id,
-      created_at: agreement.created_at,
-      updated_at: agreement.updated_at,
-      status: agreement.status,
-      completed_at: agreement.completed_at,
-      audit_log_url: agreement.audit_log_url,
-      combined_document_url: agreement.combined_document_url,
-      template: agreement.template,
-      created_by_user: agreement.created_by_user,
-      // Filter submitters to only include slug for current user
-      submitters: agreement.submitters.map((submitter: any) => ({
-        id: submitter.id,
-        email: submitter.email,
-        status: submitter.status,
-        completed_at: submitter.completed_at,
-        role: submitter.role,
-        // Only include slug for current user, remove for others
-        ...(submitter.email === userEmail ? { slug: submitter.slug } : {})
-        // Remove sensitive fields: uuid, name for all users
-      }))
-    }));
+    // Filter sensitive data for security and update status logic
+    const filteredData = agreementsArray.map((agreement: any) => {
+      // Find current user's submitter
+      const currentUserSubmitter = agreement.submitters.find((s: any) => s.email === userEmail);
+      
+      // Determine display status based on current user's submission status
+      let displayStatus = agreement.status;
+      let userHasCompleted = false;
+      
+      if (currentUserSubmitter) {
+        userHasCompleted = currentUserSubmitter.status?.toLowerCase() === 'completed';
+        
+        // If current user has completed but overall status is still pending
+        // it means they're waiting for the other party to sign
+        if (userHasCompleted && agreement.status?.toLowerCase() === 'pending') {
+          displayStatus = 'waiting_for_other_party';
+        }
+      }
+      
+      return {
+        id: agreement.id,
+        created_at: agreement.created_at,
+        updated_at: agreement.updated_at,
+        status: displayStatus,
+        completed_at: agreement.completed_at,
+        audit_log_url: agreement.audit_log_url,
+        combined_document_url: agreement.combined_document_url,
+        template: agreement.template,
+        created_by_user: agreement.created_by_user,
+        // Add user completion status for frontend logic
+        user_has_completed: userHasCompleted,
+        // Filter submitters to only include slug for current user
+        submitters: agreement.submitters.map((submitter: any) => ({
+          id: submitter.id,
+          email: submitter.email,
+          status: submitter.status,
+          completed_at: submitter.completed_at,
+          role: submitter.role,
+          // Only include slug for current user, remove for others
+          ...(submitter.email === userEmail ? { slug: submitter.slug } : {})
+          // Remove sensitive fields: uuid, name for all users
+        }))
+      };
+    });
     
     // Return the filtered data
     return NextResponse.json(filteredData);

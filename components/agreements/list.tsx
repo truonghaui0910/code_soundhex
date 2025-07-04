@@ -48,9 +48,9 @@ import {
 // Types for API response
 interface Submitter {
   id: number;
-  slug: string;
-  uuid: string;
-  name: string | null;
+  slug?: string;
+  uuid?: string;
+  name?: string | null;
   email: string;
   status: string;
   completed_at: string | null;
@@ -59,13 +59,14 @@ interface Submitter {
 
 interface Agreement {
   id: number;
-  slug: string;
+  slug?: string;
   created_at: string;
   updated_at: string;
   status: string;
   completed_at: string | null;
   audit_log_url: string | null;
   combined_document_url: string | null;
+  user_has_completed: boolean;
   submitters: Submitter[];
   template: {
     id: number;
@@ -150,24 +151,35 @@ export default function AgreementsList() {
           color:
             "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-700",
           icon: CheckCircle,
+          displayText: "Completed"
+        };
+      case "waiting_for_other_party":
+        return {
+          color:
+            "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-700",
+          icon: Clock,
+          displayText: "Waiting for Soundhex"
         };
       case "pending":
         return {
           color:
             "bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-700",
           icon: Clock,
+          displayText: "Pending"
         };
       case "declined":
         return {
           color:
             "bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-700",
           icon: XCircle,
+          displayText: "Declined"
         };
       default:
         return {
           color:
             "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600",
           icon: Clock,
+          displayText: status
         };
     }
   };
@@ -322,7 +334,7 @@ export default function AgreementsList() {
                     <p className="text-3xl font-bold text-yellow-600">
                       {
                         agreements.filter(
-                          (a) => a.status.toLowerCase() === "pending",
+                          (a) => a.status.toLowerCase() === "pending" || a.status.toLowerCase() === "waiting_for_other_party",
                         ).length
                       }
                     </p>
@@ -406,7 +418,7 @@ export default function AgreementsList() {
                             <TableCell>
                               <Badge className={statusInfo.color}>
                                 <StatusIcon className="mr-1 h-3 w-3" />
-                                {agreement.status}
+                                {statusInfo.displayText}
                               </Badge>
                             </TableCell>
                             <TableCell>
@@ -417,18 +429,17 @@ export default function AgreementsList() {
                             </TableCell>
                             <TableCell className="text-right">
                               <div className="flex justify-end space-x-2">
-                                {agreement.status.toLowerCase() ===
-                                  "pending" && (
+                                {!agreement.user_has_completed && 
+                                  agreement.status.toLowerCase() === "pending" && (
                                   <Button
                                     variant="outline"
                                     size="sm"
                                     onClick={() => {
-                                      const submitterSlug =
-                                        agreement.submitters[0]?.slug;
-                                      if (submitterSlug) {
-                                        goToSignPage(submitterSlug);
+                                      const currentUserSubmitter = agreement.submitters.find(s => s.slug);
+                                      if (currentUserSubmitter?.slug) {
+                                        goToSignPage(currentUserSubmitter.slug);
                                       } else {
-                                        showError("submiter is not found");
+                                        showError("submitter is not found");
                                       }
                                     }}
                                   >
