@@ -314,6 +314,8 @@ export async function GET(request: NextRequest) {
       combined_document_url: data.combined_document_url,
       template: data.template,
       created_by_user: data.created_by_user,
+      // Include documents at same level as submitters
+      documents: data.documents || [],
       // Filter submitters to only include slug for current user
       submitters: data.submitters?.map((submitter: any) => ({
         id: submitter.id,
@@ -322,9 +324,7 @@ export async function GET(request: NextRequest) {
         completed_at: submitter.completed_at,
         role: submitter.role,
         // Only include slug for current user, remove for others
-        ...(submitter.email === userEmail ? { slug: submitter.slug } : {}),
-        // Include documents for download functionality
-        documents: submitter.documents || []
+        ...(submitter.email === userEmail ? { slug: submitter.slug } : {})
         // Remove sensitive fields: uuid, name for all users
       })) || []
     };

@@ -204,20 +204,15 @@ export default function AgreementsList() {
       }
       const data = await response.json();
 
-      // Get document URL from submitters.documents.url
-      let documentUrl = null;
-      
-      if (data && data.submitters && Array.isArray(data.submitters)) {
-        for (const submitter of data.submitters) {
-          if (submitter.documents && Array.isArray(submitter.documents) && submitter.documents.length > 0) {
-            documentUrl = submitter.documents[0].url;
-            break;
-          }
-        }
-      }
-
-      if (documentUrl) {
-        window.open(documentUrl, "_blank");
+      // Get document URL from documents.url
+      if (
+        data &&
+        data.documents &&
+        Array.isArray(data.documents) &&
+        data.documents.length > 0 &&
+        data.documents[0].url
+      ) {
+        window.open(data.documents[0].url, "_blank");
       } else {
         showError("Document not available");
       }
