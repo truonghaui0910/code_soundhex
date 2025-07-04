@@ -300,8 +300,32 @@ export async function GET(request: NextRequest) {
       duration: Date.now() - startTime
     });
     
-    // Return the data
-    return NextResponse.json(data);
+    // Filter sensitive data for security
+    const filteredData = {
+      id: data.id,
+      created_at: data.created_at,
+      updated_at: data.updated_at,
+      status: data.status,
+      completed_at: data.completed_at,
+      audit_log_url: data.audit_log_url,
+      combined_document_url: data.combined_document_url,
+      template: data.template,
+      created_by_user: data.created_by_user,
+      // Filter submitters to only include slug for current user
+      submitters: data.submitters?.map((submitter: any) => ({
+        id: submitter.id,
+        email: submitter.email,
+        status: submitter.status,
+        completed_at: submitter.completed_at,
+        role: submitter.role,
+        // Only include slug for current user, remove for others
+        ...(submitter.email === userEmail ? { slug: submitter.slug } : {})
+        // Remove sensitive fields: uuid, name for all users
+      })) || []
+    };
+    
+    // Return the filtered data
+    return NextResponse.json(filteredData);
     
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : "Unknown error";
