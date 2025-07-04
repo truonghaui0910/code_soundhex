@@ -25,11 +25,20 @@ export async function GET(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    // Import UserRoleService to check role
+    const { UserRoleService } = await import("@/lib/services/user-role-service");
+    const userRole = await UserRoleService.getUserRoleByEmail(userEmail);
+    
+    // Use admin email for admin users, regular email for others
+    const queryEmail = userRole === 'admin' 
+      ? (process.env.AGREEMENT_EMAIL_ADMIN || userEmail)
+      : userEmail;
     
     // Call the external API to get agreements
     const apiBaseUrl = process.env.FORM_SUBMISSION_API_BASE_URL || 'https://docs.360digital.fm/api';
     const response = await fetch(
-      `${apiBaseUrl}/submissions?q=${encodeURIComponent(userEmail)}&limit=100`,
+      `${apiBaseUrl}/submissions?q=${encodeURIComponent(queryEmail)}&limit=100`,
       {
         headers: {
           'X-Auth-Token': process.env.FORM_SUBMISSION_API_TOKEN!

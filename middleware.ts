@@ -90,7 +90,7 @@ export async function middleware(req: NextRequest) {
   }
 
   // Protected routes - require authentication
-  const protectedPaths = ["/dashboard", "/agreements", "/music/upload"];
+  const protectedPaths = ["/dashboard", "/agreements", "/music/upload", "/admin", "/right-management"];
 
   const isProtectedPath = protectedPaths.some((path) =>
     req.nextUrl.pathname.startsWith(path),
@@ -118,6 +118,25 @@ export async function middleware(req: NextRequest) {
     const redirectUrl = new URL("/login", req.url);
     redirectUrl.searchParams.set("returnUrl", req.nextUrl.pathname);
     return NextResponse.redirect(redirectUrl);
+  }
+
+  // Check role-based permissions for protected routes
+  if (session && session.user?.email) {
+    // Import role middleware dynamically to avoid circular dependency
+    const { checkRoutePermission } = await import("./lib/middleware/role-middleware");
+    
+    const permissionCheck = await checkRoutePermission(req.nextUrl.pathname, session.user.email);
+    
+    if (!permissionCheck.allowed && permissionCheck.redirectTo) {
+      console.log(
+        `[${timestamp}] 🚫 Access denied for role ${permissionCheck.userRole}:`,
+        req.nextUrl.pathname,
+        "-> redirecting to:",
+        permissionCheck.redirectTo
+      );
+      const redirectUrl = new URL(permissionCheck.redirectTo, req.url);
+      return NextResponse.redirect(redirectUrl);
+    }
   }
 
   // Redirect to dashboard if accessing login/register with valid session

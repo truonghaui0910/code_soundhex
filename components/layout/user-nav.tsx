@@ -6,6 +6,8 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase/client";
 import { User } from "@/hooks/use-current-user";
+import { Badge } from "@/components/ui/badge";
+import { useUserRole } from "@/hooks/use-user-role";
 
 interface UserNavProps {
   user: User | null;
@@ -15,6 +17,7 @@ export function UserNav({ user }: UserNavProps) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const { userRole } = useUserRole();
 
   const handleSignOut = async () => {
     try {
@@ -93,14 +96,27 @@ export function UserNav({ user }: UserNavProps) {
       {isOpen && (
         <div className="absolute right-0 top-full mt-2 w-56 rounded-md border bg-white dark:bg-gray-800 shadow-lg z-[9999]">
           <div className="p-3 border-b border-gray-200 dark:border-gray-700">
-            <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-              {user.user_metadata?.name || "User"}
-            </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              {user.email}
-            </p>
+            <div className="flex flex-col space-y-1">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium leading-none">
+                  {user.user_metadata?.name || "User"}
+                </p>
+                <Badge variant={
+                  userRole === 'admin' ? 'default' : 
+                  userRole === 'music_provider' ? 'secondary' : 
+                  'outline'
+                } className="text-xs">
+                  {userRole === 'admin' ? 'Admin' : 
+                   userRole === 'music_provider' ? 'Provider' : 
+                   'User'}
+                </Badge>
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                {user.email}
+              </p>
+            </div>
           </div>
-          
+
           <div className="py-1">
             {menuItems.map((item, index) => (
               <div key={index}>
