@@ -68,14 +68,16 @@ export async function GET(request: NextRequest) {
       combined_document_url: agreement.combined_document_url,
       template: agreement.template,
       created_by_user: agreement.created_by_user,
-      // Only include essential submitter info for current user
+      // Filter submitters to only include slug for current user
       submitters: agreement.submitters.map((submitter: any) => ({
         id: submitter.id,
         email: submitter.email,
         status: submitter.status,
         completed_at: submitter.completed_at,
-        role: submitter.role
-        // Remove sensitive fields: slug, uuid, name
+        role: submitter.role,
+        // Only include slug for current user, remove for others
+        ...(submitter.email === userEmail ? { slug: submitter.slug } : {})
+        // Remove sensitive fields: uuid, name for all users
       }))
     }));
     
