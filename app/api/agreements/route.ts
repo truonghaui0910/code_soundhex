@@ -61,11 +61,6 @@ export async function POST(request: NextRequest) {
     
     // Validate data
     if (!requestBody.selectedRights || requestBody.selectedRights.length === 0) {
-      agreementLogger.logError('AGREEMENT_CREATE_VALIDATION_ERROR', 'No rights selected', {
-        userEmail,
-        requestData: requestBody,
-        duration: Date.now() - startTime
-      });
       return NextResponse.json(
         { error: "At least one right must be selected" },
         { status: 400 }
@@ -163,7 +158,8 @@ export async function POST(request: NextRequest) {
       duration: Date.now() - startTime
     });
     
-    if (!submissionData || !submissionData.id) {
+    // API returns array of submitters, get submission_id from first submitter
+    if (!Array.isArray(submissionData) || submissionData.length === 0 || !submissionData[0].submission_id) {
       agreementLogger.logError('AGREEMENT_CREATE_INVALID_SUBMISSION_DATA', 'Invalid submission data received', {
         userEmail,
         responseData: submissionData,
@@ -176,14 +172,14 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    submissionId = submissionData.id;
+    submissionId = submissionData[0].submission_id;
     
     const finalResponse = {
       success: true,
       message: "Agreement saved successfully",
       data: {
         submissionId,
-        submissionData
+        submitters: submissionData
       }
     };
     
