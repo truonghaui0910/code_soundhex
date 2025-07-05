@@ -39,24 +39,21 @@ export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPl
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [newPlaylistName, setNewPlaylistName] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [isOpen, setIsOpen] = useState(false);
 
   const fetchPlaylists = async () => {
-    if (playlists.length === 0) {
-      setIsLoading(true);
-      try {
-        const response = await fetch("/api/playlists");
-        if (!response.ok) {
-          throw new Error("Failed to fetch playlists");
-        }
-        const data = await response.json();
-        setPlaylists(data);
-      } catch (error) {
-        console.error("Error fetching playlists:", error);
-        toast.error("Failed to load playlists");
-      } finally {
-        setIsLoading(false);
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/playlists");
+      if (!response.ok) {
+        throw new Error("Failed to fetch playlists");
       }
+      const data = await response.json();
+      setPlaylists(data);
+    } catch (error) {
+      console.error("Error fetching playlists:", error);
+      toast.error("Failed to load playlists");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -77,7 +74,6 @@ export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPl
 
       const playlist = playlists.find(p => p.id === playlistId);
       toast.success(`Added "${trackTitle}" to "${playlist?.name}"`);
-      setIsOpen(false);
     } catch (error: any) {
       console.error("Error adding track to playlist:", error);
       
@@ -86,7 +82,6 @@ export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPl
       } else {
         toast.error(error.message || "Failed to add track to playlist");
       }
-      setIsOpen(false);
     }
   };
 
@@ -142,15 +137,19 @@ export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPl
 
   return (
     <>
-      <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+      <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <div onClick={(e) => {
-            e.stopPropagation();
-            setIsOpen(true);
-            fetchPlaylists();
-          }}>
-            {children}
-          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            onClick={(e) => {
+              e.stopPropagation();
+              fetchPlaylists();
+            }}
+          >
+            <Plus className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+          </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-64">
           <div className="p-2">
@@ -161,15 +160,18 @@ export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPl
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="h-8"
+                onClick={(e) => e.stopPropagation()}
               />
             </div>
           </div>
           
-          <DropdownMenuItem onClick={(e) => {
-            e.preventDefault();
-            setShowCreateDialog(true);
-            setIsOpen(false);
-          }}>
+          <DropdownMenuItem 
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setShowCreateDialog(true);
+            }}
+          >
             <Plus className="mr-2 h-4 w-4" />
             Create new playlist
           </DropdownMenuItem>
@@ -188,6 +190,7 @@ export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPl
                 key={playlist.id}
                 onClick={(e) => {
                   e.preventDefault();
+                  e.stopPropagation();
                   handleAddToPlaylist(playlist.id);
                 }}
               >
