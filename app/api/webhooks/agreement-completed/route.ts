@@ -174,6 +174,39 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check if SoundHex submitter has completed status
+    const soundhexSubmitter = submissionData.submitters.find(
+      (submitter: any) => submitter.role?.toLowerCase() === 'soundhex'
+    );
+
+    if (!soundhexSubmitter || soundhexSubmitter.status?.toLowerCase() !== 'completed') {
+      agreementLogger.logWarn('WEBHOOK_SOUNDHEX_NOT_COMPLETED', {
+        operation: 'soundhex_not_completed',
+        userEmail: artistEmail,
+        submissionId,
+        requestData: { 
+          soundhexSubmitter: soundhexSubmitter || null,
+          status: soundhexSubmitter?.status || 'not_found'
+        },
+        duration: Date.now() - startTime
+      });
+      return NextResponse.json(
+        { message: "SoundHex has not completed the agreement" },
+        { status: 200 }
+      );
+    }
+
+    agreementLogger.logInfo('WEBHOOK_BOTH_PARTIES_COMPLETED', {
+      operation: 'both_parties_completed',
+      userEmail: artistEmail,
+      submissionId,
+      requestData: {
+        artistStatus: artistSubmitter.status,
+        soundhexStatus: soundhexSubmitter.status
+      },
+      duration: Date.now() - startTime
+    });
+
     // Update user role to music_provider
     const roleCheckStart = Date.now();
     const currentRole = await UserRoleService.getUserRoleByEmail(artistEmail);
