@@ -30,10 +30,18 @@ export async function checkRoutePermission(
     const hasPermission = UserRoleService.hasPermission(userRole, requiredPermission.requiredRole);
     
     if (!hasPermission) {
+      // Special case: redirect user role to /music when trying to access dashboard
+      let redirectTo = '/music';
+      if (userRole === 'music_provider') {
+        redirectTo = '/dashboard';
+      } else if (userRole === 'admin') {
+        redirectTo = '/admin';
+      }
+      
       return {
         allowed: false,
         userRole,
-        redirectTo: userRole === 'user' ? '/music' : '/dashboard'
+        redirectTo
       };
     }
   }

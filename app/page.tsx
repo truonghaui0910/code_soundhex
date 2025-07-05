@@ -62,10 +62,10 @@ export default function Home() {
                   {user ? (
                     <div className="flex items-center space-x-4">
                       <a
-                        href="/dashboard"
+                        href="/music"
                         className="px-4 py-2 text-foreground hover:text-primary transition-colors"
                       >
-                        Dashboard
+                        Music
                       </a>
                       <UserNav user={user} />
                     </div>
@@ -109,13 +109,6 @@ export default function Home() {
                 <>
                   {user ? (
                     <div className="space-y-4">
-                      <a
-                        href="/dashboard"
-                        className="block px-6 py-4 text-foreground hover:text-white hover:bg-gradient-to-r hover:from-pink-500 hover:to-purple-600 rounded-xl transition-all font-semibold text-lg border border-border hover:border-transparent"
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        Dashboard
-                      </a>
                       <a
                         href="/music"
                         className="block px-6 py-4 text-foreground hover:text-white hover:bg-gradient-to-r hover:from-pink-500 hover:to-purple-600 rounded-xl transition-all font-semibold text-lg border border-border hover:border-transparent"
