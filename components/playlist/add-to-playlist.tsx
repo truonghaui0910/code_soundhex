@@ -39,21 +39,24 @@ export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPl
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [newPlaylistName, setNewPlaylistName] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
 
   const fetchPlaylists = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch("/api/playlists");
-      if (!response.ok) {
-        throw new Error("Failed to fetch playlists");
+    if (playlists.length === 0) {
+      setIsLoading(true);
+      try {
+        const response = await fetch("/api/playlists");
+        if (!response.ok) {
+          throw new Error("Failed to fetch playlists");
+        }
+        const data = await response.json();
+        setPlaylists(data);
+      } catch (error) {
+        console.error("Error fetching playlists:", error);
+        toast.error("Failed to load playlists");
+      } finally {
+        setIsLoading(false);
       }
-      const data = await response.json();
-      setPlaylists(data);
-    } catch (error) {
-      console.error("Error fetching playlists:", error);
-      toast.error("Failed to load playlists");
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -74,6 +77,7 @@ export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPl
 
       const playlist = playlists.find(p => p.id === playlistId);
       toast.success(`Added "${trackTitle}" to "${playlist?.name}"`);
+      setIsOpen(false);
     } catch (error: any) {
       console.error("Error adding track to playlist:", error);
       
@@ -82,6 +86,7 @@ export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPl
       } else {
         toast.error(error.message || "Failed to add track to playlist");
       }
+      setIsOpen(false);
     }
   };
 
@@ -137,10 +142,11 @@ export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPl
 
   return (
     <>
-      <DropdownMenu>
+      <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
         <DropdownMenuTrigger asChild>
           <div onClick={(e) => {
             e.stopPropagation();
+            setIsOpen(true);
             fetchPlaylists();
           }}>
             {children}
@@ -159,7 +165,11 @@ export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPl
             </div>
           </div>
           
-          <DropdownMenuItem onClick={() => setShowCreateDialog(true)}>
+          <DropdownMenuItem onClick={(e) => {
+            e.preventDefault();
+            setShowCreateDialog(true);
+            setIsOpen(false);
+          }}>
             <Plus className="mr-2 h-4 w-4" />
             Create new playlist
           </DropdownMenuItem>
@@ -176,7 +186,10 @@ export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPl
             filteredPlaylists.map((playlist) => (
               <DropdownMenuItem
                 key={playlist.id}
-                onClick={() => handleAddToPlaylist(playlist.id)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleAddToPlaylist(playlist.id);
+                }}
               >
                 <ListMusic className="mr-2 h-4 w-4" />
                 <div className="flex-1">
