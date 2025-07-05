@@ -85,6 +85,17 @@ export async function GET(request: NextRequest) {
           displayStatus = 'waiting_for_other_party';
         }
       }
+
+      // Special logic for admin view: if artist has completed but overall status is pending
+      // show 'waiting_for_soundhex' to indicate artist submitted and waiting for SoundHex
+      if (userRole === 'admin') {
+        const artistSubmitter = agreement.submitters.find((s: any) => s.role?.toLowerCase() === 'artist');
+        if (artistSubmitter && 
+            artistSubmitter.status?.toLowerCase() === 'completed' && 
+            agreement.status?.toLowerCase() === 'pending') {
+          displayStatus = 'waiting_for_soundhex';
+        }
+      }
       
       return {
         id: agreement.id,

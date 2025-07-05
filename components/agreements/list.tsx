@@ -160,6 +160,13 @@ export default function AgreementsList() {
           icon: Clock,
           displayText: "Waiting for SoundHex"
         };
+      case "waiting_for_soundhex":
+        return {
+          color:
+            "bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-900/30 dark:text-orange-400 dark:border-orange-700",
+          icon: Clock,
+          displayText: "Artist Submitted - Waiting for SoundHex"
+        };
       case "pending":
         return {
           color:
@@ -332,7 +339,9 @@ export default function AgreementsList() {
                     <p className="text-3xl font-bold text-yellow-600">
                       {
                         agreements.filter(
-                          (a) => a.status.toLowerCase() === "pending" || a.status.toLowerCase() === "waiting_for_other_party",
+                          (a) => a.status.toLowerCase() === "pending" || 
+                                a.status.toLowerCase() === "waiting_for_other_party" ||
+                                a.status.toLowerCase() === "waiting_for_soundhex",
                         ).length
                       }
                     </p>
