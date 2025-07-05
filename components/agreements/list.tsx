@@ -438,6 +438,27 @@ export default function AgreementsList() {
                             </TableCell>
                             <TableCell className="text-right">
                               <div className="flex justify-end space-x-2">
+                                {/* Admin: Show Sign button only for waiting_for_soundhex status */}
+                                {agreement.is_admin_view && 
+                                  agreement.status.toLowerCase() === "waiting_for_soundhex" && (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                      const currentUserSubmitter = agreement.submitters.find(s => s.slug);
+                                      if (currentUserSubmitter?.slug) {
+                                        goToSignPage(currentUserSubmitter.slug);
+                                      } else {
+                                        showError("submitter is not found");
+                                      }
+                                    }}
+                                  >
+                                    <Edit className="mr-1 h-3 w-3" />
+                                    Sign
+                                  </Button>
+                                )}
+                                
+                                {/* Non-admin: Show Sign button with existing logic */}
                                 {!agreement.is_admin_view && 
                                   !agreement.user_has_completed && 
                                   agreement.status.toLowerCase() === "pending" && (
@@ -576,6 +597,21 @@ export default function AgreementsList() {
                               </div>
                             )}
                           </div>
+                          {/* Admin: Show Sign button only for waiting_for_soundhex status */}
+                          {selectedAgreement.is_admin_view && 
+                            selectedAgreement.status.toLowerCase() === "waiting_for_soundhex" &&
+                            submitter.status.toLowerCase() === "pending" && (
+                            <Button
+                              size="sm"
+                              className="mt-3"
+                              onClick={() => goToSignPage(submitter.slug)}
+                            >
+                              <Edit className="mr-1 h-3 w-3" />
+                              Sign Now
+                            </Button>
+                          )}
+                          
+                          {/* Non-admin: Show Sign button with existing logic */}
                           {!selectedAgreement.is_admin_view && 
                             submitter.status.toLowerCase() === "pending" && (
                             <Button
