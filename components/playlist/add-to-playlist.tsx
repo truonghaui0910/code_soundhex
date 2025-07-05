@@ -139,7 +139,10 @@ export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPl
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <div onClick={fetchPlaylists}>
+          <div onClick={(e) => {
+            e.stopPropagation();
+            fetchPlaylists();
+          }}>
             {children}
           </div>
         </DropdownMenuTrigger>

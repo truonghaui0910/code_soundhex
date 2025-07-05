@@ -206,7 +206,10 @@ export function TracksList({ initialTracks }: TracksListProps) {
                                                 trackId={track.id}
                                                 trackTitle={track.title}
                                             >
-                                                <button className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                                                <button 
+                                                    className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                                    onClick={(e) => e.stopPropagation()}
+                                                >
                                                     <Plus className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                                                 </button>
                                             </AddToPlaylist>
