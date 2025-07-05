@@ -52,12 +52,6 @@ export async function POST(request: NextRequest) {
     // Parse the JSON body
     requestBody = await request.json();
 
-    agreementLogger.logInfo('AGREEMENT_CREATE_START', {
-      userEmail,
-      requestData: requestBody,
-      duration: Date.now() - startTime
-    });
-
     // Validate data
     if (!requestBody.selectedRights || requestBody.selectedRights.length === 0) {
       return NextResponse.json(
@@ -101,12 +95,6 @@ export async function POST(request: NextRequest) {
       ]
     };
 
-    agreementLogger.logInfo('AGREEMENT_CREATE_API_START', {
-      userEmail,
-      requestData: submissionRequestBody,
-      duration: Date.now() - startTime
-    });
-
     const apiBaseUrl = process.env.FORM_SUBMISSION_API_BASE_URL || 'https://docs.360digital.fm/api';
     const submissionResponse = await fetch(`${apiBaseUrl}/submissions`, {
       method: 'POST',
@@ -134,13 +122,6 @@ export async function POST(request: NextRequest) {
     }
 
     const submissionData = await submissionResponse.json();
-
-    agreementLogger.logInfo('AGREEMENT_CREATE_API_SUCCESS', {
-      userEmail,
-      requestData: submissionRequestBody,
-      responseData: submissionData,
-      duration: Date.now() - startTime
-    });
 
     // API returns array of submitters, get submission_id from first submitter
     if (!Array.isArray(submissionData) || submissionData.length === 0 || !submissionData[0].submission_id) {

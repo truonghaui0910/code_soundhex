@@ -117,21 +117,6 @@ export async function POST(request: NextRequest) {
     }
 
     const submissionData = await response.json();
-
-    agreementLogger.logInfo('WEBHOOK_API_CALL_SUCCESS', {
-      operation: 'external_api_success',
-      userEmail,
-      submissionId,
-      responseData: submissionData,
-      apiCalls: [{
-        url: apiUrl,
-        method: 'GET',
-        status: response.status,
-        response: submissionData,
-        duration: apiCallDuration
-      }],
-      duration: Date.now() - startTime
-    });
     
     // Find the artist's email from submitters
     let artistEmail: string | null = null;
