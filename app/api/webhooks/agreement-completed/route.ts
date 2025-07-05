@@ -27,11 +27,6 @@ export async function POST(request: NextRequest) {
   let userEmail: string | null = null;
 
   try {
-    agreementLogger.logInfo('WEBHOOK_RECEIVED', {
-      operation: 'webhook_start',
-      duration: Date.now() - startTime
-    });
-
     // Verify webhook secret
     const authHeader = request.headers.get("authorization");
     const webhookSecret = process.env.WEBHOOK_SECRET;
@@ -101,31 +96,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    agreementLogger.logInfo('WEBHOOK_VALIDATION_SUCCESS', {
-      operation: 'webhook_validation_passed',
-      userEmail,
-      submissionId,
-      duration: Date.now() - startTime
-    });
-
     // Call external API to get submission details
     const apiBaseUrl = process.env.FORM_SUBMISSION_API_BASE_URL || 'https://docs.360digital.fm/api';
     const apiUrl = `${apiBaseUrl}/submissions/${submissionId}`;
     const apiCallStart = Date.now();
-
-    agreementLogger.logInfo('WEBHOOK_API_CALL_START', {
-      operation: 'external_api_call',
-      userEmail,
-      submissionId,
-      apiCalls: [{
-        url: apiUrl,
-        method: 'GET',
-        status: 0,
-        response: null,
-        duration: 0
-      }],
-      duration: Date.now() - startTime
-    });
 
     const response = await fetch(apiUrl, {
       headers: {
@@ -136,19 +110,6 @@ export async function POST(request: NextRequest) {
     const apiCallDuration = Date.now() - apiCallStart;
 
     if (!response.ok) {
-      agreementLogger.logError('WEBHOOK_API_CALL_FAILED', `Failed to fetch submission ${submissionId}: ${response.status}`, {
-        operation: 'external_api_failed',
-        userEmail,
-        submissionId,
-        apiCalls: [{
-          url: apiUrl,
-          method: 'GET',
-          status: response.status,
-          response: null,
-          duration: apiCallDuration
-        }],
-        duration: Date.now() - startTime
-      });
       return NextResponse.json(
         { error: "Failed to fetch submission details" },
         { status: 500 }
@@ -175,14 +136,6 @@ export async function POST(request: NextRequest) {
     // Find the artist's email from submitters
     let artistEmail: string | null = null;
     
-    agreementLogger.logDebug('WEBHOOK_EXTRACTING_ARTIST_EMAIL', {
-      operation: 'extract_artist_email',
-      userEmail,
-      submissionId,
-      requestData: { submitters: submissionData.submitters },
-      duration: Date.now() - startTime
-    });
-
     if (submissionData.submitters && Array.isArray(submissionData.submitters)) {
       const artistSubmitter = submissionData.submitters.find(
         (submitter: any) => submitter.role?.toLowerCase() === 'artist'
