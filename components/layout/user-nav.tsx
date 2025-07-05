@@ -77,7 +77,13 @@ export function UserNav({ user }: UserNavProps) {
     { label: "Music", href: "/music" },
     { label: "Agreements", href: "/agreements" },
     { label: "Sign out", action: handleSignOut, isSignOut: true },
-  ];
+  ].filter(item => {
+    // Hide Dashboard for user role
+    if (item.href === "/dashboard" && userRole === "user") {
+      return false;
+    }
+    return true;
+  });
 
   return (
     <div className="relative" ref={dropdownRef}>
