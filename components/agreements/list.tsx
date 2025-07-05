@@ -67,6 +67,8 @@ interface Agreement {
   audit_log_url: string | null;
   combined_document_url: string | null;
   user_has_completed: boolean;
+  display_email?: string;
+  is_admin_view?: boolean;
   submitters: Submitter[];
   template: {
     id: number;
@@ -420,7 +422,7 @@ export default function AgreementsList() {
                               {agreement.id}
                             </TableCell>
                             <TableCell>
-                              {agreement.submitters[0]?.email || "N/A"}
+                              {agreement.display_email || agreement.submitters[0]?.email || "N/A"}
                             </TableCell>
                             <TableCell>
                               <Badge className={statusInfo.color}>
@@ -436,7 +438,8 @@ export default function AgreementsList() {
                             </TableCell>
                             <TableCell className="text-right">
                               <div className="flex justify-end space-x-2">
-                                {!agreement.user_has_completed && 
+                                {!agreement.is_admin_view && 
+                                  !agreement.user_has_completed && 
                                   agreement.status.toLowerCase() === "pending" && (
                                   <Button
                                     variant="outline"
@@ -573,7 +576,8 @@ export default function AgreementsList() {
                               </div>
                             )}
                           </div>
-                          {submitter.status.toLowerCase() === "pending" && (
+                          {!selectedAgreement.is_admin_view && 
+                            submitter.status.toLowerCase() === "pending" && (
                             <Button
                               size="sm"
                               className="mt-3"
