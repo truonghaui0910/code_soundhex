@@ -22,6 +22,7 @@ import Link from "next/link";
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 import { Track } from "@/lib/definitions/Track";
 import { useDownload } from "@/hooks/use-download";
+import AddToPlaylist from "@/components/playlist/add-to-playlist";
 
 // Helper function to format time
 const formatDuration = (seconds: number | null) => {
@@ -319,9 +320,11 @@ export function ArtistDetailClient({ artist, tracks, albums }: ArtistDetailClien
                     </div>
 
                     <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button size="sm" variant="ghost" className="p-2" title="Add to playlist">
-                        <Plus className="h-4 w-4" />
-                      </Button>
+                      <AddToPlaylist trackId={track.id} trackTitle={track.title}>
+                        <Button size="sm" variant="ghost" className="p-2" title="Add to playlist">
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </AddToPlaylist>
                       <Button 
                         size="sm" 
                         variant="ghost" 
