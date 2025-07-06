@@ -252,7 +252,12 @@ export default function PlaylistManager() {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {playlists.map((playlist) => (
             <Card key={playlist.id} className="group hover:shadow-lg transition-shadow cursor-pointer"
-                  onClick={() => window.location.href = `/playlists/${playlist.id}`}
+                  onClick={(e) => {
+                    // Only navigate if the click is not on the dropdown button
+                    if (!(e.target as HTMLElement).closest('[data-radix-dropdown-menu-trigger]')) {
+                      window.location.href = `/playlists/${playlist.id}`;
+                    }
+                  }}
             >
                 <CardContent className="p-0">
                   {/* Cover Image */}
@@ -290,6 +295,11 @@ export default function PlaylistManager() {
                           <Button 
                             variant="ghost" 
                             size="sm"
+                            className="relative z-10"
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                            }}
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
@@ -298,11 +308,10 @@ export default function PlaylistManager() {
                             <MoreVertical className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
+                        <DropdownMenuContent align="end" className="z-[9999]">
                           <DropdownMenuItem 
-                            onClick={(e) => {
+                            onSelect={(e) => {
                               e.preventDefault();
-                              e.stopPropagation();
                               openEditDialog(playlist);
                             }}
                           >
@@ -310,9 +319,8 @@ export default function PlaylistManager() {
                             Edit
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            onClick={(e) => {
+                            onSelect={(e) => {
                               e.preventDefault();
-                              e.stopPropagation();
                               handleDeletePlaylist(playlist);
                             }}
                             className="text-red-600"
