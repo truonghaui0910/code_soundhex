@@ -1,4 +1,3 @@
-
 import { NextRequest, NextResponse } from "next/server";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
@@ -85,8 +84,8 @@ export async function DELETE(
       return NextResponse.json({ error: "Invalid playlist ID" }, { status: 400 });
     }
 
-    await PlaylistsController.deletePlaylist(playlistId, user.id);
-    return NextResponse.json({ success: true });
+    await PlaylistsController.softDeletePlaylist(playlistId, user.id);
+    return NextResponse.json({ message: "Playlist deleted successfully" });
   } catch (error) {
     console.error("Error deleting playlist:", error);
     return NextResponse.json(

@@ -46,10 +46,11 @@ export class PlaylistsController {
     const { data, error } = await supabase
       .from("playlists")
       .select(`
-        id, name, description, cover_image_url, user_id, created_at, updated_at,
+        id, name, description, cover_image_url, user_id, created_at, updated_at, del_status, private,
         playlist_tracks(count)
       `)
       .eq("user_id", userId)
+      .eq("del_status", 0)
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -70,7 +71,8 @@ export class PlaylistsController {
     userId: string,
     name: string,
     description?: string,
-    coverImageUrl?: string
+    coverImageUrl?: string,
+    isPrivate?: boolean
   ): Promise<Playlist> {
     const supabase = createServerComponentClient<Database>({ cookies });
 
@@ -80,7 +82,9 @@ export class PlaylistsController {
         name,
         description,
         cover_image_url: coverImageUrl,
-        user_id: userId
+        user_id: userId,
+        private: isPrivate || false,
+        del_status: 0
       })
       .select()
       .single();
@@ -99,7 +103,7 @@ export class PlaylistsController {
   static async updatePlaylist(
     playlistId: number,
     userId: string,
-    updates: Partial<Pick<Playlist, "name" | "description" | "cover_image_url">>
+    updates: Partial<Pick<Playlist, "name" | "description" | "cover_image_url" | "private">>
   ): Promise<Playlist> {
     const supabase = createServerComponentClient<Database>({ cookies });
 
@@ -120,7 +124,25 @@ export class PlaylistsController {
   }
 
   /**
-   * Xóa playlist
+   * Soft delete playlist (set del_status = 1)
+   */
+  static async softDeletePlaylist(playlistId: number, userId: string): Promise<void> {
+    const supabase = createServerComponentClient<Database>({ cookies });
+
+    const { error } = await supabase
+      .from("playlists")
+      .update({ del_status: 1 })
+      .eq("id", playlistId)
+      .eq("user_id", userId);
+
+    if (error) {
+      console.error("Error soft deleting playlist:", error);
+      throw new Error(`Failed to delete playlist: ${error.message}`);
+    }
+  }
+
+  /**
+   * Hard delete playlist (thực sự xóa khỏi database)
    */
   static async deletePlaylist(playlistId: number, userId: string): Promise<void> {
     const supabase = createServerComponentClient<Database>({ cookies });
@@ -265,10 +287,11 @@ export class PlaylistsController {
     const { data, error } = await supabase
       .from("playlists")
       .select(`
-        id, name, description, cover_image_url, user_id, created_at, updated_at,
+        id, name, description, cover_image_url, user_id, created_at, updated_at, del_status, private,
         playlist_tracks(count)
       `)
       .eq("id", playlistId)
+      .eq("del_status", 0)
       .single();
 
     if (error) {
