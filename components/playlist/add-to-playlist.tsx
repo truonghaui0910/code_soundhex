@@ -176,8 +176,12 @@ export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPl
         <DropdownMenuContent 
           align="end" 
           className="w-64 z-[9999] max-h-80 overflow-y-auto bg-white dark:bg-gray-800 border shadow-lg focus:outline-none"
-          style={{ zIndex: 9999 }}
+          style={{ 
+            zIndex: 9999,
+            position: 'fixed'
+          }}
           onCloseAutoFocus={(e) => e.preventDefault()}
+          onOpenAutoFocus={(e) => e.preventDefault()}
         >
           <div className="p-2">
             <div className="flex items-center gap-2 mb-2">

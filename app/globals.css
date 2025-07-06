@@ -422,6 +422,16 @@
               transform 0.3s ease, box-shadow 0.3s ease;
 }
 
+/* Force scrollbar to always be visible to prevent layout shift */
+html {
+  overflow-y: scroll !important;
+  scrollbar-gutter: stable;
+}
+
+body {
+  overflow-x: hidden;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
@@ -502,5 +512,22 @@
 
   .radix-dropdown-content {
     z-index: 9999 !important;
+  }
+
+  /* Prevent body scroll and layout shift when dropdown is open */
+  [data-radix-dropdown-menu-content] {
+    position: fixed !important;
+  }
+
+  /* Ensure dropdown doesn't affect document flow */
+  [data-radix-popper-content-wrapper] {
+    position: fixed !important;
+    z-index: 9999 !important;
+  }
+
+  /* Prevent scrollbar from disappearing */
+  body:has([data-radix-dropdown-menu-content]) {
+    overflow-y: scroll !important;
+    scrollbar-gutter: stable !important;
   }
 }
