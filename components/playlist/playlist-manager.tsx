@@ -329,7 +329,7 @@ export default function PlaylistManager() {
           </DialogHeader>
           <form onSubmit={handleCreatePlaylist}>
             <div className="space-y-4 py-4">
-              <div>
+              <div className="space-y-2">
                 <Label htmlFor="name">Playlist Name</Label>
                 <Input
                   id="name"
@@ -341,7 +341,7 @@ export default function PlaylistManager() {
                   required
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label htmlFor="description">Description (Optional)</Label>
                 <Textarea
                   id="description"
@@ -379,7 +379,7 @@ export default function PlaylistManager() {
           </DialogHeader>
           <form onSubmit={handleEditPlaylist}>
             <div className="space-y-4 py-4">
-              <div>
+              <div className="space-y-2">
                 <Label htmlFor="edit-name">Playlist Name</Label>
                 <Input
                   id="edit-name"
@@ -391,7 +391,7 @@ export default function PlaylistManager() {
                   required
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label htmlFor="edit-description">Description (Optional)</Label>
                 <Textarea
                   id="edit-description"

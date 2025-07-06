@@ -248,12 +248,12 @@ export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPl
           <DialogHeader>
             <DialogTitle>Create New Playlist</DialogTitle>
             <DialogDescription>
-              Create a new playlist and add "{trackTitle}" to it
+              Create a new playlist to organize your favorite tracks
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleCreateAndAddToPlaylist}>
             <div className="space-y-4 py-4">
-              <div>
+              <div className="space-y-2">
                 <Label htmlFor="playlist-name">Playlist Name</Label>
                 <Input
                   id="playlist-name"
