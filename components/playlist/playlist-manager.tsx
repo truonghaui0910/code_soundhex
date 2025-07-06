@@ -268,24 +268,38 @@ export default function PlaylistManager() {
         return;
       }
 
-      // Debug log to check track structure
-      console.log("Playlist tracks:", tracks);
+      console.log("Raw playlist tracks:", tracks);
+
+      // Process tracks to ensure proper audio URLs (same as playlist detail page)
+      const processedTracks = tracks.map(track => ({
+        ...track,
+        file_url: track.file_url || track.audio_file_url,
+        audio_file_url: track.audio_file_url || track.file_url
+      }));
+
+      console.log("Processed tracks:", processedTracks);
 
       // Validate tracks have required properties
-      const validTracks = tracks.filter(track => track && track.id && track.title);
+      const validTracks = processedTracks.filter(track => 
+        track && 
+        track.id && 
+        track.title && 
+        (track.file_url || track.audio_file_url)
+      );
+
       if (validTracks.length === 0) {
         toast.error("No valid tracks found in playlist");
         return;
       }
 
-      // Set track list first (like in album play)
+      // Set track list first (exactly like playlist detail page)
       setTrackList(validTracks);
       
-      // Small delay to ensure trackList state is updated before playing
+      // Same delay as playlist detail page (50ms)
       setTimeout(() => {
         console.log("Playing first track:", validTracks[0]);
         playTrack(validTracks[0]);
-      }, 100);
+      }, 50);
       
       toast.success(`Playing "${playlist.name}" - ${validTracks.length} tracks`);
     } catch (error) {
