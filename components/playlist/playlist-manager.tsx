@@ -36,9 +36,12 @@ import {
   Trash2,
   Play,
   Clock,
+  Pause,
 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
+import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
+import { Track } from "@/lib/definitions/Track";
 
 interface Playlist {
   id: number;
@@ -50,6 +53,13 @@ interface Playlist {
 }
 
 export default function PlaylistManager() {
+  const { 
+    currentTrack, 
+    isPlaying, 
+    playTrack, 
+    setTrackList, 
+    togglePlayPause 
+  } = useAudioPlayer();
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -65,6 +75,7 @@ export default function PlaylistManager() {
   const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [playlistToDelete, setPlaylistToDelete] = useState<Playlist | null>(null);
+  const [loadingPlaylist, setLoadingPlaylist] = useState<number | null>(null);
 
   useEffect(() => {
     fetchPlaylists();
@@ -228,6 +239,42 @@ export default function PlaylistManager() {
     setOpenDropdownId(null); // Close dropdown
   };
 
+  const handlePlayPlaylist = async (playlist: Playlist) => {
+    if (playlist.track_count === 0) {
+      toast.error("This playlist is empty");
+      return;
+    }
+
+    setLoadingPlaylist(playlist.id);
+    try {
+      // Fetch tracks from the playlist
+      const response = await fetch(`/api/playlists/${playlist.id}/tracks`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch playlist tracks");
+      }
+
+      const tracks: Track[] = await response.json();
+      
+      if (tracks.length === 0) {
+        toast.error("This playlist is empty");
+        return;
+      }
+
+      // Set the track list and play the first track
+      setTrackList(tracks);
+      setTimeout(() => {
+        playTrack(tracks[0]);
+      }, 50);
+      
+      toast.success(`Playing "${playlist.name}"`);
+    } catch (error) {
+      console.error("Error playing playlist:", error);
+      toast.error("Failed to play playlist");
+    } finally {
+      setLoadingPlaylist(null);
+    }
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("vi-VN", {
       year: "numeric",
@@ -312,8 +359,17 @@ export default function PlaylistManager() {
                         size="sm"
                         className="opacity-0 group-hover:opacity-100 transition-opacity"
                         variant="secondary"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handlePlayPlaylist(playlist);
+                        }}
+                        disabled={loadingPlaylist === playlist.id}
                       >
-                        <Play className="h-4 w-4" />
+                        {loadingPlaylist === playlist.id ? (
+                          <div className="h-4 w-4 border-2 border-gray-600 border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <Play className="h-4 w-4" />
+                        )}
                       </Button>
                     </div>
                   </div>
