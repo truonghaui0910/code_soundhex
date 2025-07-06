@@ -111,7 +111,7 @@ export function TracksList({ initialTracks }: TracksListProps) {
                                     <TableRow
                                         key={track.id}
                                         onClick={() => playTrack(track)}
-                                        className={`cursor-pointer hover:bg-muted/50 transition-all duration-300 ease-in-out hover:shadow-sm hover:transform hover:scale-[1.005] ${currentTrack?.id === Number(track.id) ? "bg-muted" : ""}`}
+                                        className={`cursor-pointer hover:bg-muted/50 ${currentTrack?.id === Number(track.id) ? "bg-muted" : ""}`}
                                     >
                                         <TableCell>
                                             {currentTrack?.id === Number(track.id) &&
@@ -206,8 +206,8 @@ export function TracksList({ initialTracks }: TracksListProps) {
                                                 trackId={track.id}
                                                 trackTitle={track.title}
                                             >
-                                                <button className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 ease-in-out hover:scale-110 active:scale-95">
-                                                    <Plus className="h-4 w-4 text-gray-600 dark:text-gray-400 transition-transform duration-200" />
+                                                <button className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                                                    <Plus className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                                                 </button>
                                             </AddToPlaylist>
                                         </TableCell>
