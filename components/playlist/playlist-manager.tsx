@@ -118,43 +118,54 @@ export default function PlaylistManager() {
   const handleEditPlaylist = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedPlaylist || !formData.name.trim()) {
+      toast.error("Playlist name is required");
       return;
     }
 
     try {
       const response = await fetch(`/api/playlists/${selectedPlaylist.id}`, {
-        method: "PUT",
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          name: formData.name,
-          description: formData.description,
+          name: formData.name.trim(),
+          description: formData.description.trim(),
         }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to update playlist");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to update playlist");
       }
 
       const updatedPlaylist = await response.json();
+      
+      // Update local state
       setPlaylists(
         playlists.map((p) =>
-          p.id === selectedPlaylist.id ? updatedPlaylist : p
+          p.id === selectedPlaylist.id ? { ...p, ...updatedPlaylist } : p
         )
       );
+      
+      // Reset form and close dialog
       setEditDialogOpen(false);
       setSelectedPlaylist(null);
       setFormData({ name: "", description: "" });
-      toast.success("Playlist updated successfully!");
+      
+      toast.success(`"${updatedPlaylist.name}" updated successfully!`);
     } catch (error) {
       console.error("Error updating playlist:", error);
-      toast.error("Failed to update playlist");
+      toast.error("Failed to update playlist. Please try again.");
     }
   };
 
   const handleDeletePlaylist = async (playlist: Playlist) => {
-    if (!confirm(`Are you sure you want to delete "${playlist.name}"?`)) {
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete "${playlist.name}"?\n\nThis action cannot be undone.`
+    );
+    
+    if (!confirmDelete) {
       return;
     }
 
@@ -164,14 +175,16 @@ export default function PlaylistManager() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to delete playlist");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to delete playlist");
       }
 
+      // Remove from local state
       setPlaylists(playlists.filter((p) => p.id !== playlist.id));
-      toast.success("Playlist deleted successfully!");
+      toast.success(`"${playlist.name}" has been deleted successfully!`);
     } catch (error) {
       console.error("Error deleting playlist:", error);
-      toast.error("Failed to delete playlist");
+      toast.error("Failed to delete playlist. Please try again.");
     }
   };
 
@@ -238,8 +251,10 @@ export default function PlaylistManager() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {playlists.map((playlist) => (
-            <Link href={`/playlists/${playlist.id}`} key={playlist.id}>
-              <Card className="group hover:shadow-lg transition-shadow">
+            <div key={playlist.id}>
+              <Card className="group hover:shadow-lg transition-shadow cursor-pointer"
+                    onClick={() => window.location.href = `/playlists/${playlist.id}`}
+              >
                 <CardContent className="p-0">
                   {/* Cover Image */}
                   <div className="relative h-32 sm:h-36 md:h-40 bg-gradient-to-br from-purple-400 to-pink-400 rounded-t-lg">
@@ -273,17 +288,34 @@ export default function PlaylistManager() {
                       </h3>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                            }}
+                          >
                             <MoreVertical className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => openEditDialog(playlist)}>
+                          <DropdownMenuItem 
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              openEditDialog(playlist);
+                            }}
+                          >
                             <Edit className="mr-2 h-4 w-4" />
                             Edit
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            onClick={() => handleDeletePlaylist(playlist)}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleDeletePlaylist(playlist);
+                            }}
                             className="text-red-600"
                           >
                             <Trash2 className="mr-2 h-4 w-4" />
@@ -313,7 +345,7 @@ export default function PlaylistManager() {
                   </div>
                 </CardContent>
               </Card>
-            </Link>
+            </div>
           ))}
         </div>
       )}
