@@ -292,26 +292,29 @@ export default function PlaylistManager() {
                       </h3>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            className="relative z-10"
-                            onMouseDown={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                            }}
+                          <div onClick={(e) => {
+                            e.stopPropagation();
+                          }}>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              className="relative z-10"
+                            >
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent 
+                          align="end" 
+                          className="z-[9999] bg-white dark:bg-gray-800 border shadow-lg"
+                          onCloseAutoFocus={(e) => e.preventDefault()}
+                          onOpenAutoFocus={(e) => e.preventDefault()}
+                        >
+                          <DropdownMenuItem 
+                            className="focus:bg-gray-100 dark:focus:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
-                            }}
-                          >
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="z-[9999]">
-                          <DropdownMenuItem 
-                            onSelect={(e) => {
-                              e.preventDefault();
                               openEditDialog(playlist);
                             }}
                           >
@@ -319,11 +322,12 @@ export default function PlaylistManager() {
                             Edit
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            onSelect={(e) => {
+                            className="text-red-600 focus:bg-red-50 dark:focus:bg-red-900/20 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                            onClick={(e) => {
                               e.preventDefault();
+                              e.stopPropagation();
                               handleDeletePlaylist(playlist);
                             }}
-                            className="text-red-600"
                           >
                             <Trash2 className="mr-2 h-4 w-4" />
                             Delete
