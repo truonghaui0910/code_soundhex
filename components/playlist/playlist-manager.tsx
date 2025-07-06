@@ -210,8 +210,8 @@ export default function PlaylistManager() {
 
       {/* Playlists Grid */}
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[...Array(6)].map((_, i) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {[...Array(8)].map((_, i) => (
             <Card key={i} className="animate-pulse">
               <CardContent className="p-6">
                 <div className="h-32 bg-gray-200 dark:bg-gray-700 rounded mb-4"></div>
@@ -236,13 +236,13 @@ export default function PlaylistManager() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {playlists.map((playlist) => (
             <Link href={`/playlists/${playlist.id}`} key={playlist.id}>
               <Card className="group hover:shadow-lg transition-shadow">
                 <CardContent className="p-0">
                   {/* Cover Image */}
-                  <div className="relative h-40 bg-gradient-to-br from-purple-400 to-pink-400 rounded-t-lg">
+                  <div className="relative h-32 sm:h-36 md:h-40 bg-gradient-to-br from-purple-400 to-pink-400 rounded-t-lg">
                     {playlist.cover_image_url ? (
                       <img
                         src={playlist.cover_image_url}
@@ -266,9 +266,9 @@ export default function PlaylistManager() {
                   </div>
 
                   {/* Content */}
-                  <div className="p-4">
+                  <div className="p-3">
                     <div className="flex items-start justify-between mb-2">
-                      <h3 className="font-semibold text-lg truncate">
+                      <h3 className="font-semibold text-base truncate">
                         {playlist.name}
                       </h3>
                       <DropdownMenu>
