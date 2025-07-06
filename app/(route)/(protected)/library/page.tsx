@@ -160,7 +160,7 @@ export default function YourLibraryPage() {
           {activeTab === "playlists" && (
             <div className="space-y-6">
               <Card className="border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm shadow-lg">
-                <CardContent className="p-0">
+                <CardContent className="p-6">
                   <PlaylistManager />
                 </CardContent>
               </Card>
