@@ -1,4 +1,3 @@
-
 import { NextRequest, NextResponse } from "next/server";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
@@ -60,11 +59,11 @@ export async function POST(
     return NextResponse.json(playlistTrack, { status: 201 });
   } catch (error: any) {
     console.error("Error adding track to playlist:", error);
-    
+
     if (error.message === "Playlist not found or access denied") {
       return NextResponse.json({ error: error.message }, { status: 403 });
     }
-    
+
     if (error.message === "Track already exists in playlist") {
       return NextResponse.json({ error: error.message }, { status: 409 });
     }
@@ -109,7 +108,7 @@ export async function DELETE(
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error("Error removing track from playlist:", error);
-    
+
     if (error.message === "Playlist not found or access denied") {
       return NextResponse.json({ error: error.message }, { status: 403 });
     }

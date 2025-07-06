@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -311,6 +310,7 @@ export default function PlaylistManager() {
                 </div>
               </CardContent>
             </Card>
+            </Link>
           ))}
         </div>
       )}

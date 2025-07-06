@@ -1,4 +1,3 @@
-
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { Database } from "@/types/supabase";
@@ -282,5 +281,39 @@ export class PlaylistsController {
       ...data,
       track_count: data.playlist_tracks?.[0]?.count || 0
     } as Playlist;
+  }
+
+  /**
+   * Xóa track khỏi playlist
+   */
+  static async removeTrackFromPlaylist(
+    playlistId: number,
+    playlistTrackId: number,
+    userId: string
+  ): Promise<void> {
+    const supabase = createServerComponentClient<Database>({ cookies });
+
+    // Verify user owns the playlist
+    const { data: playlist, error: playlistError } = await supabase
+      .from("playlists")
+      .select("user_id")
+      .eq("id", playlistId)
+      .eq("user_id", userId)
+      .single();
+
+    if (playlistError || !playlist) {
+      throw new Error("Playlist not found or unauthorized");
+    }
+
+    const { error } = await supabase
+      .from("playlist_tracks")
+      .delete()
+      .eq("id", playlistTrackId)
+      .eq("playlist_id", playlistId);
+
+    if (error) {
+      console.error("Error removing track from playlist:", error);
+      throw new Error(`Failed to remove track from playlist: ${error.message}`);
+    }
   }
 }
