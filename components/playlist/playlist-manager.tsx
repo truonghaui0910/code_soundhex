@@ -62,12 +62,6 @@ export default function PlaylistManager() {
     trackList
   } = useAudioPlayer();
 
-  // Debug log to check audio player state
-  console.log('Audio Player State:', {
-    currentTrack: currentTrack?.title,
-    isPlaying,
-    trackListLength: trackList?.length
-  });
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
