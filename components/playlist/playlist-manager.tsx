@@ -82,25 +82,10 @@ function PlaylistManager() {
   const [loadingPlaylist, setLoadingPlaylist] = useState<number | null>(null);
 
   useEffect(() => {
-    let mounted = true;
-    
-    const loadPlaylists = async () => {
-      if (mounted) {
-        await fetchPlaylists();
-      }
-    };
-    
-    loadPlaylists();
-    
-    return () => {
-      mounted = false;
-    };
+    fetchPlaylists();
   }, []);
 
   const fetchPlaylists = async () => {
-    // Prevent duplicate calls
-    if (isLoading) return;
-    
     setIsLoading(true);
     try {
       const response = await fetch("/api/playlists");
@@ -672,4 +657,4 @@ function PlaylistManager() {
   );
 }
 
-export default React.memo(PlaylistManager);
+export default PlaylistManager;
