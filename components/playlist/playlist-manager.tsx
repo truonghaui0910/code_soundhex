@@ -330,7 +330,10 @@ function PlaylistManager() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">My Playlists</h2>
+          <h2 className="text-xl font-semibold flex items-center gap-2">
+            <List className="h-5 w-5" />
+            Your Playlist
+          </h2>
           <p className="text-gray-600 dark:text-gray-400">
             Create and manage your personal playlists
           </p>
