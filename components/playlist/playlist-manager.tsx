@@ -266,8 +266,11 @@ export default function PlaylistManager() {
           {playlists.map((playlist) => (
             <Card key={playlist.id} className="group hover:shadow-lg transition-shadow cursor-pointer"
                   onClick={(e) => {
-                    // Only navigate if the click is not on the dropdown button
-                    if (!(e.target as HTMLElement).closest('[data-radix-dropdown-menu-trigger]')) {
+                    // Only navigate if the click is not on the dropdown button or content
+                    const target = e.target as HTMLElement;
+                    if (!target.closest('[data-radix-dropdown-menu-trigger]') && 
+                        !target.closest('[data-radix-dropdown-menu-content]') &&
+                        !target.closest('[data-slot="dropdown-menu-item"]')) {
                       window.location.href = `/playlists/${playlist.id}`;
                     }
                   }}
@@ -325,8 +328,9 @@ export default function PlaylistManager() {
                         >
                           <DropdownMenuItem 
                             className="focus:bg-gray-100 dark:focus:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                            onSelect={(e) => {
+                            onClick={(e) => {
                               e.preventDefault();
+                              e.stopPropagation();
                               openEditDialog(playlist);
                             }}
                           >
@@ -335,8 +339,9 @@ export default function PlaylistManager() {
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             className="text-red-600 focus:bg-red-50 dark:focus:bg-red-900/20 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                            onSelect={(e) => {
+                            onClick={(e) => {
                               e.preventDefault();
+                              e.stopPropagation();
                               handleDeletePlaylist(playlist);
                             }}
                             disabled={isDeleting === playlist.id}
