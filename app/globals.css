@@ -471,6 +471,44 @@ body {
     z-index: 9999 !important;
   }
 
+  /* Custom dropdown animation - slide from bottom to top */
+  [data-radix-dropdown-menu-content] {
+    position: fixed !important;
+    will-change: transform !important;
+    animation-duration: 200ms !important;
+    animation-timing-function: ease-out !important;
+  }
+
+  [data-radix-dropdown-menu-content][data-state="open"] {
+    animation-name: slideInFromBottom !important;
+  }
+
+  [data-radix-dropdown-menu-content][data-state="closed"] {
+    animation-name: slideOutToBottom !important;
+  }
+
+  @keyframes slideInFromBottom {
+    from {
+      opacity: 0;
+      transform: translateY(10px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes slideOutToBottom {
+    from {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(10px) scale(0.95);
+    }
+  }
+
   /* Remove all white borders and flashing effects from dropdown menu items */
   [data-radix-dropdown-menu-item] {
     border: none !important;
@@ -511,12 +549,6 @@ body {
 
   .radix-dropdown-content {
     z-index: 9999 !important;
-  }
-
-  /* Prevent dropdown from affecting document flow */
-  [data-radix-dropdown-menu-content] {
-    position: fixed !important;
-    will-change: transform !important;
   }
 
   /* Ensure dropdown portal doesn't affect body layout */
