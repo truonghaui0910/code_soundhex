@@ -260,10 +260,11 @@ export default function PlaylistManager() {
         return;
       }
 
-      // Set the track list and play the first track
+      // Always update trackList when playing a new playlist (similar to album play)
       setTrackList(tracks);
+      // Small delay to ensure trackList is updated before playing
       setTimeout(() => {
-        playTrack(tracks[0]);
+        playTrack(tracks[0]); // Play the first track
       }, 50);
       
       toast.success(`Playing "${playlist.name}"`);
