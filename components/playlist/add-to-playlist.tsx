@@ -91,6 +91,16 @@ export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPl
       return;
     }
 
+    // Check for duplicate playlist name
+    const duplicatePlaylist = playlists.find(
+      playlist => playlist.name.toLowerCase() === newPlaylistName.trim().toLowerCase()
+    );
+    
+    if (duplicatePlaylist) {
+      toast.error("A playlist with this name already exists");
+      return;
+    }
+
     try {
       // Create new playlist
       const createResponse = await fetch("/api/playlists", {
@@ -145,7 +155,7 @@ export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPl
             {children}
           </div>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-64 z-50 max-h-80 overflow-y-auto bg-white dark:bg-gray-800 border shadow-lg">
+        <DropdownMenuContent align="end" className="w-64 z-[9999] max-h-80 overflow-y-auto bg-white dark:bg-gray-800 border shadow-lg" style={{ zIndex: 9999 }}>
           <div className="p-2">
             <div className="flex items-center gap-2 mb-2">
               <Search className="h-4 w-4 text-gray-400" />

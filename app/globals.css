@@ -439,3 +439,30 @@
 ::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(135deg, #e91e63, #9c27b0);
 }
+
+@layer components {
+  .animate-equalize-1 {
+    animation: equalize1 1.5s ease-in-out infinite;
+  }
+
+  .animate-equalize-2 {
+    animation: equalize2 1.5s ease-in-out infinite;
+  }
+
+  .animate-equalize-3 {
+    animation: equalize3 1.5s ease-in-out infinite;
+  }
+
+  .animate-loading-bar {
+    animation: loadingBar 2s ease-in-out infinite;
+  }
+
+  /* Fix dropdown menu visibility */
+  [data-radix-popper-content-wrapper] {
+    z-index: 9999 !important;
+  }
+
+  .radix-dropdown-content {
+    z-index: 9999 !important;
+  }
+}

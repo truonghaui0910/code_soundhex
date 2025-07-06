@@ -45,6 +45,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check for duplicate playlist name for this user
+    const existingPlaylists = await PlaylistsController.getUserPlaylists(user.id);
+    const duplicatePlaylist = existingPlaylists.find(
+      playlist => playlist.name.toLowerCase() === name.trim().toLowerCase()
+    );
+    
+    if (duplicatePlaylist) {
+      return NextResponse.json(
+        { error: "A playlist with this name already exists" },
+        { status: 409 }
+      );
+    }
+
     const playlist = await PlaylistsController.createPlaylist(
       user.id,
       name.trim(),
