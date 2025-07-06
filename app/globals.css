@@ -422,10 +422,9 @@
               transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* Force scrollbar to always be visible to prevent layout shift */
+/* Prevent layout shift without creating unnecessary space */
 html {
-  overflow-y: scroll !important;
-  scrollbar-gutter: stable;
+  overflow-y: auto;
 }
 
 body {
@@ -514,20 +513,21 @@ body {
     z-index: 9999 !important;
   }
 
-  /* Prevent body scroll and layout shift when dropdown is open */
+  /* Prevent dropdown from affecting document flow */
   [data-radix-dropdown-menu-content] {
     position: fixed !important;
+    will-change: transform !important;
   }
 
-  /* Ensure dropdown doesn't affect document flow */
+  /* Ensure dropdown portal doesn't affect body layout */
   [data-radix-popper-content-wrapper] {
     position: fixed !important;
     z-index: 9999 !important;
+    contain: layout style !important;
   }
 
-  /* Prevent scrollbar from disappearing */
+  /* Prevent any layout changes when dropdown opens */
   body:has([data-radix-dropdown-menu-content]) {
-    overflow-y: scroll !important;
-    scrollbar-gutter: stable !important;
+    overflow: visible !important;
   }
 }
