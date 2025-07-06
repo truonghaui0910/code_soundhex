@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Music, Clock, Search, Volume2 } from "lucide-react";
+import { Music, Clock, Search, Volume2, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Track } from "@/lib/definitions/Track";
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 import { MusicPlayer } from "@/components/music/MusicPlayer";
+import AddToPlaylist from "@/components/playlist/add-to-playlist";
 
 // Helper function to format time in minutes:seconds
 const formatDuration = (seconds: number | null) => {
@@ -78,6 +79,7 @@ export function TracksList({ initialTracks }: TracksListProps) {
                                 <TableHead className="text-right">
                                     <Clock className="ml-auto h-4 w-4" />
                                 </TableHead>
+                                <TableHead className="w-24">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -196,8 +198,18 @@ export function TracksList({ initialTracks }: TracksListProps) {
                                                 </span>
                                             )}
                                         </TableCell>
-                                        <TableCell className="text-right font-mono">
+                                        <TableCell className="text-gray-500">
                                             {formatDuration(track.duration)}
+                                        </TableCell>
+                                        <TableCell>
+                                            <AddToPlaylist
+                                                trackId={track.id}
+                                                trackTitle={track.title}
+                                            >
+                                                <button className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                                                    <Plus className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                                                </button>
+                                            </AddToPlaylist>
                                         </TableCell>
                                     </TableRow>
                                 ))

@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, Upload } from "lucide-react";
+import { useUserRole } from "@/hooks/use-user-role";
 
 const items = [
   {
@@ -105,27 +106,40 @@ export function Sidebar() {
     return () => window.removeEventListener('resize', updateNavbarHeight);
   }, []);
 
-  const SidebarContent = () => (
-    <div className="flex flex-col gap-2 p-4">
-      <div className="font-semibold py-2 text-rose-600">Menu</div>
-      {items.map((item) => (
-        <Link
-          key={item.href}
-          href={item.href}
-          onClick={() => setOpen(false)}
-          className={cn(
-            "flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-rose-600",
-            pathname === item.href
-              ? "bg-muted font-medium text-rose-600"
-              : "text-muted-foreground"
-          )}
-        >
-          {item.icon}
-          {item.title}
-        </Link>
-      ))}
-    </div>
-  );
+  const { userRole } = useUserRole();
+
+  const SidebarContent = () => {
+    // Filter items based on user role
+    const filteredItems = items.filter(item => {
+      // Hide Dashboard for user role
+      if (item.href === "/dashboard" && userRole === "user") {
+        return false;
+      }
+      return true;
+    });
+
+    return (
+      <div className="flex flex-col gap-2 p-4">
+        <div className="font-semibold py-2 text-rose-600">Menu</div>
+        {filteredItems.map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            onClick={() => setOpen(false)}
+            className={cn(
+              "flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-rose-600",
+              pathname === item.href
+                ? "bg-muted font-medium text-rose-600"
+                : "text-muted-foreground"
+            )}
+          >
+            {item.icon}
+            {item.title}
+          </Link>
+        ))}
+      </div>
+    );
+  };
 
   // Mobile sidebar (drawer/sheet)
   const MobileSidebar = () => (

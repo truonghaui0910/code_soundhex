@@ -85,6 +85,26 @@ export async function GET(request: NextRequest) {
           displayStatus = 'waiting_for_other_party';
         }
       }
+
+      // Special logic for admin view: if artist has completed but overall status is pending
+      // show 'waiting_for_soundhex' to indicate artist submitted and waiting for SoundHex
+      if (userRole === 'admin') {
+        const artistSubmitter = agreement.submitters.find((s: any) => s.role?.toLowerCase() === 'artist');
+        if (artistSubmitter && 
+            artistSubmitter.status?.toLowerCase() === 'completed' && 
+            agreement.status?.toLowerCase() === 'pending') {
+          displayStatus = 'waiting_for_soundhex';
+        }
+      }
+
+      // For admin view, find the artist email to display
+      let displayEmail = userEmail; // default to current user email
+      if (userRole === 'admin') {
+        const artistSubmitter = agreement.submitters.find((s: any) => s.role?.toLowerCase() === 'artist');
+        if (artistSubmitter) {
+          displayEmail = artistSubmitter.email;
+        }
+      }
       
       return {
         id: agreement.id,
@@ -98,6 +118,10 @@ export async function GET(request: NextRequest) {
         created_by_user: agreement.created_by_user,
         // Add user completion status for frontend logic
         user_has_completed: userHasCompleted,
+        // Add display email for admin view
+        display_email: displayEmail,
+        // Flag to indicate if current user is admin
+        is_admin_view: userRole === 'admin',
         // Filter submitters to only include slug for current user
         submitters: agreement.submitters.map((submitter: any) => ({
           id: submitter.id,

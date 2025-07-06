@@ -104,13 +104,19 @@ export class UserRoleService {
           return false;
         }
       } else {
-        // User doesn't exist, insert new record
+        // User doesn't exist, find user_id from auth.users first
+        const { data: authUser } = await supabase
+          .from('auth.users')
+          .select('id')
+          .eq('email', email)
+          .single();
+
         const { error } = await supabase
           .from('user_roles')
           .insert({
             email: email,
             role: newRole,
-            user_id: email, // Use email as user_id temporarily
+            user_id: authUser?.id || null, // Use actual user_id if found
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
           });
