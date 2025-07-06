@@ -62,6 +62,9 @@ export default function PlaylistManager() {
   const [isCreating, setIsCreating] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState<number | null>(null);
+  const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [playlistToDelete, setPlaylistToDelete] = useState<Playlist | null>(null);
 
   useEffect(() => {
     fetchPlaylists();
@@ -201,6 +204,20 @@ export default function PlaylistManager() {
     });
   };
 
+  const openDeleteConfirm = (playlist: Playlist) => {
+    setPlaylistToDelete(playlist);
+    setDeleteConfirmOpen(true);
+    setOpenDropdownId(null); // Close dropdown
+  };
+
+  const confirmDelete = () => {
+    if (playlistToDelete) {
+      handleDeletePlaylist(playlistToDelete);
+      setDeleteConfirmOpen(false);
+      setPlaylistToDelete(null);
+    }
+  };
+
   const openEditDialog = (playlist: Playlist) => {
     setSelectedPlaylist(playlist);
     setFormData({
@@ -208,6 +225,7 @@ export default function PlaylistManager() {
       description: playlist.description || "",
     });
     setEditDialogOpen(true);
+    setOpenDropdownId(null); // Close dropdown
   };
 
   const formatDate = (dateString: string) => {
@@ -306,7 +324,10 @@ export default function PlaylistManager() {
                       <h3 className="font-semibold text-base truncate">
                         {playlist.name}
                       </h3>
-                      <DropdownMenu>
+                      <DropdownMenu 
+                        open={openDropdownId === playlist.id} 
+                        onOpenChange={(open) => setOpenDropdownId(open ? playlist.id : null)}
+                      >
                         <DropdownMenuTrigger asChild>
                           <div onClick={(e) => {
                             e.stopPropagation();
@@ -342,21 +363,12 @@ export default function PlaylistManager() {
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
-                              handleDeletePlaylist(playlist);
+                              openDeleteConfirm(playlist);
                             }}
                             disabled={isDeleting === playlist.id}
                           >
-                            {isDeleting === playlist.id ? (
-                              <>
-                                <div className="mr-2 h-4 w-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
-                                Deleting...
-                              </>
-                            ) : (
-                              <>
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Delete
-                              </>
-                            )}
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -501,6 +513,46 @@ export default function PlaylistManager() {
               </Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Playlist</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete "{playlistToDelete?.name}"? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setDeleteConfirmOpen(false)}
+              disabled={isDeleting === playlistToDelete?.id}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={confirmDelete}
+              disabled={isDeleting === playlistToDelete?.id}
+            >
+              {isDeleting === playlistToDelete?.id ? (
+                <>
+                  <div className="mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete
+                </>
+              )}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
