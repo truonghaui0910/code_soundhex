@@ -335,9 +335,6 @@ function PlaylistManager() {
             <List className="h-5 w-5" />
             Your Playlist
           </h2>
-          <p className="text-gray-600 dark:text-gray-400">
-            Create and manage your personal playlists
-          </p>
         </div>
         <Button onClick={() => setCreateDialogOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />

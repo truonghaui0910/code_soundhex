@@ -224,11 +224,19 @@ export default function YourLibraryPage() {
                   Manage your library efficiently
                 </p>
                 <div className="flex gap-3">
-                  <Button variant="secondary" size="sm">
+                  <Button 
+                    variant="secondary" 
+                    size="sm"
+                    onClick={() => setActiveTab("playlists")}
+                  >
                     <List className="mr-2 h-4 w-4" />
                     Create Playlist
                   </Button>
-                  <Button variant="secondary" size="sm">
+                  <Button 
+                    variant="secondary" 
+                    size="sm"
+                    onClick={() => window.location.href = '/upload'}
+                  >
                     <Album className="mr-2 h-4 w-4" />
                     Upload Album
                   </Button>
