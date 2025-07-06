@@ -32,6 +32,7 @@ import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 import { Track } from "@/lib/definitions/Track";
 import { useDownload } from "@/hooks/use-download";
 import { toast } from "sonner";
+import AddToPlaylist from "@/components/playlist/add-to-playlist";
 
 interface Playlist {
   id: number;
@@ -279,7 +280,7 @@ export default function PlaylistDetailPage() {
                   return (
                     <div
                       key={playlistTrack.id}
-                      className="group flex items-center gap-4 p-4 hover:bg-white/50 dark:hover:bg-gray-700/30 transition-colors cursor-pointer border-b border-gray-100/50 dark:border-gray-700/30 last:border-b-0"
+                      className="group flex items-center gap-4 p-4 hover:bg-white/50 dark:hover:bg-gray-700/30 transition-colors border-b border-gray-100/50 dark:border-gray-700/30 last:border-b-0"
                     >
                       <div className="w-8 text-center text-sm text-gray-500 dark:text-gray-400 group-hover:hidden">
                         {currentTrack?.id === track.id && isPlaying ? (
@@ -299,7 +300,10 @@ export default function PlaylistDetailPage() {
                         size="sm"
                         variant="ghost"
                         className="w-8 h-8 p-0 hidden group-hover:flex rounded-full"
-                        onClick={() => handlePlayTrack(track)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handlePlayTrack(track);
+                        }}
                       >
                         {currentTrack?.id === track.id && isPlaying ? (
                           <Pause className="h-4 w-4" />
@@ -309,7 +313,7 @@ export default function PlaylistDetailPage() {
                       </Button>
 
                       <div 
-                        className="w-12 h-12 rounded-lg overflow-hidden bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0"
+                        className="w-12 h-12 rounded-lg overflow-hidden bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0 cursor-pointer"
                         onClick={() => handlePlayTrack(track)}
                       >
                         {track.album?.cover_image_url ? (
@@ -326,7 +330,7 @@ export default function PlaylistDetailPage() {
                       </div>
 
                       <div 
-                        className="flex-1 min-w-0"
+                        className="flex-1 min-w-0 cursor-pointer"
                         onClick={() => handlePlayTrack(track)}
                       >
                         <div className="font-semibold text-gray-900 dark:text-white truncate">
@@ -355,6 +359,12 @@ export default function PlaylistDetailPage() {
                       </div>
 
                       <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <AddToPlaylist trackId={track.id} trackTitle={track.title}>
+                          <button className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" title="Add to playlist">
+                            <Plus className="h-4 w-4" />
+                          </button>
+                        </AddToPlaylist>
+                        
                         <Button 
                           size="sm" 
                           variant="ghost" 
