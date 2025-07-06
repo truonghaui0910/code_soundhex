@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -97,7 +96,7 @@ export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPl
     const duplicatePlaylist = playlists.find(
       playlist => playlist.name.toLowerCase() === newPlaylistName.trim().toLowerCase()
     );
-    
+
     if (duplicatePlaylist) {
       toast.error("A playlist with this name already exists");
       return;
@@ -115,13 +114,13 @@ export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPl
 
       if (!createResponse.ok) {
         const errorData = await createResponse.json();
-        
+
         // Handle specific error responses
         if (createResponse.status === 409) {
           toast.error("A playlist with this name already exists");
           return;
         }
-        
+
         throw new Error(errorData.error || "Failed to create playlist");
       }
 
@@ -143,7 +142,7 @@ export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPl
       setShowCreateDialog(false);
       setNewPlaylistName("");
       toast.success(`Created "${newPlaylist.name}" and added "${trackTitle}"`);
-      
+
       // Force refresh playlists to ensure UI is up to date
       await fetchPlaylists();
     } catch (error: any) {
@@ -176,9 +175,13 @@ export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPl
         </DropdownMenuTrigger>
         <DropdownMenuContent 
           align="end" 
-          className="w-64 z-[9999] max-h-80 overflow-y-auto bg-white dark:bg-gray-800 border shadow-lg"
-          style={{ zIndex: 9999 }}
+          className="w-64 z-[9999] max-h-80 overflow-y-auto bg-white dark:bg-gray-800 border shadow-lg focus:outline-none"
+          style={{ 
+            zIndex: 9999,
+            position: 'fixed'
+          }}
           onCloseAutoFocus={(e) => e.preventDefault()}
+          onOpenAutoFocus={(e) => e.preventDefault()}
         >
           <div className="p-2">
             <div className="flex items-center gap-2 mb-2">
@@ -194,6 +197,7 @@ export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPl
           </div>
 
           <DropdownMenuItem 
+            className="focus:bg-gray-100 dark:focus:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
@@ -217,6 +221,7 @@ export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPl
             filteredPlaylists.map((playlist) => (
               <DropdownMenuItem
                 key={playlist.id}
+                className="focus:bg-gray-100 dark:focus:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();

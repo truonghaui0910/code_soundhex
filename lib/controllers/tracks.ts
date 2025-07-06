@@ -15,7 +15,7 @@ export class TracksController {
     const { data, error } = await supabase
       .from("tracks")
       .select(`
-        id, title, description, duration, file_url, audio_file_url, source_type, created_at,
+        id, title, description, duration, file_url, source_type, created_at,
         artist:artist_id (id, name, profile_image_url),
         album:album_id (id, title, cover_image_url),
         genre:genre_id (id, name)
@@ -235,7 +235,7 @@ export class TracksController {
     const { data, error } = await supabase
       .from("tracks")
       .select(`
-        *,
+        id, title, description, duration, file_url, source_type, created_at,
         artist:artist_id(id, name, profile_image_url),
         album:album_id(id, title, cover_image_url),
         genre:genre_id(id, name)

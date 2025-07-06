@@ -422,6 +422,15 @@
               transform 0.3s ease, box-shadow 0.3s ease;
 }
 
+/* Prevent layout shift without creating unnecessary space */
+html {
+  overflow-y: auto;
+}
+
+body {
+  overflow-x: hidden;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
@@ -462,7 +471,63 @@
     z-index: 9999 !important;
   }
 
+  /* Remove all white borders and flashing effects from dropdown menu items */
+  [data-radix-dropdown-menu-item] {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+
+  [data-radix-dropdown-menu-item]:hover {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    background: rgba(0, 0, 0, 0.05) !important;
+    transition: background-color 0.2s ease !important;
+  }
+
+  [data-radix-dropdown-menu-item]:focus {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    background: rgba(0, 0, 0, 0.05) !important;
+  }
+
+  [data-radix-dropdown-menu-item]:focus-visible {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Dark mode dropdown items */
+  .dark [data-radix-dropdown-menu-item]:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+  }
+
+  .dark [data-radix-dropdown-menu-item]:focus {
+    background: rgba(255, 255, 255, 0.05) !important;
+  }
+
   .radix-dropdown-content {
     z-index: 9999 !important;
+  }
+
+  /* Prevent dropdown from affecting document flow */
+  [data-radix-dropdown-menu-content] {
+    position: fixed !important;
+    will-change: transform !important;
+  }
+
+  /* Ensure dropdown portal doesn't affect body layout */
+  [data-radix-popper-content-wrapper] {
+    position: fixed !important;
+    z-index: 9999 !important;
+    contain: layout style !important;
+  }
+
+  /* Prevent any layout changes when dropdown opens */
+  body:has([data-radix-dropdown-menu-content]) {
+    overflow: visible !important;
   }
 }
