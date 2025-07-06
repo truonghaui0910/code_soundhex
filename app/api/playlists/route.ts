@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, description, cover_image_url } = body;
+    const { name, description, cover_image_url, private: isPrivate } = body;
 
     if (!name || typeof name !== "string" || name.trim().length === 0) {
       return NextResponse.json(
@@ -62,7 +62,8 @@ export async function POST(request: NextRequest) {
       user.id,
       name.trim(),
       description,
-      cover_image_url
+      cover_image_url,
+      isPrivate
     );
 
     return NextResponse.json(playlist, { status: 201 });

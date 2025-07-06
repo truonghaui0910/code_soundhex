@@ -1,7 +1,7 @@
 // contexts/AudioPlayerContext.tsx
 "use client";
 
-import React, { createContext, useContext, ReactNode } from 'react';
+import React, { createContext, useContext, ReactNode, useMemo } from 'react';
 import { useAudioPlayer as useAudioPlayerHook } from '@/hooks/use-audio-player';
 import { Track } from '@/lib/definitions/Track';
 
@@ -31,7 +31,7 @@ const AudioPlayerContext = createContext<AudioPlayerContextType | undefined>(und
 // Provider component
 export function AudioPlayerProvider({ children }: { children: ReactNode }) {
   const audioPlayerState = useAudioPlayerHook();
-  
+
   return (
     <AudioPlayerContext.Provider value={audioPlayerState}>
       {children}
@@ -42,10 +42,10 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
 // Hook để sử dụng context
 export function useAudioPlayer() {
   const context = useContext(AudioPlayerContext);
-  
+
   if (context === undefined) {
     throw new Error('useAudioPlayer must be used within an AudioPlayerProvider');
   }
-  
+
   return context;
 }

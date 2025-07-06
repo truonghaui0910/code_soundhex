@@ -36,9 +36,12 @@ import {
   Trash2,
   Play,
   Clock,
+  Pause,
 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
+import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
+import { Track } from "@/lib/definitions/Track";
 
 interface Playlist {
   id: number;
@@ -49,7 +52,18 @@ interface Playlist {
   created_at: string;
 }
 
-export default function PlaylistManager() {
+import React from "react";
+
+function PlaylistManager() {
+  const { 
+    currentTrack, 
+    isPlaying, 
+    playTrack, 
+    setTrackList, 
+    togglePlayPause,
+    trackList
+  } = useAudioPlayer();
+
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -59,6 +73,13 @@ export default function PlaylistManager() {
     name: "",
     description: "",
   });
+  const [isCreating, setIsCreating] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isDeleting, setIsDeleting] = useState<number | null>(null);
+  const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [playlistToDelete, setPlaylistToDelete] = useState<Playlist | null>(null);
+  const [loadingPlaylist, setLoadingPlaylist] = useState<number | null>(null);
 
   useEffect(() => {
     fetchPlaylists();
@@ -88,6 +109,7 @@ export default function PlaylistManager() {
       return;
     }
 
+    setIsCreating(true);
     try {
       const response = await fetch("/api/playlists", {
         method: "POST",
@@ -112,66 +134,102 @@ export default function PlaylistManager() {
     } catch (error) {
       console.error("Error creating playlist:", error);
       toast.error("Failed to create playlist");
+    } finally {
+      setIsCreating(false);
     }
   };
 
   const handleEditPlaylist = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedPlaylist || !formData.name.trim()) {
+      toast.error("Playlist name is required");
       return;
     }
 
+    setIsEditing(true);
     try {
       const response = await fetch(`/api/playlists/${selectedPlaylist.id}`, {
-        method: "PUT",
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          name: formData.name,
-          description: formData.description,
+          name: formData.name.trim(),
+          description: formData.description.trim(),
         }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to update playlist");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to update playlist");
       }
 
       const updatedPlaylist = await response.json();
+      
+      // Update local state
       setPlaylists(
         playlists.map((p) =>
-          p.id === selectedPlaylist.id ? updatedPlaylist : p
+          p.id === selectedPlaylist.id ? { ...p, ...updatedPlaylist } : p
         )
       );
+      
+      // Reset form and close dialog
       setEditDialogOpen(false);
       setSelectedPlaylist(null);
       setFormData({ name: "", description: "" });
-      toast.success("Playlist updated successfully!");
+      
+      toast.success(`"${updatedPlaylist.name}" updated successfully!`);
     } catch (error) {
       console.error("Error updating playlist:", error);
-      toast.error("Failed to update playlist");
+      toast.error("Failed to update playlist. Please try again.");
+    } finally {
+      setIsEditing(false);
     }
   };
 
   const handleDeletePlaylist = async (playlist: Playlist) => {
-    if (!confirm(`Are you sure you want to delete "${playlist.name}"?`)) {
-      return;
-    }
+    setIsDeleting(playlist.id);
+    
+    const deletePromise = new Promise(async (resolve, reject) => {
+      try {
+        const response = await fetch(`/api/playlists/${playlist.id}`, {
+          method: "DELETE",
+        });
 
-    try {
-      const response = await fetch(`/api/playlists/${playlist.id}`, {
-        method: "DELETE",
-      });
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Failed to delete playlist");
+        }
 
-      if (!response.ok) {
-        throw new Error("Failed to delete playlist");
+        // Remove from local state
+        setPlaylists(playlists.filter((p) => p.id !== playlist.id));
+        resolve(`"${playlist.name}" has been deleted successfully!`);
+      } catch (error) {
+        console.error("Error deleting playlist:", error);
+        reject(new Error("Failed to delete playlist. Please try again."));
+      } finally {
+        setIsDeleting(null);
       }
+    });
 
-      setPlaylists(playlists.filter((p) => p.id !== playlist.id));
-      toast.success("Playlist deleted successfully!");
-    } catch (error) {
-      console.error("Error deleting playlist:", error);
-      toast.error("Failed to delete playlist");
+    toast.promise(deletePromise, {
+      loading: `Deleting "${playlist.name}"...`,
+      success: (message) => message as string,
+      error: (err) => err.message,
+    });
+  };
+
+  const openDeleteConfirm = (playlist: Playlist) => {
+    setPlaylistToDelete(playlist);
+    setDeleteConfirmOpen(true);
+    setOpenDropdownId(null); // Close dropdown
+  };
+
+  const confirmDelete = () => {
+    if (playlistToDelete) {
+      handleDeletePlaylist(playlistToDelete);
+      setDeleteConfirmOpen(false);
+      setPlaylistToDelete(null);
     }
   };
 
@@ -182,6 +240,81 @@ export default function PlaylistManager() {
       description: playlist.description || "",
     });
     setEditDialogOpen(true);
+    setOpenDropdownId(null); // Close dropdown
+  };
+
+  const handlePlayPlaylist = async (playlist: Playlist) => {
+    if (playlist.track_count === 0) {
+      toast.error("This playlist is empty");
+      return;
+    }
+
+    setLoadingPlaylist(playlist.id);
+    try {
+      // Fetch tracks from the playlist
+      const response = await fetch(`/api/playlists/${playlist.id}/tracks`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch playlist tracks");
+      }
+
+      // API might return PlaylistTrack[] or Track[] depending on context
+      const tracksData = await response.json();
+      
+      if (tracksData.length === 0) {
+        toast.error("This playlist is empty");
+        return;
+      }
+
+      console.log("Raw API response:", tracksData);
+
+      // Handle both PlaylistTrack[] and Track[] responses
+      let tracks: Track[];
+      if (tracksData[0]?.track) {
+        // PlaylistTrack[] format (like in detail page)
+        tracks = tracksData.map((pt: any) => pt.track);
+      } else {
+        // Direct Track[] format  
+        tracks = tracksData;
+      }
+
+      // Process tracks to ensure proper audio URLs (same as playlist detail page)
+      const processedTracks = tracks.map(track => ({
+        ...track,
+        file_url: track.file_url || track.audio_file_url,
+        audio_file_url: track.audio_file_url || track.file_url
+      }));
+
+      console.log("Processed tracks:", processedTracks);
+
+      // Validate tracks have required properties
+      const validTracks = processedTracks.filter(track => 
+        track && 
+        track.id && 
+        track.title && 
+        (track.file_url || track.audio_file_url)
+      );
+
+      if (validTracks.length === 0) {
+        toast.error("No valid tracks found in playlist");
+        return;
+      }
+
+      // Set track list first (exactly like playlist detail page)
+      setTrackList(validTracks);
+      
+      // Same delay as playlist detail page (50ms)
+      setTimeout(() => {
+        console.log("Playing first track:", validTracks[0]);
+        playTrack(validTracks[0]);
+      }, 50);
+      
+      toast.success(`Playing "${playlist.name}" - ${validTracks.length} tracks`);
+    } catch (error) {
+      console.error("Error playing playlist:", error);
+      toast.error("Failed to play playlist");
+    } finally {
+      setLoadingPlaylist(null);
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -210,8 +343,8 @@ export default function PlaylistManager() {
 
       {/* Playlists Grid */}
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[...Array(6)].map((_, i) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {[...Array(8)].map((_, i) => (
             <Card key={i} className="animate-pulse">
               <CardContent className="p-6">
                 <div className="h-32 bg-gray-200 dark:bg-gray-700 rounded mb-4"></div>
@@ -236,13 +369,22 @@ export default function PlaylistManager() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {playlists.map((playlist) => (
-            <Link href={`/playlists/${playlist.id}`} key={playlist.id}>
-              <Card className="group hover:shadow-lg transition-shadow">
+            <Card key={playlist.id} className="group hover:shadow-lg transition-shadow cursor-pointer"
+                  onClick={(e) => {
+                    // Only navigate if the click is not on the dropdown button or content
+                    const target = e.target as HTMLElement;
+                    if (!target.closest('[data-radix-dropdown-menu-trigger]') && 
+                        !target.closest('[data-radix-dropdown-menu-content]') &&
+                        !target.closest('[data-slot="dropdown-menu-item"]')) {
+                      window.location.href = `/playlists/${playlist.id}`;
+                    }
+                  }}
+            >
                 <CardContent className="p-0">
                   {/* Cover Image */}
-                  <div className="relative h-40 bg-gradient-to-br from-purple-400 to-pink-400 rounded-t-lg">
+                  <div className="relative h-32 sm:h-36 md:h-40 bg-gradient-to-br from-purple-400 to-pink-400 rounded-t-lg">
                     {playlist.cover_image_url ? (
                       <img
                         src={playlist.cover_image_url}
@@ -259,32 +401,69 @@ export default function PlaylistManager() {
                         size="sm"
                         className="opacity-0 group-hover:opacity-100 transition-opacity"
                         variant="secondary"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handlePlayPlaylist(playlist);
+                        }}
+                        disabled={loadingPlaylist === playlist.id}
                       >
-                        <Play className="h-4 w-4" />
+                        {loadingPlaylist === playlist.id ? (
+                          <div className="h-4 w-4 border-2 border-gray-600 border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <Play className="h-4 w-4" />
+                        )}
                       </Button>
                     </div>
                   </div>
 
                   {/* Content */}
-                  <div className="p-4">
+                  <div className="p-3">
                     <div className="flex items-start justify-between mb-2">
-                      <h3 className="font-semibold text-lg truncate">
+                      <h3 className="font-semibold text-base truncate">
                         {playlist.name}
                       </h3>
-                      <DropdownMenu>
+                      <DropdownMenu 
+                        open={openDropdownId === playlist.id} 
+                        onOpenChange={(open) => setOpenDropdownId(open ? playlist.id : null)}
+                      >
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
+                          <div onClick={(e) => {
+                            e.stopPropagation();
+                          }}>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              className="relative z-10"
+                            >
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => openEditDialog(playlist)}>
+                        <DropdownMenuContent 
+                          align="end" 
+                          className="z-[9999] bg-white dark:bg-gray-800 border shadow-lg"
+                          onCloseAutoFocus={(e) => e.preventDefault()}
+                          onOpenAutoFocus={(e) => e.preventDefault()}
+                        >
+                          <DropdownMenuItem 
+                            className="focus:bg-gray-100 dark:focus:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              openEditDialog(playlist);
+                            }}
+                          >
                             <Edit className="mr-2 h-4 w-4" />
                             Edit
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            onClick={() => handleDeletePlaylist(playlist)}
-                            className="text-red-600"
+                            className="text-red-600 focus:bg-red-50 dark:focus:bg-red-900/20 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              openDeleteConfirm(playlist);
+                            }}
+                            disabled={isDeleting === playlist.id}
                           >
                             <Trash2 className="mr-2 h-4 w-4" />
                             Delete
@@ -312,8 +491,7 @@ export default function PlaylistManager() {
                     </div>
                   </div>
                 </CardContent>
-              </Card>
-            </Link>
+            </Card>
           ))}
         </div>
       )}
@@ -329,7 +507,7 @@ export default function PlaylistManager() {
           </DialogHeader>
           <form onSubmit={handleCreatePlaylist}>
             <div className="space-y-4 py-4">
-              <div>
+              <div className="space-y-2">
                 <Label htmlFor="name">Playlist Name</Label>
                 <Input
                   id="name"
@@ -341,7 +519,7 @@ export default function PlaylistManager() {
                   required
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label htmlFor="description">Description (Optional)</Label>
                 <Textarea
                   id="description"
@@ -362,7 +540,16 @@ export default function PlaylistManager() {
               >
                 Cancel
               </Button>
-              <Button type="submit">Create Playlist</Button>
+              <Button type="submit" disabled={isCreating}>
+                {isCreating ? (
+                  <>
+                    <div className="mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  "Create Playlist"
+                )}
+              </Button>
             </DialogFooter>
           </form>
         </DialogContent>
@@ -379,7 +566,7 @@ export default function PlaylistManager() {
           </DialogHeader>
           <form onSubmit={handleEditPlaylist}>
             <div className="space-y-4 py-4">
-              <div>
+              <div className="space-y-2">
                 <Label htmlFor="edit-name">Playlist Name</Label>
                 <Input
                   id="edit-name"
@@ -391,7 +578,7 @@ export default function PlaylistManager() {
                   required
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label htmlFor="edit-description">Description (Optional)</Label>
                 <Textarea
                   id="edit-description"
@@ -412,11 +599,62 @@ export default function PlaylistManager() {
               >
                 Cancel
               </Button>
-              <Button type="submit">Save Changes</Button>
+              <Button type="submit" disabled={isEditing}>
+                {isEditing ? (
+                  <>
+                    <div className="mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save Changes"
+                )}
+              </Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Playlist</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete "{playlistToDelete?.name}"? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setDeleteConfirmOpen(false)}
+              disabled={isDeleting === playlistToDelete?.id}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={confirmDelete}
+              disabled={isDeleting === playlistToDelete?.id}
+            >
+              {isDeleting === playlistToDelete?.id ? (
+                <>
+                  <div className="mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete
+                </>
+              )}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
   );
 }
+
+export default PlaylistManager;
