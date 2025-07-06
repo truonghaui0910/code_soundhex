@@ -37,6 +37,7 @@ import {
   Play,
   Clock,
   Pause,
+  List,
 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
