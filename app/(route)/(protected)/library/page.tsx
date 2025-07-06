@@ -160,7 +160,7 @@ export default function YourLibraryPage() {
           {activeTab === "playlists" && (
             <div className="space-y-6">
               <Card className="border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm shadow-lg">
-                <CardContent className="p-0">
+                <CardContent className="p-6">
                   <PlaylistManager />
                 </CardContent>
               </Card>
@@ -172,7 +172,7 @@ export default function YourLibraryPage() {
               <Card className="border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm shadow-lg">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-lg font-semibold flex items-center gap-2">
+                    <h3 className="text-xl font-semibold flex items-center gap-2">
                       <Album className="h-5 w-5" />
                       Your Albums
                     </h3>
