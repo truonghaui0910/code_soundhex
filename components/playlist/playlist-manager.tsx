@@ -52,7 +52,9 @@ interface Playlist {
   created_at: string;
 }
 
-export default function PlaylistManager() {
+import React from "react";
+
+function PlaylistManager() {
   const { 
     currentTrack, 
     isPlaying, 
@@ -80,10 +82,25 @@ export default function PlaylistManager() {
   const [loadingPlaylist, setLoadingPlaylist] = useState<number | null>(null);
 
   useEffect(() => {
-    fetchPlaylists();
+    let mounted = true;
+    
+    const loadPlaylists = async () => {
+      if (mounted) {
+        await fetchPlaylists();
+      }
+    };
+    
+    loadPlaylists();
+    
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const fetchPlaylists = async () => {
+    // Prevent duplicate calls
+    if (isLoading) return;
+    
     setIsLoading(true);
     try {
       const response = await fetch("/api/playlists");
@@ -654,3 +671,5 @@ export default function PlaylistManager() {
     </div>
   );
 }
+
+export default React.memo(PlaylistManager);
