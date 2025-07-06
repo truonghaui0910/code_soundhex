@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -237,81 +238,81 @@ export default function PlaylistManager() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {playlists.map((playlist) => (
-            <Link href={`/playlist/${playlist.id}`} key={playlist.id}`}>
-            <Card className="group hover:shadow-lg transition-shadow">
-              <CardContent className="p-0">
-                {/* Cover Image */}
-                <div className="relative h-40 bg-gradient-to-br from-purple-400 to-pink-400 rounded-t-lg">
-                  {playlist.cover_image_url ? (
-                    <img
-                      src={playlist.cover_image_url}
-                      alt={playlist.name}
-                      className="w-full h-full object-cover rounded-t-lg"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <Music className="h-16 w-16 text-white" />
-                    </div>
-                  )}
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded-t-lg flex items-center justify-center">
-                    <Button
-                      size="sm"
-                      className="opacity-0 group-hover:opacity-100 transition-opacity"
-                      variant="secondary"
-                    >
-                      <Play className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Content */}
-                <div className="p-4">
-                  <div className="flex items-start justify-between mb-2">
-                    <h3 className="font-semibold text-lg truncate">
-                      {playlist.name}
-                    </h3>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => openEditDialog(playlist)}>
-                          <Edit className="mr-2 h-4 w-4" />
-                          Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => handleDeletePlaylist(playlist)}
-                          className="text-red-600"
-                        >
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-
-                  {playlist.description && (
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
-                      {playlist.description}
-                    </p>
-                  )}
-
-                  <div className="flex items-center justify-between text-sm text-gray-500">
-                    <div className="flex items-center gap-2">
-                      <Badge variant="secondary">
-                        {playlist.track_count} tracks
-                      </Badge>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      {formatDate(playlist.created_at)}
+            <Link href={`/playlists/${playlist.id}`} key={playlist.id}>
+              <Card className="group hover:shadow-lg transition-shadow">
+                <CardContent className="p-0">
+                  {/* Cover Image */}
+                  <div className="relative h-40 bg-gradient-to-br from-purple-400 to-pink-400 rounded-t-lg">
+                    {playlist.cover_image_url ? (
+                      <img
+                        src={playlist.cover_image_url}
+                        alt={playlist.name}
+                        className="w-full h-full object-cover rounded-t-lg"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Music className="h-16 w-16 text-white" />
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded-t-lg flex items-center justify-center">
+                      <Button
+                        size="sm"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity"
+                        variant="secondary"
+                      >
+                        <Play className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+
+                  {/* Content */}
+                  <div className="p-4">
+                    <div className="flex items-start justify-between mb-2">
+                      <h3 className="font-semibold text-lg truncate">
+                        {playlist.name}
+                      </h3>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => openEditDialog(playlist)}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleDeletePlaylist(playlist)}
+                            className="text-red-600"
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+
+                    {playlist.description && (
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
+                        {playlist.description}
+                      </p>
+                    )}
+
+                    <div className="flex items-center justify-between text-sm text-gray-500">
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary">
+                          {playlist.track_count} tracks
+                        </Badge>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        {formatDate(playlist.created_at)}
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </Link>
           ))}
         </div>
