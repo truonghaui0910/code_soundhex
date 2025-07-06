@@ -1,310 +1,264 @@
+
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { 
   Music, 
   Album, 
   List, 
-  Upload,
+  TrendingUp, 
+  Users,
   Play,
-  Pause,
   Clock,
-  Plus,
-  MoreVertical,
-  Download,
-  Heart,
-  Trash2,
-  TrendingUp
+  Calendar
 } from "lucide-react";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
+import PlaylistManager from "@/components/playlist/playlist-manager";
+import { AlbumsList } from "@/components/album/albums-list";
 import { AlbumsController } from "@/lib/controllers/albums";
-import { PlaylistsController } from "@/lib/controllers/playlists";
-import { TracksController } from "@/lib/controllers/tracks";
-import { Track } from "@/lib/definitions/Track";
-import { toast } from "sonner";
-import { useDownload } from "@/hooks/use-download";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import AddToPlaylist from "@/components/playlist/add-to-playlist";
-import { PlaylistManager } from "@/components/playlist/playlist-manager";
+import { useEffect } from "react";
 
-interface LibraryStats {
-  totalPlaylists: number;
-  totalAlbums: number;
-  totalTracks: number;
-  playlistsThisMonth: number;
-  albumsThisWeek: number;
-  tracksThisWeek: number;
-}
+type TabType = "playlists" | "albums";
 
-export default function LibraryPage() {
-  const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"albums" | "playlists">("albums");
-  const [albums, setAlbums] = useState<any[]>([]);
-  const [tracks, setTracks] = useState<Track[]>([]);
-  const [stats, setStats] = useState<LibraryStats | null>(null);
+export default function YourLibraryPage() {
+  const [activeTab, setActiveTab] = useState<TabType>("playlists");
+  const [albums, setAlbums] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isStatsLoading, setIsStatsLoading] = useState(true);
-  const { currentTrack, isPlaying, playTrack, setTrackList, togglePlayPause } = useAudioPlayer();
-  const { downloadTrack, isTrackDownloading } = useDownload();
 
   useEffect(() => {
-    fetchUserAlbums();
-    fetchLibraryStats();
-  }, []);
-
-  const fetchLibraryStats = async () => {
-    try {
-      setIsStatsLoading(true);
-      const response = await fetch('/api/library/stats');
-      if (!response.ok) {
-        throw new Error('Failed to fetch stats');
+    const fetchAlbums = async () => {
+      try {
+        const albumsData = await fetch('/api/albums/user');
+        const result = await albumsData.json();
+        setAlbums(result || []);
+      } catch (error) {
+        console.error('Error fetching albums:', error);
+        setAlbums([]);
+      } finally {
+        setIsLoading(false);
       }
-      const statsData = await response.json();
-      setStats(statsData);
-    } catch (error) {
-      console.error('Error fetching library stats:', error);
-    } finally {
-      setIsStatsLoading(false);
+    };
+
+    if (activeTab === "albums") {
+      fetchAlbums();
     }
-  };
+  }, [activeTab]);
 
-  const fetchUserAlbums = async () => {
-    try {
-      setIsLoading(true);
-      const response = await fetch('/api/albums/user');
-      if (!response.ok) {
-        throw new Error('Failed to fetch albums');
-      }
-      const albumsData = await response.json();
-      setAlbums(albumsData);
-
-      // Lấy tracks từ tất cả albums
-      const allTracks: Track[] = [];
-      for (const album of albumsData) {
-        try {
-          const albumTracks = await TracksController.getTracksByAlbum(album.id);
-          allTracks.push(...albumTracks);
-        } catch (error) {
-          console.error(`Error fetching tracks for album ${album.id}:`, error);
-        }
-      }
-      setTracks(allTracks);
-    } catch (error) {
-      console.error('Error fetching user albums:', error);
-      toast.error('Failed to load albums');
-    } finally {
-      setIsLoading(false);
+  const stats = [
+    {
+      title: "Total Playlists",
+      value: "12",
+      icon: List,
+      description: "Created playlists",
+      trend: "+2 this month"
+    },
+    {
+      title: "Total Albums",
+      value: albums.length.toString(),
+      icon: Album,
+      description: "Your albums",
+      trend: "+1 this week"
+    },
+    {
+      title: "Total Tracks",
+      value: "156",
+      icon: Music,
+      description: "All your music",
+      trend: "+8 this week"
+    },
+    {
+      title: "Listening Time",
+      value: "24h",
+      icon: Clock,
+      description: "This month",
+      trend: "+12% vs last month"
     }
-  };
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20">
-      {/* Hero Section */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-slate-800 via-purple-900 to-slate-900 text-white">
-        <div className="absolute inset-0 bg-black/10"></div>
-        <div className="relative container mx-auto px-6 py-16">
-          <div className="max-w-4xl">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
-              Your Music Library
-            </h1>
-            <p className="text-xl md:text-2xl mb-8 text-purple-100">
-              Discover • Organize • Enjoy your collection
-            </p>
-
-            {/* Quick Actions */}
-            <div className="flex flex-wrap gap-4 justify-center md:justify-start">
-              <Button 
-                size="lg" 
-                className="bg-white text-purple-600 hover:bg-white/90"
-                onClick={() => router.push('/upload')}
-              >
-                <Upload className="mr-2 h-5 w-5" />
-                Upload Music
-              </Button>
-              <Button 
-                variant="secondary" 
-                size="lg"
-                onClick={() => {
-                  setActiveTab("playlists");
-                  // Trigger create playlist dialog after tab switch
-                  setTimeout(() => {
-                    const createButton = document.querySelector('[data-create-playlist-button]') as HTMLButtonElement;
-                    if (createButton) {
-                      createButton.click();
-                    }
-                  }, 100);
-                }}
-              >
-                <List className="mr-2 h-5 w-5" />
-                Create Playlist
-              </Button>
+      <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-8">
+        {/* Header */}
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+              <Music className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">Your Library</h1>
+              <p className="text-muted-foreground">
+                Manage your playlists and albums in one place
+              </p>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Main Content */}
-      <div className="container mx-auto px-6 py-12">
-        {/* Stats Section */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm opacity-90">Total Playlists</p>
-                  {isStatsLoading ? (
-                    <div className="h-10 bg-white/20 rounded animate-pulse mt-2"></div>
-                  ) : (
-                    <p className="text-3xl font-bold mt-2">{stats?.totalPlaylists || 0}</p>
-                  )}
-                  <p className="text-sm opacity-75 mt-1">Created playlists</p>
-                  <div className="flex items-center gap-1 mt-2">
-                    <TrendingUp className="h-3 w-3" />
-                    <span className="text-xs">+{stats?.playlistsThisMonth || 2} this month</span>
+        {/* Stats Overview */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          {stats.map((stat, index) => (
+            <Card key={index} className="border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground mb-1">
+                      {stat.title}
+                    </p>
+                    <p className="text-3xl font-bold text-foreground">
+                      {stat.value}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {stat.description}
+                    </p>
+                  </div>
+                  <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                    <stat.icon className="h-6 w-6 text-white" />
                   </div>
                 </div>
-                <List className="h-8 w-8 opacity-80" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white border-0">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm opacity-90">Total Albums</p>
-                  {isStatsLoading ? (
-                    <div className="h-10 bg-white/20 rounded animate-pulse mt-2"></div>
-                  ) : (
-                    <p className="text-3xl font-bold mt-2">{stats?.totalAlbums || 0}</p>
-                  )}
-                  <p className="text-sm opacity-75 mt-1">Your albums</p>
-                  <div className="flex items-center gap-1 mt-2">
-                    <TrendingUp className="h-3 w-3" />
-                    <span className="text-xs">+{stats?.albumsThisWeek || 1} this week</span>
-                  </div>
+                <div className="mt-4">
+                  <Badge variant="secondary" className="text-xs">
+                    {stat.trend}
+                  </Badge>
                 </div>
-                <Album className="h-8 w-8 opacity-80" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Tab Navigation */}
+        <Card className="border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm shadow-lg">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-xl">Library Content</CardTitle>
+              <div className="flex gap-2">
+                <Button
+                  variant={activeTab === "playlists" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setActiveTab("playlists")}
+                  className="flex items-center gap-2"
+                >
+                  <List className="h-4 w-4" />
+                  Playlists
+                </Button>
+                <Button
+                  variant={activeTab === "albums" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setActiveTab("albums")}
+                  className="flex items-center gap-2"
+                >
+                  <Album className="h-4 w-4" />
+                  Albums
+                </Button>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </CardHeader>
+        </Card>
 
-          <Card className="bg-gradient-to-r from-pink-500 to-rose-500 text-white border-0">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm opacity-90">Total Tracks</p>
-                  {isStatsLoading ? (
-                    <div className="h-10 bg-white/20 rounded animate-pulse mt-2"></div>
-                  ) : (
-                    <p className="text-3xl font-bold mt-2">{stats?.totalTracks || 0}</p>
-                  )}
-                  <p className="text-sm opacity-75 mt-1">All your music</p>
-                  <div className="flex items-center gap-1 mt-2">
-                    <TrendingUp className="h-3 w-3" />
-                    <span className="text-xs">+{stats?.tracksThisWeek || 8} this week</span>
+        {/* Tab Content */}
+        <div className="space-y-6">
+          {activeTab === "playlists" && (
+            <div className="space-y-6">
+              <Card className="border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm shadow-lg">
+                <CardContent className="p-6">
+                  <PlaylistManager />
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {activeTab === "albums" && (
+            <div className="space-y-6">
+              <Card className="border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm shadow-lg">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-xl font-semibold flex items-center gap-2">
+                      <Album className="h-5 w-5" />
+                      Your Albums
+                    </h3>
+                    <Badge variant="secondary">
+                      {albums.length} albums
+                    </Badge>
                   </div>
-                </div>
-                <Music className="h-8 w-8 opacity-80" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold">Your Library</h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-2">
-              Manage your music collection
-            </p>
-          </div>
-        </div>
-
-        {/* Tabs */}
-        <div className="border-b border-gray-200 dark:border-gray-700">
-          <nav className="-mb-px flex space-x-4">
-            <button
-              onClick={() => setActiveTab("albums")}
-              className={`py-4 px-1 text-sm font-medium border-b-2 ${activeTab === "albums"
-                ? "border-indigo-500 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400"
-                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300"
-                }`}
-            >
-              Albums
-            </button>
-            <button
-              onClick={() => setActiveTab("playlists")}
-              className={`py-4 px-1 text-sm font-medium border-b-2 ${activeTab === "playlists"
-                ? "border-indigo-500 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400"
-                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300"
-                }`}
-            >
-              Playlists
-            </button>
-          </nav>
-        </div>
-
-        {/* Content based on active tab */}
-        {activeTab === "albums" && (
-          <div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-              {isLoading ? (
-                // Skeleton loading state
-                Array.from({ length: 10 }).map((_, index) => (
-                  <div key={index} className="animate-pulse">
-                    <div className="aspect-square bg-gray-300 dark:bg-gray-700 rounded-md mb-2"></div>
-                    <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded-md mb-1"></div>
-                    <div className="h-3 bg-gray-300 dark:bg-gray-700 rounded-md w-2/3"></div>
-                  </div>
-                ))
-              ) : (
-                // Album list
-                albums?.map((album) => (
-                  <div
-                    key={album.id}
-                    className="group cursor-pointer"
-                    onClick={() => router.push(`/album/${album.id}`)}
-                  >
-                    <div className="aspect-square relative rounded-md overflow-hidden">
-                      <Image
-                        src={album.coverUrl}
-                        alt={album.name}
-                        className="object-cover rounded-md"
-                        fill
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      />
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/60 transition-colors duration-300 flex items-center justify-center">
-                        <Play className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                      </div>
+                  
+                  {isLoading ? (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                      {Array.from({ length: 8 }).map((_, idx) => (
+                        <div key={idx} className="animate-pulse">
+                          <div className="aspect-square bg-gray-200 dark:bg-gray-700 rounded-lg mb-2"></div>
+                          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-1"></div>
+                          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-2/3"></div>
+                        </div>
+                      ))}
                     </div>
-                    <p className="font-medium text-gray-900 dark:text-white mt-2 truncate">
-                      {album.name}
-                    </p>
-                    <p className="text-gray-500 dark:text-gray-400 text-sm truncate">
-                      {album.artist}
-                    </p>
-                  </div>
-                ))
-              )}
+                  ) : albums.length > 0 ? (
+                    <AlbumsList initialAlbums={albums} />
+                  ) : (
+                    <div className="text-center py-12">
+                      <Album className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                        No Albums Yet
+                      </h3>
+                      <p className="text-gray-600 dark:text-gray-400 mb-4">
+                        You haven't created any albums yet. Upload some music to get started.
+                      </p>
+                      <Button className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600">
+                        <Play className="mr-2 h-4 w-4" />
+                        Upload Music
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
-        {activeTab === "playlists" && (
-          <div>
-            <PlaylistManager />
-          </div>
-        )}
+        {/* Quick Actions */}
+        <Card className="border-0 bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold mb-2">Quick Actions</h3>
+                <p className="text-purple-100 mb-4">
+                  Manage your library efficiently
+                </p>
+                <div className="flex gap-3">
+                  <Button 
+                    variant="secondary" 
+                    size="sm"
+                    onClick={() => {
+                      setActiveTab("playlists");
+                      // Trigger create playlist dialog after tab switch
+                      setTimeout(() => {
+                        const createButton = document.querySelector('[data-create-playlist-button]') as HTMLButtonElement;
+                        if (createButton) {
+                          createButton.click();
+                        }
+                      }, 100);
+                    }}
+                  >
+                    <List className="mr-2 h-4 w-4" />
+                    Create Playlist
+                  </Button>
+                  <Button 
+                    variant="secondary" 
+                    size="sm"
+                    onClick={() => window.location.href = '/upload'}
+                  >
+                    <Album className="mr-2 h-4 w-4" />
+                    Upload Album
+                  </Button>
+                </div>
+              </div>
+              <div className="hidden sm:flex items-center gap-4">
+                <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center">
+                  <TrendingUp className="h-8 w-8 text-white" />
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
