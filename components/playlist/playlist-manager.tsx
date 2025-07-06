@@ -59,6 +59,9 @@ export default function PlaylistManager() {
     name: "",
     description: "",
   });
+  const [isCreating, setIsCreating] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isDeleting, setIsDeleting] = useState<number | null>(null);
 
   useEffect(() => {
     fetchPlaylists();
@@ -88,6 +91,7 @@ export default function PlaylistManager() {
       return;
     }
 
+    setIsCreating(true);
     try {
       const response = await fetch("/api/playlists", {
         method: "POST",
@@ -112,6 +116,8 @@ export default function PlaylistManager() {
     } catch (error) {
       console.error("Error creating playlist:", error);
       toast.error("Failed to create playlist");
+    } finally {
+      setIsCreating(false);
     }
   };
 
@@ -122,6 +128,7 @@ export default function PlaylistManager() {
       return;
     }
 
+    setIsEditing(true);
     try {
       const response = await fetch(`/api/playlists/${selectedPlaylist.id}`, {
         method: "PATCH",
@@ -157,35 +164,41 @@ export default function PlaylistManager() {
     } catch (error) {
       console.error("Error updating playlist:", error);
       toast.error("Failed to update playlist. Please try again.");
+    } finally {
+      setIsEditing(false);
     }
   };
 
   const handleDeletePlaylist = async (playlist: Playlist) => {
-    const confirmDelete = window.confirm(
-      `Are you sure you want to delete "${playlist.name}"?\n\nThis action cannot be undone.`
-    );
+    setIsDeleting(playlist.id);
     
-    if (!confirmDelete) {
-      return;
-    }
+    const deletePromise = new Promise(async (resolve, reject) => {
+      try {
+        const response = await fetch(`/api/playlists/${playlist.id}`, {
+          method: "DELETE",
+        });
 
-    try {
-      const response = await fetch(`/api/playlists/${playlist.id}`, {
-        method: "DELETE",
-      });
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Failed to delete playlist");
+        }
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to delete playlist");
+        // Remove from local state
+        setPlaylists(playlists.filter((p) => p.id !== playlist.id));
+        resolve(`"${playlist.name}" has been deleted successfully!`);
+      } catch (error) {
+        console.error("Error deleting playlist:", error);
+        reject(new Error("Failed to delete playlist. Please try again."));
+      } finally {
+        setIsDeleting(null);
       }
+    });
 
-      // Remove from local state
-      setPlaylists(playlists.filter((p) => p.id !== playlist.id));
-      toast.success(`"${playlist.name}" has been deleted successfully!`);
-    } catch (error) {
-      console.error("Error deleting playlist:", error);
-      toast.error("Failed to delete playlist. Please try again.");
-    }
+    toast.promise(deletePromise, {
+      loading: `Deleting "${playlist.name}"...`,
+      success: (message) => message as string,
+      error: (err) => err.message,
+    });
   };
 
   const openEditDialog = (playlist: Playlist) => {
@@ -312,9 +325,8 @@ export default function PlaylistManager() {
                         >
                           <DropdownMenuItem 
                             className="focus:bg-gray-100 dark:focus:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                            onClick={(e) => {
+                            onSelect={(e) => {
                               e.preventDefault();
-                              e.stopPropagation();
                               openEditDialog(playlist);
                             }}
                           >
@@ -323,14 +335,23 @@ export default function PlaylistManager() {
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             className="text-red-600 focus:bg-red-50 dark:focus:bg-red-900/20 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                            onClick={(e) => {
+                            onSelect={(e) => {
                               e.preventDefault();
-                              e.stopPropagation();
                               handleDeletePlaylist(playlist);
                             }}
+                            disabled={isDeleting === playlist.id}
                           >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete
+                            {isDeleting === playlist.id ? (
+                              <>
+                                <div className="mr-2 h-4 w-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                                Deleting...
+                              </>
+                            ) : (
+                              <>
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete
+                              </>
+                            )}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -404,7 +425,16 @@ export default function PlaylistManager() {
               >
                 Cancel
               </Button>
-              <Button type="submit">Create Playlist</Button>
+              <Button type="submit" disabled={isCreating}>
+                {isCreating ? (
+                  <>
+                    <div className="mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  "Create Playlist"
+                )}
+              </Button>
             </DialogFooter>
           </form>
         </DialogContent>
@@ -454,7 +484,16 @@ export default function PlaylistManager() {
               >
                 Cancel
               </Button>
-              <Button type="submit">Save Changes</Button>
+              <Button type="submit" disabled={isEditing}>
+                {isEditing ? (
+                  <>
+                    <div className="mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save Changes"
+                )}
+              </Button>
             </DialogFooter>
           </form>
         </DialogContent>
