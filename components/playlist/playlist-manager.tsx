@@ -37,6 +37,7 @@ import {
   Clock,
 } from "lucide-react";
 import { toast } from "sonner";
+import Link from "next/link";
 
 interface Playlist {
   id: number;
@@ -236,7 +237,8 @@ export default function PlaylistManager() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {playlists.map((playlist) => (
-            <Card key={playlist.id} className="group hover:shadow-lg transition-shadow">
+            <Link href={`/playlist/${playlist.id}`} key={playlist.id}`}>
+            <Card className="group hover:shadow-lg transition-shadow">
               <CardContent className="p-0">
                 {/* Cover Image */}
                 <div className="relative h-40 bg-gradient-to-br from-purple-400 to-pink-400 rounded-t-lg">
