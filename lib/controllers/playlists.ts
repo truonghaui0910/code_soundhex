@@ -168,22 +168,68 @@ export class PlaylistsController {
     const { data, error } = await supabase
       .from("playlist_tracks")
       .select(`
-        id, playlist_id, track_id, added_at,
-        track:tracks(
-          id, title, duration,
-          artist:artist_id(id, name),
-          album:album_id(id, title, cover_image_url)
-        )
-      `)
-      .eq("playlist_id", playlistId)
-      .order("added_at", { ascending: false });
+      position,
+      tracks (
+        id,
+        title,
+        file_url,
+        audio_file_url,
+        duration,
+        created_at,
+        artists (id, name, profile_image_url),
+        albums (id, title, cover_image_url, release_date),
+        genres (id, name)
+      )
+    `)
+      .eq('playlist_id', playlistId)
+      .order('position');
 
     if (error) {
-      console.error("Error fetching playlist tracks:", error);
       throw new Error(`Failed to fetch playlist tracks: ${error.message}`);
     }
 
-    return data as PlaylistTrack[];
+    // Transform the data to match Track interface exactly like in albums/tracks
+    const tracks = data?.map(item => {
+      const track = item.tracks as any;
+
+      // Ensure we have complete track data structure
+      const transformedTrack = {
+        id: track.id,
+        title: track.title || 'Unknown Title',
+        file_url: track.file_url,
+        audio_file_url: track.audio_file_url,
+        duration: track.duration,
+        created_at: track.created_at,
+        artist: track.artists ? {
+          id: track.artists.id,
+          name: track.artists.name,
+          profile_image_url: track.artists.profile_image_url
+        } : null,
+        album: track.albums ? {
+          id: track.albums.id,
+          title: track.albums.title,
+          cover_image_url: track.albums.cover_image_url,
+          release_date: track.albums.release_date
+        } : null,
+        genre: track.genres ? {
+          id: track.genres.id,
+          name: track.genres.name
+        } : null
+      };
+
+      return transformedTrack;
+    }) || [];
+
+    console.log('Playlist tracks with complete info:', tracks.map(t => ({
+      id: t.id,
+      title: t.title,
+      file_url: t.file_url,
+      audio_file_url: t.audio_file_url,
+      hasArtist: !!t.artist,
+      hasAlbum: !!t.album
+    })));
+
+    return tracks;
   }
 
   /**

@@ -58,8 +58,16 @@ export default function PlaylistManager() {
     isPlaying, 
     playTrack, 
     setTrackList, 
-    togglePlayPause 
+    togglePlayPause,
+    trackList
   } = useAudioPlayer();
+
+  // Debug log to check audio player state
+  console.log('Audio Player State:', {
+    currentTrack: currentTrack?.title,
+    isPlaying,
+    trackListLength: trackList?.length
+  });
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -260,14 +268,26 @@ export default function PlaylistManager() {
         return;
       }
 
-      // Always update trackList when playing a new playlist (similar to album play)
-      setTrackList(tracks);
-      // Small delay to ensure trackList is updated before playing
-      setTimeout(() => {
-        playTrack(tracks[0]); // Play the first track
-      }, 50);
+      // Debug log to check track structure
+      console.log("Playlist tracks:", tracks);
+
+      // Validate tracks have required properties
+      const validTracks = tracks.filter(track => track && track.id && track.title);
+      if (validTracks.length === 0) {
+        toast.error("No valid tracks found in playlist");
+        return;
+      }
+
+      // Set track list first (like in album play)
+      setTrackList(validTracks);
       
-      toast.success(`Playing "${playlist.name}"`);
+      // Small delay to ensure trackList state is updated before playing
+      setTimeout(() => {
+        console.log("Playing first track:", validTracks[0]);
+        playTrack(validTracks[0]);
+      }, 100);
+      
+      toast.success(`Playing "${playlist.name}" - ${validTracks.length} tracks`);
     } catch (error) {
       console.error("Error playing playlist:", error);
       toast.error("Failed to play playlist");
