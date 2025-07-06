@@ -112,7 +112,8 @@ export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPl
       });
 
       if (!createResponse.ok) {
-        throw new Error("Failed to create playlist");
+        const errorData = await createResponse.json();
+        throw new Error(errorData.error || "Failed to create playlist");
       }
 
       const newPlaylist = await createResponse.json();
@@ -134,9 +135,18 @@ export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPl
       setShowCreateDialog(false);
       setNewPlaylistName("");
       toast.success(`Created "${newPlaylist.name}" and added "${trackTitle}"`);
+      
+      // Refetch playlists to ensure UI is up to date
+      fetchPlaylists();
     } catch (error: any) {
       console.error("Error creating playlist and adding track:", error);
-      toast.error(error.message || "Failed to create playlist");
+      
+      // Handle specific error cases
+      if (error.message.includes("409") || error.message.includes("already exists")) {
+        toast.error("A playlist with this name already exists");
+      } else {
+        toast.error(error.message || "Failed to create playlist");
+      }
     }
   };
 
@@ -150,6 +160,8 @@ export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPl
         <DropdownMenuTrigger asChild>
           <div onClick={(e) => {
             e.stopPropagation();
+            // Always refetch playlists when opening dropdown
+            setPlaylists([]);
             fetchPlaylists();
           }}>
             {children}
