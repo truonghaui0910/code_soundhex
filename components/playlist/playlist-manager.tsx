@@ -336,7 +336,10 @@ function PlaylistManager() {
             Your Playlist
           </h2>
         </div>
-        <Button onClick={() => setCreateDialogOpen(true)}>
+        <Button 
+          onClick={() => setCreateDialogOpen(true)}
+          data-create-playlist-button
+        >
           <Plus className="mr-2 h-4 w-4" />
           Create Playlist
         </Button>

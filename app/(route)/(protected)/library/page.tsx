@@ -227,7 +227,16 @@ export default function YourLibraryPage() {
                   <Button 
                     variant="secondary" 
                     size="sm"
-                    onClick={() => setActiveTab("playlists")}
+                    onClick={() => {
+                      setActiveTab("playlists");
+                      // Trigger create playlist dialog after tab switch
+                      setTimeout(() => {
+                        const createButton = document.querySelector('[data-create-playlist-button]') as HTMLButtonElement;
+                        if (createButton) {
+                          createButton.click();
+                        }
+                      }, 100);
+                    }}
                   >
                     <List className="mr-2 h-4 w-4" />
                     Create Playlist
