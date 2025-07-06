@@ -251,10 +251,9 @@ export default function PlaylistManager() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {playlists.map((playlist) => (
-            <div key={playlist.id}>
-              <Card className="group hover:shadow-lg transition-shadow cursor-pointer"
-                    onClick={() => window.location.href = `/playlists/${playlist.id}`}
-              >
+            <Card key={playlist.id} className="group hover:shadow-lg transition-shadow cursor-pointer"
+                  onClick={() => window.location.href = `/playlists/${playlist.id}`}
+            >
                 <CardContent className="p-0">
                   {/* Cover Image */}
                   <div className="relative h-32 sm:h-36 md:h-40 bg-gradient-to-br from-purple-400 to-pink-400 rounded-t-lg">
@@ -344,8 +343,7 @@ export default function PlaylistManager() {
                     </div>
                   </div>
                 </CardContent>
-              </Card>
-            </div>
+            </Card>
           ))}
         </div>
       )}
