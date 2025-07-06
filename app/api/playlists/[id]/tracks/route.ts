@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { PlaylistsController } from "@/lib/controllers/playlists";
+import { TracksController } from "@/lib/controllers/tracks";
 
 export const dynamic = "force-dynamic";
 
@@ -10,17 +11,81 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
+    const { searchParams } = new URL(request.url);
     const playlistId = parseInt(params.id);
+
     if (isNaN(playlistId)) {
       return NextResponse.json({ error: "Invalid playlist ID" }, { status: 400 });
     }
 
-    const tracks = await PlaylistsController.getPlaylistTracks(playlistId);
-    return NextResponse.json(tracks);
+    const supabase = createServerComponentClient({ cookies });
+
+    // Get playlist tracks with full track information
+    const { data: playlistTracks, error } = await supabase
+      .from("playlist_tracks")
+      .select(`
+        id,
+        playlist_id,
+        track_id,
+        added_at,
+        track:track_id (
+          id,
+          title,
+          description,
+          duration,
+          file_url,
+          audio_file_url,
+          source_type,
+          created_at,
+          artist_id,
+          album_id,
+          genre_id
+        )
+      `)
+      .eq("playlist_id", playlistId)
+      .order("added_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching playlist tracks:", error);
+      return NextResponse.json(
+        { error: "Failed to fetch playlist tracks" },
+        { status: 500 }
+      );
+    }
+
+    if (!playlistTracks || playlistTracks.length === 0) {
+      return NextResponse.json([]);
+    }
+
+    // Get track IDs to fetch complete information
+    const trackIds = playlistTracks.map(pt => pt.track.id);
+
+    // Use TracksController to get complete track information
+    const tracks = await TracksController.getTracksByIds(trackIds);
+
+    // Map tracks to playlist tracks structure
+    const trackMap = new Map(tracks.map(track => [track.id, track]));
+
+    const completePlaylistTracks = playlistTracks.map(pt => ({
+      id: pt.id,
+      playlist_id: pt.playlist_id,
+      track_id: pt.track_id,
+      added_at: pt.added_at,
+      track: trackMap.get(pt.track.id) || pt.track
+    }));
+
+    console.log("Playlist tracks with complete info:", completePlaylistTracks.map(pt => ({
+      id: pt.track.id,
+      title: pt.track.title,
+      file_url: pt.track.file_url,
+      audio_file_url: pt.track.audio_file_url
+    })));
+
+    return NextResponse.json(completePlaylistTracks);
   } catch (error) {
-    console.error("Error fetching playlist tracks:", error);
+    console.error("Error in playlist tracks API:", error);
     return NextResponse.json(
-      { error: "Failed to fetch playlist tracks" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }

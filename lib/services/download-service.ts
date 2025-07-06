@@ -7,7 +7,11 @@ export class DownloadService {
    */
   static async downloadTrack(track: Track): Promise<void> {
     if (!track.file_url) {
-      throw new Error('Track file URL is not available');
+      throw new Error('This track is not available for download');
+    }
+    
+    if (!this.isDownloadSupported()) {
+      throw new Error('Downloads are not supported in your browser');
     }
     
     try {
