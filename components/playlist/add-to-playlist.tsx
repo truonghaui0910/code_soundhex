@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -76,7 +75,7 @@ export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPl
       toast.success(`Added "${trackTitle}" to "${playlist?.name}"`);
     } catch (error: any) {
       console.error("Error adding track to playlist:", error);
-      
+
       if (error.message === "Track already exists in playlist") {
         toast.error("This track is already in the playlist");
       } else {
@@ -139,19 +138,14 @@ export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPl
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-            onClick={(e) => {
-              e.stopPropagation();
-              fetchPlaylists();
-            }}
-          >
-            <Plus className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-          </Button>
+          <div onClick={(e) => {
+            e.stopPropagation();
+            fetchPlaylists();
+          }}>
+            {children}
+          </div>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-64">
+        <DropdownMenuContent align="end" className="w-64 z-50 max-h-80 overflow-y-auto bg-white dark:bg-gray-800 border shadow-lg">
           <div className="p-2">
             <div className="flex items-center gap-2 mb-2">
               <Search className="h-4 w-4 text-gray-400" />
@@ -164,7 +158,7 @@ export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPl
               />
             </div>
           </div>
-          
+
           <DropdownMenuItem 
             onClick={(e) => {
               e.preventDefault();
@@ -175,7 +169,7 @@ export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPl
             <Plus className="mr-2 h-4 w-4" />
             Create new playlist
           </DropdownMenuItem>
-          
+
           {isLoading ? (
             <div className="p-4 text-center text-sm text-gray-500">
               Loading playlists...

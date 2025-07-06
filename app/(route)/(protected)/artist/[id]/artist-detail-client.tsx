@@ -321,9 +321,9 @@ export function ArtistDetailClient({ artist, tracks, albums }: ArtistDetailClien
 
                     <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <AddToPlaylist trackId={track.id} trackTitle={track.title}>
-                        <Button size="sm" variant="ghost" className="p-2" title="Add to playlist">
+                        <button className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" title="Add to playlist">
                           <Plus className="h-4 w-4" />
-                        </Button>
+                        </button>
                       </AddToPlaylist>
                       <Button 
                         size="sm" 
