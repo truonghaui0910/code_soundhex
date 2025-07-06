@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -38,6 +39,7 @@ export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPl
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [newPlaylistName, setNewPlaylistName] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const fetchPlaylists = async () => {
     setIsLoading(true);
@@ -113,6 +115,13 @@ export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPl
 
       if (!createResponse.ok) {
         const errorData = await createResponse.json();
+        
+        // Handle specific error responses
+        if (createResponse.status === 409) {
+          toast.error("A playlist with this name already exists");
+          return;
+        }
+        
         throw new Error(errorData.error || "Failed to create playlist");
       }
 
@@ -131,22 +140,23 @@ export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPl
         throw new Error("Failed to add track to playlist");
       }
 
-      setPlaylists([newPlaylist, ...playlists]);
       setShowCreateDialog(false);
       setNewPlaylistName("");
       toast.success(`Created "${newPlaylist.name}" and added "${trackTitle}"`);
       
-      // Refetch playlists to ensure UI is up to date
-      fetchPlaylists();
+      // Force refresh playlists to ensure UI is up to date
+      await fetchPlaylists();
     } catch (error: any) {
       console.error("Error creating playlist and adding track:", error);
-      
-      // Handle specific error cases
-      if (error.message.includes("409") || error.message.includes("already exists")) {
-        toast.error("A playlist with this name already exists");
-      } else {
-        toast.error(error.message || "Failed to create playlist");
-      }
+      toast.error(error.message || "Failed to create playlist");
+    }
+  };
+
+  const handleDropdownOpenChange = (open: boolean) => {
+    setIsDropdownOpen(open);
+    if (open) {
+      // Always refresh playlists when dropdown opens
+      fetchPlaylists();
     }
   };
 
@@ -156,18 +166,20 @@ export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPl
 
   return (
     <>
-      <DropdownMenu>
+      <DropdownMenu open={isDropdownOpen} onOpenChange={handleDropdownOpenChange}>
         <DropdownMenuTrigger asChild>
           <div onClick={(e) => {
             e.stopPropagation();
-            // Always refetch playlists when opening dropdown
-            setPlaylists([]);
-            fetchPlaylists();
           }}>
             {children}
           </div>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-64 z-[9999] max-h-80 overflow-y-auto bg-white dark:bg-gray-800 border shadow-lg" style={{ zIndex: 9999 }}>
+        <DropdownMenuContent 
+          align="end" 
+          className="w-64 z-[9999] max-h-80 overflow-y-auto bg-white dark:bg-gray-800 border shadow-lg"
+          style={{ zIndex: 9999 }}
+          onCloseAutoFocus={(e) => e.preventDefault()}
+        >
           <div className="p-2">
             <div className="flex items-center gap-2 mb-2">
               <Search className="h-4 w-4 text-gray-400" />
@@ -186,6 +198,7 @@ export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPl
               e.preventDefault();
               e.stopPropagation();
               setShowCreateDialog(true);
+              setIsDropdownOpen(false);
             }}
           >
             <Plus className="mr-2 h-4 w-4" />
@@ -208,6 +221,7 @@ export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPl
                   e.preventDefault();
                   e.stopPropagation();
                   handleAddToPlaylist(playlist.id);
+                  setIsDropdownOpen(false);
                 }}
               >
                 <ListMusic className="mr-2 h-4 w-4" />
