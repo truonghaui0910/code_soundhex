@@ -261,14 +261,25 @@ export default function PlaylistManager() {
         throw new Error("Failed to fetch playlist tracks");
       }
 
-      const tracks: Track[] = await response.json();
+      // API might return PlaylistTrack[] or Track[] depending on context
+      const tracksData = await response.json();
       
-      if (tracks.length === 0) {
+      if (tracksData.length === 0) {
         toast.error("This playlist is empty");
         return;
       }
 
-      console.log("Raw playlist tracks:", tracks);
+      console.log("Raw API response:", tracksData);
+
+      // Handle both PlaylistTrack[] and Track[] responses
+      let tracks: Track[];
+      if (tracksData[0]?.track) {
+        // PlaylistTrack[] format (like in detail page)
+        tracks = tracksData.map((pt: any) => pt.track);
+      } else {
+        // Direct Track[] format  
+        tracks = tracksData;
+      }
 
       // Process tracks to ensure proper audio URLs (same as playlist detail page)
       const processedTracks = tracks.map(track => ({
