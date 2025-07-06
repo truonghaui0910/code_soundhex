@@ -19,7 +19,8 @@ import {
   ArrowLeft,
   MoreVertical,
   Edit,
-  Trash2
+  Trash2,
+  Plus
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -279,6 +280,7 @@ export default function PlaylistDetailPage() {
                     <div
                       key={playlistTrack.id}
                       className="group flex items-center gap-4 p-4 hover:bg-white/50 dark:hover:bg-gray-700/30 transition-colors cursor-pointer border-b border-gray-100/50 dark:border-gray-700/30 last:border-b-0"
+                      onClick={() => handlePlayTrack(track)}
                     >
                       <div className="w-8 text-center text-sm text-gray-500 dark:text-gray-400 group-hover:hidden">
                         {currentTrack?.id === track.id && isPlaying ? (
@@ -368,6 +370,10 @@ export default function PlaylistDetailPage() {
                           ) : (
                             <Download className="h-4 w-4" />
                           )}
+                        </Button>
+                        
+                        <Button size="sm" variant="ghost" className="p-2" title="Like">
+                          <Heart className="h-4 w-4" />
                         </Button>
                         
                         <DropdownMenu>
