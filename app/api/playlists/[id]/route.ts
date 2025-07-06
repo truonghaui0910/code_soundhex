@@ -67,6 +67,43 @@ export async function PUT(
   }
 }
 
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const supabase = createServerComponentClient({ cookies });
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const playlistId = parseInt(params.id);
+    if (isNaN(playlistId)) {
+      return NextResponse.json({ error: "Invalid playlist ID" }, { status: 400 });
+    }
+
+    const body = await request.json();
+    const { name, description, cover_image_url, private: isPrivate } = body;
+
+    const updates: any = {};
+    if (name !== undefined) updates.name = name;
+    if (description !== undefined) updates.description = description;
+    if (cover_image_url !== undefined) updates.cover_image_url = cover_image_url;
+    if (isPrivate !== undefined) updates.private = isPrivate;
+
+    const playlist = await PlaylistsController.updatePlaylist(playlistId, user.id, updates);
+    return NextResponse.json(playlist);
+  } catch (error) {
+    console.error("Error updating playlist:", error);
+    return NextResponse.json(
+      { error: "Failed to update playlist" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
