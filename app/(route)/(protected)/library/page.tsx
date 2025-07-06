@@ -127,28 +127,36 @@ export default function YourLibraryPage() {
         </div>
 
         {/* Tab Navigation */}
-        <Card className="border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm shadow-lg">
-          <CardHeader className="pb-3">
+        <Card className="border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-xl">
+          <CardHeader className="pb-4">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-xl">Library Content</CardTitle>
-              <div className="flex gap-2">
+              <CardTitle className="text-2xl font-bold text-gray-800 dark:text-white">Library Content</CardTitle>
+              <div className="flex bg-gray-100 dark:bg-gray-700 p-1 rounded-xl shadow-inner">
                 <Button
-                  variant={activeTab === "playlists" ? "default" : "outline"}
-                  size="sm"
+                  variant="ghost"
+                  size="lg"
                   onClick={() => setActiveTab("playlists")}
-                  className="flex items-center gap-2"
+                  className={`flex items-center gap-3 px-6 py-3 rounded-lg font-semibold transition-all duration-300 ${
+                    activeTab === "playlists"
+                      ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg transform scale-105"
+                      : "text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white hover:bg-gray-200/50 dark:hover:bg-gray-600/50"
+                  }`}
                 >
-                  <List className="h-4 w-4" />
-                  Playlists
+                  <List className="h-5 w-5" />
+                  <span className="text-base">Playlists</span>
                 </Button>
                 <Button
-                  variant={activeTab === "albums" ? "default" : "outline"}
-                  size="sm"
+                  variant="ghost"
+                  size="lg"
                   onClick={() => setActiveTab("albums")}
-                  className="flex items-center gap-2"
+                  className={`flex items-center gap-3 px-6 py-3 rounded-lg font-semibold transition-all duration-300 ${
+                    activeTab === "albums"
+                      ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg transform scale-105"
+                      : "text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white hover:bg-gray-200/50 dark:hover:bg-gray-600/50"
+                  }`}
                 >
-                  <Album className="h-4 w-4" />
-                  Albums
+                  <Album className="h-5 w-5" />
+                  <span className="text-base">Albums</span>
                 </Button>
               </div>
             </div>
