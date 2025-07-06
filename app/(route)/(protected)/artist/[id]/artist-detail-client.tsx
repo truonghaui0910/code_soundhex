@@ -234,7 +234,7 @@ export function ArtistDetailClient({ artist, tracks, albums }: ArtistDetailClien
                 {tracks.slice(0, 10).map((track, idx) => (
                   <div
                     key={track.id}
-                    className="group flex items-center gap-4 p-4 hover:bg-white/50 dark:hover:bg-gray-700/30 transition-colors cursor-pointer border-b border-gray-100/50 dark:border-gray-700/30 last:border-b-0"
+                    className="group flex items-center gap-4 p-4 hover:bg-white/50 dark:hover:bg-gray-700/30 transition-all duration-300 ease-in-out cursor-pointer border-b border-gray-100/50 dark:border-gray-700/30 last:border-b-0 hover:shadow-sm hover:transform hover:scale-[1.01]"
                     onClick={() => handlePlayTrack(track)}
                   >
                     <div className="w-8 text-center text-sm text-gray-500 dark:text-gray-400 group-hover:hidden">
@@ -319,16 +319,16 @@ export function ArtistDetailClient({ artist, tracks, albums }: ArtistDetailClien
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 ease-in-out transform translate-x-2 group-hover:translate-x-0">
                       <AddToPlaylist trackId={track.id} trackTitle={track.title}>
-                        <button className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" title="Add to playlist">
-                          <Plus className="h-4 w-4" />
+                        <button className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 ease-in-out hover:scale-105 active:scale-95" title="Add to playlist">
+                          <Plus className="h-4 w-4 transition-transform duration-200" />
                         </button>
                       </AddToPlaylist>
                       <Button 
                         size="sm" 
                         variant="ghost" 
-                        className={`p-2 relative overflow-hidden ${isTrackDownloading(track.id) ? 'bg-blue-50 dark:bg-blue-900/20' : ''}`}
+                        className={`p-2 relative overflow-hidden transition-all duration-200 ease-in-out hover:scale-105 active:scale-95 ${isTrackDownloading(track.id) ? 'bg-blue-50 dark:bg-blue-900/20' : ''}`}
                         title="Download"
                         onClick={(e) => {
                           e.stopPropagation();
@@ -343,14 +343,14 @@ export function ArtistDetailClient({ artist, tracks, albums }: ArtistDetailClien
                             <Download className="h-4 w-4 text-blue-600 animate-bounce" />
                           </>
                         ) : (
-                          <Download className="h-4 w-4" />
+                          <Download className="h-4 w-4 transition-transform duration-200" />
                         )}
                       </Button>
-                      <Button size="sm" variant="ghost" className="p-2" title="Like">
-                        <Heart className="h-4 w-4" />
+                      <Button size="sm" variant="ghost" className="p-2 transition-all duration-200 ease-in-out hover:scale-105 active:scale-95" title="Like">
+                        <Heart className="h-4 w-4 transition-transform duration-200" />
                       </Button>
-                      <Button size="sm" variant="ghost" className="p-2" title="Share">
-                        <Share className="h-4 w-4" />
+                      <Button size="sm" variant="ghost" className="p-2 transition-all duration-200 ease-in-out hover:scale-105 active:scale-95" title="Share">
+                        <Share className="h-4 w-4 transition-transform duration-200" />
                       </Button>
                     </div>
                   </div>

@@ -428,17 +428,36 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(31, 31, 35, 0.8);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #dc2675, #7c3aed);
+  background: rgba(156, 163, 175, 0.3);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, #e91e63, #9c27b0);
+  background: rgba(156, 163, 175, 0.5);
 }
+
+/* Smooth hover animations */
+.smooth-hover {
+  will-change: transform;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.smooth-hover:hover {
+  transform: translateY(-2px) scale(1.02);
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    }
+  }
 
 @layer components {
   .animate-equalize-1 {

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -239,7 +238,11 @@ export default function PlaylistManager() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {playlists.map((playlist) => (
             <Link href={`/playlists/${playlist.id}`} key={playlist.id}>
-              <Card className="group hover:shadow-lg transition-shadow">
+              
+              <Card
+                key={playlist.id}
+                className="group hover:shadow-lg transition-all duration-300 ease-in-out cursor-pointer overflow-hidden hover:transform hover:scale-[1.02] hover:-translate-y-1"
+              >
                 <CardContent className="p-0">
                   {/* Cover Image */}
                   <div className="relative h-40 bg-gradient-to-br from-purple-400 to-pink-400 rounded-t-lg">
