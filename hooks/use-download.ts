@@ -2,14 +2,20 @@
 import { useState } from 'react';
 import { Track } from '@/lib/definitions/Track';
 import { DownloadService } from '@/lib/services/download-service';
+import { toast } from 'sonner';
 
 export function useDownload() {
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState<Record<string, boolean>>({});
 
   const downloadTrack = async (track: Track) => {
+    if (!track.file_url) {
+      toast.error('This track is not available for download');
+      return;
+    }
+
     if (!DownloadService.isDownloadSupported()) {
-      alert('Download is not supported in your browser');
+      toast.error('Downloads are not supported in your browser');
       return;
     }
 
@@ -18,9 +24,10 @@ export function useDownload() {
 
     try {
       await DownloadService.downloadTrack(track);
+      toast.success(`Downloaded: ${track.title}`);
     } catch (error) {
       console.error('Download error:', error);
-      alert(error instanceof Error ? error.message : 'Download failed');
+      toast.error(error instanceof Error ? error.message : 'Download failed');
     } finally {
       setIsDownloading(false);
       setDownloadProgress(prev => ({ ...prev, [track.id]: false }));

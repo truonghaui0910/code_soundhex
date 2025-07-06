@@ -280,7 +280,6 @@ export default function PlaylistDetailPage() {
                     <div
                       key={playlistTrack.id}
                       className="group flex items-center gap-4 p-4 hover:bg-white/50 dark:hover:bg-gray-700/30 transition-colors cursor-pointer border-b border-gray-100/50 dark:border-gray-700/30 last:border-b-0"
-                      onClick={() => handlePlayTrack(track)}
                     >
                       <div className="w-8 text-center text-sm text-gray-500 dark:text-gray-400 group-hover:hidden">
                         {currentTrack?.id === track.id && isPlaying ? (
@@ -309,7 +308,10 @@ export default function PlaylistDetailPage() {
                         )}
                       </Button>
 
-                      <div className="w-12 h-12 rounded-lg overflow-hidden bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0">
+                      <div 
+                        className="w-12 h-12 rounded-lg overflow-hidden bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0"
+                        onClick={() => handlePlayTrack(track)}
+                      >
                         {track.album?.cover_image_url ? (
                           <Image
                             src={track.album.cover_image_url}
@@ -323,7 +325,10 @@ export default function PlaylistDetailPage() {
                         )}
                       </div>
 
-                      <div className="flex-1 min-w-0">
+                      <div 
+                        className="flex-1 min-w-0"
+                        onClick={() => handlePlayTrack(track)}
+                      >
                         <div className="font-semibold text-gray-900 dark:text-white truncate">
                           {track.title}
                         </div>
@@ -357,9 +362,13 @@ export default function PlaylistDetailPage() {
                           title="Download"
                           onClick={(e) => {
                             e.stopPropagation();
+                            if (!track.file_url) {
+                              toast.error("Download not available for this track");
+                              return;
+                            }
                             downloadTrack(track);
                           }}
-                          disabled={isTrackDownloading(track.id)}
+                          disabled={isTrackDownloading(track.id) || !track.file_url}
                         >
                           {isTrackDownloading(track.id) ? (
                             <>
