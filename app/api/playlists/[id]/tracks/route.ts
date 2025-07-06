@@ -34,7 +34,6 @@ export async function GET(
           description,
           duration,
           file_url,
-          audio_file_url,
           source_type,
           created_at,
           artist_id,

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -65,11 +64,11 @@ export default function PlaylistDetailPage() {
   const params = useParams();
   const router = useRouter();
   const playlistId = params.id as string;
-  
+
   const [playlist, setPlaylist] = useState<Playlist | null>(null);
   const [tracks, setTracks] = useState<PlaylistTrack[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   const { currentTrack, isPlaying, playTrack, setTrackList, togglePlayPause } = useAudioPlayer();
   const { downloadTrack, isTrackDownloading } = useDownload();
 
@@ -112,7 +111,7 @@ export default function PlaylistDetailPage() {
         file_url: pt.track.file_url || pt.track.audio_file_url,
         audio_file_url: pt.track.audio_file_url || pt.track.file_url
       }));
-      
+
       setTrackList(trackList);
       setTimeout(() => {
         playTrack(trackList[0]);
@@ -138,7 +137,7 @@ export default function PlaylistDetailPage() {
       file_url: pt.track.file_url || pt.track.audio_file_url,
       audio_file_url: pt.track.audio_file_url || pt.track.file_url
     }));
-    
+
     setTrackList(trackList);
     setTimeout(() => {
       playTrack(processedTrack);
@@ -212,7 +211,7 @@ export default function PlaylistDetailPage() {
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Playlists
           </Button>
-          
+
           <div className="flex flex-col md:flex-row gap-8 items-center md:items-end">
             <div className="w-48 h-48 md:w-64 md:h-64 rounded-xl overflow-hidden bg-white/10 backdrop-blur-sm flex items-center justify-center shadow-2xl">
               {playlist.cover_image_url ? (
@@ -227,7 +226,7 @@ export default function PlaylistDetailPage() {
                 <Music className="h-20 w-20 text-white/60" />
               )}
             </div>
-            
+
             <div className="flex-1 flex flex-col gap-4 text-center md:text-left">
               <Badge className="bg-white/20 text-white border-white/30 w-fit mx-auto md:mx-0">
                 Playlist
@@ -313,7 +312,7 @@ export default function PlaylistDetailPage() {
                           idx + 1
                         )}
                       </div>
-                      
+
                       <Button
                         size="sm"
                         variant="ghost"
@@ -376,7 +375,7 @@ export default function PlaylistDetailPage() {
                             <Plus className="h-4 w-4" />
                           </button>
                         </AddToPlaylist>
-                        
+
                         <Button 
                           size="sm" 
                           variant="ghost" 
@@ -398,11 +397,11 @@ export default function PlaylistDetailPage() {
                             <Download className="h-4 w-4" />
                           )}
                         </Button>
-                        
+
                         <Button size="sm" variant="ghost" className="p-2" title="Like">
                           <Heart className="h-4 w-4" />
                         </Button>
-                        
+
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button size="sm" variant="ghost" className="p-2">
