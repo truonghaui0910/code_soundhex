@@ -75,6 +75,7 @@ export function UserNav({ user }: UserNavProps) {
   const menuItems = [
     { label: "Dashboard", href: "/dashboard" },
     { label: "Music", href: "/music" },
+    { label: "Your Library", href: "/library" },
     { label: "Agreements", href: "/agreements" },
     { label: "Sign out", action: handleSignOut, isSignOut: true },
   ].filter(item => {
