@@ -462,6 +462,24 @@
     z-index: 9999 !important;
   }
 
+  /* Custom dropdown menu item styles */
+  [data-radix-dropdown-menu-item] {
+    border: none !important;
+    outline: none !important;
+  }
+
+  [data-radix-dropdown-menu-item]:hover {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
+  [data-radix-dropdown-menu-item]:focus {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
   .radix-dropdown-content {
     z-index: 9999 !important;
   }

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -97,7 +96,7 @@ export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPl
     const duplicatePlaylist = playlists.find(
       playlist => playlist.name.toLowerCase() === newPlaylistName.trim().toLowerCase()
     );
-    
+
     if (duplicatePlaylist) {
       toast.error("A playlist with this name already exists");
       return;
@@ -115,13 +114,13 @@ export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPl
 
       if (!createResponse.ok) {
         const errorData = await createResponse.json();
-        
+
         // Handle specific error responses
         if (createResponse.status === 409) {
           toast.error("A playlist with this name already exists");
           return;
         }
-        
+
         throw new Error(errorData.error || "Failed to create playlist");
       }
 
@@ -143,7 +142,7 @@ export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPl
       setShowCreateDialog(false);
       setNewPlaylistName("");
       toast.success(`Created "${newPlaylist.name}" and added "${trackTitle}"`);
-      
+
       // Force refresh playlists to ensure UI is up to date
       await fetchPlaylists();
     } catch (error: any) {
