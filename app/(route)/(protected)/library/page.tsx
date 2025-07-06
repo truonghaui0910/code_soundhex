@@ -107,7 +107,53 @@ export default function LibraryPage() {
     }
   };
 
-{/* Main Content */}
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20">
+      {/* Hero Section */}
+      <div className="relative overflow-hidden bg-gradient-to-r from-slate-800 via-purple-900 to-slate-900 text-white">
+        <div className="absolute inset-0 bg-black/10"></div>
+        <div className="relative container mx-auto px-6 py-16">
+          <div className="max-w-4xl">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
+              Your Music Library
+            </h1>
+            <p className="text-xl md:text-2xl mb-8 text-purple-100">
+              Discover • Organize • Enjoy your collection
+            </p>
+
+            {/* Quick Actions */}
+            <div className="flex flex-wrap gap-4 justify-center md:justify-start">
+              <Button 
+                size="lg" 
+                className="bg-white text-purple-600 hover:bg-white/90"
+                onClick={() => router.push('/upload')}
+              >
+                <Upload className="mr-2 h-5 w-5" />
+                Upload Music
+              </Button>
+              <Button 
+                variant="secondary" 
+                size="lg"
+                onClick={() => {
+                  setActiveTab("playlists");
+                  // Trigger create playlist dialog after tab switch
+                  setTimeout(() => {
+                    const createButton = document.querySelector('[data-create-playlist-button]') as HTMLButtonElement;
+                    if (createButton) {
+                      createButton.click();
+                    }
+                  }, 100);
+                }}
+              >
+                <List className="mr-2 h-5 w-5" />
+                Create Playlist
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
       <div className="container mx-auto px-6 py-12">
         {/* Stats Section */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
