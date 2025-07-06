@@ -49,12 +49,13 @@ export async function PUT(
     }
 
     const body = await request.json();
-    const { name, description, cover_image_url } = body;
+    const { name, description, cover_image_url, private: isPrivate } = body;
 
     const updates: any = {};
     if (name !== undefined) updates.name = name;
     if (description !== undefined) updates.description = description;
     if (cover_image_url !== undefined) updates.cover_image_url = cover_image_url;
+    if (isPrivate !== undefined) updates.private = isPrivate;
 
     const playlist = await PlaylistsController.updatePlaylist(playlistId, user.id, updates);
     return NextResponse.json(playlist);

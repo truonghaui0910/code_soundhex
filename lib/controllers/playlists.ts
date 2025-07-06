@@ -11,6 +11,8 @@ export interface Playlist {
   created_at: string;
   updated_at: string;
   track_count?: number;
+  del_status?: number;
+  private?: boolean;
 }
 
 export interface PlaylistTrack {
@@ -281,6 +283,33 @@ export class PlaylistsController {
       ...data,
       track_count: data.playlist_tracks?.[0]?.count || 0
     } as Playlist;
+  }
+
+  /**
+   * Lấy public playlists (cho tất cả user)
+   */
+  static async getPublicPlaylists(): Promise<Playlist[]> {
+    const supabase = createServerComponentClient<Database>({ cookies });
+
+    const { data, error } = await supabase
+      .from("playlists")
+      .select(`
+        id, name, description, cover_image_url, user_id, created_at, updated_at, del_status, private,
+        playlist_tracks(count)
+      `)
+      .eq("del_status", 0)
+      .eq("private", false)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching public playlists:", error);
+      throw new Error(`Failed to fetch public playlists: ${error.message}`);
+    }
+
+    return (data || []).map((playlist: any) => ({
+      ...playlist,
+      track_count: playlist.playlist_tracks?.[0]?.count || 0
+    }));
   }
 
   /**
