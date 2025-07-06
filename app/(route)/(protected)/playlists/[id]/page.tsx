@@ -107,7 +107,12 @@ export default function PlaylistDetailPage() {
 
   const handlePlayPlaylist = () => {
     if (tracks && tracks.length > 0) {
-      const trackList = tracks.map(pt => pt.track);
+      const trackList = tracks.map(pt => ({
+        ...pt.track,
+        file_url: pt.track.file_url || pt.track.audio_file_url,
+        audio_file_url: pt.track.audio_file_url || pt.track.file_url
+      }));
+      
       setTrackList(trackList);
       setTimeout(() => {
         playTrack(trackList[0]);
@@ -121,10 +126,22 @@ export default function PlaylistDetailPage() {
       return;
     }
 
-    const trackList = tracks.map(pt => pt.track);
+    // Ensure track has proper audio URL
+    const processedTrack = {
+      ...track,
+      file_url: track.file_url || track.audio_file_url,
+      audio_file_url: track.audio_file_url || track.file_url
+    };
+
+    const trackList = tracks.map(pt => ({
+      ...pt.track,
+      file_url: pt.track.file_url || pt.track.audio_file_url,
+      audio_file_url: pt.track.audio_file_url || pt.track.file_url
+    }));
+    
     setTrackList(trackList);
     setTimeout(() => {
-      playTrack(track);
+      playTrack(processedTrack);
     }, 50);
   };
 
@@ -372,13 +389,20 @@ export default function PlaylistDetailPage() {
                           title="Download"
                           onClick={(e) => {
                             e.stopPropagation();
-                            if (!track.file_url) {
+                            const audioUrl = track.file_url || track.audio_file_url;
+                            if (!audioUrl) {
                               toast.error("Download not available for this track");
                               return;
                             }
-                            downloadTrack(track);
+                            
+                            const downloadTrack = {
+                              ...track,
+                              file_url: audioUrl,
+                              audio_file_url: audioUrl
+                            };
+                            downloadTrack(downloadTrack);
                           }}
-                          disabled={isTrackDownloading(track.id) || !track.file_url}
+                          disabled={isTrackDownloading(track.id) || (!track.file_url && !track.audio_file_url)}
                         >
                           {isTrackDownloading(track.id) ? (
                             <>
