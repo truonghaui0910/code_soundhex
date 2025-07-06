@@ -175,7 +175,7 @@ export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPl
         </DropdownMenuTrigger>
         <DropdownMenuContent 
           align="end" 
-          className="w-64 z-[9999] max-h-80 overflow-y-auto bg-white dark:bg-gray-800 border shadow-lg"
+          className="w-64 z-[9999] max-h-80 overflow-y-auto bg-white dark:bg-gray-800 border shadow-lg focus:outline-none"
           style={{ zIndex: 9999 }}
           onCloseAutoFocus={(e) => e.preventDefault()}
         >
@@ -193,6 +193,7 @@ export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPl
           </div>
 
           <DropdownMenuItem 
+            className="focus:bg-gray-100 dark:focus:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
@@ -216,6 +217,7 @@ export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPl
             filteredPlaylists.map((playlist) => (
               <DropdownMenuItem
                 key={playlist.id}
+                className="focus:bg-gray-100 dark:focus:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
