@@ -24,7 +24,17 @@ import {
     Activity
 } from "lucide-react";
 
-// Mock data for dashboard
+interface DashboardStats {
+    totalPlaylists: number;
+    totalAlbums: number;
+    totalTracks: number;
+    totalPlays: number;
+    monthlyRevenue: number;
+    dailyRevenue: number;
+    revenueChange: string;
+}
+
+// Mock data for other sections (will be replaced with real data later)
 const dashboardData = {
     agreementStatus: {
         distribution: {
@@ -40,11 +50,6 @@ const dashboardData = {
         { id: 2, title: "Night City", status: "review", plays: 0 },
         { id: 3, title: "Ocean Dreams", status: "rejected", plays: 0 }
     ],
-    revenue: {
-        monthly: 2450,
-        daily: 185,
-        change: "+12.5%"
-    },
     agreementOverview: {
         total: 25,
         active: 18,
@@ -60,18 +65,14 @@ const dashboardData = {
         { type: "approval", message: "New distribution agreement requires approval", time: "2 hours ago" },
         { type: "revenue", message: "Monthly revenue report is ready", time: "1 day ago" },
         { type: "expiration", message: "3 agreements expiring this month", time: "3 days ago" }
-    ],
-    stats: {
-        totalPlays: 45678,
-        totalTracks: 24,
-        activeAgreements: 18,
-        monthlyEarnings: 2450
-    }
+    ]
 };
 
 export default function Dashboard() {
     const [currentView, setCurrentView] = useState<"overview" | "analytics" | "agreements">("overview");
     const [mounted, setMounted] = useState(false);
+    const [stats, setStats] = useState<DashboardStats | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     // Format numbers consistently on client-side to prevent hydration mismatch
     const formatNumber = (num: number): string => {
@@ -79,8 +80,26 @@ export default function Dashboard() {
         return num.toLocaleString('en-US');
     };
 
+    // Fetch dashboard stats
+    const fetchStats = async () => {
+        try {
+            setIsLoading(true);
+            const response = await fetch('/api/dashboard/stats');
+            if (!response.ok) {
+                throw new Error('Failed to fetch stats');
+            }
+            const data = await response.json();
+            setStats(data);
+        } catch (error) {
+            console.error('Error fetching dashboard stats:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     useEffect(() => {
         setMounted(true);
+        fetchStats();
     }, []);
 
     return (
@@ -105,7 +124,11 @@ export default function Dashboard() {
                                         <Play className="h-5 w-5 text-white" />
                                     </div>
                                     <div>
-                                        <p className="text-2xl font-bold">{formatNumber(dashboardData.stats.totalPlays)}</p>
+                                        {isLoading ? (
+                                            <div className="h-8 bg-white/20 rounded animate-pulse mb-1"></div>
+                                        ) : (
+                                            <p className="text-2xl font-bold">{formatNumber(stats?.totalPlays || 0)}</p>
+                                        )}
                                         <p className="text-purple-200 text-sm">Total Plays</p>
                                     </div>
                                 </div>
@@ -116,7 +139,11 @@ export default function Dashboard() {
                                         <Music className="h-5 w-5 text-white" />
                                     </div>
                                     <div>
-                                        <p className="text-2xl font-bold">{dashboardData.stats.totalTracks}</p>
+                                        {isLoading ? (
+                                            <div className="h-8 bg-white/20 rounded animate-pulse mb-1"></div>
+                                        ) : (
+                                            <p className="text-2xl font-bold">{stats?.totalTracks || 0}</p>
+                                        )}
                                         <p className="text-purple-200 text-sm">Tracks</p>
                                     </div>
                                 </div>
@@ -124,11 +151,15 @@ export default function Dashboard() {
                             <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
                                 <div className="flex items-center gap-3">
                                     <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-blue-500 rounded-full flex items-center justify-center">
-                                        <FileText className="h-5 w-5 text-white" />
+                                        <Album className="h-5 w-5 text-white" />
                                     </div>
                                     <div>
-                                        <p className="text-2xl font-bold">{dashboardData.stats.activeAgreements}</p>
-                                        <p className="text-purple-200 text-sm">Agreements</p>
+                                        {isLoading ? (
+                                            <div className="h-8 bg-white/20 rounded animate-pulse mb-1"></div>
+                                        ) : (
+                                            <p className="text-2xl font-bold">{stats?.totalAlbums || 0}</p>
+                                        )}
+                                        <p className="text-purple-200 text-sm">Albums</p>
                                     </div>
                                 </div>
                             </div>
@@ -138,7 +169,11 @@ export default function Dashboard() {
                                         <DollarSign className="h-5 w-5 text-white" />
                                     </div>
                                     <div>
-                                        <p className="text-2xl font-bold">${formatNumber(dashboardData.stats.monthlyEarnings)}</p>
+                                        {isLoading ? (
+                                            <div className="h-8 bg-white/20 rounded animate-pulse mb-1"></div>
+                                        ) : (
+                                            <p className="text-2xl font-bold">${formatNumber(stats?.monthlyRevenue || 0)}</p>
+                                        )}
                                         <p className="text-purple-200 text-sm">This Month</p>
                                     </div>
                                 </div>
@@ -197,11 +232,15 @@ export default function Dashboard() {
                                         <div className="flex items-center justify-between">
                                             <div>
                                                 <p className="text-sm font-medium text-muted-foreground">Monthly Revenue</p>
-                                                <p className="text-3xl font-bold text-foreground">
-                                                    ${formatNumber(dashboardData.revenue.monthly)}
-                                                </p>
+                                                {isLoading ? (
+                                                    <div className="h-10 bg-muted rounded animate-pulse mb-2"></div>
+                                                ) : (
+                                                    <p className="text-3xl font-bold text-foreground">
+                                                        ${formatNumber(stats?.monthlyRevenue || 0)}
+                                                    </p>
+                                                )}
                                                 <Badge variant="secondary" className="mt-2 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                                                    {dashboardData.revenue.change}
+                                                    {stats?.revenueChange || "+12.5%"}
                                                 </Badge>
                                             </div>
                                             <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
@@ -216,9 +255,13 @@ export default function Dashboard() {
                                         <div className="flex items-center justify-between">
                                             <div>
                                                 <p className="text-sm font-medium text-muted-foreground">Daily Average</p>
-                                                <p className="text-3xl font-bold text-foreground">
-                                                    ${dashboardData.revenue.daily}
-                                                </p>
+                                                {isLoading ? (
+                                                    <div className="h-10 bg-muted rounded animate-pulse mb-2"></div>
+                                                ) : (
+                                                    <p className="text-3xl font-bold text-foreground">
+                                                        ${stats?.dailyRevenue || 0}
+                                                    </p>
+                                                )}
                                                 <p className="text-sm text-muted-foreground mt-2">Last 30 days</p>
                                             </div>
                                             <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
@@ -232,14 +275,18 @@ export default function Dashboard() {
                                     <CardContent className="p-6">
                                         <div className="flex items-center justify-between">
                                             <div>
-                                                <p className="text-sm font-medium text-muted-foreground">Total Plays</p>
-                                                <p className="text-3xl font-bold text-foreground">
-                                                    {formatNumber(dashboardData.stats.totalPlays)}
-                                                </p>
-                                                <p className="text-sm text-muted-foreground mt-2">All time</p>
+                                                <p className="text-sm font-medium text-muted-foreground">Total Playlists</p>
+                                                {isLoading ? (
+                                                    <div className="h-10 bg-muted rounded animate-pulse mb-2"></div>
+                                                ) : (
+                                                    <p className="text-3xl font-bold text-foreground">
+                                                        {formatNumber(stats?.totalPlaylists || 0)}
+                                                    </p>
+                                                )}
+                                                <p className="text-sm text-muted-foreground mt-2">Created playlists</p>
                                             </div>
                                             <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center">
-                                                <Play className="h-6 w-6 text-purple-600" />
+                                                <FileText className="h-6 w-6 text-purple-600" />
                                             </div>
                                         </div>
                                     </CardContent>
