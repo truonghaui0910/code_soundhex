@@ -671,14 +671,24 @@ export function MusicUpload() {
                 preview_url: track.preview_url,
                 artists: track.artists || [
                     {
-                        id: track.artist_id || `artist_${track.id}`,
+                        // Use real Spotify artist ID if available, otherwise use generated ID
+                        id: track.artist_id && !track.artist_id.startsWith('artist_') 
+                            ? track.artist_id 
+                            : (spotifyData.type === "album" || spotifyData.type === "playlist") 
+                                ? spotifyData.data.artist_id || `artist_${track.id}`
+                                : `artist_${track.id}`,
                         name: track.artist,
                         // Pass artist genres for artist imports
                         genres: spotifyData.type === "artist" ? spotifyData.data.genres : undefined,
                     },
                 ],
                 album_data: {
-                    id: track.album_id || `album_${track.id}`,
+                    // Use real Spotify album ID if available, otherwise use generated ID
+                    id: track.album_id && !track.album_id.startsWith('album_') 
+                        ? track.album_id 
+                        : (spotifyData.type === "album") 
+                            ? spotifyData.data.id 
+                            : track.album_id || `album_${track.id}`,
                     release_date: track.release_date,
                     description: null,
                 },

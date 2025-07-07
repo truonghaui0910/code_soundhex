@@ -148,8 +148,8 @@ async function importSingleTrack(
     console.log("🎤 ARTIST_SPOTIFY_ID:", { artistSpotifyId, artistName: trackData.artist });
 
     let artist;
-    if (artistSpotifyId) {
-        // Use real Spotify ID if available
+    if (artistSpotifyId && !artistSpotifyId.startsWith('artist_')) {
+        // Use real Spotify ID if available and not generated
         artist = await getOrCreateArtist(supabase, {
             name: trackData.artist,
             spotify_id: artistSpotifyId,
@@ -172,8 +172,8 @@ async function importSingleTrack(
     console.log("💿 ALBUM_SPOTIFY_ID:", { albumSpotifyId, albumName: trackData.album });
 
     let album;
-    if (albumSpotifyId) {
-        // Use real Spotify ID if available
+    if (albumSpotifyId && !albumSpotifyId.startsWith('album_')) {
+        // Use real Spotify ID if available and not generated
         album = await getOrCreateAlbum(supabase, {
             title: trackData.album,
             spotify_id: albumSpotifyId,

@@ -197,6 +197,7 @@ export async function POST(request: NextRequest) {
             id: albumInfoData.id || spotifyId,
             name: albumInfoData.name || "Unknown Album",
             artist: albumInfoData.artists?.[0]?.name || "Unknown Artist",
+            artist_id: albumInfoData.artists?.[0]?.id, // Add artist Spotify ID
             image: albumInfoData.images?.[0]?.url || "",
             release_date: albumInfoData.release_date || "",
             tracks: mappedTracks,
