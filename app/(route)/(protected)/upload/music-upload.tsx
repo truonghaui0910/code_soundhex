@@ -680,6 +680,8 @@ export function MusicUpload() {
                     release_date: track.release_date,
                     description: null,
                 },
+                // Pass artist genres for artist imports
+                artist_genres: spotifyData.type === "artist" ? spotifyData.data.genres : undefined,
             }));
             // Call import API
             const response = await fetch("/api/import-music", {

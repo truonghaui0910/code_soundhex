@@ -131,12 +131,13 @@ async function importSingleTrack(
     console.log("🎭 GENRES_EXTRACTED:", { genreNames });
 
     // 1. Create or get genres
-    const genreIds: number[] = [];
-    for (const genreName of genreNames) {
+    let genreId: number | null = null;
+    if (genreNames.length > 0) {
+        const genreName = genreNames[0];
         if (genreName) {
             let genre = await getOrCreateGenre(supabase, genreName);
             if (genre) {
-                genreIds.push(genre.id);
+                genreId = genre.id;
                 console.log("🎭 GENRE_PROCESSED:", { genreName, genreId: genre.id });
             }
         }
@@ -215,7 +216,7 @@ async function importSingleTrack(
         file_url: trackData.preview_url || null,
         artist_id: artist.id,
         album_id: album.id,
-        genre_id: genreIds.length > 0 ? genreIds[0] : null,
+        genre_id: genreId,
         source_type: "spotify",
         spotify_id: trackData.id,
         preview_url: trackData.preview_url || null,
@@ -241,34 +242,39 @@ async function importSingleTrack(
     return newTrack;
 }
 
-async function getOrCreateGenre(supabase: any, name: string) {
-    console.log("🎭 GET_OR_CREATE_GENRE:", { name });
+async function getOrCreateGenre(supabase: any, genreName: string) {
+    console.log("🎭 GET_OR_CREATE_GENRE:", { genreName });
 
-    // Check if genre exists
-    const { data: existingGenre } = await supabase
+    // First, try to find existing genre
+    const { data: existingGenre, error: findError } = await supabase
         .from("genres")
-        .select("*")
-        .eq("name", name)
+        .select("id, name")
+        .ilike("name", genreName)
         .single();
 
-    if (existingGenre) {
-        console.log("🎭 GENRE_EXISTS:", { genreId: existingGenre.id, name });
-        return existingGenre;
-    }
-
-    // Create new genre
-    const { data: newGenre, error } = await supabase
-        .from("genres")
-        .insert({ name })
-        .select()
-        .single();
-
-    if (error) {
-        console.error("❌ GENRE_CREATE_ERROR:", error);
+    if (findError && findError.code !== "PGRST116") {
+        console.error("Error finding genre:", findError);
         return null;
     }
 
-    console.log("✅ GENRE_CREATED:", { genreId: newGenre.id, name });
+    if (existingGenre) {
+        console.log("🎭 GENRE_FOUND:", { genreId: existingGenre.id, genreName });
+        return existingGenre;
+    }
+
+    // Create new genre if not found
+    const { data: newGenre, error: createError } = await supabase
+        .from("genres")
+        .insert({ name: genreName })
+        .select("id, name")
+        .single();
+
+    if (createError) {
+        console.error("Error creating genre:", createError);
+        return null;
+    }
+
+    console.log("🎭 GENRE_CREATED:", { genreId: newGenre.id, genreName });
     return newGenre;
 }
 

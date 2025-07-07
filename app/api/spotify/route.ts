@@ -151,6 +151,7 @@ export async function POST(request: NextRequest) {
             id: artistData.id,
             name: artistData.name,
             image: artistData.images?.[0]?.url || "",
+            genres: artistData.genres || [], // Add genres from artist data
             albums:
               albumsData.items?.map((album: SpotifyAlbum) => ({
                 id: album.id,
