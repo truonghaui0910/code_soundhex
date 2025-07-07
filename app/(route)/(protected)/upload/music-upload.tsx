@@ -463,6 +463,15 @@ export function MusicUpload() {
                 };
             });
 
+            // Auto-select all tracks from this album
+            setSelectedTracks((prev) => {
+                const newSelected = new Set(prev);
+                tracks.forEach((track: any) => {
+                    newSelected.add(track.id);
+                });
+                return newSelected;
+            });
+
             setExpandedAlbums((prev) => new Set(prev).add(albumId));
         } catch (error) {
             console.error("Error fetching album tracks:", error);
