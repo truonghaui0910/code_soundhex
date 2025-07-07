@@ -185,20 +185,10 @@ export async function POST(request: NextRequest) {
             image: albumInfoData.images?.[0]?.url || "",
             isrc: track.external_ids?.isrc || null,
             preview_url: track.preview_url,
-            artist_id: track.artists?.[0]?.id,
+            artist_id: track.artists?.[0]?.id || albumInfoData.artists?.[0]?.id,
             album_id: albumInfoData.id,
-            artists: [
-              {
-                id: track.artists?.[0]?.id,
-                name: track.artists?.[0]?.name || "Unknown Artist"
-              }
-            ],
+            artists: track.artists || albumInfoData.artists || [],
             release_date: albumInfoData.release_date,
-            album_data: {
-              id: albumInfoData.id,
-              release_date: albumInfoData.release_date,
-              description: null,
-            },
           })) || [];
 
         data = {
