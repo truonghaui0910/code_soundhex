@@ -71,7 +71,10 @@ export async function POST(request: NextRequest) {
                     album: track.album
                 });
 
-                await importSingleTrack(supabase, track, session.user.id);
+                // Detect import type based on track data structure
+                const importType = track.album_data?.id && !track.artists?.[0]?.genres ? 'album' : 'artist';
+                
+                await importSingleTrack(supabase, track, session.user.id, importType);
                 results.success++;
 
                 console.log("✅ TRACK_IMPORTED_SUCCESS:", {
@@ -149,20 +152,57 @@ async function fetchArtistGenres(artistId: string): Promise<string[]> {
     }
 }
 
+// Cache để lưu full artist data
+const artistFullDataCache = new Map<string, any>();
+
+// Hàm fetch thông tin artist đầy đủ từ API
+async function fetchArtistFullData(artistId: string): Promise<any> {
+    // Kiểm tra cache trước
+    if (artistFullDataCache.has(artistId)) {
+        console.log("🎤 ARTIST_FULL_DATA_FROM_CACHE:", { artistId });
+        return artistFullDataCache.get(artistId);
+    }
+
+    try {
+        console.log("🎤 FETCHING_ARTIST_FULL_DATA:", { artistId });
+        const apiUrl = `http://source.automusic.win/spotify/artist-onl/get/${artistId}`;
+        const response = await fetch(apiUrl);
+        
+        if (!response.ok) {
+            console.error("🎤 ARTIST_FULL_DATA_API_ERROR:", { artistId, status: response.status });
+            return null;
+        }
+
+        const artistData = await response.json();
+        
+        // Lưu vào cache
+        artistFullDataCache.set(artistId, artistData);
+        console.log("🎤 ARTIST_FULL_DATA_FETCHED:", { artistId, name: artistData.name });
+        
+        return artistData;
+    } catch (error) {
+        console.error("🎤 ARTIST_FULL_DATA_FETCH_ERROR:", { artistId, error: error instanceof Error ? error.message : 'Unknown error' });
+        return null;
+    }
+}
+
 async function importSingleTrack(
     supabase: any,
     trackData: ImportTrack,
-    userId: string
+    userId: string,
+    importType?: string
 ) {
     console.log("🔍 IMPORT_SINGLE_TRACK_START:", {
         trackId: trackData.id,
         trackName: trackData.name,
         artistData: trackData.artists,
-        albumData: trackData.album_data
+        albumData: trackData.album_data,
+        importType
     });
 
     // Extract genre from artist data if available (for artist imports)
     let genreNames = trackData.artists?.[0]?.genres || [];
+    let artistFullData = null;
     console.log("🎭 GENRES_FROM_TRACK_DATA:", { genreNames, artistData: trackData.artists?.[0] });
 
     // Nếu chưa có genres và có artist_id thực từ Spotify, fetch từ API
@@ -170,6 +210,11 @@ async function importSingleTrack(
     if (genreNames.length === 0 && artistSpotifyId && !artistSpotifyId.startsWith('generated_') && !artistSpotifyId.startsWith('artist_')) {
         console.log("🎭 FETCHING_GENRES_FOR_ARTIST:", { artistSpotifyId });
         genreNames = await fetchArtistGenres(artistSpotifyId);
+        
+        // Nếu là album import, cần fetch thông tin artist đầy đủ để tạo artist record
+        if (importType === 'album') {
+            artistFullData = await fetchArtistFullData(artistSpotifyId);
+        }
     }
 
     // 1. Create or get genres
@@ -191,10 +236,14 @@ async function importSingleTrack(
     let artist;
     if (artistSpotifyId && !artistSpotifyId.startsWith('generated_') && !artistSpotifyId.startsWith('artist_')) {
         // Use real Spotify ID if available and valid
+        const artistImageUrl = importType === 'album' && artistFullData?.images?.[0]?.url 
+            ? artistFullData.images[0].url 
+            : trackData.image;
+            
         artist = await getOrCreateArtist(supabase, {
             name: trackData.artist,
             spotify_id: artistSpotifyId,
-            profile_image_url: trackData.image,
+            profile_image_url: artistImageUrl,
             user_id: userId,
         });
     } else {
