@@ -201,7 +201,7 @@ export default function Home() {
                   href="/register"
                   className="btn-primary px-8 py-4 rounded-lg text-white font-semibold text-lg animate-pulse-glow text-center"
                 >
-                  Start Distributing
+                  Submit your music
                 </a>
                 <a
                   href="/music"
@@ -309,7 +309,7 @@ export default function Home() {
                 href="/register"
                 className="btn-primary px-8 py-4 rounded-lg text-white font-semibold text-lg text-center"
               >
-                Sign Up Now
+                Submit your music
               </a>
               <a
                 href="/music"
