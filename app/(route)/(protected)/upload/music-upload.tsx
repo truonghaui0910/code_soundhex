@@ -327,13 +327,52 @@ export function MusicUpload() {
             setSpotifyData(data);
 
             // Auto-select all tracks for album, playlist, and single track
-            if (data.type === "album" || data.type === "playlist") {
-                const trackIds = new Set<string>(
-                    data.data.tracks.map((track: SpotifyTrack) =>
-                        String(track.id),
-                    ),
-                );
-                setSelectedTracks(trackIds);
+            if (data.type === "album") {
+                const tracks =
+                    await fetchAlbumTracks(
+                        data.data.id,
+                    );
+                setSpotifyData((prev) => ({
+                    ...prev,
+                    data: {
+                        ...prev.data,
+                        tracks: tracks,
+                    },
+                }));
+
+                // Auto-select all tracks from this album
+                setSelectedTracks((prev) => {
+                    const newSelected = new Set(prev);
+                    tracks.forEach((track: any) => {
+                        newSelected.add(track.id);
+                    });
+                    return newSelected;
+                });
+            }
+            if (
+                data.type ===
+                "playlist"
+            ) {
+                const tracks =
+                    await fetchPlaylistTracks(
+                        data.data.id,
+                    );
+                setSpotifyData((prev) => ({
+                    ...prev,
+                    data: {
+                        ...prev.data,
+                        tracks: tracks,
+                    },
+                }));
+
+                // Auto-select all tracks from this playlist
+                setSelectedTracks((prev) => {
+                    const newSelected = new Set(prev);
+                    tracks.forEach((track: any) => {
+                        newSelected.add(track.id);
+                    });
+                    return newSelected;
+                });
             } else if (data.type === "track") {
                 setSelectedTracks(new Set([String(data.data.id)]));
             }
@@ -960,7 +999,7 @@ export function MusicUpload() {
                                 <div className="grid md:grid-cols-4 gap-4 text-sm text-gray-600 dark:text-gray-400">
                                     <div className="flex items-center gap-2">
                                         <Users className="h-4 w-4" />
-                                        <span>Artist URLs</span>
+                                        <span>ArtistURLs</span>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <Album className="h-4 w-4" />
@@ -2624,4 +2663,44 @@ export function MusicUpload() {
             </div>
         </div>
     );
+}
+
+async function fetchAlbumTracks(albumId: string): Promise<any[]> {
+    try {
+        const response = await fetch("/api/spotify/album-tracks", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ albumId }),
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to fetch album tracks");
+        }
+
+        const { tracks } = await response.json();
+        return tracks;
+    } catch (error) {
+        console.error("Error fetching album tracks:", error);
+        return [];
+    }
+}
+
+async function fetchPlaylistTracks(playlistId: string): Promise<any[]> {
+    try {
+        const response = await fetch("/api/spotify/playlist-tracks", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ playlistId }),
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to fetch playlist tracks");
+        }
+
+        const { tracks } = await response.json();
+        return tracks;
+    } catch (error) {
+        console.error("Error fetching playlist tracks:", error);
+        return [];
+    }
 }
