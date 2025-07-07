@@ -1488,7 +1488,7 @@ export function MusicUpload() {
                                                                             </Button>
                                                                         </div>
 
-                                                                        <div className="space-y-2 max-h-64 overflow-y-auto pl-4 border-l-2 border-gray-200 dark:border-gray-700">
+                                                                        <div className="space-y-2 pl-4 border-l-2 border-gray-200 dark:border-gray-700">
                                                                             {album.tracks.map(
                                                                                 (
                                                                                     track: SpotifyTrack,
