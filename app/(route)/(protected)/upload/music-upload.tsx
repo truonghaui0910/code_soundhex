@@ -671,14 +671,14 @@ export function MusicUpload() {
                 preview_url: track.preview_url,
                 artists: track.artists || [
                     {
-                        id: track.artist_id || `artist_${track.id}`,
+                        id: track.artist_id,
                         name: track.artist,
                         // Pass artist genres for artist imports
                         genres: spotifyData.type === "artist" ? spotifyData.data.genres : undefined,
                     },
                 ],
-                album_data: {
-                    id: track.album_id || `album_${track.id}`,
+                album_data: track.album_data || {
+                    id: track.album_id,
                     release_date: track.release_date,
                     description: null,
                 },

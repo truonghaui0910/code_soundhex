@@ -189,6 +189,11 @@ export async function POST(request: NextRequest) {
             album_id: albumInfoData.id,
             artists: track.artists || albumInfoData.artists || [],
             release_date: albumInfoData.release_date,
+            album_data: {
+              id: albumInfoData.id,
+              release_date: albumInfoData.release_date,
+              description: null,
+            },
           })) || [];
 
         data = {
