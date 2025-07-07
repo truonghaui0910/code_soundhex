@@ -151,11 +151,13 @@ export async function POST(request: NextRequest) {
             id: artistData.id,
             name: artistData.name,
             image: artistData.images?.[0]?.url || "",
+            genres: artistData.genres || [], // Add genres from artist data
             albums:
               albumsData.items?.map((album: SpotifyAlbum) => ({
                 id: album.id,
                 name: album.name,
                 artist: album.artists?.[0]?.name || artistData.name,
+                artist_id: album.artists?.[0]?.id || artistData.id, // Add artist Spotify ID
                 image: album.images?.[0]?.url || "",
                 release_date: album.release_date,
                 tracks: [], // Will be populated when album is expanded
@@ -187,6 +189,11 @@ export async function POST(request: NextRequest) {
             album_id: albumInfoData.id,
             artists: track.artists || albumInfoData.artists || [],
             release_date: albumInfoData.release_date,
+            album_data: {
+              id: albumInfoData.id,
+              release_date: albumInfoData.release_date,
+              description: null,
+            },
           })) || [];
 
         data = {

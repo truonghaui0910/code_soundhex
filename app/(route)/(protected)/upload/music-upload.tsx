@@ -121,7 +121,7 @@ export function MusicUpload() {
     const [userArtists, setUserArtists] = useState<UserArtist[]>([]);
     const [genres, setGenres] = useState<{ id: number; name: string }[]>([]);
     const [loadingUserData, setLoadingUserData] = useState(false);
-    
+
     // Recently uploaded tracks state
     const [recentlyUploaded, setRecentlyUploaded] = useState<any[]>([]);
 
@@ -327,13 +327,35 @@ export function MusicUpload() {
             setSpotifyData(data);
 
             // Auto-select all tracks for album, playlist, and single track
-            if (data.type === "album" || data.type === "playlist") {
-                const trackIds = new Set<string>(
-                    data.data.tracks.map((track: SpotifyTrack) =>
-                        String(track.id),
-                    ),
-                );
-                setSelectedTracks(trackIds);
+            if (data.type === "album") {
+                // For albums, we need to fetch detailed track info
+                const tracks = await fetchAlbumTracks(data.data.id);
+                setSpotifyData((prev) => ({
+                    ...prev,
+                    data: {
+                        ...prev.data,
+                        tracks: tracks,
+                    },
+                }));
+
+                // Auto-select all tracks from this album
+                setSelectedTracks((prev) => {
+                    const newSelected = new Set(prev);
+                    tracks.forEach((track: any) => {
+                        newSelected.add(track.id);
+                    });
+                    return newSelected;
+                });
+            } else if (data.type === "playlist") {
+                // For playlists, tracks are already included in the response
+                // Auto-select all tracks from this playlist
+                setSelectedTracks((prev) => {
+                    const newSelected = new Set(prev);
+                    data.data.tracks?.forEach((track: any) => {
+                        newSelected.add(track.id);
+                    });
+                    return newSelected;
+                });
             } else if (data.type === "track") {
                 setSelectedTracks(new Set([String(data.data.id)]));
             }
@@ -417,20 +439,72 @@ export function MusicUpload() {
     };
 
     const toggleAlbumExpansion = async (albumId: string) => {
-        const newExpanded = new Set(expandedAlbums);
-        if (newExpanded.has(albumId)) {
-            newExpanded.delete(albumId);
-        } else {
-            newExpanded.add(albumId);
-            // Load tracks if not already loaded
-            const album = spotifyData?.data?.albums?.find(
-                (a: SpotifyAlbum) => a.id === albumId,
-            );
-            if (album && (!album.tracks || album.tracks.length === 0)) {
-                await loadAlbumTracks(albumId);
-            }
+        if (expandedAlbums.has(albumId)) {
+            setExpandedAlbums((prev) => {
+                const newSet = new Set(prev);
+                newSet.delete(albumId);
+                return newSet;
+            });
+            return;
         }
-        setExpandedAlbums(newExpanded);
+
+        setLoadingAlbums((prev) => new Set(prev).add(albumId));
+
+        try {
+            const response = await fetch("/api/spotify/album-tracks", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ albumId }),
+            });
+
+            if (!response.ok) throw new Error("Failed to fetch album tracks");
+
+            const { tracks } = await response.json();
+
+            // Update the album with tracks in spotifyData
+            setSpotifyData((prev: any) => {
+                if (!prev || prev.type !== "artist") return prev;
+
+                return {
+                    ...prev,
+                    data: {
+                        ...prev.data,
+                        albums: prev.data.albums.map((album: any) =>
+                            album.id === albumId 
+                                ? { 
+                                    ...album, 
+                                    tracks: tracks.map((track: any) => ({
+                                        ...track,
+                                        artist_id: album.artist_id, // Use album's artist ID
+                                        album_id: albumId, // Use album's Spotify ID
+                                    }))
+                                  } 
+                                : album,
+                        ),
+                    },
+                };
+            });
+
+            // Auto-select all tracks from this album
+            setSelectedTracks((prev) => {
+                const newSelected = new Set(prev);
+                tracks.forEach((track: any) => {
+                    newSelected.add(track.id);
+                });
+                return newSelected;
+            });
+
+            setExpandedAlbums((prev) => new Set(prev).add(albumId));
+        } catch (error) {
+            console.error("Error fetching album tracks:", error);
+            showError("Failed to load album tracks");
+        } finally {
+            setLoadingAlbums((prev) => {
+                const newSet = new Set(prev);
+                newSet.delete(albumId);
+                return newSet;
+            });
+        }
     };
 
     const handleUploadSubmit = async () => {
@@ -469,7 +543,7 @@ export function MusicUpload() {
 
         try {
             const uploadedTracks: any[] = [];
-            
+
             for (const fileData of uploadFiles) {
                 const formData = new FormData();
                 formData.append("audioFile", fileData.file);
@@ -517,7 +591,7 @@ export function MusicUpload() {
 
             dismissNotifications();
             showInfo("All music files uploaded successfully!");
-            
+
             // Load complete track info for recently uploaded tracks
             if (uploadedTracks.length > 0) {
                 const trackIds = uploadedTracks.map(track => track.id);
@@ -536,10 +610,10 @@ export function MusicUpload() {
                     setRecentlyUploaded(prev => [...prev, ...uploadedTracks]);
                 }
             }
-            
+
             // Reload albums and artists lists
             await loadUserData();
-            
+
             setUploadFiles([]);
             setOwnershipConfirmed(false);
         } catch (error) {
@@ -597,12 +671,14 @@ export function MusicUpload() {
                 preview_url: track.preview_url,
                 artists: track.artists || [
                     {
-                        id: track.artist_id || `artist_${track.id}`,
+                        id: track.artist_id,
                         name: track.artist,
+                        // Pass artist genres for artist imports
+                        genres: spotifyData.type === "artist" ? spotifyData.data.genres : undefined,
                     },
                 ],
-                album_data: {
-                    id: track.album_id || `album_${track.id}`,
+                album_data: track.album_data || {
+                    id: track.album_id,
                     release_date: track.release_date,
                     description: null,
                 },
@@ -908,7 +984,7 @@ export function MusicUpload() {
                                 <div className="grid md:grid-cols-4 gap-4 text-sm text-gray-600 dark:text-gray-400">
                                     <div className="flex items-center gap-2">
                                         <Users className="h-4 w-4" />
-                                        <span>Artist URLs</span>
+                                        <span>ArtistURLs</span>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <Album className="h-4 w-4" />
@@ -1140,7 +1216,7 @@ export function MusicUpload() {
                                                     </Button>
                                                 </div>
 
-                                                <div className="space-y-2 max-h-96 overflow-y-auto">
+                                                <div className="space-y-2">
                                                     {spotifyData.data.tracks?.map(
                                                         (
                                                             track: SpotifyTrack,
@@ -1436,7 +1512,7 @@ export function MusicUpload() {
                                                                             </Button>
                                                                         </div>
 
-                                                                        <div className="space-y-2 max-h-64 overflow-y-auto pl-4 border-l-2 border-gray-200 dark:border-gray-700">
+                                                                        <div className="space-y-2 pl-4 border-l-2 border-gray-200 dark:border-gray-700">
                                                                             {album.tracks.map(
                                                                                 (
                                                                                     track: SpotifyTrack,
@@ -2516,7 +2592,7 @@ export function MusicUpload() {
                                                             artist: track.artist || { id: 0, name: "Unknown Artist" },
                                                             album: track.album || { id: 0, title: "Unknown Album", cover_image_url: null },
                                                         };
-                                                        
+
                                                         setTrackList([trackToPlay]);
                                                         const currentTrackId = currentTrack?.id;
                                                         if (currentTrackId === track.id && isPlaying) {
@@ -2534,7 +2610,7 @@ export function MusicUpload() {
                                                 </Button>
                                             )}
                                         </div>
-                                        
+
                                         <div className="flex-1 min-w-0">
                                             <h4 className="font-semibold truncate">
                                                 {track.title || "Unknown Title"}
@@ -2546,7 +2622,7 @@ export function MusicUpload() {
                                                 {track.album?.title || "Unknown Album"}
                                             </p>
                                         </div>
-                                        
+
                                         <div className="flex items-center gap-4 text-sm text-gray-500">
                                             <span>{formatDuration(track.duration)}</span>
                                             <Badge variant="outline" className="text-xs">
@@ -2556,7 +2632,7 @@ export function MusicUpload() {
                                     </div>
                                 ))}
                             </div>
-                            
+
                             <div className="flex justify-center pt-4">
                                 <Button
                                     variant="outline"
@@ -2572,4 +2648,44 @@ export function MusicUpload() {
             </div>
         </div>
     );
+}
+
+async function fetchAlbumTracks(albumId: string): Promise<any[]> {
+    try {
+        const response = await fetch("/api/spotify/album-tracks", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ albumId }),
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to fetch album tracks");
+        }
+
+        const { tracks } = await response.json();
+        return tracks;
+    } catch (error) {
+        console.error("Error fetching album tracks:", error);
+        return [];
+    }
+}
+
+async function fetchPlaylistTracks(playlistId: string): Promise<any[]> {
+    try {
+        const response = await fetch("/api/spotify/playlist-tracks", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ playlistId }),
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to fetch playlist tracks");
+        }
+
+        const { tracks } = await response.json();
+        return tracks;
+    } catch (error) {
+        console.error("Error fetching playlist tracks:", error);
+        return [];
+    }
 }
