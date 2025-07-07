@@ -1231,7 +1231,7 @@ export function MusicUpload() {
                                                     </Button>
                                                 </div>
 
-                                                <div className="space-y-2 max-h-96 overflow-y-auto">
+                                                <div className="space-y-2">
                                                     {spotifyData.data.tracks?.map(
                                                         (
                                                             track: SpotifyTrack,
