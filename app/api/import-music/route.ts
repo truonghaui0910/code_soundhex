@@ -114,6 +114,41 @@ export async function POST(request: NextRequest) {
     }
 }
 
+// Cache để lưu genres của artist đã fetch
+const artistGenresCache = new Map<string, string[]>();
+
+// Hàm fetch genres từ artist API
+async function fetchArtistGenres(artistId: string): Promise<string[]> {
+    // Kiểm tra cache trước
+    if (artistGenresCache.has(artistId)) {
+        console.log("🎭 ARTIST_GENRES_FROM_CACHE:", { artistId, genres: artistGenresCache.get(artistId) });
+        return artistGenresCache.get(artistId) || [];
+    }
+
+    try {
+        console.log("🎭 FETCHING_ARTIST_GENRES:", { artistId });
+        const apiUrl = `http://source.automusic.win/spotify/artist-onl/get/${artistId}`;
+        const response = await fetch(apiUrl);
+        
+        if (!response.ok) {
+            console.error("🎭 ARTIST_GENRES_API_ERROR:", { artistId, status: response.status });
+            return [];
+        }
+
+        const artistData = await response.json();
+        const genres = artistData.genres || [];
+        
+        // Lưu vào cache
+        artistGenresCache.set(artistId, genres);
+        console.log("🎭 ARTIST_GENRES_FETCHED:", { artistId, genres });
+        
+        return genres;
+    } catch (error) {
+        console.error("🎭 ARTIST_GENRES_FETCH_ERROR:", { artistId, error: error instanceof Error ? error.message : 'Unknown error' });
+        return [];
+    }
+}
+
 async function importSingleTrack(
     supabase: any,
     trackData: ImportTrack,
@@ -126,9 +161,16 @@ async function importSingleTrack(
         albumData: trackData.album_data
     });
 
-    // Extract genre from artist data if available
-    const genreNames = trackData.artists?.[0]?.genres || [];
-    console.log("🎭 GENRES_EXTRACTED:", { genreNames, artistData: trackData.artists?.[0] });
+    // Extract genre from artist data if available (for artist imports)
+    let genreNames = trackData.artists?.[0]?.genres || [];
+    console.log("🎭 GENRES_FROM_TRACK_DATA:", { genreNames, artistData: trackData.artists?.[0] });
+
+    // Nếu chưa có genres và có artist_id thực từ Spotify, fetch từ API
+    const artistSpotifyId = trackData.artists?.[0]?.id;
+    if (genreNames.length === 0 && artistSpotifyId && !artistSpotifyId.startsWith('generated_') && !artistSpotifyId.startsWith('artist_')) {
+        console.log("🎭 FETCHING_GENRES_FOR_ARTIST:", { artistSpotifyId });
+        genreNames = await fetchArtistGenres(artistSpotifyId);
+    }
 
     // 1. Create or get genres
     let genreId: number | null = null;
@@ -144,12 +186,11 @@ async function importSingleTrack(
     }
 
     // 2. Create or get artist
-    const artistSpotifyId = trackData.artists?.[0]?.id;
     console.log("🎤 ARTIST_SPOTIFY_ID:", { artistSpotifyId, artistName: trackData.artist });
 
     let artist;
-    if (artistSpotifyId) {
-        // Use real Spotify ID if available
+    if (artistSpotifyId && !artistSpotifyId.startsWith('generated_') && !artistSpotifyId.startsWith('artist_')) {
+        // Use real Spotify ID if available and valid
         artist = await getOrCreateArtist(supabase, {
             name: trackData.artist,
             spotify_id: artistSpotifyId,
