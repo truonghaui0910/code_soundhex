@@ -201,7 +201,7 @@ export default function Home() {
                   href="/register"
                   className="btn-primary px-8 py-4 rounded-lg text-white font-semibold text-lg animate-pulse-glow text-center"
                 >
-                  Start Distributing
+                  Submit your music
                 </a>
                 <a
                   href="/music"
@@ -292,6 +292,72 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Music Industry Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-primary/5 to-secondary/5">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold mb-6">
+              For Music <span className="gradient-text">Industry</span> Professionals
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+              Discover high-quality, licensable music from our curated artist network
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              {
+                icon: <Music className="w-8 h-8" />,
+                title: "Frictionless Catalog Browsing",
+                description:
+                  "Music supervisors can explore our extensive catalog without barriers. Advanced search, filtering, and preview capabilities make finding the perfect track effortless.",
+              },
+              {
+                icon: <TrendingUp className="w-8 h-8" />,
+                title: "High-Quality Licensable Music",
+                description:
+                  "Showcase premium, professionally curated music from our verified artist network. Every track is cleared for licensing with transparent rights information.",
+              },
+              {
+                icon: <Users className="w-8 h-8" />,
+                title: "Private Sharing & Playlisting",
+                description:
+                  "Create custom playlists for internal use, share music privately with teams, and collaborate on music selection projects with built-in workflow tools.",
+              },
+            ].map((feature, idx) => (
+              <div
+                key={idx}
+                className="music-card p-8 rounded-xl group animate-fadeInUp"
+                style={{ animationDelay: `${idx * 0.1}s` }}
+              >
+                <div className="text-primary mb-4 group-hover:scale-110 transition-transform">
+                  {feature.icon}
+                </div>
+                <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
+                <p className="text-muted-foreground">{feature.description}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="text-center mt-12">
+            <div className="inline-flex flex-col sm:flex-row gap-4">
+              <a
+                href="/music"
+                className="btn-primary px-8 py-4 rounded-lg text-white font-semibold text-lg text-center"
+              >
+                Browse Music Catalog
+              </a>
+              <a
+                href="/register"
+                className="px-8 py-4 rounded-lg border border-border text-foreground hover:bg-card transition-all text-center"
+              >
+                Contact for Licensing
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
       {/* CTA Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto text-center">
@@ -309,7 +375,7 @@ export default function Home() {
                 href="/register"
                 className="btn-primary px-8 py-4 rounded-lg text-white font-semibold text-lg text-center"
               >
-                Sign Up Now
+                Submit your music
               </a>
               <a
                 href="/music"
