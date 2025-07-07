@@ -340,7 +340,7 @@ export default function Home() {
             ))}
           </div>
 
-          <div className="text-center mt-12">
+          <div className="text-center mt-20">
             <div className="inline-flex flex-col sm:flex-row gap-4">
               <a
                 href="/music"
