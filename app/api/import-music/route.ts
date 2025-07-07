@@ -198,10 +198,10 @@ async function importSingleTrack(
             user_id: userId,
         });
     } else {
-        // Only create generated ID as fallback for single track imports
+        // Create without spotify_id if no valid Spotify ID available
         artist = await getOrCreateArtist(supabase, {
             name: trackData.artist,
-            spotify_id: `generated_artist_${trackData.id}`,
+            spotify_id: null, // No Spotify ID
             profile_image_url: trackData.image,
             user_id: userId,
         });
@@ -213,8 +213,8 @@ async function importSingleTrack(
     console.log("💿 ALBUM_SPOTIFY_ID:", { albumSpotifyId, albumName: trackData.album });
 
     let album;
-    if (albumSpotifyId) {
-        // Use real Spotify ID if available
+    if (albumSpotifyId && !albumSpotifyId.startsWith('generated_') && !albumSpotifyId.startsWith('album_')) {
+        // Use real Spotify ID if available and valid
         album = await getOrCreateAlbum(supabase, {
             title: trackData.album,
             spotify_id: albumSpotifyId,
@@ -225,10 +225,10 @@ async function importSingleTrack(
             user_id: userId,
         });
     } else {
-        // Only create generated ID as fallback for single track imports
+        // Create without spotify_id if no valid Spotify ID available
         album = await getOrCreateAlbum(supabase, {
             title: trackData.album,
-            spotify_id: `generated_album_${trackData.id}`,
+            spotify_id: null, // No Spotify ID
             artist_id: artist.id,
             cover_image_url: trackData.image,
             release_date: trackData.album_data?.release_date || null,
@@ -339,7 +339,7 @@ async function getOrCreateArtist(
     supabase: any,
     artistData: {
         name: string;
-        spotify_id: string;
+        spotify_id: string | null;
         profile_image_url?: string;
         user_id: string;
     }
@@ -349,25 +349,49 @@ async function getOrCreateArtist(
         spotify_id: artistData.spotify_id
     });
 
-    // Check if artist exists by spotify_id
-    const { data: existingArtist, error: selectError } = await supabase
-        .from("artists")
-        .select("*")
-        .eq("spotify_id", artistData.spotify_id)
-        .single();
+    // Check if artist exists by spotify_id (only if spotify_id is provided)
+    if (artistData.spotify_id) {
+        const { data: existingArtist, error: selectError } = await supabase
+            .from("artists")
+            .select("*")
+            .eq("spotify_id", artistData.spotify_id)
+            .single();
 
-    if (selectError && selectError.code !== 'PGRST116') {
-        console.error("❌ ARTIST_SELECT_ERROR:", selectError);
-        throw new Error(`Failed to query artist: ${selectError.message}`);
-    }
+        if (selectError && selectError.code !== 'PGRST116') {
+            console.error("❌ ARTIST_SELECT_ERROR:", selectError);
+            throw new Error(`Failed to query artist: ${selectError.message}`);
+        }
 
-    if (existingArtist) {
-        console.log("🎤 ARTIST_EXISTS:", { 
-            artistId: existingArtist.id, 
-            name: artistData.name,
-            spotify_id: artistData.spotify_id 
-        });
-        return existingArtist;
+        if (existingArtist) {
+            console.log("🎤 ARTIST_EXISTS:", { 
+                artistId: existingArtist.id, 
+                name: artistData.name,
+                spotify_id: artistData.spotify_id 
+            });
+            return existingArtist;
+        }
+    } else {
+        // If no spotify_id, check by name and user_id to avoid duplicates
+        const { data: existingArtist, error: selectError } = await supabase
+            .from("artists")
+            .select("*")
+            .eq("name", artistData.name)
+            .eq("user_id", artistData.user_id)
+            .is("spotify_id", null)
+            .single();
+
+        if (selectError && selectError.code !== 'PGRST116') {
+            console.error("❌ ARTIST_SELECT_ERROR:", selectError);
+            throw new Error(`Failed to query artist: ${selectError.message}`);
+        }
+
+        if (existingArtist) {
+            console.log("🎤 ARTIST_EXISTS_BY_NAME:", { 
+                artistId: existingArtist.id, 
+                name: artistData.name
+            });
+            return existingArtist;
+        }
     }
 
     // Create new artist
@@ -404,7 +428,7 @@ async function getOrCreateAlbum(
     supabase: any,
     albumData: {
         title: string;
-        spotify_id: string;
+        spotify_id: string | null;
         artist_id: number;
         cover_image_url?: string;
         release_date?: string | null;
@@ -418,25 +442,51 @@ async function getOrCreateAlbum(
         artist_id: albumData.artist_id
     });
 
-    // Check if album exists by spotify_id
-    const { data: existingAlbum, error: selectError } = await supabase
-        .from("albums")
-        .select("*")
-        .eq("spotify_id", albumData.spotify_id)
-        .single();
+    // Check if album exists by spotify_id (only if spotify_id is provided)
+    if (albumData.spotify_id) {
+        const { data: existingAlbum, error: selectError } = await supabase
+            .from("albums")
+            .select("*")
+            .eq("spotify_id", albumData.spotify_id)
+            .single();
 
-    if (selectError && selectError.code !== 'PGRST116') {
-        console.error("❌ ALBUM_SELECT_ERROR:", selectError);
-        throw new Error(`Failed to query album: ${selectError.message}`);
-    }
+        if (selectError && selectError.code !== 'PGRST116') {
+            console.error("❌ ALBUM_SELECT_ERROR:", selectError);
+            throw new Error(`Failed to query album: ${selectError.message}`);
+        }
 
-    if (existingAlbum) {
-        console.log("💿 ALBUM_EXISTS:", { 
-            albumId: existingAlbum.id, 
-            title: albumData.title,
-            spotify_id: albumData.spotify_id 
-        });
-        return existingAlbum;
+        if (existingAlbum) {
+            console.log("💿 ALBUM_EXISTS:", { 
+                albumId: existingAlbum.id, 
+                title: albumData.title,
+                spotify_id: albumData.spotify_id 
+            });
+            return existingAlbum;
+        }
+    } else {
+        // If no spotify_id, check by title, artist_id and user_id to avoid duplicates
+        const { data: existingAlbum, error: selectError } = await supabase
+            .from("albums")
+            .select("*")
+            .eq("title", albumData.title)
+            .eq("artist_id", albumData.artist_id)
+            .eq("user_id", albumData.user_id)
+            .is("spotify_id", null)
+            .single();
+
+        if (selectError && selectError.code !== 'PGRST116') {
+            console.error("❌ ALBUM_SELECT_ERROR:", selectError);
+            throw new Error(`Failed to query album: ${selectError.message}`);
+        }
+
+        if (existingAlbum) {
+            console.log("💿 ALBUM_EXISTS_BY_TITLE:", { 
+                albumId: existingAlbum.id, 
+                title: albumData.title,
+                artist_id: albumData.artist_id
+            });
+            return existingAlbum;
+        }
     }
 
     // Create new album
