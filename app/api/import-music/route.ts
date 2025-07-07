@@ -271,6 +271,22 @@ async function getOrCreateGenre(supabase: any, genreName: string) {
 
     if (createError) {
         console.error("Error creating genre:", createError);
+
+        // If it's a duplicate key error, try to find the existing genre again
+        if (createError.code === '23505') {
+            console.log("🎭 DUPLICATE_KEY_ERROR - Retrying find genre:", { genreName });
+            const { data: retryGenre, error: retryError } = await supabase
+                .from("genres")
+                .select("id, name")
+                .ilike("name", genreName)
+                .single();
+
+            if (!retryError && retryGenre) {
+                console.log("🎭 GENRE_FOUND_ON_RETRY:", { genreId: retryGenre.id, genreName });
+                return retryGenre;
+            }
+        }
+
         return null;
     }
 
