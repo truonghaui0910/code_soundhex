@@ -128,7 +128,7 @@ async function importSingleTrack(
 
     // Extract genre from artist data if available
     const genreNames = trackData.artists?.[0]?.genres || [];
-    console.log("🎭 GENRES_EXTRACTED:", { genreNames });
+    console.log("🎭 GENRES_EXTRACTED:", { genreNames, artistData: trackData.artists?.[0] });
 
     // 1. Create or get genres
     let genreId: number | null = null;

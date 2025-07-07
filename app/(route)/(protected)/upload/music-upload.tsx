@@ -673,6 +673,8 @@ export function MusicUpload() {
                     {
                         id: track.artist_id || `artist_${track.id}`,
                         name: track.artist,
+                        // Pass artist genres for artist imports
+                        genres: spotifyData.type === "artist" ? spotifyData.data.genres : undefined,
                     },
                 ],
                 album_data: {
@@ -680,8 +682,6 @@ export function MusicUpload() {
                     release_date: track.release_date,
                     description: null,
                 },
-                // Pass artist genres for artist imports
-                artist_genres: spotifyData.type === "artist" ? spotifyData.data.genres : undefined,
             }));
             // Call import API
             const response = await fetch("/api/import-music", {
