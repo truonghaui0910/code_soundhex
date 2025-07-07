@@ -328,10 +328,8 @@ export function MusicUpload() {
 
             // Auto-select all tracks for album, playlist, and single track
             if (data.type === "album") {
-                const tracks =
-                    await fetchAlbumTracks(
-                        data.data.id,
-                    );
+                // For albums, we need to fetch detailed track info
+                const tracks = await fetchAlbumTracks(data.data.id);
                 setSpotifyData((prev) => ({
                     ...prev,
                     data: {
@@ -348,27 +346,12 @@ export function MusicUpload() {
                     });
                     return newSelected;
                 });
-            }
-            if (
-                data.type ===
-                "playlist"
-            ) {
-                const tracks =
-                    await fetchPlaylistTracks(
-                        data.data.id,
-                    );
-                setSpotifyData((prev) => ({
-                    ...prev,
-                    data: {
-                        ...prev.data,
-                        tracks: tracks,
-                    },
-                }));
-
+            } else if (data.type === "playlist") {
+                // For playlists, tracks are already included in the response
                 // Auto-select all tracks from this playlist
                 setSelectedTracks((prev) => {
                     const newSelected = new Set(prev);
-                    tracks.forEach((track: any) => {
+                    data.data.tracks?.forEach((track: any) => {
                         newSelected.add(track.id);
                     });
                     return newSelected;
