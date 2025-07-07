@@ -156,6 +156,7 @@ export async function POST(request: NextRequest) {
                 id: album.id,
                 name: album.name,
                 artist: album.artists?.[0]?.name || artistData.name,
+                artist_id: album.artists?.[0]?.id || artistData.id, // Add artist Spotify ID
                 image: album.images?.[0]?.url || "",
                 release_date: album.release_date,
                 tracks: [], // Will be populated when album is expanded

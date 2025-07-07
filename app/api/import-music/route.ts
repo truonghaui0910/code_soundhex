@@ -143,30 +143,57 @@ async function importSingleTrack(
     }
 
     // 2. Create or get artist
-    const artistSpotifyId = trackData.artists?.[0]?.id || `generated_artist_${trackData.id}`;
+    const artistSpotifyId = trackData.artists?.[0]?.id;
     console.log("🎤 ARTIST_SPOTIFY_ID:", { artistSpotifyId, artistName: trackData.artist });
 
-    const artist = await getOrCreateArtist(supabase, {
-        name: trackData.artist,
-        spotify_id: artistSpotifyId,
-        profile_image_url: trackData.image,
-        user_id: userId,
-    });
+    let artist;
+    if (artistSpotifyId) {
+        // Use real Spotify ID if available
+        artist = await getOrCreateArtist(supabase, {
+            name: trackData.artist,
+            spotify_id: artistSpotifyId,
+            profile_image_url: trackData.image,
+            user_id: userId,
+        });
+    } else {
+        // Only create generated ID as fallback for single track imports
+        artist = await getOrCreateArtist(supabase, {
+            name: trackData.artist,
+            spotify_id: `generated_artist_${trackData.id}`,
+            profile_image_url: trackData.image,
+            user_id: userId,
+        });
+    }
     console.log("🎤 ARTIST_PROCESSED:", { artistId: artist.id, artistSpotifyId });
 
     // 3. Create or get album
-    const albumSpotifyId = trackData.album_data?.id || `generated_album_${trackData.id}`;
+    const albumSpotifyId = trackData.album_data?.id;
     console.log("💿 ALBUM_SPOTIFY_ID:", { albumSpotifyId, albumName: trackData.album });
 
-    const album = await getOrCreateAlbum(supabase, {
-        title: trackData.album,
-        spotify_id: albumSpotifyId,
-        artist_id: artist.id,
-        cover_image_url: trackData.image,
-        release_date: trackData.album_data?.release_date || null,
-        description: trackData.album_data?.description || null,
-        user_id: userId,
-    });
+    let album;
+    if (albumSpotifyId) {
+        // Use real Spotify ID if available
+        album = await getOrCreateAlbum(supabase, {
+            title: trackData.album,
+            spotify_id: albumSpotifyId,
+            artist_id: artist.id,
+            cover_image_url: trackData.image,
+            release_date: trackData.album_data?.release_date || null,
+            description: trackData.album_data?.description || null,
+            user_id: userId,
+        });
+    } else {
+        // Only create generated ID as fallback for single track imports
+        album = await getOrCreateAlbum(supabase, {
+            title: trackData.album,
+            spotify_id: `generated_album_${trackData.id}`,
+            artist_id: artist.id,
+            cover_image_url: trackData.image,
+            release_date: trackData.album_data?.release_date || null,
+            description: trackData.album_data?.description || null,
+            user_id: userId,
+        });
+    }
     console.log("💿 ALBUM_PROCESSED:", { albumId: album.id, albumSpotifyId });
 
     // 4. Create track

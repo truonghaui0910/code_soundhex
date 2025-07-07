@@ -121,7 +121,7 @@ export function MusicUpload() {
     const [userArtists, setUserArtists] = useState<UserArtist[]>([]);
     const [genres, setGenres] = useState<{ id: number; name: string }[]>([]);
     const [loadingUserData, setLoadingUserData] = useState(false);
-    
+
     // Recently uploaded tracks state
     const [recentlyUploaded, setRecentlyUploaded] = useState<any[]>([]);
 
@@ -417,20 +417,63 @@ export function MusicUpload() {
     };
 
     const toggleAlbumExpansion = async (albumId: string) => {
-        const newExpanded = new Set(expandedAlbums);
-        if (newExpanded.has(albumId)) {
-            newExpanded.delete(albumId);
-        } else {
-            newExpanded.add(albumId);
-            // Load tracks if not already loaded
-            const album = spotifyData?.data?.albums?.find(
-                (a: SpotifyAlbum) => a.id === albumId,
-            );
-            if (album && (!album.tracks || album.tracks.length === 0)) {
-                await loadAlbumTracks(albumId);
-            }
+        if (expandedAlbums.has(albumId)) {
+            setExpandedAlbums((prev) => {
+                const newSet = new Set(prev);
+                newSet.delete(albumId);
+                return newSet;
+            });
+            return;
         }
-        setExpandedAlbums(newExpanded);
+
+        setLoadingAlbums((prev) => new Set(prev).add(albumId));
+
+        try {
+            const response = await fetch("/api/spotify/album-tracks", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ albumId }),
+            });
+
+            if (!response.ok) throw new Error("Failed to fetch album tracks");
+
+            const { tracks } = await response.json();
+
+            // Update the album with tracks in spotifyData
+            setSpotifyData((prev: any) => {
+                if (!prev || prev.type !== "artist") return prev;
+
+                return {
+                    ...prev,
+                    data: {
+                        ...prev.data,
+                        albums: prev.data.albums.map((album: any) =>
+                            album.id === albumId 
+                                ? { 
+                                    ...album, 
+                                    tracks: tracks.map((track: any) => ({
+                                        ...track,
+                                        artist_id: album.artist_id, // Use album's artist ID
+                                        album_id: albumId, // Use album's Spotify ID
+                                    }))
+                                  } 
+                                : album,
+                        ),
+                    },
+                };
+            });
+
+            setExpandedAlbums((prev) => new Set(prev).add(albumId));
+        } catch (error) {
+            console.error("Error fetching album tracks:", error);
+            showError("Failed to load album tracks");
+        } finally {
+            setLoadingAlbums((prev) => {
+                const newSet = new Set(prev);
+                newSet.delete(albumId);
+                return newSet;
+            });
+        }
     };
 
     const handleUploadSubmit = async () => {
@@ -469,7 +512,7 @@ export function MusicUpload() {
 
         try {
             const uploadedTracks: any[] = [];
-            
+
             for (const fileData of uploadFiles) {
                 const formData = new FormData();
                 formData.append("audioFile", fileData.file);
@@ -517,7 +560,7 @@ export function MusicUpload() {
 
             dismissNotifications();
             showInfo("All music files uploaded successfully!");
-            
+
             // Load complete track info for recently uploaded tracks
             if (uploadedTracks.length > 0) {
                 const trackIds = uploadedTracks.map(track => track.id);
@@ -536,10 +579,10 @@ export function MusicUpload() {
                     setRecentlyUploaded(prev => [...prev, ...uploadedTracks]);
                 }
             }
-            
+
             // Reload albums and artists lists
             await loadUserData();
-            
+
             setUploadFiles([]);
             setOwnershipConfirmed(false);
         } catch (error) {
@@ -2516,7 +2559,7 @@ export function MusicUpload() {
                                                             artist: track.artist || { id: 0, name: "Unknown Artist" },
                                                             album: track.album || { id: 0, title: "Unknown Album", cover_image_url: null },
                                                         };
-                                                        
+
                                                         setTrackList([trackToPlay]);
                                                         const currentTrackId = currentTrack?.id;
                                                         if (currentTrackId === track.id && isPlaying) {
@@ -2534,7 +2577,7 @@ export function MusicUpload() {
                                                 </Button>
                                             )}
                                         </div>
-                                        
+
                                         <div className="flex-1 min-w-0">
                                             <h4 className="font-semibold truncate">
                                                 {track.title || "Unknown Title"}
@@ -2546,7 +2589,7 @@ export function MusicUpload() {
                                                 {track.album?.title || "Unknown Album"}
                                             </p>
                                         </div>
-                                        
+
                                         <div className="flex items-center gap-4 text-sm text-gray-500">
                                             <span>{formatDuration(track.duration)}</span>
                                             <Badge variant="outline" className="text-xs">
@@ -2556,7 +2599,7 @@ export function MusicUpload() {
                                     </div>
                                 ))}
                             </div>
-                            
+
                             <div className="flex justify-center pt-4">
                                 <Button
                                     variant="outline"
