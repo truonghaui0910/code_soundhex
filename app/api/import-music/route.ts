@@ -211,7 +211,7 @@ async function importSingleTrack(
 
     const trackInsertData = {
         title: trackData.name,
-        description: `Imported from Spotify`,
+        description: null,
         duration: Math.round(trackData.duration),
         file_url: trackData.preview_url || null,
         artist_id: artist.id,
@@ -318,7 +318,7 @@ async function getOrCreateArtist(
         name: artistData.name,
         spotify_id: artistData.spotify_id,
         profile_image_url: artistData.profile_image_url || null,
-        bio: `Artist imported from Spotify`,
+        bio: null,
         user_id: artistData.user_id,
     };
 
