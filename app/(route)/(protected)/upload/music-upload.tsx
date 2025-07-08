@@ -637,63 +637,141 @@ export function MusicUpload() {
         setIsLoading(true);
 
         try {
+            console.log("🎵 SUBMIT_SPOTIFY_TRACKS_START:", {
+                spotifyDataType: spotifyData?.type,
+                selectedTracksCount: selectedTracks.size,
+                selectedTrackIds: Array.from(selectedTracks)
+            });
+
             // Get selected track data
             const selectedTrackData: SpotifyTrack[] = [];
 
             if (spotifyData.type === "track") {
+                console.log("📀 PROCESSING_SINGLE_TRACK:", spotifyData.data);
                 selectedTrackData.push(spotifyData.data);
             } else if (
                 spotifyData.type === "album" ||
                 spotifyData.type === "playlist"
             ) {
+                console.log("💿 PROCESSING_ALBUM_OR_PLAYLIST:", {
+                    type: spotifyData.type,
+                    totalTracks: spotifyData.data.tracks?.length || 0,
+                    albumData: spotifyData.data
+                });
+                
                 spotifyData.data.tracks.forEach((track: SpotifyTrack) => {
                     if (selectedTracks.has(track.id)) {
+                        console.log("✅ ADDING_TRACK_FROM_ALBUM/PLAYLIST:", {
+                            trackId: track.id,
+                            trackName: track.name,
+                            artist: track.artist,
+                            album: track.album,
+                            artist_id: track.artist_id,
+                            album_id: track.album_id
+                        });
                         selectedTrackData.push(track);
                     }
                 });
             } else if (spotifyData.type === "artist") {
+                console.log("🎤 PROCESSING_ARTIST:", {
+                    artistName: spotifyData.data.name,
+                    albumsCount: spotifyData.data.albums?.length || 0,
+                    artistData: spotifyData.data
+                });
+                
                 spotifyData.data.albums.forEach((album: SpotifyAlbum) => {
+                    console.log("💿 PROCESSING_ALBUM_FROM_ARTIST:", {
+                        albumId: album.id,
+                        albumName: album.name,
+                        tracksCount: album.tracks?.length || 0,
+                        albumData: album
+                    });
+                    
                     album.tracks?.forEach((track: SpotifyTrack) => {
                         if (selectedTracks.has(track.id)) {
+                            console.log("✅ ADDING_TRACK_FROM_ARTIST_ALBUM:", {
+                                trackId: track.id,
+                                trackName: track.name,
+                                artist: track.artist,
+                                album: track.album,
+                                artist_id: track.artist_id,
+                                album_id: track.album_id,
+                                albumFromArtist: album
+                            });
                             selectedTrackData.push(track);
                         }
                     });
                 });
             }
-            const tracksToImport = selectedTrackData.map((track) => ({
-                id: track.id,
-                name: track.name,
-                artist: track.artist,
-                album: track.album,
-                duration: track.duration,
-                image: track.image,
-                isrc: track.isrc,
-                preview_url: track.preview_url,
-                artists: track.artists || [
-                    {
-                        // Use real Spotify artist ID if available, otherwise use generated ID
-                        id: track.artist_id && !track.artist_id.startsWith('artist_') 
-                            ? track.artist_id 
-                            : (spotifyData.type === "album" || spotifyData.type === "playlist") 
-                                ? spotifyData.data.artist_id || `artist_${track.id}`
-                                : `artist_${track.id}`,
-                        name: track.artist,
-                        // Pass artist genres for artist imports
-                        genres: spotifyData.type === "artist" ? spotifyData.data.genres : undefined,
+
+            console.log("🎯 SELECTED_TRACK_DATA_COLLECTED:", {
+                count: selectedTrackData.length,
+                tracks: selectedTrackData
+            });
+            const tracksToImport = selectedTrackData.map((track) => {
+                console.log("🔄 MAPPING_TRACK:", {
+                    originalTrack: track,
+                    spotifyDataType: spotifyData.type,
+                    spotifyDataArtistId: spotifyData.data.artist_id,
+                    spotifyDataId: spotifyData.data.id
+                });
+
+                const mappedTrack = {
+                    id: track.id,
+                    name: track.name,
+                    artist: track.artist,
+                    album: track.album,
+                    duration: track.duration,
+                    image: track.image,
+                    isrc: track.isrc,
+                    preview_url: track.preview_url,
+                    artists: track.artists || [
+                        {
+                            // Use real Spotify artist ID if available, otherwise use generated ID
+                            id: track.artist_id && !track.artist_id.startsWith('artist_') 
+                                ? track.artist_id 
+                                : (spotifyData.type === "album" || spotifyData.type === "playlist") 
+                                    ? spotifyData.data.artist_id || `artist_${track.id}`
+                                    : `artist_${track.id}`,
+                            name: track.artist,
+                            // Pass artist genres for artist imports
+                            genres: spotifyData.type === "artist" ? spotifyData.data.genres : undefined,
+                        },
+                    ],
+                    album_data: {
+                        // Use real Spotify album ID if available, otherwise use generated ID
+                        id: track.album_id && !track.album_id.startsWith('album_') 
+                            ? track.album_id 
+                            : (spotifyData.type === "album") 
+                                ? spotifyData.data.id 
+                                : track.album_id || `album_${track.id}`,
+                        release_date: track.release_date,
+                        description: null,
                     },
-                ],
-                album_data: {
-                    // Use real Spotify album ID if available, otherwise use generated ID
-                    id: track.album_id && !track.album_id.startsWith('album_') 
-                        ? track.album_id 
-                        : (spotifyData.type === "album") 
-                            ? spotifyData.data.id 
-                            : track.album_id || `album_${track.id}`,
-                    release_date: track.release_date,
-                    description: null,
-                },
-            }));
+                };
+
+                console.log("✅ MAPPED_TRACK_RESULT:", {
+                    trackId: track.id,
+                    trackName: track.name,
+                    artistId: mappedTrack.artists[0].id,
+                    albumId: mappedTrack.album_data.id,
+                    fullMappedTrack: mappedTrack
+                });
+
+                return mappedTrack;
+            });
+
+            console.log("🚀 FINAL_TRACKS_TO_IMPORT:", {
+                count: tracksToImport.length,
+                tracks: tracksToImport
+            });
             // Call import API
+            console.log("📡 CALLING_IMPORT_API:", {
+                endpoint: "/api/import-music",
+                tracksCount: tracksToImport.length,
+                requestBody: { tracks: tracksToImport }
+            });
+
             const response = await fetch("/api/import-music", {
                 method: "POST",
                 headers: {
@@ -702,10 +780,16 @@ export function MusicUpload() {
                 body: JSON.stringify({ tracks: tracksToImport }),
             });
 
+            console.log("📨 API_RESPONSE_STATUS:", {
+                status: response.status,
+                statusText: response.statusText,
+                ok: response.ok
+            });
+
             let result;
             try {
                 result = await response.json();
-                console.log("Raw API response:", result);
+                console.log("📝 RAW_API_RESPONSE:", result);
                 console.log("Response structure:", {
                     hasResults: !!result?.results,
                     resultsKeys: result?.results
