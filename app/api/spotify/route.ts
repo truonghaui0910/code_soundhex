@@ -51,9 +51,6 @@ async function fetchSpotifyData(url: string, userEmail?: string) {
   const startTime = Date.now();
 
   try {
-    // Log request tới automusic.win
-    serverLogger.logInfo("AUTOMUSIC_API_REQUEST", { url }, userEmail);
-
     const response = await fetch(url);
 
     if (!response.ok) {
@@ -61,18 +58,6 @@ async function fetchSpotifyData(url: string, userEmail?: string) {
     }
 
     const data = await response.json();
-
-    // Log response từ automusic.win
-    serverLogger.logInfo(
-      "AUTOMUSIC_API_RESPONSE",
-      {
-        url,
-        status: response.status,
-        duration: Date.now() - startTime,
-        tracksCount: data?.tracks?.items?.length || data?.items?.length || 0,
-      },
-      userEmail,
-    );
 
     return data;
   } catch (error) {
