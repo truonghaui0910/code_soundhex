@@ -745,7 +745,9 @@ export function MusicUpload() {
                             : (spotifyData.type === "album") 
                                 ? spotifyData.data.id 
                                 : track.album_id || `album_${track.id}`,
-                        release_date: track.release_date,
+                        release_date: track.release_date || 
+                                     (spotifyData.type === "album" ? spotifyData.data.release_date : null) ||
+                                     (spotifyData.type === "playlist" ? null : null),
                         description: null,
                     },
                 };
