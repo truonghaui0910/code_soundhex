@@ -994,6 +994,7 @@ export function MusicUpload() {
             {/* Header */}
             <div className="relative overflow-hidden bg-gradient-to-r from-slate-800 via-purple-900 to-slate-900 text-white">
                 <div className="absolute inset-0 bg-black/10"></div>
+                ```
                 <div className="relative container mx-auto px-6 py-16">
                     <div className="text-center max-w-4xl mx-auto">
                         <div className="w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -1385,7 +1386,7 @@ export function MusicUpload() {
                                                                         >
                                                                             {currentTrack?.id ===
                                                                                 stringToHash(
-                                                                                    `spotify-${spotifyData.data.id}`,
+                                                                                    `spotify-${track.id}`,
                                                                                 ) &&
                                                                             isPlaying ? (
                                                                                 <Pause className="h-2 w-2" />
@@ -1680,7 +1681,7 @@ export function MusicUpload() {
                                                                                                 >
                                                                                                     {currentTrack?.id ===
                                                                                                         stringToHash(
-                                                                                                            `spotify-${spotifyData.data.id}`,
+                                                                                                            `spotify-${track.id}`,
                                                                                                         ) &&
                                                                                                     isPlaying ? (
                                                                                                         <Pause className="h-2 w-2" />
@@ -1918,8 +1919,8 @@ export function MusicUpload() {
                                     }
                                 >
                                     <div className="text-center space-y-4">
-                                        <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items```python
--center justify-center mx-auto">
+                                        <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500```
+ rounded-full flex items-center justify-center mx-auto">
                                             <Upload className="h-8 w-8 text-white" />
                                         </div>
                                         <div>
@@ -2797,7 +2798,7 @@ async function fetchPlaylistTracks(playlistId: string): Promise<any[]> {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ playlistId }),
-});
+        });
 
         if (!response.ok) {
             throw new Error("Failed to fetch playlist tracks");
