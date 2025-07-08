@@ -1963,7 +1963,7 @@ export function MusicUpload() {
                                             )}
                                         </div>
 
-                                        {uploadFiles.map(fileData, index) => (
+                                        {uploadFiles.map((fileData, index) => (
                                             <div
                                                 key={index}
                                                 className="border rounded-lg p-6 bg-gray-50 dark:bg-gray-800/50"
