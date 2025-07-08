@@ -51,9 +51,6 @@ async function fetchSpotifyData(url: string, userEmail?: string) {
   const startTime = Date.now();
 
   try {
-    // Log request tới automusic.win
-    serverLogger.logInfo("AUTOMUSIC_API_REQUEST", { url }, userEmail);
-
     const response = await fetch(url);
 
     if (!response.ok) {
@@ -61,18 +58,6 @@ async function fetchSpotifyData(url: string, userEmail?: string) {
     }
 
     const data = await response.json();
-
-    // Log response từ automusic.win
-    serverLogger.logInfo(
-      "AUTOMUSIC_API_RESPONSE",
-      {
-        url,
-        status: response.status,
-        duration: Date.now() - startTime,
-        tracksCount: data?.tracks?.items?.length || data?.items?.length || 0,
-      },
-      userEmail,
-    );
 
     return data;
   } catch (error) {
@@ -189,11 +174,6 @@ export async function POST(request: NextRequest) {
             album_id: albumInfoData.id,
             artists: track.artists || albumInfoData.artists || [],
             release_date: albumInfoData.release_date,
-            album_data: {
-              id: albumInfoData.id,
-              release_date: albumInfoData.release_date,
-              description: null,
-            },
           })) || [];
 
         data = {
@@ -202,6 +182,7 @@ export async function POST(request: NextRequest) {
             id: albumInfoData.id || spotifyId,
             name: albumInfoData.name || "Unknown Album",
             artist: albumInfoData.artists?.[0]?.name || "Unknown Artist",
+            artist_id: albumInfoData.artists?.[0]?.id, // Add artist Spotify ID
             image: albumInfoData.images?.[0]?.url || "",
             release_date: albumInfoData.release_date || "",
             tracks: mappedTracks,
