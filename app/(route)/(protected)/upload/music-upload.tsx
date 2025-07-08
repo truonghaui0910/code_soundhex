@@ -213,47 +213,7 @@ export function MusicUpload() {
     ) => {
         const files = event.target.files;
         if (files && files.length > 0) {
-            const validFiles: File[] = [];
-            const invalidFiles: string[] = [];
-
-            Array.from(files).forEach((file) => {
-                // Validate file type
-                if (file.type.startsWith("audio/")) {
-                    validFiles.push(file);
-                } else {
-                    invalidFiles.push(file.name);
-                }
-            });
-
-            // Show error for invalid files
-            if (invalidFiles.length > 0) {
-                showError(
-                    `Invalid file types: ${invalidFiles.join(", ")}. Please select audio files only.`,
-                );
-            }
-
-            // Add valid files
-            if (validFiles.length > 0) {
-                const newUploadFiles: FileUploadData[] = validFiles.map(
-                    (file) => ({
-                        title: file.name.replace(/\.[^/.]+$/, ""), // Remove file extension
-                        genre: "",
-                        album: "",
-                        artist: "",
-                        description: "",
-                        file: file,
-                        isNewAlbum: false,
-                        isNewArtist: false,
-                    }),
-                );
-                setUploadFiles((prev) => [...prev, ...newUploadFiles]);
-
-                if (validFiles.length > 0) {
-                    showInfo(
-                        `Added ${validFiles.length} audio file${validFiles.length > 1 ? "s" : ""} for upload`,
-                    );
-                }
-            }
+            alert("Upload functionality will be implemented soon!");
         }
     };
 
@@ -658,7 +618,7 @@ export function MusicUpload() {
                     totalTracks: spotifyData.data.tracks?.length || 0,
                     albumData: spotifyData.data
                 });
-                
+
                 spotifyData.data.tracks.forEach((track: SpotifyTrack) => {
                     if (selectedTracks.has(track.id)) {
                         console.log("✅ ADDING_TRACK_FROM_ALBUM/PLAYLIST:", {
@@ -678,7 +638,7 @@ export function MusicUpload() {
                     albumsCount: spotifyData.data.albums?.length || 0,
                     artistData: spotifyData.data
                 });
-                
+
                 spotifyData.data.albums.forEach((album: SpotifyAlbum) => {
                     console.log("💿 PROCESSING_ALBUM_FROM_ARTIST:", {
                         albumId: album.id,
@@ -686,7 +646,7 @@ export function MusicUpload() {
                         tracksCount: album.tracks?.length || 0,
                         albumData: album
                     });
-                    
+
                     album.tracks?.forEach((track: SpotifyTrack) => {
                         if (selectedTracks.has(track.id)) {
                             console.log("✅ ADDING_TRACK_FROM_ARTIST_ALBUM:", {
@@ -1958,7 +1918,7 @@ export function MusicUpload() {
                                             )}
                                         </div>
 
-                                        {uploadFiles.map((fileData, index) => (
+                                        {uploadFiles.map(fileData, index) => (
                                             <div
                                                 key={index}
                                                 className="border rounded-lg p-6 bg-gray-50 dark:bg-gray-800/50"
