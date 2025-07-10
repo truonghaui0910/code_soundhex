@@ -1,16 +1,28 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MusicPlayer } from "@/components/music/MusicPlayer";
-import { Play, Pause, Clock, Music, Heart, Share, Download, Plus } from "lucide-react";
+import {
+  Play,
+  Clock,
+  Music,
+  Heart,
+  Share,
+  Users,
+  Album,
+  Pause,
+  Download,
+  Plus,
+} from "lucide-react";
 import Link from "next/link";
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 import { Track } from "@/lib/definitions/Track";
 import { useDownload } from "@/hooks/use-download";
-import { useContext } from "react";
+import AddToPlaylist from "@/components/playlist/add-to-playlist";
 
 // Helper function to format time
 const formatDuration = (seconds: number | null) => {
@@ -20,24 +32,62 @@ const formatDuration = (seconds: number | null) => {
   return `${mins}:${secs.toString().padStart(2, "0")}`;
 };
 
-interface AlbumDetailClientProps {
-  album: any;
-  tracks: Track[];
+interface Artist {
+  id: number;
+  name: string;
+  profile_image_url: string | null;
+  bio: string | null;
+  created_at: string;
 }
 
-export function AlbumDetailClient({ album, tracks }: AlbumDetailClientProps) {
-  const { currentTrack, isPlaying, playTrack, setTrackList, togglePlayPause } = useAudioPlayer();
+interface Album {
+  id: number;
+  title: string;
+  cover_image_url: string | null;
+  artist: {
+    id: number;
+    name: string;
+  };
+  release_date: string | null;
+}
+
+interface ArtistDetailClientProps {
+  artist: Artist;
+  tracks: Track[];
+  albums: Album[];
+}
+
+export function ArtistDetailClient({ artist, tracks, albums }: ArtistDetailClientProps) {
+  const {
+    currentTrack,
+    isPlaying,
+    playTrack,
+    setTrackList,
+    togglePlayPause,
+  } = useAudioPlayer();
   const { downloadTrack, downloadMultipleTracks, isDownloading, isTrackDownloading } = useDownload();
 
-  const handlePlayAlbum = () => {
+  const handlePlayAllTracks = () => {
     if (tracks && tracks.length > 0) {
-      // Always update trackList when playing a new album
       setTrackList(tracks);
-      // Small delay to ensure trackList is updated before playing
       setTimeout(() => {
-        playTrack(tracks[0]); // Play the first track
+        playTrack(tracks[0]);
       }, 50);
     }
+  };
+
+  const handlePlayTrack = (track: Track) => {
+    // If this track is currently playing, just toggle play/pause
+    if (currentTrack?.id === track.id && isPlaying) {
+      togglePlayPause();
+      return;
+    }
+
+    // Otherwise, set the track list and play the new track
+    setTrackList(tracks);
+    setTimeout(() => {
+      playTrack(track);
+    }, 50);
   };
 
   return (
@@ -47,54 +97,53 @@ export function AlbumDetailClient({ album, tracks }: AlbumDetailClientProps) {
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="relative container mx-auto px-6 py-16">
           <div className="flex flex-col md:flex-row gap-8 items-center md:items-end">
-            <div className="w-48 h-48 md:w-64 md:h-64 rounded-xl overflow-hidden bg-white/10 backdrop-blur-sm flex items-center justify-center shadow-2xl">
-              {album.cover_image_url ? (
+            <div className="w-48 h-48 md:w-64 md:h-64 rounded-full overflow-hidden bg-white/10 backdrop-blur-sm flex items-center justify-center shadow-2xl">
+              {artist.profile_image_url ? (
                 <Image
-                  src={album.cover_image_url}
-                  alt={album.title}
+                  src={artist.profile_image_url}
+                  alt={artist.name}
                   width={256}
                   height={256}
                   className="object-cover w-full h-full"
                 />
               ) : (
-                <Music className="h-20 w-20 text-white/60" />
+                <Users className="h-20 w-20 text-white/60" />
               )}
             </div>
             <div className="flex-1 flex flex-col gap-4 text-center md:text-left">
               <Badge className="bg-white/20 text-white border-white/30 w-fit mx-auto md:mx-0">
-                Album
+                Artist
               </Badge>
               <h1 className="text-4xl md:text-6xl font-bold leading-tight">
-                {album.title}
+                {artist.name}
               </h1>
+              {artist.bio && (
+                <p className="text-lg text-purple-100 max-w-2xl">
+                  {artist.bio}
+                </p>
+              )}
               <div className="flex items-center gap-3 text-lg text-purple-100 justify-center md:justify-start">
-                <Link
-                  href={`/artist/${album.artist?.id}`}
-                  className="font-medium hover:underline"
-                >
-                  {album.artist?.name || "Unknown Artist"}
-                </Link>
-                {album.release_date && (
+                {albums && albums.length > 0 && (
                   <>
+                    <span>
+                      {albums.length} album{albums.length > 1 ? "s" : ""}
+                    </span>
                     <span>•</span>
-                    <span>{new Date(album.release_date).getFullYear()}</span>
                   </>
                 )}
                 {tracks && tracks.length > 0 && (
-                  <>
-                    <span>•</span>
-                    <span>{tracks.length} songs</span>
-                  </>
+                  <span>{tracks.length} songs</span>
                 )}
               </div>
               <div className="flex gap-4 justify-center md:justify-start mt-4">
                 <Button
                   size="lg"
                   className="bg-white text-purple-600 hover:bg-white/90"
-                  onClick={handlePlayAlbum}
+                  onClick={handlePlayAllTracks}
+                  disabled={!tracks || tracks.length === 0}
                 >
                   <Play className="mr-2 h-5 w-5" />
-                  Play Album
+                  Play All
                 </Button>
                 <Button
                   size="lg"
@@ -102,7 +151,7 @@ export function AlbumDetailClient({ album, tracks }: AlbumDetailClientProps) {
                   className="border-white/30 text-white hover:bg-white/10"
                 >
                   <Heart className="mr-2 h-5 w-5" />
-                  Save
+                  Follow
                 </Button>
                 <Button
                   size="lg"
@@ -118,33 +167,96 @@ export function AlbumDetailClient({ album, tracks }: AlbumDetailClientProps) {
         </div>
       </div>
 
-      {/* Tracks Section */}
-      <div className="container mx-auto px-6 py-12">
-        <Card className="border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm shadow-xl">
-          <CardContent className="p-0">
-            <div className="p-6 border-b border-gray-200/50 dark:border-gray-700/50">
-              <h2 className="text-xl font-bold flex items-center gap-3">
+      <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-12">
+        {/* Albums Section */}
+        {albums && albums.length > 0 && (
+          <Card className="border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm shadow-xl">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-3 mb-6">
                 <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                  <Music className="h-4 w-4 text-white" />
+                  <Album className="h-4 w-4 text-white" />
                 </div>
-                Track List
-              </h2>
-            </div>
+                <h2 className="text-xl font-bold">Albums</h2>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                {albums.map((album) => (
+                  <Link key={album.id} href={`/album/${album.id}`}>
+                    <Card className="group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border-0 bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm">
+                      <CardContent className="p-0">
+                        <div className="aspect-square w-full overflow-hidden">
+                          {album.cover_image_url ? (
+                            <Image
+                              src={album.cover_image_url}
+                              alt={album.title}
+                              width={200}
+                              height={200}
+                              className="object-cover w-full h-full group-hover:scale-105 transition-transform"
+                            />
+                          ) : (
+                            <div className="bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center w-full h-full">
+                              <Music className="h-12 w-12 text-white" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="p-3">
+                          <div className="font-semibold truncate text-gray-900 dark:text-white group-hover:underline">
+                            {album.title}
+                          </div>
+                          {album.release_date && (
+                            <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                              {new Date(album.release_date).getFullYear()}
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-            {tracks && tracks.length > 0 ? (
+        {/* Popular Tracks Section */}
+        {tracks && tracks.length > 0 && (
+          <Card className="border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm shadow-xl">
+            <CardContent className="p-0">
+              <div className="p-6 border-b border-gray-200/50 dark:border-gray-700/50">
+                <h2 className="text-xl font-bold flex items-center gap-3">
+                  <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                    <Music className="h-4 w-4 text-white" />
+                  </div>
+                  Popular Tracks
+                </h2>
+              </div>
+
               <div className="space-y-1">
-                {tracks.map((track, idx) => (
+                {tracks.slice(0, 10).map((track, idx) => (
                   <div
                     key={track.id}
                     className="group flex items-center gap-4 p-4 hover:bg-white/50 dark:hover:bg-gray-700/30 transition-colors cursor-pointer border-b border-gray-100/50 dark:border-gray-700/30 last:border-b-0"
+                    onClick={() => handlePlayTrack(track)}
                   >
                     <div className="w-8 text-center text-sm text-gray-500 dark:text-gray-400 group-hover:hidden">
                       {currentTrack?.id === track.id && isPlaying ? (
                         <div className="flex items-center justify-center">
                           <div className="flex items-end space-x-0.5 h-4">
-                            <div className="w-0.5 bg-rose-600 animate-equalize-1" style={{ height: '30%' }}></div>
-                            <div className="w-0.5 bg-rose-600 animate-equalize-2" style={{ height: '100%' }}></div>
-                            <div className="w-0.5 bg-rose-600 animate-equalize-3" style={{ height: '60%' }}></div>
+                            <div
+                              className="w-0.5 bg-rose-600 animate-equalize-1"
+                              style={{ height: "30%" }}
+                            ></div>
+                            <div
+                              className="w-0.5 bg-rose-600 animate-equalize-2"
+                              style={{ height: "100%" }}
+                            ></div>
+                            <div
+                              className="w-0.5 bg-rose-600 animate-equalize-3"
+                              style={{ height: "60%" }}
+                            ></div>
+                            <div
+                              className="w-0.5 bg-rose-600 animate-equalize-1"
+                              style={{ height: "40%" }}
+                            ></div>
                           </div>
                         </div>
                       ) : (
@@ -155,18 +267,9 @@ export function AlbumDetailClient({ album, tracks }: AlbumDetailClientProps) {
                       size="sm"
                       variant="ghost"
                       className="w-8 h-8 p-0 hidden group-hover:flex rounded-full"
-                      onClick={() => {
-                        // If this track is currently playing, just toggle play/pause
-                        if (currentTrack?.id === track.id && isPlaying) {
-                          togglePlayPause();
-                          return;
-                        }
-                        
-                        // Otherwise, set track list and play the new track
-                        setTrackList(tracks);
-                        setTimeout(() => {
-                          playTrack(track);
-                        }, 50);
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handlePlayTrack(track);
                       }}
                     >
                       {currentTrack?.id === track.id && isPlaying ? (
@@ -191,11 +294,11 @@ export function AlbumDetailClient({ album, tracks }: AlbumDetailClientProps) {
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <div className="font-semibold text-gray-900 dark:text-white truncate hover:underline cursor-pointer">
+                      <div className="font-semibold text-gray-900 dark:text-white truncate">
                         {track.title}
                       </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400 truncate hover:underline cursor-pointer">
-                        {track.artist?.name}
+                      <div className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                        {track.album?.title}
                       </div>
                     </div>
 
@@ -217,9 +320,11 @@ export function AlbumDetailClient({ album, tracks }: AlbumDetailClientProps) {
                     </div>
 
                     <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button size="sm" variant="ghost" className="p-2" title="Add to playlist">
-                        <Plus className="h-4 w-4" />
-                      </Button>
+                      <AddToPlaylist trackId={track.id} trackTitle={track.title}>
+                        <button className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" title="Add to playlist">
+                          <Plus className="h-4 w-4" />
+                        </button>
+                      </AddToPlaylist>
                       <Button 
                         size="sm" 
                         variant="ghost" 
@@ -251,19 +356,9 @@ export function AlbumDetailClient({ album, tracks }: AlbumDetailClientProps) {
                   </div>
                 ))}
               </div>
-            ) : (
-              <div className="py-16 text-center">
-                <Music className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                  No Songs
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  This album currently has no songs.
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Music Player */}

@@ -51,9 +51,6 @@ async function fetchSpotifyData(url: string, userEmail?: string) {
   const startTime = Date.now();
 
   try {
-    // Log request tới automusic.win
-    serverLogger.logInfo("AUTOMUSIC_API_REQUEST", { url }, userEmail);
-
     const response = await fetch(url);
 
     if (!response.ok) {
@@ -61,18 +58,6 @@ async function fetchSpotifyData(url: string, userEmail?: string) {
     }
 
     const data = await response.json();
-
-    // Log response từ automusic.win
-    serverLogger.logInfo(
-      "AUTOMUSIC_API_RESPONSE",
-      {
-        url,
-        status: response.status,
-        duration: Date.now() - startTime,
-        tracksCount: data?.tracks?.items?.length || data?.items?.length || 0,
-      },
-      userEmail,
-    );
 
     return data;
   } catch (error) {
@@ -151,11 +136,13 @@ export async function POST(request: NextRequest) {
             id: artistData.id,
             name: artistData.name,
             image: artistData.images?.[0]?.url || "",
+            genres: artistData.genres || [], // Add genres from artist data
             albums:
               albumsData.items?.map((album: SpotifyAlbum) => ({
                 id: album.id,
                 name: album.name,
                 artist: album.artists?.[0]?.name || artistData.name,
+                artist_id: album.artists?.[0]?.id || artistData.id, // Add artist Spotify ID
                 image: album.images?.[0]?.url || "",
                 release_date: album.release_date,
                 tracks: [], // Will be populated when album is expanded
@@ -195,6 +182,7 @@ export async function POST(request: NextRequest) {
             id: albumInfoData.id || spotifyId,
             name: albumInfoData.name || "Unknown Album",
             artist: albumInfoData.artists?.[0]?.name || "Unknown Artist",
+            artist_id: albumInfoData.artists?.[0]?.id, // Add artist Spotify ID
             image: albumInfoData.images?.[0]?.url || "",
             release_date: albumInfoData.release_date || "",
             tracks: mappedTracks,

@@ -48,9 +48,9 @@ import {
 // Types for API response
 interface Submitter {
   id: number;
-  slug: string;
-  uuid: string;
-  name: string | null;
+  slug?: string;
+  uuid?: string;
+  name?: string | null;
   email: string;
   status: string;
   completed_at: string | null;
@@ -59,13 +59,16 @@ interface Submitter {
 
 interface Agreement {
   id: number;
-  slug: string;
+  slug?: string;
   created_at: string;
   updated_at: string;
   status: string;
   completed_at: string | null;
   audit_log_url: string | null;
   combined_document_url: string | null;
+  user_has_completed: boolean;
+  display_email?: string;
+  is_admin_view?: boolean;
   submitters: Submitter[];
   template: {
     id: number;
@@ -143,31 +146,49 @@ export default function AgreementsList() {
   };
 
   // Get status badge color and icon
-  const getStatusInfo = (status: string) => {
+  const getStatusInfo = (status: string, submitter?: Submitter, agreement?: Agreement) => {
     switch (status.toLowerCase()) {
       case "completed":
         return {
           color:
             "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-700",
           icon: CheckCircle,
+          displayText: "Completed"
+        };
+      case "waiting_for_other_party":
+        return {
+          color:
+            "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-700",
+          icon: Clock,
+          displayText: "Waiting for SoundHex"
+        };
+      case "waiting_for_soundhex":
+        return {
+          color:
+            "bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-900/30 dark:text-orange-400 dark:border-orange-700",
+          icon: Clock,
+          displayText: "Artist Submitted - Waiting for SoundHex"
         };
       case "pending":
         return {
           color:
             "bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-700",
           icon: Clock,
+          displayText: "Pending"
         };
       case "declined":
         return {
           color:
             "bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-700",
           icon: XCircle,
+          displayText: "Declined"
         };
       default:
         return {
           color:
-            "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600",
+            "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-800 dark:text-gray-600",
           icon: Clock,
+          displayText: status
         };
     }
   };
@@ -192,17 +213,15 @@ export default function AgreementsList() {
       }
       const data = await response.json();
 
-      // Get document URL from documents array
+      // Get document URL from documents.url
       if (
         data &&
         data.documents &&
+        Array.isArray(data.documents) &&
         data.documents.length > 0 &&
         data.documents[0].url
       ) {
         window.open(data.documents[0].url, "_blank");
-      } else if (data && data.audit_log_url) {
-        // Fallback to audit_log_url if documents array doesn't have URL
-        window.open(data.audit_log_url, "_blank");
       } else {
         showError("Document not available");
       }
@@ -322,7 +341,9 @@ export default function AgreementsList() {
                     <p className="text-3xl font-bold text-yellow-600">
                       {
                         agreements.filter(
-                          (a) => a.status.toLowerCase() === "pending",
+                          (a) => a.status.toLowerCase() === "pending" || 
+                                a.status.toLowerCase() === "waiting_for_other_party" ||
+                                a.status.toLowerCase() === "waiting_for_soundhex",
                         ).length
                       }
                     </p>
@@ -390,7 +411,7 @@ export default function AgreementsList() {
                     </TableHeader>
                     <TableBody>
                       {agreements.map((agreement) => {
-                        const statusInfo = getStatusInfo(agreement.status);
+                        const statusInfo = getStatusInfo(agreement.status, undefined, agreement);
                         const StatusIcon = statusInfo.icon;
                         return (
                           <TableRow
@@ -401,12 +422,12 @@ export default function AgreementsList() {
                               {agreement.id}
                             </TableCell>
                             <TableCell>
-                              {agreement.submitters[0]?.email || "N/A"}
+                              {agreement.display_email || agreement.submitters[0]?.email || "N/A"}
                             </TableCell>
                             <TableCell>
                               <Badge className={statusInfo.color}>
                                 <StatusIcon className="mr-1 h-3 w-3" />
-                                {agreement.status}
+                                {statusInfo.displayText}
                               </Badge>
                             </TableCell>
                             <TableCell>
@@ -417,18 +438,39 @@ export default function AgreementsList() {
                             </TableCell>
                             <TableCell className="text-right">
                               <div className="flex justify-end space-x-2">
-                                {agreement.status.toLowerCase() ===
-                                  "pending" && (
+                                {/* Admin: Show Sign button only for waiting_for_soundhex status */}
+                                {agreement.is_admin_view && 
+                                  agreement.status.toLowerCase() === "waiting_for_soundhex" && (
                                   <Button
                                     variant="outline"
                                     size="sm"
                                     onClick={() => {
-                                      const submitterSlug =
-                                        agreement.submitters[0]?.slug;
-                                      if (submitterSlug) {
-                                        goToSignPage(submitterSlug);
+                                      const currentUserSubmitter = agreement.submitters.find(s => s.slug);
+                                      if (currentUserSubmitter?.slug) {
+                                        goToSignPage(currentUserSubmitter.slug);
                                       } else {
-                                        showError("submiter is not found");
+                                        showError("submitter is not found");
+                                      }
+                                    }}
+                                  >
+                                    <Edit className="mr-1 h-3 w-3" />
+                                    Sign
+                                  </Button>
+                                )}
+                                
+                                {/* Non-admin: Show Sign button with existing logic */}
+                                {!agreement.is_admin_view && 
+                                  !agreement.user_has_completed && 
+                                  agreement.status.toLowerCase() === "pending" && (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                      const currentUserSubmitter = agreement.submitters.find(s => s.slug);
+                                      if (currentUserSubmitter?.slug) {
+                                        goToSignPage(currentUserSubmitter.slug);
+                                      } else {
+                                        showError("submitter is not found");
                                       }
                                     }}
                                   >
@@ -507,9 +549,9 @@ export default function AgreementsList() {
                       Status
                     </h3>
                     <Badge
-                      className={getStatusInfo(selectedAgreement.status).color}
+                      className={getStatusInfo(selectedAgreement.status, undefined, selectedAgreement).color}
                     >
-                      {selectedAgreement.status}
+                      {getStatusInfo(selectedAgreement.status, undefined, selectedAgreement).displayText}
                     </Badge>
                   </div>
                 </div>
@@ -531,8 +573,8 @@ export default function AgreementsList() {
                   </h3>
                   <div className="space-y-3">
                     {selectedAgreement.submitters.map((submitter) => {
-                      const statusInfo = getStatusInfo(submitter.status);
-                      const StatusIcon = statusInfo.icon;
+                      const submitterStatusInfo = getStatusInfo(submitter.status, submitter, selectedAgreement);
+                      const StatusIcon = submitterStatusInfo.icon;
                       return (
                         <div
                           key={submitter.id}
@@ -542,9 +584,9 @@ export default function AgreementsList() {
                             <span className="font-medium">
                               {submitter.email}
                             </span>
-                            <Badge className={statusInfo.color}>
+                            <Badge className={submitterStatusInfo.color}>
                               <StatusIcon className="mr-1 h-3 w-3" />
-                              {submitter.status}
+                              {submitterStatusInfo.displayText}
                             </Badge>
                           </div>
                           <div className="text-sm text-gray-500 dark:text-gray-400 space-y-1">
@@ -555,7 +597,23 @@ export default function AgreementsList() {
                               </div>
                             )}
                           </div>
-                          {submitter.status.toLowerCase() === "pending" && (
+                          {/* Admin: Show Sign button only for waiting_for_soundhex status */}
+                          {selectedAgreement.is_admin_view && 
+                            selectedAgreement.status.toLowerCase() === "waiting_for_soundhex" &&
+                            submitter.status.toLowerCase() === "pending" && (
+                            <Button
+                              size="sm"
+                              className="mt-3"
+                              onClick={() => goToSignPage(submitter.slug)}
+                            >
+                              <Edit className="mr-1 h-3 w-3" />
+                              Sign Now
+                            </Button>
+                          )}
+                          
+                          {/* Non-admin: Show Sign button with existing logic */}
+                          {!selectedAgreement.is_admin_view && 
+                            submitter.status.toLowerCase() === "pending" && (
                             <Button
                               size="sm"
                               className="mt-3"

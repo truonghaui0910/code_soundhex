@@ -422,6 +422,15 @@
               transform 0.3s ease, box-shadow 0.3s ease;
 }
 
+/* Prevent layout shift without creating unnecessary space */
+html {
+  overflow-y: auto;
+}
+
+body {
+  overflow-x: hidden;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
@@ -438,4 +447,119 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(135deg, #e91e63, #9c27b0);
+}
+
+@layer components {
+  .animate-equalize-1 {
+    animation: equalize1 1.5s ease-in-out infinite;
+  }
+
+  .animate-equalize-2 {
+    animation: equalize2 1.5s ease-in-out infinite;
+  }
+
+  .animate-equalize-3 {
+    animation: equalize3 1.5s ease-in-out infinite;
+  }
+
+  .animate-loading-bar {
+    animation: loadingBar 2s ease-in-out infinite;
+  }
+
+  /* Fix dropdown menu visibility */
+  [data-radix-popper-content-wrapper] {
+    z-index: 9999 !important;
+  }
+
+  /* Custom dropdown animation - slide from bottom to top */
+  [data-radix-dropdown-menu-content] {
+    position: fixed !important;
+    will-change: transform !important;
+    animation-duration: 200ms !important;
+    animation-timing-function: ease-out !important;
+  }
+
+  [data-radix-dropdown-menu-content][data-state="open"] {
+    animation-name: slideInFromBottom !important;
+  }
+
+  [data-radix-dropdown-menu-content][data-state="closed"] {
+    animation-name: slideOutToBottom !important;
+  }
+
+  @keyframes slideInFromBottom {
+    from {
+      opacity: 0;
+      transform: translateY(10px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes slideOutToBottom {
+    from {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(10px) scale(0.95);
+    }
+  }
+
+  /* Remove all white borders and flashing effects from dropdown menu items */
+  [data-radix-dropdown-menu-item] {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+
+  [data-radix-dropdown-menu-item]:hover {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    background: rgba(0, 0, 0, 0.05) !important;
+    transition: background-color 0.2s ease !important;
+  }
+
+  [data-radix-dropdown-menu-item]:focus {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    background: rgba(0, 0, 0, 0.05) !important;
+  }
+
+  [data-radix-dropdown-menu-item]:focus-visible {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Dark mode dropdown items */
+  .dark [data-radix-dropdown-menu-item]:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+  }
+
+  .dark [data-radix-dropdown-menu-item]:focus {
+    background: rgba(255, 255, 255, 0.05) !important;
+  }
+
+  .radix-dropdown-content {
+    z-index: 9999 !important;
+  }
+
+  /* Ensure dropdown portal doesn't affect body layout */
+  [data-radix-popper-content-wrapper] {
+    position: fixed !important;
+    z-index: 9999 !important;
+    contain: layout style !important;
+  }
+
+  /* Prevent any layout changes when dropdown opens */
+  body:has([data-radix-dropdown-menu-content]) {
+    overflow: visible !important;
+  }
 }

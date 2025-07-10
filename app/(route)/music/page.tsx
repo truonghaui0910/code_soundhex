@@ -1,7 +1,5 @@
-
-export const dynamic = 'force-dynamic';
 import { Metadata } from "next";
-import { MusicExplorer } from "./music-explorer";
+import dynamic from 'next/dynamic';
 import { TracksController } from "@/lib/controllers/tracks";
 
 export const metadata: Metadata = {
@@ -9,11 +7,19 @@ export const metadata: Metadata = {
   description: "Discover, stream, and upload music for free",
 };
 
+const MusicExplorer = dynamic(() => import('./music-explorer').then(mod => ({ default: mod.MusicExplorer })), {
+  loading: () => (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="animate-spin w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full"></div>
+    </div>
+  ),
+});
+
 export default async function MusicPage() {
   try {
     // Get data from controller
     const tracks = await TracksController.getAllTracks();
-    
+
     return (
       <div className="min-h-screen">
         <MusicExplorer initialTracks={tracks} />

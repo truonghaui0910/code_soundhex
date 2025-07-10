@@ -46,6 +46,19 @@ export class AudioMetadataService {
   }
 
   /**
+   * Get duration from audio file (alias for getDuration)
+   */
+  static async getAudioDuration(audioFile: File): Promise<number> {
+    try {
+      const audioBuffer = Buffer.from(await audioFile.arrayBuffer());
+      return await this.getDuration(audioBuffer);
+    } catch (error) {
+      console.error('Error getting audio duration:', error);
+      return 0; // Return 0 if unable to get duration
+    }
+  }
+
+  /**
    * Format duration in MM:SS format
    */
   static formatDuration(seconds: number): string {

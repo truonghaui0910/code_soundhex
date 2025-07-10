@@ -13,7 +13,7 @@ export interface Artist {
 
 export class ArtistsController {
   static async getUserArtists(userId: string): Promise<Artist[]> {
-    console.log("🎤 ArtistsController.getUserArtists - Starting fetch for user:", userId);
+    console.log("ArtistsController.getUserArtists - Starting fetch for user:", userId);
     const supabase = createClientComponentClient<Database>();
 
     const { data, error } = await supabase

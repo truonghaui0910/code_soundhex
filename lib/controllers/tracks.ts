@@ -8,9 +8,29 @@ import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
  * Controller để xử lý các tác vụ liên quan đến tracks
  */
 export class TracksController {
-  /**
-   * Lấy danh sách tất cả các bài hát
-   */
+  static async getTracksByIds(ids: number[]): Promise<Track[]> {
+    console.log("TracksController.getTracksByIds - Starting fetch for IDs:", ids);
+    const supabase = createServerComponentClient<Database>({ cookies });
+
+    const { data, error } = await supabase
+      .from("tracks")
+      .select(`
+        id, title, description, duration, file_url, source_type, created_at,
+        artist:artist_id (id, name, profile_image_url),
+        album:album_id (id, title, cover_image_url),
+        genre:genre_id (id, name)
+      `)
+      .in('id', ids)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching tracks by IDs:", error);
+      throw new Error(`Failed to fetch tracks: ${error.message}`);
+    }
+
+    return data as Track[];
+  }
+
   static async getAllTracks(): Promise<Track[]> {
     const supabase = createServerComponentClient<Database>({ cookies });
 
@@ -201,6 +221,31 @@ export class TracksController {
     if (error) {
       console.error(`Error searching tracks for "${query}":`, error);
       throw new Error(`Failed to search tracks: ${error.message}`);
+    }
+
+    return data as unknown as Track[];
+  }
+
+  /**
+   * Lấy danh sách bài hát theo IDs
+   */
+  static async getTracksByIds(trackIds: number[]): Promise<Track[]> {
+    const supabase = createServerComponentClient<Database>({ cookies });
+
+    const { data, error } = await supabase
+      .from("tracks")
+      .select(`
+        id, title, description, duration, file_url, source_type, created_at,
+        artist:artist_id(id, name, profile_image_url),
+        album:album_id(id, title, cover_image_url),
+        genre:genre_id(id, name)
+      `)
+      .in("id", trackIds)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error(`Error fetching tracks by IDs:`, error);
+      throw new Error(`Failed to fetch tracks: ${error.message}`);
     }
 
     return data as unknown as Track[];

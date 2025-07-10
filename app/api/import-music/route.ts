@@ -43,10 +43,6 @@ export async function POST(request: NextRequest) {
         }
 
         const { tracks } = await request.json();
-        console.log("🎵 IMPORT_MUSIC_START:", {
-            userEmail: session.user.email,
-            tracksCount: tracks?.length || 0
-        });
 
         if (!tracks || !Array.isArray(tracks)) {
             console.error("❌ INVALID_TRACKS_DATA:", { tracks });
@@ -64,20 +60,8 @@ export async function POST(request: NextRequest) {
 
         for (const track of tracks) {
             try {
-                console.log("🎯 IMPORTING_TRACK:", {
-                    trackId: track.id,
-                    trackName: track.name,
-                    artist: track.artist,
-                    album: track.album
-                });
-
                 await importSingleTrack(supabase, track, session.user.id);
                 results.success++;
-
-                console.log("✅ TRACK_IMPORTED_SUCCESS:", {
-                    trackName: track.name,
-                    trackId: track.id
-                });
             } catch (error) {
                 console.error(`❌ TRACK_IMPORT_FAILED:`, {
                     trackName: track.name,
@@ -93,13 +77,6 @@ export async function POST(request: NextRequest) {
                 );
             }
         }
-
-        console.log("🎵 IMPORT_MUSIC_COMPLETE:", {
-            userEmail: session.user.email,
-            totalTracks: tracks.length,
-            success: results.success,
-            failed: results.failed
-        });
 
         return NextResponse.json({
             message: `Import completed. ${results.success} tracks imported successfully, ${results.failed} failed.`,
@@ -119,55 +96,70 @@ async function importSingleTrack(
     trackData: ImportTrack,
     userId: string
 ) {
-    console.log("🔍 IMPORT_SINGLE_TRACK_START:", {
-        trackId: trackData.id,
-        trackName: trackData.name,
-        artistData: trackData.artists,
-        albumData: trackData.album_data
-    });
-
     // Extract genre from artist data if available
     const genreNames = trackData.artists?.[0]?.genres || [];
-    console.log("🎭 GENRES_EXTRACTED:", { genreNames });
 
     // 1. Create or get genres
-    const genreIds: number[] = [];
-    for (const genreName of genreNames) {
+    let genreId: number | null = null;
+    if (genreNames.length > 0) {
+        const genreName = genreNames[0];
         if (genreName) {
             let genre = await getOrCreateGenre(supabase, genreName);
             if (genre) {
-                genreIds.push(genre.id);
-                console.log("🎭 GENRE_PROCESSED:", { genreName, genreId: genre.id });
+                genreId = genre.id;
             }
         }
     }
 
     // 2. Create or get artist
-    const artistSpotifyId = trackData.artists?.[0]?.id || `generated_artist_${trackData.id}`;
-    console.log("🎤 ARTIST_SPOTIFY_ID:", { artistSpotifyId, artistName: trackData.artist });
+    const artistSpotifyId = trackData.artists?.[0]?.id;
 
-    const artist = await getOrCreateArtist(supabase, {
-        name: trackData.artist,
-        spotify_id: artistSpotifyId,
-        profile_image_url: trackData.image,
-        user_id: userId,
-    });
-    console.log("🎤 ARTIST_PROCESSED:", { artistId: artist.id, artistSpotifyId });
+    let artist;
+    if (artistSpotifyId && !artistSpotifyId.startsWith('artist_')) {
+        // Use real Spotify ID if available and not generated
+        artist = await getOrCreateArtist(supabase, {
+            name: trackData.artist,
+            spotify_id: artistSpotifyId,
+            profile_image_url: trackData.image,
+            user_id: userId,
+        });
+    } else {
+        // Only create generated ID as fallback for single track imports
+        artist = await getOrCreateArtist(supabase, {
+            name: trackData.artist,
+            spotify_id: `generated_artist_${trackData.id}`,
+            profile_image_url: trackData.image,
+            user_id: userId,
+        });
+    }
 
     // 3. Create or get album
-    const albumSpotifyId = trackData.album_data?.id || `generated_album_${trackData.id}`;
-    console.log("💿 ALBUM_SPOTIFY_ID:", { albumSpotifyId, albumName: trackData.album });
+    const albumSpotifyId = trackData.album_data?.id;
 
-    const album = await getOrCreateAlbum(supabase, {
-        title: trackData.album,
-        spotify_id: albumSpotifyId,
-        artist_id: artist.id,
-        cover_image_url: trackData.image,
-        release_date: trackData.album_data?.release_date || null,
-        description: trackData.album_data?.description || null,
-        user_id: userId,
-    });
-    console.log("💿 ALBUM_PROCESSED:", { albumId: album.id, albumSpotifyId });
+    let album;
+    if (albumSpotifyId && !albumSpotifyId.startsWith('album_')) {
+        // Use real Spotify ID if available and not generated
+        album = await getOrCreateAlbum(supabase, {
+            title: trackData.album,
+            spotify_id: albumSpotifyId,
+            artist_id: artist.id,
+            cover_image_url: trackData.image,
+            release_date: trackData.album_data?.release_date || null,
+            description: trackData.album_data?.description || null,
+            user_id: userId,
+        });
+    } else {
+        // Only create generated ID as fallback for single track imports
+        album = await getOrCreateAlbum(supabase, {
+            title: trackData.album,
+            spotify_id: `generated_album_${trackData.id}`,
+            artist_id: artist.id,
+            cover_image_url: trackData.image,
+            release_date: trackData.album_data?.release_date || null,
+            description: trackData.album_data?.description || null,
+            user_id: userId,
+        });
+    }
 
     // 4. Create track
     const { data: existingTrack } = await supabase
@@ -177,18 +169,17 @@ async function importSingleTrack(
         .single();
 
     if (existingTrack) {
-        console.log("⚠️ TRACK_ALREADY_EXISTS:", { trackId: trackData.id, existingTrackId: existingTrack.id });
         throw new Error("Track already exists");
     }
 
     const trackInsertData = {
         title: trackData.name,
-        description: `Imported from Spotify`,
+        description: null,
         duration: Math.round(trackData.duration),
         file_url: trackData.preview_url || null,
         artist_id: artist.id,
         album_id: album.id,
-        genre_id: genreIds.length > 0 ? genreIds[0] : null,
+        genre_id: genreId,
         source_type: "spotify",
         spotify_id: trackData.id,
         preview_url: trackData.preview_url || null,
@@ -196,8 +187,6 @@ async function importSingleTrack(
         isrc: trackData.isrc || null,
         user_id: userId,
     };
-
-    console.log("🎵 TRACK_INSERT_DATA:", trackInsertData);
 
     const { data: newTrack, error: trackError } = await supabase
         .from("tracks")
@@ -209,39 +198,37 @@ async function importSingleTrack(
         console.error("❌ TRACK_INSERT_ERROR:", trackError);
         throw new Error(`Failed to create track: ${trackError.message}`);
     }
-
-    console.log("✅ TRACK_CREATED:", { trackId: newTrack.id, spotifyId: trackData.id });
     return newTrack;
 }
 
-async function getOrCreateGenre(supabase: any, name: string) {
-    console.log("🎭 GET_OR_CREATE_GENRE:", { name });
-
-    // Check if genre exists
-    const { data: existingGenre } = await supabase
+async function getOrCreateGenre(supabase: any, genreName: string) {
+    // First, try to find existing genre
+    const { data: existingGenre, error: findError } = await supabase
         .from("genres")
-        .select("*")
-        .eq("name", name)
+        .select("id, name")
+        .ilike("name", genreName)
         .single();
 
-    if (existingGenre) {
-        console.log("🎭 GENRE_EXISTS:", { genreId: existingGenre.id, name });
-        return existingGenre;
-    }
-
-    // Create new genre
-    const { data: newGenre, error } = await supabase
-        .from("genres")
-        .insert({ name })
-        .select()
-        .single();
-
-    if (error) {
-        console.error("❌ GENRE_CREATE_ERROR:", error);
+    if (findError && findError.code !== "PGRST116") {
+        console.error("Error finding genre:", findError);
         return null;
     }
 
-    console.log("✅ GENRE_CREATED:", { genreId: newGenre.id, name });
+    if (existingGenre) {
+        return existingGenre;
+    }
+
+    // Create new genre if not found
+    const { data: newGenre, error: createError } = await supabase
+        .from("genres")
+        .insert({ name: genreName })
+        .select("id, name")
+        .single();
+
+    if (createError) {
+        console.error("Error creating genre:", createError);
+        return null;
+    }
     return newGenre;
 }
 
@@ -254,11 +241,6 @@ async function getOrCreateArtist(
         user_id: string;
     }
 ) {
-    console.log("🎤 GET_OR_CREATE_ARTIST:", {
-        name: artistData.name,
-        spotify_id: artistData.spotify_id
-    });
-
     // Check if artist exists by spotify_id
     const { data: existingArtist, error: selectError } = await supabase
         .from("artists")
@@ -272,11 +254,6 @@ async function getOrCreateArtist(
     }
 
     if (existingArtist) {
-        console.log("🎤 ARTIST_EXISTS:", { 
-            artistId: existingArtist.id, 
-            name: artistData.name,
-            spotify_id: artistData.spotify_id 
-        });
         return existingArtist;
     }
 
@@ -285,11 +262,9 @@ async function getOrCreateArtist(
         name: artistData.name,
         spotify_id: artistData.spotify_id,
         profile_image_url: artistData.profile_image_url || null,
-        bio: `Artist imported from Spotify`,
+        bio: null,
         user_id: artistData.user_id,
     };
-
-    console.log("🎤 ARTIST_INSERT_DATA:", insertData);
 
     const { data: newArtist, error } = await supabase
         .from("artists")
@@ -301,12 +276,6 @@ async function getOrCreateArtist(
         console.error("❌ ARTIST_INSERT_ERROR:", error);
         throw new Error(`Failed to create artist: ${error.message}`);
     }
-
-    console.log("✅ ARTIST_CREATED:", { 
-        artistId: newArtist.id, 
-        name: artistData.name,
-        spotify_id: artistData.spotify_id 
-    });
     return newArtist;
 }
 
@@ -322,12 +291,6 @@ async function getOrCreateAlbum(
         user_id: string;
     }
 ) {
-    console.log("💿 GET_OR_CREATE_ALBUM:", {
-        title: albumData.title,
-        spotify_id: albumData.spotify_id,
-        artist_id: albumData.artist_id
-    });
-
     // Check if album exists by spotify_id
     const { data: existingAlbum, error: selectError } = await supabase
         .from("albums")
@@ -341,11 +304,6 @@ async function getOrCreateAlbum(
     }
 
     if (existingAlbum) {
-        console.log("💿 ALBUM_EXISTS:", { 
-            albumId: existingAlbum.id, 
-            title: albumData.title,
-            spotify_id: albumData.spotify_id 
-        });
         return existingAlbum;
     }
 
@@ -360,8 +318,6 @@ async function getOrCreateAlbum(
         user_id: albumData.user_id,
     };
 
-    console.log("💿 ALBUM_INSERT_DATA:", insertData);
-
     const { data: newAlbum, error } = await supabase
         .from("albums")
         .insert(insertData)
@@ -372,11 +328,5 @@ async function getOrCreateAlbum(
         console.error("❌ ALBUM_INSERT_ERROR:", error);
         throw new Error(`Failed to create album: ${error.message}`);
     }
-
-    console.log("✅ ALBUM_CREATED:", { 
-        albumId: newAlbum.id, 
-        title: albumData.title,
-        spotify_id: albumData.spotify_id 
-    });
     return newAlbum;
 }

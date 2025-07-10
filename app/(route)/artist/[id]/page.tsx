@@ -1,8 +1,18 @@
 import { notFound } from "next/navigation";
+import dynamic from 'next/dynamic';
 import { ArtistsController } from "@/lib/controllers/artists";
 import { TracksController } from "@/lib/controllers/tracks";
 import { AlbumsController } from "@/lib/controllers/albums";
-import { ArtistDetailClient } from "./artist-detail-client";
+
+export const dynamicConfig = 'force-dynamic';
+
+const ArtistDetailClient = dynamic(() => import('./artist-detail-client').then(mod => ({ default: mod.ArtistDetailClient })), {
+  loading: () => (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="animate-spin w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full"></div>
+    </div>
+  ),
+});
 
 export default async function ArtistDetailPage({
   params,

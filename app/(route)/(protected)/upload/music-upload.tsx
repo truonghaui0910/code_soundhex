@@ -102,6 +102,23 @@ interface FileUploadData {
     artistImage?: File;
 }
 
+interface Track {
+    id: number;
+    title: string;
+    file_url: string;
+    duration: number;
+    audio_file_url: string;
+    artist: {
+        id: number;
+        name: string;
+    };
+    album: {
+        id: number;
+        title: string;
+        cover_image_url: string | null;
+    };
+}
+
 export function MusicUpload() {
     const [activeTab, setActiveTab] = useState<"spotify" | "upload">("spotify");
     const [spotifyUrl, setSpotifyUrl] = useState("");
@@ -121,6 +138,10 @@ export function MusicUpload() {
     const [userArtists, setUserArtists] = useState<UserArtist[]>([]);
     const [genres, setGenres] = useState<{ id: number; name: string }[]>([]);
     const [loadingUserData, setLoadingUserData] = useState(false);
+
+    // Recently uploaded tracks state
+    const [recentlyUploaded, setRecentlyUploaded] = useState<Track[]>([]);
+    const [recentlyImported, setRecentlyImported] = useState<Track[]>([]);
 
     const [fileInputRef] = useState<any>(useRef(null));
     const [albumImageInputRef] = useState<any>(useRef(null));
@@ -210,43 +231,7 @@ export function MusicUpload() {
     ) => {
         const files = event.target.files;
         if (files && files.length > 0) {
-            const validFiles: File[] = [];
-            const invalidFiles: string[] = [];
-            
-            Array.from(files).forEach((file) => {
-                // Validate file type
-                if (file.type.startsWith('audio/')) {
-                    validFiles.push(file);
-                } else {
-                    invalidFiles.push(file.name);
-                }
-            });
-            
-            // Show error for invalid files
-            if (invalidFiles.length > 0) {
-                showError(`🚫 Invalid file types: ${invalidFiles.join(', ')}. Please select audio files only.`);
-            }
-            
-            // Add valid files
-            if (validFiles.length > 0) {
-                const newUploadFiles: FileUploadData[] = validFiles.map(
-                    (file) => ({
-                        title: file.name.replace(/\.[^/.]+$/, ""), // Remove file extension
-                        genre: "",
-                        album: "",
-                        artist: "",
-                        description: "",
-                        file: file,
-                        isNewAlbum: false,
-                        isNewArtist: false,
-                    }),
-                );
-                setUploadFiles((prev) => [...prev, ...newUploadFiles]);
-                
-                if (validFiles.length > 0) {
-                    showInfo(`📁 Added ${validFiles.length} audio file${validFiles.length > 1 ? 's' : ''} for upload`);
-                }
-            }
+            alert("Upload functionality will be implemented soon!");
         }
     };
 
@@ -294,7 +279,7 @@ export function MusicUpload() {
 
     const handleSpotifySubmit = async () => {
         if (!spotifyUrl.trim()) {
-            showError("📝 Please enter a Spotify URL");
+            showError("Please enter a Spotify URL");
             return;
         }
 
@@ -320,20 +305,42 @@ export function MusicUpload() {
             setSpotifyData(data);
 
             // Auto-select all tracks for album, playlist, and single track
-            if (data.type === "album" || data.type === "playlist") {
-                const trackIds = new Set<string>(
-                    data.data.tracks.map((track: SpotifyTrack) =>
-                        String(track.id),
-                    ),
-                );
-                setSelectedTracks(trackIds);
+            if (data.type === "album") {
+                // For albums, we need to fetch detailed track info
+                const tracks = await fetchAlbumTracks(data.data.id);
+                setSpotifyData((prev) => ({
+                    ...prev,
+                    data: {
+                        ...prev.data,
+                        tracks: tracks,
+                    },
+                }));
+
+                // Auto-select all tracks from this album
+                setSelectedTracks((prev) => {
+                    const newSelected = new Set(prev);
+                    tracks.forEach((track: any) => {
+                        newSelected.add(track.id);
+                    });
+                    return newSelected;
+                });
+            } else if (data.type === "playlist") {
+                // For playlists, tracks are already included in the response
+                // Auto-select all tracks from this playlist
+                setSelectedTracks((prev) => {
+                    const newSelected = new Set(prev);
+                    data.data.tracks?.forEach((track: any) => {
+                        newSelected.add(track.id);
+                    });
+                    return newSelected;
+                });
             } else if (data.type === "track") {
                 setSelectedTracks(new Set([String(data.data.id)]));
             }
         } catch (error) {
             console.error("Error:", error);
             showError({
-                title: "❌ Spotify Data Error",
+                title: "Spotify Data Error",
                 message:
                     "Cannot fetch information from Spotify. Please check the URL and try again.",
             });
@@ -387,7 +394,7 @@ export function MusicUpload() {
         } catch (error) {
             console.error("Error loading album tracks:", error);
             showError({
-                title: "❌ Album Tracks Error",
+                title: "Album Tracks Error",
                 message: "Cannot load track list from album. Please try again.",
             });
         } finally {
@@ -410,25 +417,77 @@ export function MusicUpload() {
     };
 
     const toggleAlbumExpansion = async (albumId: string) => {
-        const newExpanded = new Set(expandedAlbums);
-        if (newExpanded.has(albumId)) {
-            newExpanded.delete(albumId);
-        } else {
-            newExpanded.add(albumId);
-            // Load tracks if not already loaded
-            const album = spotifyData?.data?.albums?.find(
-                (a: SpotifyAlbum) => a.id === albumId,
-            );
-            if (album && (!album.tracks || album.tracks.length === 0)) {
-                await loadAlbumTracks(albumId);
-            }
+        if (expandedAlbums.has(albumId)) {
+            setExpandedAlbums((prev) => {
+                const newSet = new Set(prev);
+                newSet.delete(albumId);
+                return newSet;
+            });
+            return;
         }
-        setExpandedAlbums(newExpanded);
+
+        setLoadingAlbums((prev) => new Set(prev).add(albumId));
+
+        try {
+            const response = await fetch("/api/spotify/album-tracks", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ albumId }),
+            });
+
+            if (!response.ok) throw new Error("Failed to fetch album tracks");
+
+            const { tracks } = await response.json();
+
+            // Update the album with tracks in spotifyData
+            setSpotifyData((prev: any) => {
+                if (!prev || prev.type !== "artist") return prev;
+
+                return {
+                    ...prev,
+                    data: {
+                        ...prev.data,
+                        albums: prev.data.albums.map((album: any) =>
+                            album.id === albumId 
+                                ? { 
+                                    ...album, 
+                                    tracks: tracks.map((track: any) => ({
+                                        ...track,
+                                        artist_id: album.artist_id, // Use album's artist ID
+                                        album_id: albumId, // Use album's Spotify ID
+                                    }))
+                                  } 
+                                : album,
+                        ),
+                    },
+                };
+            });
+
+            // Auto-select all tracks from this album
+            setSelectedTracks((prev) => {
+                const newSelected = new Set(prev);
+                tracks.forEach((track: any) => {
+                    newSelected.add(track.id);
+                });
+                return newSelected;
+            });
+
+            setExpandedAlbums((prev) => new Set(prev).add(albumId));
+        } catch (error) {
+            console.error("Error fetching album tracks:", error);
+            showError("Failed to load album tracks");
+        } finally {
+            setLoadingAlbums((prev) => {
+                const newSet = new Set(prev);
+                newSet.delete(albumId);
+                return newSet;
+            });
+        }
     };
 
     const handleUploadSubmit = async () => {
         if (uploadFiles.length === 0) {
-            showError("📝 Please select at least one audio file");
+            showError("Please select at least one audio file");
             return;
         }
 
@@ -437,30 +496,32 @@ export function MusicUpload() {
             const file = uploadFiles[i];
             if (!file.title || !file.genre || !file.album || !file.artist) {
                 showError(
-                    `📝 Please fill all required fields for file ${i + 1}: ${file.file.name}`,
+                    `Please fill all required fields for file ${i + 1}: ${file.file.name}`,
                 );
                 return;
             }
 
             if (file.isNewAlbum && !file.albumImage) {
                 showError(
-                    `📝 Please upload album image for file ${i + 1}: ${file.file.name}`,
+                    `Please upload album image for file ${i + 1}: ${file.file.name}`,
                 );
                 return;
             }
 
             if (file.isNewArtist && !file.artistImage) {
                 showError(
-                    `📝 Please upload artist image for file ${i + 1}: ${file.file.name}`,
+                    `Please upload artist image for file ${i + 1}: ${file.file.name}`,
                 );
                 return;
             }
         }
 
         setIsLoading(true);
-        showProcessing("Uploading your music files...");
+        // showProcessing("Uploading your music files...");
 
         try {
+            const uploadedTracks: any[] = [];
+
             for (const fileData of uploadFiles) {
                 const formData = new FormData();
                 formData.append("audioFile", fileData.file);
@@ -486,19 +547,58 @@ export function MusicUpload() {
                 });
 
                 if (!response.ok) {
-                    throw new Error(`Failed to upload ${fileData.file.name}`);
+                    const errorData = await response.json();
+
+                    // Handle duplicate file error specifically
+                    if (response.status === 409 && errorData.duplicate) {
+                        toast.error("Duplicate File Detected", {
+                            description: `This audio file is already uploaded as "${errorData.duplicate.title}" by ${errorData.duplicate.artist}`,
+                            duration: 8000,
+                        });
+                        return; // Don't continue with upload
+                    }
+
+                    throw new Error(errorData.error || "Upload failed");
+                }
+
+                const result = await response.json();
+                if (result.track) {
+                    uploadedTracks.push(result.track);
                 }
             }
 
             dismissNotifications();
-            showInfo("🎉 All music files uploaded successfully!");
+            showInfo("All music files uploaded successfully!");
+
+            // Load complete track info for recently uploaded tracks
+            if (uploadedTracks.length > 0) {
+                const trackIds = uploadedTracks.map(track => track.id);
+                try {
+                    const tracksResponse = await fetch(`/api/tracks?ids=${trackIds.join(',')}`);
+                    if (tracksResponse.ok) {
+                        const completeTracksData = await tracksResponse.json();
+                        // Append new tracks to existing recently uploaded list
+                        setRecentlyUploaded(prev => [...prev, ...completeTracksData]);
+                    } else {
+                        // Fallback to basic track info if detailed fetch fails
+                        setRecentlyUploaded(prev => [...prev, ...uploadedTracks]);
+                    }
+                } catch (error) {
+                    console.error("Error fetching complete track data:", error);
+                    setRecentlyUploaded(prev => [...prev, ...uploadedTracks]);
+                }
+            }
+
+            // Reload albums and artists lists
+            await loadUserData();
+
             setUploadFiles([]);
             setOwnershipConfirmed(false);
         } catch (error) {
             dismissNotifications();
             console.error("Upload error:", error);
             showError({
-                title: "❌ Upload Failed",
+                title: "Upload Failed",
                 message: `Cannot upload files: ${error instanceof Error ? error.message : "Unknown error"}`,
             });
         } finally {
@@ -508,58 +608,150 @@ export function MusicUpload() {
 
     const submitSpotifyTracks = async () => {
         if (selectedTracks.size === 0) {
-            showError("🎵 Please select at least one song to import");
+            showError("Please select at least one song to import");
             return;
         }
 
         setIsLoading(true);
 
         try {
+            console.log("🎵 SUBMIT_SPOTIFY_TRACKS_START:", {
+                spotifyDataType: spotifyData?.type,
+                selectedTracksCount: selectedTracks.size,
+                selectedTrackIds: Array.from(selectedTracks)
+            });
+
             // Get selected track data
             const selectedTrackData: SpotifyTrack[] = [];
 
             if (spotifyData.type === "track") {
+                console.log("📀 PROCESSING_SINGLE_TRACK:", spotifyData.data);
                 selectedTrackData.push(spotifyData.data);
             } else if (
                 spotifyData.type === "album" ||
                 spotifyData.type === "playlist"
             ) {
+                console.log("💿 PROCESSING_ALBUM_OR_PLAYLIST:", {
+                    type: spotifyData.type,
+                    totalTracks: spotifyData.data.tracks?.length || 0,
+                    albumData: spotifyData.data
+                });
+
                 spotifyData.data.tracks.forEach((track: SpotifyTrack) => {
                     if (selectedTracks.has(track.id)) {
+                        console.log("✅ ADDING_TRACK_FROM_ALBUM/PLAYLIST:", {
+                            trackId: track.id,
+                            trackName: track.name,
+                            artist: track.artist,
+                            album: track.album,
+                            artist_id: track.artist_id,
+                            album_id: track.album_id
+                        });
                         selectedTrackData.push(track);
                     }
                 });
             } else if (spotifyData.type === "artist") {
+                console.log("🎤 PROCESSING_ARTIST:", {
+                    artistName: spotifyData.data.name,
+                    albumsCount: spotifyData.data.albums?.length || 0,
+                    artistData: spotifyData.data
+                });
+
                 spotifyData.data.albums.forEach((album: SpotifyAlbum) => {
+                    console.log("💿 PROCESSING_ALBUM_FROM_ARTIST:", {
+                        albumId: album.id,
+                        albumName: album.name,
+                        tracksCount: album.tracks?.length || 0,
+                        albumData: album
+                    });
+
                     album.tracks?.forEach((track: SpotifyTrack) => {
                         if (selectedTracks.has(track.id)) {
+                            console.log("✅ ADDING_TRACK_FROM_ARTIST_ALBUM:", {
+                                trackId: track.id,
+                                trackName: track.name,
+                                artist: track.artist,
+                                album: track.album,
+                                artist_id: track.artist_id,
+                                album_id: track.album_id,
+                                albumFromArtist: album
+                            });
                             selectedTrackData.push(track);
                         }
                     });
                 });
             }
-            const tracksToImport = selectedTrackData.map((track) => ({
-                id: track.id,
-                name: track.name,
-                artist: track.artist,
-                album: track.album,
-                duration: track.duration,
-                image: track.image,
-                isrc: track.isrc,
-                preview_url: track.preview_url,
-                artists: track.artists || [
-                    {
-                        id: track.artist_id || `artist_${track.id}`,
-                        name: track.artist,
+
+            console.log("🎯 SELECTED_TRACK_DATA_COLLECTED:", {
+                count: selectedTrackData.length,
+                tracks: selectedTrackData
+            });
+            const tracksToImport = selectedTrackData.map((track) => {
+                console.log("🔄 MAPPING_TRACK:", {
+                    originalTrack: track,
+                    spotifyDataType: spotifyData.type,
+                    spotifyDataArtistId: spotifyData.data.artist_id,
+                    spotifyDataId: spotifyData.data.id
+                });
+
+                const mappedTrack = {
+                    id: track.id,
+                    name: track.name,
+                    artist: track.artist,
+                    album: track.album,
+                    duration: track.duration,
+                    image: track.image,
+                    isrc: track.isrc,
+                    preview_url: track.preview_url,
+                    artists: track.artists || [
+                        {
+                            // Use real Spotify artist ID if available, otherwise use generated ID
+                            id: track.artist_id && !track.artist_id.startsWith('artist_') 
+                                ? track.artist_id 
+                                : (spotifyData.type === "album" || spotifyData.type === "playlist") 
+                                    ? spotifyData.data.artist_id || `artist_${track.id}`
+                                    : `artist_${track.id}`,
+                            name: track.artist,
+                            // Pass artist genres for artist imports
+                            genres: spotifyData.type === "artist" ? spotifyData.data.genres : undefined,
+                        },
+                    ],
+                    album_data: {
+                        // Use real Spotify album ID if available, otherwise use generated ID
+                        id: track.album_id && !track.album_id.startsWith('album_') 
+                            ? track.album_id 
+                            : (spotifyData.type === "album") 
+                                ? spotifyData.data.id 
+                                : track.album_id || `album_${track.id}`,
+                        release_date: track.release_date || 
+                                     (spotifyData.type === "album" ? spotifyData.data.release_date : null) ||
+                                     (spotifyData.type === "playlist" ? null : null),
+                        description: null,
                     },
-                ],
-                album_data: {
-                    id: track.album_id || `album_${track.id}`,
-                    release_date: track.release_date,
-                    description: null,
-                },
-            }));
+                };
+
+                console.log("✅ MAPPED_TRACK_RESULT:", {
+                    trackId: track.id,
+                    trackName: track.name,
+                    artistId: mappedTrack.artists[0].id,
+                    albumId: mappedTrack.album_data.id,
+                    fullMappedTrack: mappedTrack
+                });
+
+                return mappedTrack;
+            });
+
+            console.log("🚀 FINAL_TRACKS_TO_IMPORT:", {
+                count: tracksToImport.length,
+                tracks: tracksToImport
+            });
             // Call import API
+            console.log("📡 CALLING_IMPORT_API:", {
+                endpoint: "/api/import-music",
+                tracksCount: tracksToImport.length,
+                requestBody: { tracks: tracksToImport }
+            });
+
             const response = await fetch("/api/import-music", {
                 method: "POST",
                 headers: {
@@ -568,10 +760,16 @@ export function MusicUpload() {
                 body: JSON.stringify({ tracks: tracksToImport }),
             });
 
+            console.log("📨 API_RESPONSE_STATUS:", {
+                status: response.status,
+                statusText: response.statusText,
+                ok: response.ok
+            });
+
             let result;
             try {
                 result = await response.json();
-                console.log("Raw API response:", result);
+                console.log("📝 RAW_API_RESPONSE:", result);
                 console.log("Response structure:", {
                     hasResults: !!result?.results,
                     resultsKeys: result?.results
@@ -638,6 +836,32 @@ export function MusicUpload() {
                         : undefined,
             });
 
+             // Load complete track info for recently uploaded tracks
+             if (tracksToImport.length > 0) {
+                // Convert SpotifyTrack to Track format
+                const importedTracks = tracksToImport.map(track => ({
+                    id: stringToHash(`spotify-${track.id}`),
+                    title: track.name,
+                    file_url: track.preview_url
+                        ? `/api/proxy-audio?url=${encodeURIComponent(track.preview_url)}`
+                        : "",
+                    duration: track.duration,
+                    audio_file_url: track.preview_url
+                        ? `/api/proxy-audio?url=${encodeURIComponent(track.preview_url)}`
+                        : "",
+                    artist: {
+                        id: "spotify-artist",
+                        name: track.artist,
+                    },
+                    album: {
+                        id: stringToHash(track.id),
+                        title: track.album,
+                        cover_image_url: track.image,
+                    },
+                }));
+                setRecentlyImported(prev => [...prev, ...importedTracks]);
+            }
+
             // Reset form
             setSpotifyData(null);
             setSelectedTracks(new Set());
@@ -646,7 +870,7 @@ export function MusicUpload() {
         } catch (error) {
             console.error("Import error:", error);
             showError({
-                title: "❌ Import Failed",
+                title: "Import Failed",
                 message: `Cannot import tracks: ${error instanceof Error ? error.message : "Unknown error"}`,
             });
         } finally {
@@ -666,7 +890,7 @@ export function MusicUpload() {
 
     const handlePlayTrack = (track: SpotifyTrack) => {
         if (!track.preview_url) {
-            showError("🔇 Không có bản preview cho bài hát này");
+            showError("Không có bản preview cho bài hát này");
             return;
         }
 
@@ -770,6 +994,7 @@ export function MusicUpload() {
             {/* Header */}
             <div className="relative overflow-hidden bg-gradient-to-r from-slate-800 via-purple-900 to-slate-900 text-white">
                 <div className="absolute inset-0 bg-black/10"></div>
+                ```
                 <div className="relative container mx-auto px-6 py-16">
                     <div className="text-center max-w-4xl mx-auto">
                         <div className="w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -860,7 +1085,7 @@ export function MusicUpload() {
                                 <div className="grid md:grid-cols-4 gap-4 text-sm text-gray-600 dark:text-gray-400">
                                     <div className="flex items-center gap-2">
                                         <Users className="h-4 w-4" />
-                                        <span>Artist URLs</span>
+                                        <span>ArtistURLs</span>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <Album className="h-4 w-4" />
@@ -1092,7 +1317,7 @@ export function MusicUpload() {
                                                     </Button>
                                                 </div>
 
-                                                <div className="space-y-2 max-h-96 overflow-y-auto">
+                                                <div className="space-y-2">
                                                     {spotifyData.data.tracks?.map(
                                                         (
                                                             track: SpotifyTrack,
@@ -1161,7 +1386,7 @@ export function MusicUpload() {
                                                                         >
                                                                             {currentTrack?.id ===
                                                                                 stringToHash(
-                                                                                    `spotify-${spotifyData.data.id}`,
+                                                                                    `spotify-${track.id}`,
                                                                                 ) &&
                                                                             isPlaying ? (
                                                                                 <Pause className="h-2 w-2" />
@@ -1388,7 +1613,7 @@ export function MusicUpload() {
                                                                             </Button>
                                                                         </div>
 
-                                                                        <div className="space-y-2 max-h-64 overflow-y-auto pl-4 border-l-2 border-gray-200 dark:border-gray-700">
+                                                                        <div className="space-y-2 pl-4 border-l-2 border-gray-200 dark:border-gray-700">
                                                                             {album.tracks.map(
                                                                                 (
                                                                                     track: SpotifyTrack,
@@ -1456,7 +1681,7 @@ export function MusicUpload() {
                                                                                                 >
                                                                                                     {currentTrack?.id ===
                                                                                                         stringToHash(
-                                                                                                            `spotify-${spotifyData.data.id}`,
+                                                                                                            `spotify-${track.id}`,
                                                                                                         ) &&
                                                                                                     isPlaying ? (
                                                                                                         <Pause className="h-2 w-2" />
@@ -1694,7 +1919,8 @@ export function MusicUpload() {
                                     }
                                 >
                                     <div className="text-center space-y-4">
-                                        <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto">
+                                        <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500```
+ rounded-full flex items-center justify-center mx-auto">
                                             <Upload className="h-8 w-8 text-white" />
                                         </div>
                                         <div>
@@ -2419,7 +2645,169 @@ export function MusicUpload() {
                         </CardContent>
                     </Card>
                 )}
+
+                {/* Recently Uploaded Tracks */}
+                {recentlyUploaded.length > 0 && (
+                    <Card className="border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm shadow-xl">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-3">
+                                <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
+                                    <Music className="h-4 w-4 text-white" />
+                                </div>
+                                Recently Uploaded Tracks
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="grid gap-4">
+                                {recentlyUploaded.map((track, index) => (
+                                    <div
+                                        key={track.id || index}
+                                        className="flex items-center gap-4 p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50 border"
+                                    >
+                                        <div className="relative">
+                                            <div className="w-16 h-16 rounded-lg overflow-hidden">
+                                                {track.album?.cover_image_url ? (
+                                                    <Image
+                                                        src={track.album.cover_image_url}
+                                                        alt={track.album.title || "Album cover"}
+                                                        width={64}
+                                                        height={64}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                ) : (
+                                                    <div className="w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                                                        <Music className="h-6 w-6 text-gray-400" />
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <div className="flex-1 min-w-0">
+                                            <h4 className="font-semibold truncate">
+                                                {track.title || "Unknown Title"}
+                                            </h4>
+                                            <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                                                {track.artist?.name || "Unknown Artist"}
+                                            </p>
+                                            <p className="text-xs text-gray-500 truncate">
+                                                {track.album?.title || "Unknown Album"}
+                                            </p>
+                                        </div>
+
+                                        <div className="flex items-center gap-4 text-sm text-gray-500">
+                                            <span>{formatDuration(track.duration)}</span>
+                                            <Badge variant="outline" className="text-xs">
+                                                Just uploaded
+                                            </Badge>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
+
+                {/* Recently Imported Tracks */}
+                {recentlyImported.length > 0 && (
+                    <Card className="border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm shadow-xl">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-3">
+                                <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                                    <Download className="h-4 w-4 text-white" />
+                                </div>
+                                Recently Imported from Spotify
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="grid gap-4">
+                                {recentlyImported.map((track, index) => (
+                                    <div
+                                        key={track.id || index}
+                                        className="flex items-center gap-4 p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50 border"
+                                    >
+                                        <div className="relative">
+                                            <div className="w-16 h-16 rounded-lg overflow-hidden">
+                                                {track.album?.cover_image_url ? (
+                                                    <Image
+                                                        src={track.album.cover_image_url}
+                                                        alt={track.album.title || "Album cover"}
+                                                        width={64}
+                                                        height={64}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                ) : (
+                                                    <div className="w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                                                        <Music className="h-6 w-6 text-gray-400" />
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <div className="flex-1 min-w-0">
+                                            <h4 className="font-semibold truncate">
+                                                {track.title || "Unknown Title"}
+                                            </h4>
+                                            <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                                                {track.artist?.name || "Unknown Artist"}
+                                            </p>
+                                            <p className="text-xs text-gray-500 truncate">
+                                                {track.album?.title || "Unknown Album"}
+                                            </p>
+                                        </div>
+
+                                        <div className="flex items-center gap-4 text-sm text-gray-500">
+                                            <span>{formatDuration(track.duration)}</span>
+                                            <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-200">
+                                                Imported from Spotify
+                                            </Badge>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
             </div>
         </div>
     );
+}
+
+async function fetchAlbumTracks(albumId: string): Promise<any[]> {
+    try {
+        const response = await fetch("/api/spotify/album-tracks", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ albumId }),
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to fetch album tracks");
+        }
+
+        const { tracks } = await response.json();
+        return tracks;
+    } catch (error) {
+        console.error("Error fetching album tracks:", error);
+        return [];
+    }
+}
+
+async function fetchPlaylistTracks(playlistId: string): Promise<any[]> {
+    try {
+        const response = await fetch("/api/spotify/playlist-tracks", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ playlistId }),
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to fetch playlist tracks");
+        }
+
+        const { tracks } = await response.json();
+        return tracks;
+    } catch (error) {
+        console.error("Error fetching playlist tracks:", error);
+        return [];
+    }
 }

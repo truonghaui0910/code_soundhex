@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, Upload } from "lucide-react";
+import { useUserRole } from "@/hooks/use-user-role";
 
 const items = [
   {
@@ -43,6 +44,25 @@ const items = [
         <path d="M9 18V5l12-2v13" />
         <circle cx="6" cy="18" r="3" />
         <circle cx="18" cy="16" r="3" />
+      </svg>
+    ),
+  },
+  {
+    title: "Your Library",
+    href: "/library",
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-5 w-5"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      >
+        <path d="m16 6 4 14" />
+        <path M="M12 6v14" />
+        <path d="M8 8v12" />
+        <path d="M4 4v16" />
       </svg>
     ),
   },
@@ -105,27 +125,40 @@ export function Sidebar() {
     return () => window.removeEventListener('resize', updateNavbarHeight);
   }, []);
 
-  const SidebarContent = () => (
-    <div className="flex flex-col gap-2 p-4">
-      <div className="font-semibold py-2 text-rose-600">Menu</div>
-      {items.map((item) => (
-        <Link
-          key={item.href}
-          href={item.href}
-          onClick={() => setOpen(false)}
-          className={cn(
-            "flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-rose-600",
-            pathname === item.href
-              ? "bg-muted font-medium text-rose-600"
-              : "text-muted-foreground"
-          )}
-        >
-          {item.icon}
-          {item.title}
-        </Link>
-      ))}
-    </div>
-  );
+  const { userRole } = useUserRole();
+
+  const SidebarContent = () => {
+    // Filter items based on user role
+    const filteredItems = items.filter(item => {
+      // Hide Dashboard for user role
+      if (item.href === "/dashboard" && userRole === "user") {
+        return false;
+      }
+      return true;
+    });
+
+    return (
+      <div className="flex flex-col gap-2 p-4">
+        <div className="font-semibold py-2 text-rose-600">Menu</div>
+        {filteredItems.map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            onClick={() => setOpen(false)}
+            className={cn(
+              "flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-rose-600",
+              pathname === item.href
+                ? "bg-muted font-medium text-rose-600"
+                : "text-muted-foreground"
+            )}
+          >
+            {item.icon}
+            {item.title}
+          </Link>
+        ))}
+      </div>
+    );
+  };
 
   // Mobile sidebar (drawer/sheet)
   const MobileSidebar = () => (
