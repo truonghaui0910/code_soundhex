@@ -1,27 +1,29 @@
-# Sử dụng Node.js làm base image
+# Sử dụng Ubuntu-based như cũ, chỉ tối ưu structure
 FROM node:18 AS build
-# Cài đặt zlib, python3, pip, ffmpeg
+
+# Cài đặt dependencies hệ thống
 RUN apt-get update && apt-get install -y zlib1g-dev
 
-# Đặt thư mục làm việc trong container
 WORKDIR /app
 
-# Sao chép package.json và package-lock.json (nếu có)
+# Copy package files trước để cache layer
 COPY package*.json ./
-
-# Cài đặt các dependencies
 RUN npm install --legacy-peer-deps
 
-# Sao chép toàn bộ mã nguồn vào container
+# Copy toàn bộ source code
 COPY . .
 
+# Disable telemetry và tăng memory
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_OPTIONS="--max-old-space-size=4096"
 
-# Build ứng dụng Next.js
+# Build ứng dụng
 RUN npm run build
 
-# Giai đoạn thứ hai: Chỉ cần chạy ứng dụng
+# Production stage
 FROM node:18 AS run
-# Cài đặt zlib, python3, pip, ffmpeg
+
+# Cài đặt dependencies hệ thống như cũ
 RUN apt-get update && apt-get install -y \
     zlib1g-dev \
     python3 \
@@ -30,23 +32,18 @@ RUN apt-get update && apt-get install -y \
     ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
-    
-# Đặt thư mục làm việc trong container
 WORKDIR /app
 
-# Sao chép các file đã build từ giai đoạn build trước đó
+# Copy từ build stage như cũ
 COPY --from=build /app/.next ./.next
 COPY --from=build /app/public ./public
 COPY --from=build /app/package*.json ./
 COPY --from=build /app/.env* ./
 
-#COPY --from=build /app/scripts ./scripts
-
-
-# Cài đặt các dependencies
+# Install production dependencies
 RUN npm install --production --legacy-peer-deps
 
 EXPOSE 3000
 
-# Chạy ứng dụng Next.js
+# Dùng npm start như cũ
 CMD ["npm", "run", "start"]
