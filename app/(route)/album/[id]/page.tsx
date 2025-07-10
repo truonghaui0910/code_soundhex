@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
 import dynamic from 'next/dynamic';
+
+export const dynamicConfig = 'force-dynamic';
 import { AlbumsController } from "@/lib/controllers/albums";
 import { TracksController } from "@/lib/controllers/tracks";
 
