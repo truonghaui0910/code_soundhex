@@ -1,0 +1,26 @@
+name: soundhex
+services:
+  nextjs-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      # Sử dụng BuildKit cho build nhanh hơn
+      cache_from:
+        - nextjs-app:latest
+      # Build args để skip lint
+      args:
+        - BUILDKIT_INLINE_CACHE=1
+        - NODE_ENV=production
+    ports:
+      - "8501:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_TELEMETRY_DISABLED=1
+    restart: unless-stopped
+    # Tăng memory limit
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 1G
