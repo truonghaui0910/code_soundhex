@@ -1,8 +1,8 @@
 import { Metadata } from "next";
 import dynamic from 'next/dynamic';
-
-export const dynamicConfig = 'force-dynamic';
 import { TracksController } from "@/lib/controllers/tracks";
+
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: "SoundHex Music Platform",
