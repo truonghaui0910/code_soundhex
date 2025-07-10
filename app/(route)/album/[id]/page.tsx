@@ -1,11 +1,21 @@
 import { notFound } from "next/navigation";
-import { TracksController } from "@/lib/controllers/tracks";
+import dynamic from 'next/dynamic';
 import { AlbumsController } from "@/lib/controllers/albums";
-import { AlbumDetailClient } from "./album-detail-client";
+import { TracksController } from "@/lib/controllers/tracks";
+
+const AlbumDetailClient = dynamic(() => import('./album-detail-client').then(mod => ({ default: mod.AlbumDetailClient })), {
+  loading: () => (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="animate-spin w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full"></div>
+    </div>
+  ),
+});
 
 export default async function AlbumDetailPage({
   params,
-}: Readonly<{ params: { id: string } }>) {
+}: {
+  params: { id: string };
+}) {
   const albumId = Number(params.id);
 
   if (!albumId) {
