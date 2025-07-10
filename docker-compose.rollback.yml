@@ -1,7 +1,7 @@
 name: soundhex
 services:
   nextjs-app:
-    image: ghcr.io/vtdocker/soundhex_app:latest
+    image: ghcr.io/vtdocker/soundhex_app:backup
     ports:
       - "8501:3000"
     environment:
