@@ -1,8 +1,8 @@
 // app/(route)/album/[id]/page.tsx
-import { AlbumDetailClient } from './album-detail-client';
+import { AlbumDetailClient } from "./album-detail-client";
 
 // Force dynamic để tránh SSR blocking
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 // Page component đơn giản - không fetch data ở đây nữa

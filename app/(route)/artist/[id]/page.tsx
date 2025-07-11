@@ -1,8 +1,8 @@
 // app/(route)/artist/[id]/page.tsx - Fixed version
-import { ArtistDetailClient } from './artist-detail-client';
+import { ArtistDetailClient } from "./artist-detail-client";
 
 // Force dynamic để tránh SSR blocking
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 // Page component đơn giản - không fetch data ở đây nữa
