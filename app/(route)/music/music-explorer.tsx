@@ -216,7 +216,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                 className={`${currentView === "featured" ? "bg-white text-purple-600 hover:bg-red-500 hover:text-white" : "bg-white/20 text-white hover:bg-white/30"}`}
                             >
                                 <Music className="mr-2 h-5 w-5" />
-                                Explore Musicsxx
+                                Explore Musicsxxyy
                             </Button>
                             <Button
                                 size="lg"
