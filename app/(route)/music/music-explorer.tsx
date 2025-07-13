@@ -194,7 +194,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                     <div className="text-center max-w-4xl mx-auto">
                         <p className="text-xl md:text-2xl mb-8 text-purple-100">
                             Stream unlimited music for free • Upload your tracks
-                            • Connect with artist__
+                            • Connect with artist
                         </p>
 
                         {/* Search Bar */}
