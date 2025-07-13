@@ -46,7 +46,7 @@ function UploadRedirect() {
     const router = useRouter();
 
     useEffect(() => {
-        router.replace('/upload');
+        router.replace("/upload");
     }, [router]);
 
     return (
@@ -93,7 +93,9 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
             (track.artist?.name || "")
                 .toLowerCase()
                 .includes(searchQuery.toLowerCase()) ||
-            (track.album?.title || "").toLowerCase().includes(searchQuery.toLowerCase());
+            (track.album?.title || "")
+                .toLowerCase()
+                .includes(searchQuery.toLowerCase());
 
         const matchesGenre =
             selectedGenre === "all" || track.genre?.name === selectedGenre;
@@ -118,7 +120,8 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                             cover_image_url: track.album!.cover_image_url,
                             artist: track.artist,
                             tracksCount: tracks.filter(
-                                (t) => t.album && t.album.id === track.album!.id,
+                                (t) =>
+                                    t.album && t.album.id === track.album!.id,
                             ).length,
                         },
                     ]),
@@ -138,7 +141,9 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                             name: track.artist!.name,
                             profile_image_url: track.artist!.profile_image_url,
                             tracksCount: tracks.filter(
-                                (t) => t.artist && t.artist.id === track.artist!.id,
+                                (t) =>
+                                    t.artist &&
+                                    t.artist.id === track.artist!.id,
                             ).length,
                         },
                     ]),
@@ -189,7 +194,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                     <div className="text-center max-w-4xl mx-auto">
                         <p className="text-xl md:text-2xl mb-8 text-purple-100">
                             Stream unlimited music for free • Upload your tracks
-                            • Connect with artists
+                            • Connect with artist
                         </p>
 
                         {/* Search Bar */}
@@ -211,7 +216,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                 className={`${currentView === "featured" ? "bg-white text-purple-600 hover:bg-red-500 hover:text-white" : "bg-white/20 text-white hover:bg-white/30"}`}
                             >
                                 <Music className="mr-2 h-5 w-5" />
-                                Explore Music
+                                Explore Musicsxxyyzz
                             </Button>
                             <Button
                                 size="lg"
@@ -298,7 +303,9 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                     .slice(0, 25)
                                     .map((albumId) => {
                                         const track = filteredTracks.find(
-                                            (t) => t.album && t.album.id === albumId,
+                                            (t) =>
+                                                t.album &&
+                                                t.album.id === albumId,
                                         );
                                         if (!track || !track.album) return null;
 
@@ -310,6 +317,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                 <div className="relative aspect-square">
                                                     <Link
                                                         href={`/album/${track.album.id}`}
+                                                        prefetch={false}
                                                     >
                                                         {track.album
                                                             .cover_image_url ? (
@@ -355,8 +363,12 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                                             ) =>
                                                                                 t.album &&
                                                                                 track.album &&
-                                                                                t.album.id ===
-                                                                                track.album.id,
+                                                                                t
+                                                                                    .album
+                                                                                    .id ===
+                                                                                    track
+                                                                                        .album
+                                                                                        .id,
                                                                         );
                                                                     if (
                                                                         albumTracks.length >
@@ -399,7 +411,10 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                             href={`/artist/${track.artist.id}`}
                                                         >
                                                             <p className="text-gray-600 dark:text-gray-400 truncate text-xs hover:underline cursor-pointer">
-                                                                {track.artist.name}
+                                                                {
+                                                                    track.artist
+                                                                        .name
+                                                                }
                                                             </p>
                                                         </Link>
                                                     )}
@@ -432,12 +447,17 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                     .slice(0, 25)
                                     .map((artistId) => {
                                         const track = filteredTracks.find(
-                                            (t) => t.artist && t.artist.id === artistId,
+                                            (t) =>
+                                                t.artist &&
+                                                t.artist.id === artistId,
                                         );
                                         const artistTracks = tracks.filter(
-                                            (t) => t.artist && t.artist.id === artistId,
+                                            (t) =>
+                                                t.artist &&
+                                                t.artist.id === artistId,
                                         );
-                                        if (!track || !track.artist) return null;
+                                        if (!track || !track.artist)
+                                            return null;
 
                                         return (
                                             <div
@@ -504,7 +524,10 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                         track.album
                                                             .cover_image_url
                                                     }
-                                                    alt={track.album?.title || track.title}
+                                                    alt={
+                                                        track.album?.title ||
+                                                        track.title
+                                                    }
                                                     fill
                                                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                                                     className="object-cover group-hover:scale-110 transition-transform duration-500"
@@ -577,7 +600,8 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                 {track.title}
                                             </h3>
                                             <p className="text-gray-600 dark:text-gray-400 truncate text-sm">
-                                                {track.artist?.name || "Unknown Artist"}
+                                                {track.artist?.name ||
+                                                    "Unknown Artist"}
                                             </p>
                                             <div className="flex items-center justify-between mt-3">
                                                 <Badge
@@ -638,7 +662,10 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                 src={
                                                     track.album.cover_image_url
                                                 }
-                                                alt={track.album?.title || track.title}
+                                                alt={
+                                                    track.album?.title ||
+                                                    track.title
+                                                }
                                                 fill
                                                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                                                 className="object-cover rounded-t-lg group-hover:scale-105 transition-transform duration-300"
@@ -710,10 +737,12 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                             {track.title}
                                         </h3>
                                         <p className="text-gray-600 dark:text-gray-400 truncate text-sm mb-2">
-                                            {track.artist?.name || "Unknown Artist"}
+                                            {track.artist?.name ||
+                                                "Unknown Artist"}
                                         </p>
                                         <p className="text-gray-500 dark:text-gray-500 truncate text-xs mb-3">
-                                            {track.album?.title || "Unknown Album"}
+                                            {track.album?.title ||
+                                                "Unknown Album"}
                                         </p>
 
                                         <div className="flex items-center justify-between">
@@ -734,13 +763,18 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                         </div>
 
                                         <div className="mt-1 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <AddToPlaylist trackId={track.id} trackTitle={track.title}>
+                                            <AddToPlaylist
+                                                trackId={track.id}
+                                                trackTitle={track.title}
+                                            >
                                                 <Button
                                                     size="sm"
                                                     variant="ghost"
                                                     className="p-2"
                                                     title="Add to playlist"
-                                                    onClick={(e) => e.stopPropagation()}
+                                                    onClick={(e) =>
+                                                        e.stopPropagation()
+                                                    }
                                                 >
                                                     <Plus className="h-4 w-4" />
                                                 </Button>
@@ -785,9 +819,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                     </div>
                 )}
 
-                {currentView === "upload" && (
-                    <UploadRedirect />
-                )}
+                {currentView === "upload" && <UploadRedirect />}
             </div>
         </div>
     );

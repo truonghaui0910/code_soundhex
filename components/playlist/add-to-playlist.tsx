@@ -17,7 +17,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, ListMusic, Search, Check, Lock, Globe, Loader2 } from "lucide-react";
+import {
+  Plus,
+  ListMusic,
+  Search,
+  Check,
+  Lock,
+  Globe,
+  Loader2,
+} from "lucide-react";
 import { toast } from "sonner";
 
 interface Playlist {
@@ -33,7 +41,11 @@ interface AddToPlaylistProps {
   children: React.ReactNode;
 }
 
-export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPlaylistProps) {
+export default function AddToPlaylist({
+  trackId,
+  trackTitle,
+  children,
+}: AddToPlaylistProps) {
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -74,7 +86,7 @@ export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPl
         throw new Error(error.error || "Failed to add track to playlist");
       }
 
-      const playlist = playlists.find(p => p.id === playlistId);
+      const playlist = playlists.find((p) => p.id === playlistId);
       toast.success(`Added "${trackTitle}" to "${playlist?.name}"`);
     } catch (error: any) {
       console.error("Error adding track to playlist:", error);
@@ -96,7 +108,8 @@ export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPl
 
     // Check for duplicate playlist name
     const duplicatePlaylist = playlists.find(
-      playlist => playlist.name.toLowerCase() === newPlaylistName.trim().toLowerCase()
+      (playlist) =>
+        playlist.name.toLowerCase() === newPlaylistName.trim().toLowerCase(),
     );
 
     if (duplicatePlaylist) {
@@ -129,13 +142,16 @@ export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPl
       const newPlaylist = await createResponse.json();
 
       // Add track to the new playlist
-      const addResponse = await fetch(`/api/playlists/${newPlaylist.id}/tracks`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const addResponse = await fetch(
+        `/api/playlists/${newPlaylist.id}/tracks`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ track_id: trackId }),
         },
-        body: JSON.stringify({ track_id: trackId }),
-      });
+      );
 
       if (!addResponse.ok) {
         throw new Error("Failed to add track to playlist");
@@ -161,7 +177,10 @@ export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPl
     }
   };
 
-  const togglePlaylistPrivacy = async (playlistId: number, currentPrivateStatus: boolean) => {
+  const togglePlaylistPrivacy = async (
+    playlistId: number,
+    currentPrivateStatus: boolean,
+  ) => {
     setTogglingPrivacy(playlistId);
     try {
       const response = await fetch(`/api/playlists/${playlistId}`, {
@@ -177,12 +196,12 @@ export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPl
       }
 
       // Update local state
-      setPlaylists(prevPlaylists =>
-        prevPlaylists.map(playlist =>
+      setPlaylists((prevPlaylists) =>
+        prevPlaylists.map((playlist) =>
           playlist.id === playlistId
             ? { ...playlist, private: !currentPrivateStatus }
-            : playlist
-        )
+            : playlist,
+        ),
       );
     } catch (error) {
       console.error("Error updating playlist privacy:", error);
@@ -191,33 +210,37 @@ export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPl
     }
   };
 
-  const filteredPlaylists = playlists.filter(playlist =>
-    playlist.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredPlaylists = playlists.filter((playlist) =>
+    playlist.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   return (
     <>
-      <DropdownMenu open={isDropdownOpen} onOpenChange={handleDropdownOpenChange}>
+      <DropdownMenu
+        open={isDropdownOpen}
+        onOpenChange={handleDropdownOpenChange}
+      >
         <DropdownMenuTrigger asChild>
-          <div onClick={(e) => {
-            e.stopPropagation();
-          }}>
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+          >
             {children}
           </div>
         </DropdownMenuTrigger>
-        <DropdownMenuContent 
-          align="center" 
+        <DropdownMenuContent
+          align="center"
           side="top"
           className="w-80 z-[9999] max-h-80 overflow-y-auto bg-white dark:bg-gray-800 border shadow-lg focus:outline-none"
-          style={{ 
+          style={{
             zIndex: 9999,
-            position: 'fixed',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)'
+            position: "fixed",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
           }}
           onCloseAutoFocus={(e) => e.preventDefault()}
-          onOpenAutoFocus={(e) => e.preventDefault()}
         >
           <div className="p-2">
             <div className="flex items-center gap-2 mb-2">
@@ -232,7 +255,7 @@ export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPl
             </div>
           </div>
 
-          <DropdownMenuItem 
+          <DropdownMenuItem
             className="focus:bg-gray-100 dark:focus:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
             onClick={(e) => {
               e.preventDefault();
@@ -265,7 +288,7 @@ export default function AddToPlaylist({ trackId, trackTitle, children }: AddToPl
               >
                 <div className="flex items-center w-full p-2">
                   <ListMusic className="mr-2 h-4 w-4 flex-shrink-0" />
-                  <div 
+                  <div
                     className="flex-1 cursor-pointer"
                     onClick={() => {
                       handleAddToPlaylist(playlist.id);

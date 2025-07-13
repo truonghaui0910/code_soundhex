@@ -22,8 +22,8 @@ interface WebhookData {
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
-  let submissionId: number | null = null;
-  let userEmail: string | null = null;
+  let submissionId: string | undefined = undefined;
+  let userEmail: string | undefined = undefined;
 
   try {
     // Verify webhook secret
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     }
 
     const webhookData: WebhookData = await request.json();
-    submissionId = webhookData.data?.submission_id;
+    submissionId = webhookData.data?.submission_id?.toString() || undefined;
     userEmail = webhookData.data?.email;
 
     agreementLogger.logInfo("WEBHOOK_DATA_RECEIVED", {

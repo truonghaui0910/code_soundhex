@@ -146,49 +146,53 @@ export default function AgreementsList() {
   };
 
   // Get status badge color and icon
-  const getStatusInfo = (status: string, submitter?: Submitter, agreement?: Agreement) => {
+  const getStatusInfo = (
+    status: string,
+    submitter?: Submitter,
+    agreement?: Agreement,
+  ) => {
     switch (status.toLowerCase()) {
       case "completed":
         return {
           color:
             "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-700",
           icon: CheckCircle,
-          displayText: "Completed"
+          displayText: "Completed",
         };
       case "waiting_for_other_party":
         return {
           color:
             "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-700",
           icon: Clock,
-          displayText: "Waiting for SoundHex"
+          displayText: "Waiting for SoundHex",
         };
       case "waiting_for_soundhex":
         return {
           color:
             "bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-900/30 dark:text-orange-400 dark:border-orange-700",
           icon: Clock,
-          displayText: "Artist Submitted - Waiting for SoundHex"
+          displayText: "Artist Submitted - Waiting for SoundHex",
         };
       case "pending":
         return {
           color:
             "bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-700",
           icon: Clock,
-          displayText: "Pending"
+          displayText: "Pending",
         };
       case "declined":
         return {
           color:
             "bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-700",
           icon: XCircle,
-          displayText: "Declined"
+          displayText: "Declined",
         };
       default:
         return {
           color:
             "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-800 dark:text-gray-600",
           icon: Clock,
-          displayText: status
+          displayText: status,
         };
     }
   };
@@ -228,7 +232,7 @@ export default function AgreementsList() {
     } catch (error: any) {
       console.error("Error downloading document:", error);
       showError({
-        title: "❌ Document Download Error",
+        title: "Document Download Error",
         message:
           error.message || "Failed to download document. Please try again.",
       });
@@ -341,9 +345,11 @@ export default function AgreementsList() {
                     <p className="text-3xl font-bold text-yellow-600">
                       {
                         agreements.filter(
-                          (a) => a.status.toLowerCase() === "pending" || 
-                                a.status.toLowerCase() === "waiting_for_other_party" ||
-                                a.status.toLowerCase() === "waiting_for_soundhex",
+                          (a) =>
+                            a.status.toLowerCase() === "pending" ||
+                            a.status.toLowerCase() ===
+                              "waiting_for_other_party" ||
+                            a.status.toLowerCase() === "waiting_for_soundhex",
                         ).length
                       }
                     </p>
@@ -411,7 +417,11 @@ export default function AgreementsList() {
                     </TableHeader>
                     <TableBody>
                       {agreements.map((agreement) => {
-                        const statusInfo = getStatusInfo(agreement.status, undefined, agreement);
+                        const statusInfo = getStatusInfo(
+                          agreement.status,
+                          undefined,
+                          agreement,
+                        );
                         const StatusIcon = statusInfo.icon;
                         return (
                           <TableRow
@@ -422,7 +432,9 @@ export default function AgreementsList() {
                               {agreement.id}
                             </TableCell>
                             <TableCell>
-                              {agreement.display_email || agreement.submitters[0]?.email || "N/A"}
+                              {agreement.display_email ||
+                                agreement.submitters[0]?.email ||
+                                "N/A"}
                             </TableCell>
                             <TableCell>
                               <Badge className={statusInfo.color}>
@@ -439,45 +451,57 @@ export default function AgreementsList() {
                             <TableCell className="text-right">
                               <div className="flex justify-end space-x-2">
                                 {/* Admin: Show Sign button only for waiting_for_soundhex status */}
-                                {agreement.is_admin_view && 
-                                  agreement.status.toLowerCase() === "waiting_for_soundhex" && (
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => {
-                                      const currentUserSubmitter = agreement.submitters.find(s => s.slug);
-                                      if (currentUserSubmitter?.slug) {
-                                        goToSignPage(currentUserSubmitter.slug);
-                                      } else {
-                                        showError("submitter is not found");
-                                      }
-                                    }}
-                                  >
-                                    <Edit className="mr-1 h-3 w-3" />
-                                    Sign
-                                  </Button>
-                                )}
-                                
+                                {agreement.is_admin_view &&
+                                  agreement.status.toLowerCase() ===
+                                    "waiting_for_soundhex" && (
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => {
+                                        const currentUserSubmitter =
+                                          agreement.submitters.find(
+                                            (s) => s.slug,
+                                          );
+                                        if (currentUserSubmitter?.slug) {
+                                          goToSignPage(
+                                            currentUserSubmitter.slug,
+                                          );
+                                        } else {
+                                          showError("submitter is not found");
+                                        }
+                                      }}
+                                    >
+                                      <Edit className="mr-1 h-3 w-3" />
+                                      Sign
+                                    </Button>
+                                  )}
+
                                 {/* Non-admin: Show Sign button with existing logic */}
-                                {!agreement.is_admin_view && 
-                                  !agreement.user_has_completed && 
-                                  agreement.status.toLowerCase() === "pending" && (
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => {
-                                      const currentUserSubmitter = agreement.submitters.find(s => s.slug);
-                                      if (currentUserSubmitter?.slug) {
-                                        goToSignPage(currentUserSubmitter.slug);
-                                      } else {
-                                        showError("submitter is not found");
-                                      }
-                                    }}
-                                  >
-                                    <Edit className="mr-1 h-3 w-3" />
-                                    Sign
-                                  </Button>
-                                )}
+                                {!agreement.is_admin_view &&
+                                  !agreement.user_has_completed &&
+                                  agreement.status.toLowerCase() ===
+                                    "pending" && (
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => {
+                                        const currentUserSubmitter =
+                                          agreement.submitters.find(
+                                            (s) => s.slug,
+                                          );
+                                        if (currentUserSubmitter?.slug) {
+                                          goToSignPage(
+                                            currentUserSubmitter.slug,
+                                          );
+                                        } else {
+                                          showError("submitter is not found");
+                                        }
+                                      }}
+                                    >
+                                      <Edit className="mr-1 h-3 w-3" />
+                                      Sign
+                                    </Button>
+                                  )}
 
                                 {agreement.status.toLowerCase() ===
                                   "completed" && (
@@ -549,9 +573,21 @@ export default function AgreementsList() {
                       Status
                     </h3>
                     <Badge
-                      className={getStatusInfo(selectedAgreement.status, undefined, selectedAgreement).color}
+                      className={
+                        getStatusInfo(
+                          selectedAgreement.status,
+                          undefined,
+                          selectedAgreement,
+                        ).color
+                      }
                     >
-                      {getStatusInfo(selectedAgreement.status, undefined, selectedAgreement).displayText}
+                      {
+                        getStatusInfo(
+                          selectedAgreement.status,
+                          undefined,
+                          selectedAgreement,
+                        ).displayText
+                      }
                     </Badge>
                   </div>
                 </div>
@@ -573,7 +609,11 @@ export default function AgreementsList() {
                   </h3>
                   <div className="space-y-3">
                     {selectedAgreement.submitters.map((submitter) => {
-                      const submitterStatusInfo = getStatusInfo(submitter.status, submitter, selectedAgreement);
+                      const submitterStatusInfo = getStatusInfo(
+                        submitter.status,
+                        submitter,
+                        selectedAgreement,
+                      );
                       const StatusIcon = submitterStatusInfo.icon;
                       return (
                         <div
@@ -598,31 +638,36 @@ export default function AgreementsList() {
                             )}
                           </div>
                           {/* Admin: Show Sign button only for waiting_for_soundhex status */}
-                          {selectedAgreement.is_admin_view && 
-                            selectedAgreement.status.toLowerCase() === "waiting_for_soundhex" &&
+                          {selectedAgreement.is_admin_view &&
+                            selectedAgreement.status.toLowerCase() ===
+                              "waiting_for_soundhex" &&
                             submitter.status.toLowerCase() === "pending" && (
-                            <Button
-                              size="sm"
-                              className="mt-3"
-                              onClick={() => goToSignPage(submitter.slug)}
-                            >
-                              <Edit className="mr-1 h-3 w-3" />
-                              Sign Now
-                            </Button>
-                          )}
-                          
+                              <Button
+                                size="sm"
+                                className="mt-3"
+                                onClick={() =>
+                                  submitter.slug && goToSignPage(submitter.slug)
+                                }
+                              >
+                                <Edit className="mr-1 h-3 w-3" />
+                                Sign Now
+                              </Button>
+                            )}
+
                           {/* Non-admin: Show Sign button with existing logic */}
-                          {!selectedAgreement.is_admin_view && 
+                          {!selectedAgreement.is_admin_view &&
                             submitter.status.toLowerCase() === "pending" && (
-                            <Button
-                              size="sm"
-                              className="mt-3"
-                              onClick={() => goToSignPage(submitter.slug)}
-                            >
-                              <Edit className="mr-1 h-3 w-3" />
-                              Sign Now
-                            </Button>
-                          )}
+                              <Button
+                                size="sm"
+                                className="mt-3"
+                                onClick={() =>
+                                  submitter.slug && goToSignPage(submitter.slug)
+                                }
+                              >
+                                <Edit className="mr-1 h-3 w-3" />
+                                Sign Now
+                              </Button>
+                            )}
                         </div>
                       );
                     })}

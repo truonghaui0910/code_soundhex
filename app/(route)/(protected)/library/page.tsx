@@ -1,19 +1,18 @@
-
 "use client";
 
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Music, 
-  Album, 
-  List, 
-  TrendingUp, 
+import {
+  Music,
+  Album,
+  List,
+  TrendingUp,
   Users,
   Play,
   Clock,
-  Calendar
+  Calendar,
 } from "lucide-react";
 import PlaylistManager from "@/components/playlist/playlist-manager";
 import { AlbumsList } from "@/components/album/albums-list";
@@ -30,11 +29,11 @@ export default function YourLibraryPage() {
   useEffect(() => {
     const fetchAlbums = async () => {
       try {
-        const albumsData = await fetch('/api/albums/user');
+        const albumsData = await fetch("/api/albums/user");
         const result = await albumsData.json();
         setAlbums(result || []);
       } catch (error) {
-        console.error('Error fetching albums:', error);
+        console.error("Error fetching albums:", error);
         setAlbums([]);
       } finally {
         setIsLoading(false);
@@ -52,29 +51,29 @@ export default function YourLibraryPage() {
       value: "12",
       icon: List,
       description: "Created playlists",
-      trend: "+2 this month"
+      trend: "+2 this month",
     },
     {
       title: "Total Albums",
       value: albums.length.toString(),
       icon: Album,
       description: "Your albums",
-      trend: "+1 this week"
+      trend: "+1 this week",
     },
     {
       title: "Total Tracks",
       value: "156",
       icon: Music,
       description: "All your music",
-      trend: "+8 this week"
+      trend: "+8 this week",
     },
     {
       title: "Listening Time",
       value: "24h",
       icon: Clock,
       description: "This month",
-      trend: "+12% vs last month"
-    }
+      trend: "+12% vs last month",
+    },
   ];
 
   return (
@@ -87,7 +86,9 @@ export default function YourLibraryPage() {
               <Music className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">Your Library</h1>
+              <h1 className="text-3xl font-bold tracking-tight">
+                Your Library
+              </h1>
               <p className="text-muted-foreground">
                 Manage your playlists and albums in one place
               </p>
@@ -98,7 +99,10 @@ export default function YourLibraryPage() {
         {/* Stats Overview */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {stats.map((stat, index) => (
-            <Card key={index} className="border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300">
+            <Card
+              key={index}
+              className="border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300"
+            >
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -130,7 +134,9 @@ export default function YourLibraryPage() {
         <Card className="border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-xl">
           <CardHeader className="pb-4">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-2xl font-bold text-gray-800 dark:text-white">Library Content</CardTitle>
+              <CardTitle className="text-2xl font-bold text-gray-800 dark:text-white">
+                Library Content
+              </CardTitle>
               <div className="flex bg-gray-100 dark:bg-gray-700 p-1 rounded-xl shadow-inner">
                 <Button
                   variant="ghost"
@@ -184,11 +190,9 @@ export default function YourLibraryPage() {
                       <Album className="h-5 w-5" />
                       Your Albums
                     </h3>
-                    <Badge variant="secondary">
-                      {albums.length} albums
-                    </Badge>
+                    <Badge variant="secondary">{albums.length} albums</Badge>
                   </div>
-                  
+
                   {isLoading ? (
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
                       {Array.from({ length: 8 }).map((_, idx) => (
@@ -208,7 +212,8 @@ export default function YourLibraryPage() {
                         No Albums Yet
                       </h3>
                       <p className="text-gray-600 dark:text-gray-400 mb-4">
-                        You haven't created any albums yet. Upload some music to get started.
+                        You have not created any albums yet. Upload some music
+                        to get started.
                       </p>
                       <Button className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600">
                         <Play className="mr-2 h-4 w-4" />
@@ -232,14 +237,16 @@ export default function YourLibraryPage() {
                   Manage your library efficiently
                 </p>
                 <div className="flex gap-3">
-                  <Button 
-                    variant="secondary" 
+                  <Button
+                    variant="secondary"
                     size="sm"
                     onClick={() => {
                       setActiveTab("playlists");
                       // Trigger create playlist dialog after tab switch
                       setTimeout(() => {
-                        const createButton = document.querySelector('[data-create-playlist-button]') as HTMLButtonElement;
+                        const createButton = document.querySelector(
+                          "[data-create-playlist-button]",
+                        ) as HTMLButtonElement;
                         if (createButton) {
                           createButton.click();
                         }
@@ -249,10 +256,10 @@ export default function YourLibraryPage() {
                     <List className="mr-2 h-4 w-4" />
                     Create Playlist
                   </Button>
-                  <Button 
-                    variant="secondary" 
+                  <Button
+                    variant="secondary"
                     size="sm"
-                    onClick={() => window.location.href = '/upload'}
+                    onClick={() => (window.location.href = "/upload")}
                   >
                     <Album className="mr-2 h-4 w-4" />
                     Upload Album

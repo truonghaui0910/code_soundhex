@@ -1,4 +1,3 @@
-export const dynamic = 'force-dynamic';
 import { Metadata } from "next";
 import dynamic from 'next/dynamic';
 import { TracksController } from "@/lib/controllers/tracks";

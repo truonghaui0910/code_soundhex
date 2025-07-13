@@ -60,7 +60,7 @@ const items = [
         strokeWidth="2"
       >
         <path d="m16 6 4 14" />
-        <path M="M12 6v14" />
+        <path d="M12 6v14" />
         <path d="M8 8v12" />
         <path d="M4 4v16" />
       </svg>
@@ -101,7 +101,7 @@ export function Sidebar() {
   // Detect if mobile search is expanded and adjust sidebar position
   useEffect(() => {
     const updateNavbarHeight = () => {
-      const navbar = document.querySelector('.border-b.fixed');
+      const navbar = document.querySelector(".border-b.fixed");
       if (navbar) {
         setNavbarHeight(navbar.clientHeight);
       }
@@ -111,25 +111,29 @@ export function Sidebar() {
     updateNavbarHeight();
 
     // Observer to detect height changes in navbar (for mobile search)
-    if (typeof MutationObserver !== 'undefined') {
-      const navbar = document.querySelector('.border-b.fixed');
+    if (typeof MutationObserver !== "undefined") {
+      const navbar = document.querySelector(".border-b.fixed");
       if (navbar) {
         const observer = new MutationObserver(updateNavbarHeight);
-        observer.observe(navbar, { attributes: true, childList: true, subtree: true });
+        observer.observe(navbar, {
+          attributes: true,
+          childList: true,
+          subtree: true,
+        });
         return () => observer.disconnect();
       }
     }
 
     // Fallback for browsers without MutationObserver
-    window.addEventListener('resize', updateNavbarHeight);
-    return () => window.removeEventListener('resize', updateNavbarHeight);
+    window.addEventListener("resize", updateNavbarHeight);
+    return () => window.removeEventListener("resize", updateNavbarHeight);
   }, []);
 
   const { userRole } = useUserRole();
 
   const SidebarContent = () => {
     // Filter items based on user role
-    const filteredItems = items.filter(item => {
+    const filteredItems = items.filter((item) => {
       // Hide Dashboard for user role
       if (item.href === "/dashboard" && userRole === "user") {
         return false;
@@ -149,7 +153,7 @@ export function Sidebar() {
               "flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-rose-600",
               pathname === item.href
                 ? "bg-muted font-medium text-rose-600"
-                : "text-muted-foreground"
+                : "text-muted-foreground",
             )}
           >
             {item.icon}
@@ -169,7 +173,10 @@ export function Sidebar() {
           <span className="sr-only">Toggle menu</span>
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="w-64 p-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
+      <SheetContent
+        side="left"
+        className="w-64 p-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm"
+      >
         <SidebarContent />
       </SheetContent>
     </Sheet>
@@ -177,11 +184,11 @@ export function Sidebar() {
 
   // Desktop sidebar - Fixed position with dynamic top position
   const DesktopSidebar = () => (
-    <div 
+    <div
       className="hidden md:block w-64 border-r bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm fixed left-0 overflow-y-auto"
-      style={{ 
-        top: `${navbarHeight}px`, 
-        height: `calc(100vh - ${navbarHeight}px)` 
+      style={{
+        top: `${navbarHeight}px`,
+        height: `calc(100vh - ${navbarHeight}px)`,
       }}
     >
       <SidebarContent />

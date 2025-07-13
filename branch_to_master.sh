@@ -1,0 +1,81 @@
+#!/bin/bash
+echo "🔄 Merging replit-agent branch to master..."
+
+# Check for git locks first
+if [ -f .git/index.lock ]; then
+    echo "⚠️ Git lock detected, cleaning up..."
+    rm -f .git/index.lock
+    rm -f .git/refs/remotes/origin/*.lock
+    rm -f .git/refs/heads/*.lock
+    pkill -f git 2>/dev/null || true
+    sleep 2
+fi
+
+# Check what branches exist
+echo "📍 Available branches:"
+git branch -a
+
+# Get current branch
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+echo "📍 Current branch: $CURRENT_BRANCH"
+
+# Ensure all changes are committed
+echo "📦 Committing any pending changes..."
+git add . && git commit -m "Final replit-agent changes - $(date)" || true
+
+# Check if replit-agent branch exists
+if git show-ref --verify --quiet refs/heads/replit-agent; then
+    echo "✅ replit-agent branch exists"
+    REPLIT_BRANCH="replit-agent"
+elif [ "$CURRENT_BRANCH" != "master" ]; then
+    echo "✅ Using current branch: $CURRENT_BRANCH"
+    REPLIT_BRANCH="$CURRENT_BRANCH"
+else
+    echo "❌ No replit-agent branch found and already on master"
+    echo "🎯 Just pushing current changes to master..."
+    git push origin master
+    exit 0
+fi
+
+# Switch to master and merge
+echo "🔄 Switching to master..."
+git checkout master
+
+if [ $? -ne 0 ]; then
+    echo "❌ Failed to switch to master branch!"
+    exit 1
+fi
+
+echo "🔀 Merging $REPLIT_BRANCH into master..."
+git merge $REPLIT_BRANCH --no-ff -m "Merge $REPLIT_BRANCH to master - $(date '+%Y-%m-%d %H:%M')"
+
+if [ $? -ne 0 ]; then
+    echo "❌ Merge failed! Please resolve conflicts manually."
+    exit 1
+fi
+
+# Push to remote
+echo "🚀 Pushing to remote master..."
+git push origin master
+
+if [ $? -ne 0 ]; then
+    echo "❌ Push failed! Please check your remote access."
+    exit 1
+fi
+
+# Optional: Reset replit-agent branch to master
+if [ "$REPLIT_BRANCH" = "replit-agent" ]; then
+    echo "🧹 Resetting replit-agent branch to master..."
+    git checkout replit-agent
+    git reset --hard master
+    git push -f origin replit-agent || echo "⚠️ Could not force push replit-agent branch"
+    git checkout master
+fi
+
+echo "✅ Successfully merged $REPLIT_BRANCH to master and pushed!"
+echo "🎉 All changes are now in master branch on remote repository."
+
+# Show recent commits
+echo ""
+echo "📝 Recent commits on master:"
+git log --oneline -5
