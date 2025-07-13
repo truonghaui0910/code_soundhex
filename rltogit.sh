@@ -9,6 +9,16 @@ git branch -a
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 echo "📍 Current branch: $CURRENT_BRANCH"
 
+# Check for git locks first
+if [ -f .git/index.lock ]; then
+    echo "⚠️ Git lock detected, cleaning up..."
+    rm -f .git/index.lock
+    rm -f .git/refs/remotes/origin/*.lock
+    rm -f .git/refs/heads/*.lock
+    pkill -f git 2>/dev/null || true
+    sleep 2
+fi
+
 # Ensure all changes are committed
 echo "📦 Committing any pending changes..."
 git add . && git commit -m "Final replit changes - $(date)" || true
