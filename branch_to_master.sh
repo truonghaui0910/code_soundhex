@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "🔄 Merging replit-agent branch to master..."
+echo "🔄 Clean merge replit-agent to master..."
 
 # Check for git locks first
 if [ -f .git/index.lock ]; then
@@ -11,45 +11,46 @@ if [ -f .git/index.lock ]; then
     sleep 2
 fi
 
-# Check what branches exist
-echo "📍 Available branches:"
-git branch -a
-
 # Get current branch
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 echo "📍 Current branch: $CURRENT_BRANCH"
 
-# Ensure all changes are committed
-echo "📦 Committing any pending changes..."
-git add . && git commit -m "Final replit-agent changes - $(date)" || true
+# If already on master, check if we need to merge anything
+if [ "$CURRENT_BRANCH" = "master" ]; then
+    echo "✅ Already on master branch"
 
-# Check if replit-agent branch exists
-if git show-ref --verify --quiet refs/heads/replit-agent; then
-    echo "✅ replit-agent branch exists"
-    REPLIT_BRANCH="replit-agent"
-elif [ "$CURRENT_BRANCH" != "master" ]; then
-    echo "✅ Using current branch: $CURRENT_BRANCH"
-    REPLIT_BRANCH="$CURRENT_BRANCH"
-else
-    echo "❌ No replit-agent branch found and already on master"
-    echo "🎯 Just pushing current changes to master..."
-    git push origin master
-    exit 0
+    # Check if replit-agent is ahead of master
+    AHEAD_COUNT=$(git rev-list --count master..replit-agent 2>/dev/null || echo "0")
+
+    if [ "$AHEAD_COUNT" = "0" ]; then
+        echo "📍 replit-agent is up to date with master, just pushing..."
+        git add . && git commit -m "Direct changes on master - $(date)" || true
+        git push origin master
+        exit 0
+    fi
 fi
 
-# Switch to master and merge
+# Commit any pending changes on current branch
+echo "📦 Committing any pending changes..."
+git add . && git commit -m "Final changes before merge - $(date)" || true
+
+# Switch to master
 echo "🔄 Switching to master..."
 git checkout master
 
-if [ $? -ne 0 ]; then
-    echo "❌ Failed to switch to master branch!"
-    exit 1
+# Option 1: Fast-forward merge if possible (cleaner)
+echo "🔍 Checking if fast-forward merge is possible..."
+if git merge-base --is-ancestor master replit-agent; then
+    echo "✅ Using fast-forward merge (no extra commit)"
+    git merge replit-agent --ff-only
+    MERGE_STATUS=$?
+else
+    echo "⚠️ Fast-forward not possible, using regular merge"
+    git merge replit-agent --no-ff -m "Merge replit-agent changes"
+    MERGE_STATUS=$?
 fi
 
-echo "🔀 Merging $REPLIT_BRANCH into master..."
-git merge $REPLIT_BRANCH --no-ff -m "Merge $REPLIT_BRANCH to master - $(date '+%Y-%m-%d %H:%M')"
-
-if [ $? -ne 0 ]; then
+if [ $MERGE_STATUS -ne 0 ]; then
     echo "❌ Merge failed! Please resolve conflicts manually."
     exit 1
 fi
@@ -59,23 +60,21 @@ echo "🚀 Pushing to remote master..."
 git push origin master
 
 if [ $? -ne 0 ]; then
-    echo "❌ Push failed! Please check your remote access."
+    echo "❌ Push failed!"
     exit 1
 fi
 
-# Optional: Reset replit-agent branch to master
-if [ "$REPLIT_BRANCH" = "replit-agent" ]; then
-    echo "🧹 Resetting replit-agent branch to master..."
-    git checkout replit-agent
-    git reset --hard master
-    git push -f origin replit-agent || echo "⚠️ Could not force push replit-agent branch"
-    git checkout master
-fi
+# Reset replit-agent to master to avoid future conflicts
+echo "🧹 Syncing replit-agent with master..."
+git checkout replit-agent
+git reset --hard master
+git push -f origin replit-agent || echo "⚠️ Could not force push replit-agent"
+git checkout master
 
-echo "✅ Successfully merged $REPLIT_BRANCH to master and pushed!"
-echo "🎉 All changes are now in master branch on remote repository."
+echo "✅ Clean merge completed!"
+echo "📊 Git history should be cleaner now"
 
-# Show recent commits
+# Show recent commits (should be fewer)
 echo ""
 echo "📝 Recent commits on master:"
-git log --oneline -5
+git log --oneline -3
