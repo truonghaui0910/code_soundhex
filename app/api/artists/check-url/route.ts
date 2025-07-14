@@ -5,10 +5,14 @@ export async function POST(request: NextRequest) {
   try {
     const { custom_url, exclude_id } = await request.json();
 
+    if (!custom_url) {
+      return NextResponse.json({ error: "Custom URL is required" }, { status: 400 });
+    }
+
     // Validate custom_url format
     if (!/^[a-z0-9_-]+$/.test(custom_url)) {
       return NextResponse.json(
-        { available: false, error: "Invalid format" },
+        { available: false, error: "Custom URL can only contain lowercase letters, numbers, hyphens, and underscores" },
         { status: 400 }
       );
     }
