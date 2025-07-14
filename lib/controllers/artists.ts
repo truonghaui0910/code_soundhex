@@ -53,7 +53,19 @@ export class ArtistsController {
       throw new Error(`Failed to fetch artists: ${error.message}`);
     }
 
-    return data ?? [];
+    // Convert social from database format to array if needed
+    const artists = (data ?? []).map(artist => {
+      if (artist.social && typeof artist.social === 'string') {
+        try {
+          artist.social = JSON.parse(artist.social);
+        } catch (e) {
+          artist.social = [];
+        }
+      }
+      return artist;
+    });
+
+    return artists;
   }
 
   static async getArtistById(id: number): Promise<Artist | null> {
@@ -69,44 +81,34 @@ export class ArtistsController {
       return null;
     }
 
-    return data as Artist;
+    // Convert social from database format to array if needed
+    const artist = data as Artist;
+    if (artist.social && typeof artist.social === 'string') {
+      try {
+        artist.social = JSON.parse(artist.social);
+      } catch (e) {
+        artist.social = [];
+      }
+    }
+
+    return artist;
   }
 
-  static async getArtistByCustomUrl(customUrl: string): Promise<Artist | null> {
+  static async updateArtist(id: number, data: Partial<Artist>): Promise<Artist> {
     const supabase = createServerComponentClient<Database>({ cookies });
-    const { data, error } = await supabase
-      .from("artists")
-      .select("id, name, profile_image_url, bio, created_at, custom_url, social, user_id")
-      .eq("custom_url", customUrl)
+    const { data: artist, error } = await supabase
+      .from('artists')
+      .update(data)
+      .eq('id', id)
+      .select()
       .single();
 
-    if (error) {
-      console.error("Error fetching artist by custom URL:", error);
-      return null;
-    }
-
-    return data as Artist;
-  }
-
-  static async updateArtist(id: number, updates: Partial<Artist>): Promise<Artist | null> {
-    const supabase = createClientComponentClient<Database>();
-    const { data, error } = await supabase
-      .from("artists")
-      .update(updates)
-      .eq("id", id)
-      .select("id, name, profile_image_url, bio, created_at, custom_url, social, user_id")
-      .single();
-
-    if (error) {
-      console.error("Error updating artist:", error);
-      throw new Error(`Failed to update artist: ${error.message}`);
-    }
-
-    return data as Artist;
+    if (error) throw error;
+    return artist;
   }
 
   static async checkCustomUrlAvailable(customUrl: string, excludeId?: number): Promise<boolean> {
-    const supabase = createClientComponentClient<Database>();
+    const supabase = createServerComponentClient<Database>({ cookies });
     let query = supabase
       .from("artists")
       .select("id")
@@ -118,11 +120,25 @@ export class ArtistsController {
 
     const { data, error } = await query;
 
+    if (error) throw error;
+    return data.length === 0;
+  }
+
+  static async getArtistByCustomUrl(customUrl: string): Promise<Artist | null> {
+    const supabase = createServerComponentClient<Database>({ cookies });
+    const { data: artist, error } = await supabase
+      .from('artists')
+      .select('*')
+      .eq('custom_url', customUrl)
+      .single();
+
     if (error) {
-      console.error("Error checking custom URL availability:", error);
-      return false;
+      if (error.code === 'PGRST116') {
+        return null; // No rows found
+      }
+      throw error;
     }
 
-    return data.length === 0;
+    return artist;
   }
 }

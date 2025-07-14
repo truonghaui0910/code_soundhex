@@ -1,6 +1,8 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { ArtistsController } from "@/lib/controllers/artists";
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { cookies } from "next/headers";
 
 export async function GET(
   request: NextRequest,
@@ -34,10 +36,6 @@ export async function GET(
     );
   }
 }
-import { NextRequest, NextResponse } from "next/server";
-import { ArtistsController } from "@/lib/controllers/artists";
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
 
 export async function PUT(
   request: NextRequest,
@@ -56,7 +54,7 @@ export async function PUT(
     const { custom_url, social, bio } = body;
 
     // Validate custom_url format
-    if (custom_url && !/^[a-z0-9-_]+$/.test(custom_url)) {
+    if (custom_url && !/^[a-z0-9_-]+$/.test(custom_url)) {
       return NextResponse.json(
         { error: "Custom URL can only contain lowercase letters, numbers, hyphens, and underscores" },
         { status: 400 }
@@ -87,7 +85,7 @@ export async function PUT(
     // Update artist
     const updatedArtist = await ArtistsController.updateArtist(artistId, {
       custom_url,
-      social: social || [],
+      social: social && social.length > 0 ? social : null,
       bio
     });
 

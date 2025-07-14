@@ -2,6 +2,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,6 +39,7 @@ const SOCIAL_PLATFORMS = [
 ];
 
 export function EditArtistModal({ artist, onUpdate }: EditArtistModalProps) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [customUrl, setCustomUrl] = useState(artist.custom_url || "");
@@ -52,7 +54,7 @@ export function EditArtistModal({ artist, onUpdate }: EditArtistModalProps) {
       return;
     }
 
-    if (!/^[a-z0-9-_]+$/.test(url)) {
+    if (!/^[a-z0-9_-]+$/.test(url)) {
       setCustomUrlStatus("invalid");
       return;
     }
@@ -120,6 +122,12 @@ export function EditArtistModal({ artist, onUpdate }: EditArtistModalProps) {
       const updatedArtist = await response.json();
       onUpdate(updatedArtist);
       setOpen(false);
+      
+      // Redirect to custom URL if it was updated
+      if (customUrl && customUrl !== artist.custom_url) {
+        router.replace(`/artist/${customUrl}`);
+        window.location.reload();
+      }
     } catch (error) {
       console.error("Error updating artist:", error);
       alert(error instanceof Error ? error.message : "Failed to update artist");
