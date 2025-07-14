@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -77,7 +76,7 @@ export function EditArtistModal({ artist, onUpdate }: EditArtistModalProps) {
   const handleCustomUrlChange = (value: string) => {
     const cleanValue = value.toLowerCase().replace(/[^a-z0-9-_]/g, "");
     setCustomUrl(cleanValue);
-    
+
     // Debounce URL checking
     const timeoutId = setTimeout(() => {
       checkCustomUrl(cleanValue);
@@ -115,14 +114,23 @@ export function EditArtistModal({ artist, onUpdate }: EditArtistModalProps) {
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Failed to update artist");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to update artist");
       }
 
-      const updatedArtist = await response.json();
+      const updatedArtistFromAPI = await response.json();
+
+      // Parse social from JSON string if needed
+      const updatedArtist = {
+        ...updatedArtistFromAPI,
+        social: typeof updatedArtistFromAPI.social === 'string' 
+          ? JSON.parse(updatedArtistFromAPI.social || '[]')
+          : updatedArtistFromAPI.social || []
+      };
+
       onUpdate(updatedArtist);
       setOpen(false);
-      
+
       // Redirect to custom URL if it was updated
       if (customUrl && customUrl !== artist.custom_url) {
         router.push(`/artist/${customUrl}`);
@@ -158,7 +166,7 @@ export function EditArtistModal({ artist, onUpdate }: EditArtistModalProps) {
         <DialogHeader>
           <DialogTitle>Edit Artist Profile</DialogTitle>
         </DialogHeader>
-        
+
         <div className="space-y-6">
           {/* Custom URL */}
           <div className="space-y-2">
@@ -208,7 +216,7 @@ export function EditArtistModal({ artist, onUpdate }: EditArtistModalProps) {
           {/* Social Links */}
           <div className="space-y-4">
             <Label>Social Links</Label>
-            
+
             {/* Quick Add Buttons */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
               {SOCIAL_PLATFORMS.map((platform) => (
