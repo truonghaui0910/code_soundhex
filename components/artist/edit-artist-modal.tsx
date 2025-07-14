@@ -329,22 +329,37 @@ export function EditArtistModal({ artist, onUpdate }: EditArtistModalProps) {
             {/* Current Links */}
             {Array.isArray(socialLinks) && socialLinks.length > 0 && (
               <div className="space-y-2">
-                {socialLinks.map((link, index) => (
-                  <div key={index} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
-                    <div className="flex items-center space-x-2 flex-1 min-w-0">
-                      <ExternalLink className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                      <span className="text-sm truncate">{link}</span>
+                {socialLinks.map((link, index) => {
+                  // Find matching platform for icon
+                  const matchedPlatform = SOCIAL_PLATFORMS.find(platform => {
+                    if (link.includes('instagram.com')) return platform.name === 'Instagram';
+                    if (link.includes('twitter.com') || link.includes('x.com')) return platform.name === 'Twitter';
+                    if (link.includes('facebook.com')) return platform.name === 'Facebook';
+                    if (link.includes('youtube.com')) return platform.name === 'YouTube';
+                    if (link.includes('tiktok.com')) return platform.name === 'TikTok';
+                    if (link.includes('spotify.com')) return platform.name === 'Spotify';
+                    if (link.includes('soundcloud.com')) return platform.name === 'SoundCloud';
+                    return platform.name === 'Website';
+                  });
+
+                  return (
+                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <div className="flex items-center space-x-3 flex-1 min-w-0">
+                        {matchedPlatform ? matchedPlatform.icon : <ExternalLink className="w-4 h-4 text-gray-400 flex-shrink-0" />}
+                        <span className="text-sm truncate">{link}</span>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeSocialLink(index)}
+                        className="h-8 w-8 p-0"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
                     </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeSocialLink(index)}
-                    >
-                      <X className="w-4 h-4" />
-                    </Button>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>

@@ -38,7 +38,7 @@ export class TracksController {
       .from("tracks")
       .select(`
         *,
-        artist:artist_id(id, name, profile_image_url),
+        artist:artist_id(id, name, profile_image_url, custom_url),
         album:album_id(id, title, cover_image_url),
         genre:genre_id(id, name)
       `)
@@ -62,7 +62,7 @@ export class TracksController {
       .from("tracks")
       .select(`
         *,
-        artist:artist_id(id, name, profile_image_url),
+        artist:artist_id(id, name, profile_image_url, custom_url),
         album:album_id(id, title, cover_image_url),
         genre:genre_id(id, name)
       `)
@@ -91,7 +91,7 @@ export class TracksController {
       .from("tracks")
       .select(`
         *,
-        artist:artist_id(id, name, profile_image_url),
+        artist:artist_id(id, name, profile_image_url, custom_url),
         album:album_id(id, title, cover_image_url),
         genre:genre_id(id, name)
       `)
@@ -129,15 +129,15 @@ export class TracksController {
     const albumIds = Array.from(new Set((data ?? []).map((track: any) => track.album_id)));
     const genreIds = Array.from(new Set((data ?? []).map((track: any) => track.genre_id).filter(Boolean)));
 
-    let artistsMap: Record<number, { id: number; name: string }> = {};
+    let artistsMap: Record<number, { id: number; name: string; custom_url?: string | null }> = {};
     let albumsMap: Record<number, { id: number; title: string; cover_image_url: string | null }> = {};
     let genresMap: Record<number, { id: number; name: string }> = {};
 
     if (artistIds.length > 0) {
-      const { data: artistsData } = await supabase.from("artists").select("id, name, profile_image_url").in("id", artistIds);
+      const { data: artistsData } = await supabase.from("artists").select("id, name, profile_image_url, custom_url").in("id", artistIds);
       if (artistsData) {
         for (const artist of artistsData) {
-          artistsMap[artist.id] = { id: artist.id, name: artist.name };
+          artistsMap[artist.id] = { id: artist.id, name: artist.name, custom_url: artist.custom_url };
         }
       }
     }
@@ -161,7 +161,7 @@ export class TracksController {
     // Gán thông tin phụ cho từng track
     const tracksWithInfo = (data ?? []).map((track: any) => ({
       ...track,
-      artist: artistsMap[track.artist_id] || { id: track.artist_id, name: "Unknown Artist", profile_image_url: null },
+      artist: artistsMap[track.artist_id] || { id: track.artist_id, name: "Unknown Artist", profile_image_url: null, custom_url: null },
       album: albumsMap[track.album_id] || { id: track.album_id, title: "Unknown Album", cover_image_url: null },
       genre: track.genre_id ? (genresMap[track.genre_id] || { id: track.genre_id, name: "Unknown Genre" }) : null,
     }));

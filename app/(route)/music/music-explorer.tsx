@@ -140,6 +140,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                             id: track.artist!.id,
                             name: track.artist!.name,
                             profile_image_url: track.artist!.profile_image_url,
+                            custom_url: track.artist!.custom_url,
                             tracksCount: tracks.filter(
                                 (t) =>
                                     t.artist &&
@@ -437,66 +438,38 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                             </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                                {Array.from(
-                                    new Set(
-                                        filteredTracks
-                                            .filter((track) => track.artist)
-                                            .map((track) => track.artist!.id),
-                                    ),
-                                )
-                                    .slice(0, 25)
-                                    .map((artistId) => {
-                                        const track = filteredTracks.find(
-                                            (t) =>
-                                                t.artist &&
-                                                t.artist.id === artistId,
-                                        );
-                                        const artistTracks = tracks.filter(
-                                            (t) =>
-                                                t.artist &&
-                                                t.artist.id === artistId,
-                                        );
-                                        if (!track || !track.artist)
-                                            return null;
-
-                                        return (
-                                            <div
-                                                key={track.artist.id}
-                                                className="group cursor-pointer text-center"
-                                            >
-                                                <div className="aspect-square mx-auto mb-3 rounded-full overflow-hidden bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center relative group-hover:scale-105 transition-transform duration-300">
-                                                    {track.artist
-                                                        .profile_image_url ? (
-                                                        <Image
-                                                            src={
-                                                                track.artist
-                                                                    .profile_image_url
-                                                            }
-                                                            alt={
-                                                                track.artist
-                                                                    .name
-                                                            }
-                                                            fill
-                                                            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
-                                                            className="object-cover"
-                                                        />
-                                                    ) : (
-                                                        <Users className="h-12 w-12 text-white" />
-                                                    )}
-                                                </div>
-                                                <Link
-                                                    href={`/artist/${track.artist.custom_url || track.artist.id}`}
-                                                >
-                                                    <h3 className="font-semibold text-sm mb-1 truncate text-gray-900 dark:text-white hover:underline cursor-pointer">
-                                                        {track.artist.name}
-                                                    </h3>
-                                                </Link>
-                                                <p className="text-gray-600 dark:text-gray-400 text-xs">
-                                                    {artistTracks.length} songs
-                                                </p>
+                                {uniqueArtists.slice(0, 25).map((artist) => {
+                                    return (
+                                        <div
+                                            key={artist.id}
+                                            className="group cursor-pointer text-center"
+                                        >
+                                            <div className="aspect-square mx-auto mb-3 rounded-full overflow-hidden bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center relative group-hover:scale-105 transition-transform duration-300">
+                                                {artist.profile_image_url ? (
+                                                    <Image
+                                                        src={artist.profile_image_url}
+                                                        alt={artist.name}
+                                                        fill
+                                                        sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
+                                                        className="object-cover"
+                                                    />
+                                                ) : (
+                                                    <Users className="h-12 w-12 text-white" />
+                                                )}
                                             </div>
-                                        );
-                                    })}
+                                            <Link
+                                                href={`/artist/${artist.custom_url || artist.id}`}
+                                            >
+                                                <h3 className="font-semibold text-sm mb-1 truncate text-gray-900 dark:text-white hover:underline cursor-pointer">
+                                                    {artist.name}
+                                                </h3>
+                                            </Link>
+                                            <p className="text-gray-600 dark:text-gray-400 text-xs">
+                                                {artist.tracksCount} songs
+                                            </p>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </section>
 
