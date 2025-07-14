@@ -181,22 +181,37 @@ export function ArtistDetailUI({ artist, tracks, albums }: ArtistDetailUIProps) 
               )}
 
               {/* Social Links */}
-              {currentArtist.social && Array.isArray(currentArtist.social) && currentArtist.social.length > 0 && (
-                <div className="flex flex-wrap gap-3">
-                  {currentArtist.social.map((link, index) => (
-                    <a
-                      key={index}
-                      href={link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 px-3 py-2 bg-white/10 backdrop-blur-sm rounded-full hover:bg-white/20 transition-colors text-sm"
-                    >
-                      <span>{getSocialIcon(link)}</span>
-                      <span>{getSocialName(link)}</span>
-                    </a>
-                  ))}
-                </div>
-              )}
+              {(() => {
+                const socialLinks = currentArtist.social;
+                let parsedSocial = [];
+                
+                if (Array.isArray(socialLinks)) {
+                  parsedSocial = socialLinks;
+                } else if (typeof socialLinks === 'string') {
+                  try {
+                    parsedSocial = JSON.parse(socialLinks);
+                  } catch (e) {
+                    parsedSocial = [];
+                  }
+                }
+                
+                return parsedSocial.length > 0 && (
+                  <div className="flex flex-wrap gap-3">
+                    {parsedSocial.map((link, index) => (
+                      <a
+                        key={index}
+                        href={link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 px-3 py-2 bg-white/10 backdrop-blur-sm rounded-full hover:bg-white/20 transition-colors text-sm"
+                      >
+                        <span>{getSocialIcon(link)}</span>
+                        <span>{getSocialName(link)}</span>
+                      </a>
+                    ))}
+                  </div>
+                );
+              })()}
               <div className="flex items-center gap-3 text-lg text-purple-100 justify-center md:justify-start">
                 {albums && albums.length > 0 && (
                   <>

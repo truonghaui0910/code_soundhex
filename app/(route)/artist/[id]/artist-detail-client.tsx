@@ -71,10 +71,10 @@ export function ArtistDetailClient({ artistId, artist: initialArtist }: ArtistDe
       try {
         setLoading(true);
         setError(null);
-        
+
         console.log(`Starting API fetch for artist ${artistId}`);
         const startTime = Date.now();
-        
+
         // Fetch artist, tracks và albums song song từ API
         const [artistsResponse, tracksResponse, albumsResponse] = await Promise.all([
           fetch('/api/artists'),
@@ -87,7 +87,7 @@ export function ArtistDetailClient({ artistId, artist: initialArtist }: ArtistDe
           console.error(`Artists API error:`, errorText);
           throw new Error(`Artists API error: ${artistsResponse.status} - ${errorText}`);
         }
-        
+
         if (!tracksResponse.ok) {
           const errorText = await tracksResponse.text();
           console.error(`Tracks API error:`, errorText);
@@ -111,7 +111,7 @@ export function ArtistDetailClient({ artistId, artist: initialArtist }: ArtistDe
 
         const artistData = artistsData.find((a) => a.id === artistId);
         console.log(`Looking for artist ID ${artistId}:`, artistData ? 'Found' : 'Not found');
-        
+
         // Giống album: Không dùng notFound(), chỉ log
         if (!artistData) {
           console.log(`Artist not found with ID: ${artistId}`);
@@ -129,12 +129,14 @@ export function ArtistDetailClient({ artistId, artist: initialArtist }: ArtistDe
           profile_image_url: artistData.profile_image_url || null,
           bio: artistData.bio || null,
           created_at: artistData.created_at || null,
+          social: artistData.social || [], // Ensure social exists and is an array
         } : {
           id: artistId,
           name: "Unknown Artist",
           profile_image_url: null,
           bio: null,
           created_at: null,
+          social: [], //Provide default value
         };
 
         const validatedTracks = Array.isArray(tracksData) ? tracksData : [];
