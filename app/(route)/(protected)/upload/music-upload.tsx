@@ -232,7 +232,47 @@ export function MusicUpload() {
     ) => {
         const files = event.target.files;
         if (files && files.length > 0) {
-            alert("Upload functionality will be implemented soon!");
+                        const validFiles: File[] = [];
+            const invalidFiles: string[] = [];
+
+            Array.from(files).forEach((file) => {
+                // Validate file type
+                if (file.type.startsWith("audio/")) {
+                    validFiles.push(file);
+                } else {
+                    invalidFiles.push(file.name);
+                }
+            });
+
+            // Show error for invalid files
+            if (invalidFiles.length > 0) {
+                showError(
+                    `Invalid file types: ${invalidFiles.join(", ")}. Please select audio files only.`,
+                );
+            }
+
+            // Add valid files
+            if (validFiles.length > 0) {
+                const newUploadFiles: FileUploadData[] = validFiles.map(
+                    (file) => ({
+                        title: file.name.replace(/\.[^/.]+$/, ""), // Remove file extension
+                        genre: "",
+                        album: "",
+                        artist: "",
+                        description: "",
+                        file: file,
+                        isNewAlbum: false,
+                        isNewArtist: false,
+                    }),
+                );
+                setUploadFiles((prev) => [...prev, ...newUploadFiles]);
+
+                if (validFiles.length > 0) {
+                    showInfo(
+                        `Added ${validFiles.length} audio file${validFiles.length > 1 ? "s" : ""} for upload`,
+                    );
+                }
+            }
         }
     };
 
