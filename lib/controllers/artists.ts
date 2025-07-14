@@ -53,7 +53,19 @@ export class ArtistsController {
       throw new Error(`Failed to fetch artists: ${error.message}`);
     }
 
-    return data ?? [];
+    // Convert social from database format to array if needed
+    const artists = (data ?? []).map(artist => {
+      if (artist.social && typeof artist.social === 'string') {
+        try {
+          artist.social = JSON.parse(artist.social);
+        } catch (e) {
+          artist.social = [];
+        }
+      }
+      return artist;
+    });
+
+    return artists;
   }
 
   static async getArtistById(id: number): Promise<Artist | null> {
@@ -69,7 +81,17 @@ export class ArtistsController {
       return null;
     }
 
-    return data as Artist;
+    // Convert social from database format to array if needed
+    const artist = data as Artist;
+    if (artist.social && typeof artist.social === 'string') {
+      try {
+        artist.social = JSON.parse(artist.social);
+      } catch (e) {
+        artist.social = [];
+      }
+    }
+
+    return artist;
   }
 
   static async updateArtist(id: number, data: Partial<Artist>): Promise<Artist> {
