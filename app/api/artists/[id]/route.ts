@@ -85,7 +85,7 @@ export async function PUT(
     // Update artist
     const updatedArtist = await ArtistsController.updateArtist(artistId, {
       custom_url,
-      social: social && social.length > 0 ? social : null,
+      social: social && social.length > 0 ? JSON.stringify(social) : null,
       bio
     });
 

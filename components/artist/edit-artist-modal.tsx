@@ -232,9 +232,21 @@ export function EditArtistModal({ artist, onUpdate }: EditArtistModalProps) {
                 value={newSocialLink}
                 onChange={(e) => setNewSocialLink(e.target.value)}
                 placeholder="https://..."
-                onKeyPress={(e) => e.key === "Enter" && addSocialLink()}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addSocialLink();
+                  }
+                }}
               />
-              <Button type="button" onClick={addSocialLink} size="sm">
+              <Button 
+                type="button" 
+                onClick={(e) => {
+                  e.preventDefault();
+                  addSocialLink();
+                }} 
+                size="sm"
+              >
                 <Plus className="w-4 h-4" />
               </Button>
             </div>
