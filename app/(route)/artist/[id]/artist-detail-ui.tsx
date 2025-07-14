@@ -170,9 +170,9 @@ export function ArtistDetailUI({ artist, tracks, albums }: ArtistDetailUIProps) 
                   {currentArtist.bio}
                 </p>
               )}
-              
+
               {/* Social Links */}
-              {currentArtist.social && currentArtist.social.length > 0 && (
+              {currentArtist.social && Array.isArray(currentArtist.social) && currentArtist.social.length > 0 && (
                 <div className="flex flex-wrap gap-3">
                   {currentArtist.social.map((link, index) => (
                     <a
