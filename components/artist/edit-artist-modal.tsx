@@ -30,10 +30,10 @@ const SOCIAL_PLATFORMS = [
   { name: "Instagram", icon: "📷", placeholder: "https://instagram.com/username" },
   { name: "Twitter", icon: "🐦", placeholder: "https://twitter.com/username" },
   { name: "Facebook", icon: "📘", placeholder: "https://facebook.com/username" },
-  { name: "YouTube", icon: "📺", placeholder: "https://youtube.com/c/username" },
+  { name: "YouTube", icon: "▶️", placeholder: "https://youtube.com/c/username" },
   { name: "TikTok", icon: "🎵", placeholder: "https://tiktok.com/@username" },
-  { name: "Spotify", icon: "🟢", placeholder: "https://open.spotify.com/artist/..." },
-  { name: "SoundCloud", icon: "🟠", placeholder: "https://soundcloud.com/username" },
+  { name: "Spotify", icon: "🎧", placeholder: "https://open.spotify.com/artist/..." },
+  { name: "SoundCloud", icon: "☁️", placeholder: "https://soundcloud.com/username" },
   { name: "Website", icon: "🌐", placeholder: "https://yourwebsite.com" },
 ];
 
@@ -231,7 +231,7 @@ export function EditArtistModal({ artist, onUpdate }: EditArtistModalProps) {
             <Label>Social Links</Label>
 
             {/* Quick Add Buttons */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            <div className="flex flex-wrap gap-2">
               {SOCIAL_PLATFORMS.map((platform) => (
                 <Button
                   key={platform.name}
@@ -239,7 +239,7 @@ export function EditArtistModal({ artist, onUpdate }: EditArtistModalProps) {
                   variant="outline"
                   size="sm"
                   onClick={() => setNewSocialLink(platform.placeholder)}
-                  className="justify-start"
+                  className="justify-start whitespace-nowrap"
                 >
                   <span className="mr-2">{platform.icon}</span>
                   {platform.name}
