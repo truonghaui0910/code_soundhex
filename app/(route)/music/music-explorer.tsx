@@ -408,7 +408,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                     </Link>
                                                     {track.artist && (
                                                         <Link
-                                                            href={`/artist/${track.artist.id}`}
+                                                            href={`/artist/${track.artist.custom_url || track.artist.id}`}
                                                         >
                                                             <p className="text-gray-600 dark:text-gray-400 truncate text-xs hover:underline cursor-pointer">
                                                                 {
@@ -485,7 +485,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                     )}
                                                 </div>
                                                 <Link
-                                                    href={`/artist/${track.artist.id}`}
+                                                    href={`/artist/${track.artist.custom_url || track.artist.id}`}
                                                 >
                                                     <h3 className="font-semibold text-sm mb-1 truncate text-gray-900 dark:text-white hover:underline cursor-pointer">
                                                         {track.artist.name}
