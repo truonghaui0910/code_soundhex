@@ -225,7 +225,7 @@ export function ArtistDetailUI({ artist, tracks, albums }: ArtistDetailUIProps) 
               <Badge className="bg-white/20 text-white border-white/30 w-fit mx-auto md:mx-0">
                 Artist
               </Badge>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center justify-center md:justify-start gap-4">
                 <h1 className="text-4xl md:text-6xl font-bold leading-tight">
                   {currentArtist.name}
                 </h1>
