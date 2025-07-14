@@ -222,7 +222,7 @@ export function EditArtistModal({ artist, onUpdate }: EditArtistModalProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
+        <Button className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all duration-200 border-0" size="sm">
           <Edit className="w-4 h-4 mr-2" />
           Edit Artist
         </Button>

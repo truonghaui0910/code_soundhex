@@ -112,16 +112,14 @@ export function AlbumDetailUI({ album, tracks }: AlbumDetailUIProps) {
                 </Button>
                 <Button
                   size="lg"
-                  variant="outline"
-                  className="border-white/30 text-white hover:bg-white/10"
+                  className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all duration-200 border-0"
                 >
                   <Heart className="mr-2 h-5 w-5" />
                   Save
                 </Button>
                 <Button
                   size="lg"
-                  variant="outline"
-                  className="border-white/30 text-white hover:bg-white/10"
+                  className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all duration-200 border-0"
                 >
                   <Share className="mr-2 h-5 w-5" />
                   Share
