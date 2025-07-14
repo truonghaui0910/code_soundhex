@@ -125,7 +125,8 @@ export function EditArtistModal({ artist, onUpdate }: EditArtistModalProps) {
       
       // Redirect to custom URL if it was updated
       if (customUrl && customUrl !== artist.custom_url) {
-        router.push(`/artist/${customUrl}`);
+        router.replace(`/artist/${customUrl}`);
+        window.location.reload();
       }
     } catch (error) {
       console.error("Error updating artist:", error);

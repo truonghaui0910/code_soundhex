@@ -73,16 +73,10 @@ export class ArtistsController {
   }
 
   static async updateArtist(id: number, data: Partial<Artist>): Promise<Artist> {
-    // Ensure social is properly formatted as array
-    const updateData = {
-      ...data,
-      social: Array.isArray(data.social) ? data.social : (data.social ? [data.social] : [])
-    };
-
     const supabase = createServerComponentClient<Database>({ cookies });
     const { data: artist, error } = await supabase
       .from('artists')
-      .update(updateData)
+      .update(data)
       .eq('id', id)
       .select()
       .single();
