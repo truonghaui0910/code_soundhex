@@ -86,14 +86,66 @@ export function ArtistDetailUI({ artist, tracks, albums }: ArtistDetailUIProps) 
   }, []);
 
   const getSocialIcon = (url: string) => {
-    if (url.includes('instagram.com')) return '📷';
-    if (url.includes('twitter.com') || url.includes('x.com')) return '🐦';
-    if (url.includes('facebook.com')) return '📘';
-    if (url.includes('youtube.com')) return '📺';
-    if (url.includes('tiktok.com')) return '🎵';
-    if (url.includes('spotify.com')) return '🟢';
-    if (url.includes('soundcloud.com')) return '🟠';
-    return '🌐';
+    if (url.includes('instagram.com')) {
+      return (
+        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
+          <rect x="2" y="2" width="20" height="20" rx="5" ry="5" stroke="currentColor" strokeWidth="2"/>
+          <path d="m16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" stroke="currentColor" strokeWidth="2"/>
+          <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" stroke="currentColor" strokeWidth="2"/>
+        </svg>
+      );
+    }
+    if (url.includes('twitter.com') || url.includes('x.com')) {
+      return (
+        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/>
+        </svg>
+      );
+    }
+    if (url.includes('facebook.com')) {
+      return (
+        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+        </svg>
+      );
+    }
+    if (url.includes('youtube.com')) {
+      return (
+        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"/>
+          <polygon points="9.75,15.02 15.5,11.75 9.75,8.48" fill="white"/>
+        </svg>
+      );
+    }
+    if (url.includes('tiktok.com')) {
+      return (
+        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+        </svg>
+      );
+    }
+    if (url.includes('spotify.com')) {
+      return (
+        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.301 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
+        </svg>
+      );
+    }
+    if (url.includes('soundcloud.com')) {
+      return (
+        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M1.175 12.225c-.051 0-.094.046-.101.1l-.233 2.154.233 2.105c.007.058.05.104.101.104.05 0 .093-.046.1-.104l.255-2.105-.255-2.154c-.007-.058-.05-.1-.1-.1zm1.73.027c-.058 0-.106.053-.113.12l-.193 2.128.193 2.042c.007.067.055.12.113.12.057 0 .105-.053.112-.12l.213-2.042-.213-2.128c-.007-.067-.055-.12-.112-.12zm1.73.013c-.067 0-.121.061-.129.136l-.172 2.115.172 2.019c.008.075.062.136.129.136.066 0 .12-.061.128-.136l.19-2.019-.19-2.115c-.008-.075-.062-.136-.128-.136zm1.73.026c-.075 0-.135.069-.143.154l-.152 2.089.152 1.999c.008.085.068.154.143.154.074 0 .135-.069.142-.154l.168-1.999-.168-2.089c-.007-.085-.068-.154-.142-.154zm1.73.022c-.083 0-.151.076-.16.17l-.133 2.067.133 1.977c.009.094.077.17.16.17.082 0 .15-.076.159-.17l.147-1.977-.147-2.067c-.009-.094-.077-.17-.159-.17zm1.73.018c-.091 0-.165.084-.175.188l-.114 2.049.114 1.955c.01.104.084.188.175.188.09 0 .164-.084.174-.188l.126-1.955-.126-2.049c-.01-.104-.084-.188-.174-.188zm1.73.014c-.1 0-.18.092-.191.206l-.095 2.035.095 1.934c.011.114.091.206.191.206.099 0 .179-.092.19-.206l.105-1.934-.105-2.035c-.011-.114-.091-.206-.19-.206zm1.73.01c-.108 0-.195.1-.207.223l-.075 2.021.075 1.913c.012.123.099.223.207.223.107 0 .194-.1.206-.223l.084-1.913-.084-2.021c-.012-.123-.099-.223-.206-.223zm1.73.007c-.116 0-.21.108-.223.24l-.056 2.007.056 1.892c.013.132.107.24.223.24.115 0 .209-.108.222-.24l.063-1.892-.063-2.007c-.013-.132-.107-.24-.222-.24zm1.73.004c-.124 0-.224.116-.238.258l-.037 1.993.037 1.87c.014.142.114.258.238.258.123 0 .223-.116.237-.258l.042-1.87-.042-1.993c-.014-.142-.114-.258-.237-.258zM18.01 9.188c-.381 0-.747.1-1.061.277a6.685 6.685 0 0 0-11.912 4.337l.016 4.026c.014.143.131.258.274.258h12.683c.694 0 1.26-.563 1.26-1.258v-6.382c0-.695-.566-1.258-1.26-1.258z"/>
+        </svg>
+      );
+    }
+    return (
+      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="2" y1="12" x2="22" y2="12"/>
+        <path d="m2 12c0-5.523 4.477-10 10-10s10 4.477 10 10"/>
+        <path d="m2 12c0 5.523 4.477 10 10 10s10-4.477 10-10"/>
+      </svg>
+    );
   };
 
   const getSocialName = (url: string) => {
@@ -105,6 +157,17 @@ export function ArtistDetailUI({ artist, tracks, albums }: ArtistDetailUIProps) 
     if (url.includes('spotify.com')) return 'Spotify';
     if (url.includes('soundcloud.com')) return 'SoundCloud';
     return 'Website';
+  };
+
+  const getSocialColor = (url: string) => {
+    if (url.includes('instagram.com')) return 'text-pink-500 hover:bg-pink-50 dark:hover:bg-pink-900/20';
+    if (url.includes('twitter.com') || url.includes('x.com')) return 'text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20';
+    if (url.includes('facebook.com')) return 'text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20';
+    if (url.includes('youtube.com')) return 'text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20';
+    if (url.includes('tiktok.com')) return 'text-black dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700';
+    if (url.includes('spotify.com')) return 'text-green-500 hover:bg-green-50 dark:hover:bg-green-900/20';
+    if (url.includes('soundcloud.com')) return 'text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20';
+    return 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700';
   };
 
   const handlePlayAllTracks = () => {
@@ -203,10 +266,10 @@ export function ArtistDetailUI({ artist, tracks, albums }: ArtistDetailUIProps) 
                         href={link}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-2 px-3 py-2 bg-white/10 backdrop-blur-sm rounded-full hover:bg-white/20 transition-colors text-sm"
+                        className={`flex items-center gap-2 px-3 py-2 bg-white/10 backdrop-blur-sm rounded-full transition-all duration-200 text-sm ${getSocialColor(link)}`}
                       >
-                        <span>{getSocialIcon(link)}</span>
-                        <span>{getSocialName(link)}</span>
+                        <span className="flex items-center">{getSocialIcon(link)}</span>
+                        <span className="text-white">{getSocialName(link)}</span>
                       </a>
                     ))}
                   </div>
