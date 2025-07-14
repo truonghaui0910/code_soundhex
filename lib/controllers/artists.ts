@@ -107,6 +107,18 @@ export class ArtistsController {
       .single();
 
     if (error) throw error;
+    
+    // Parse social from JSON string if needed
+    if (artist.social && typeof artist.social === 'string') {
+      try {
+        artist.social = JSON.parse(artist.social);
+      } catch (e) {
+        artist.social = [];
+      }
+    } else if (!artist.social) {
+      artist.social = [];
+    }
+    
     return artist;
   }
 
