@@ -89,7 +89,7 @@ export class ArtistsController {
   }
 
   static async updateArtist(id: number, updates: Partial<Artist>): Promise<Artist | null> {
-    const supabase = createClientComponentClient<Database>();
+    const supabase = createServerComponentClient<Database>({ cookies });
     const { data, error } = await supabase
       .from("artists")
       .update(updates)
@@ -106,7 +106,7 @@ export class ArtistsController {
   }
 
   static async checkCustomUrlAvailable(customUrl: string, excludeId?: number): Promise<boolean> {
-    const supabase = createClientComponentClient<Database>();
+    const supabase = createServerComponentClient<Database>({ cookies });
     let query = supabase
       .from("artists")
       .select("id")
