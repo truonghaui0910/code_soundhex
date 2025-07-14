@@ -108,7 +108,7 @@ export function AlbumDetailUI({ album, tracks }: AlbumDetailUIProps) {
                   disabled={safeTracks.length === 0}
                 >
                   <Play className="mr-2 h-5 w-5" />
-                  Play Album xx
+                  Play Album
                 </Button>
                 <Button
                   size="lg"
