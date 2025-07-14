@@ -85,7 +85,8 @@ export class ArtistsController {
     const artist = data as Artist;
     if (artist.social && typeof artist.social === 'string') {
       try {
-        artist.social = JSON.parse(artist.social);
+        const parsed = JSON.parse(artist.social);
+        artist.social = Array.isArray(parsed) ? parsed : [];
       } catch (e) {
         artist.social = [];
       }
