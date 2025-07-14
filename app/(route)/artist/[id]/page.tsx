@@ -1,30 +1,36 @@
-// app/(route)/artist/[id]/page.tsx - Fixed version
+
+import { notFound } from "next/navigation";
 import { ArtistDetailClient } from "./artist-detail-client";
+import { ArtistsController } from "@/lib/controllers/artists";
 
-// Force dynamic để tránh SSR blocking
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+interface ArtistPageProps {
+  params: {
+    id: string;
+  };
+}
 
-// Page component đơn giản - không fetch data ở đây nữa
-export default function ArtistDetailPage({
-  params,
-}: {
-  params: { id: string };
-}) {
-  const artistId = Number(params.id);
+export default async function ArtistPage({ params }: ArtistPageProps) {
+  const { id } = params;
+  
+  let artist;
+  let artistId: number;
 
-  // Basic validation
-  if (!artistId || isNaN(artistId)) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20">
-        <div className="container mx-auto py-10">
-          <h1 className="text-3xl font-bold mb-4">Artist</h1>
-          <p className="text-red-500">Invalid artist ID</p>
-        </div>
-      </div>
-    );
+  // Check if ID is numeric (old format) or custom URL
+  if (/^\d+$/.test(id)) {
+    // Numeric ID
+    artistId = parseInt(id);
+    artist = await ArtistsController.getArtistById(artistId);
+  } else {
+    // Custom URL
+    artist = await ArtistsController.getArtistByCustomUrl(id);
+    if (artist) {
+      artistId = artist.id;
+    }
   }
 
-  // Chỉ pass artistId, không fetch data ở đây
-  return <ArtistDetailClient artistId={artistId} />;
+  if (!artist) {
+    notFound();
+  }
+
+  return <ArtistDetailClient artistId={artistId} artist={artist} />;
 }

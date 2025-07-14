@@ -24,6 +24,9 @@ import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 import { Track } from "@/lib/definitions/Track";
 import { useDownload } from "@/hooks/use-download";
 import AddToPlaylist from "@/components/playlist/add-to-playlist";
+import { EditArtistModal } from "@/components/artist/edit-artist-modal";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { useEffect } from "react";
 
 // Helper function to format time
 const formatDuration = (seconds: number | null) => {
@@ -39,6 +42,9 @@ interface Artist {
   profile_image_url: string | null;
   bio: string | null;
   created_at: string | null;
+  custom_url: string | null;
+  social: string[] | null;
+  user_id: string | null;
 }
 
 interface Album {
@@ -59,6 +65,8 @@ interface ArtistDetailUIProps {
 }
 
 export function ArtistDetailUI({ artist, tracks, albums }: ArtistDetailUIProps) {
+  const [currentUser, setCurrentUser] = useState(null);
+  const [currentArtist, setCurrentArtist] = useState(artist);
   const {
     currentTrack,
     isPlaying,
@@ -67,6 +75,37 @@ export function ArtistDetailUI({ artist, tracks, albums }: ArtistDetailUIProps) 
     togglePlayPause,
   } = useAudioPlayer();
   const { downloadTrack, downloadMultipleTracks, isDownloading, isTrackDownloading } = useDownload();
+
+  useEffect(() => {
+    const supabase = createClientComponentClient();
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setCurrentUser(user);
+    };
+    getUser();
+  }, []);
+
+  const getSocialIcon = (url: string) => {
+    if (url.includes('instagram.com')) return '📷';
+    if (url.includes('twitter.com') || url.includes('x.com')) return '🐦';
+    if (url.includes('facebook.com')) return '📘';
+    if (url.includes('youtube.com')) return '📺';
+    if (url.includes('tiktok.com')) return '🎵';
+    if (url.includes('spotify.com')) return '🟢';
+    if (url.includes('soundcloud.com')) return '🟠';
+    return '🌐';
+  };
+
+  const getSocialName = (url: string) => {
+    if (url.includes('instagram.com')) return 'Instagram';
+    if (url.includes('twitter.com') || url.includes('x.com')) return 'Twitter';
+    if (url.includes('facebook.com')) return 'Facebook';
+    if (url.includes('youtube.com')) return 'YouTube';
+    if (url.includes('tiktok.com')) return 'TikTok';
+    if (url.includes('spotify.com')) return 'Spotify';
+    if (url.includes('soundcloud.com')) return 'SoundCloud';
+    return 'Website';
+  };
 
   const handlePlayAllTracks = () => {
     if (tracks && tracks.length > 0) {
@@ -115,13 +154,39 @@ export function ArtistDetailUI({ artist, tracks, albums }: ArtistDetailUIProps) 
               <Badge className="bg-white/20 text-white border-white/30 w-fit mx-auto md:mx-0">
                 Artist
               </Badge>
-              <h1 className="text-4xl md:text-6xl font-bold leading-tight">
-                {artist.name}
-              </h1>
-              {artist.bio && (
+              <div className="flex items-center gap-4">
+                <h1 className="text-4xl md:text-6xl font-bold leading-tight">
+                  {currentArtist.name}
+                </h1>
+                {currentUser?.id === currentArtist.user_id && (
+                  <EditArtistModal 
+                    artist={currentArtist} 
+                    onUpdate={setCurrentArtist}
+                  />
+                )}
+              </div>
+              {currentArtist.bio && (
                 <p className="text-lg text-purple-100 max-w-2xl">
-                  {artist.bio}
+                  {currentArtist.bio}
                 </p>
+              )}
+              
+              {/* Social Links */}
+              {currentArtist.social && currentArtist.social.length > 0 && (
+                <div className="flex flex-wrap gap-3">
+                  {currentArtist.social.map((link, index) => (
+                    <a
+                      key={index}
+                      href={link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 px-3 py-2 bg-white/10 backdrop-blur-sm rounded-full hover:bg-white/20 transition-colors text-sm"
+                    >
+                      <span>{getSocialIcon(link)}</span>
+                      <span>{getSocialName(link)}</span>
+                    </a>
+                  ))}
+                </div>
               )}
               <div className="flex items-center gap-3 text-lg text-purple-100 justify-center md:justify-start">
                 {albums && albums.length > 0 && (
