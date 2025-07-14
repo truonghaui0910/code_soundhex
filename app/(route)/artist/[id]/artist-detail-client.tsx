@@ -7,17 +7,67 @@ import { ArtistDetailUI } from './artist-detail-ui';
 
 interface ArtistDetailClientProps {
   artistId: number;
+  artist?: any;
 }
 
-export function ArtistDetailClient({ artistId }: ArtistDetailClientProps) {
-  const [loading, setLoading] = useState(true);
-  const [artist, setArtist] = useState(null);
+export function ArtistDetailClient({ artistId, artist: initialArtist }: ArtistDetailClientProps) {
+  const [loading, setLoading] = useState(!initialArtist);
+  const [artist, setArtist] = useState(initialArtist);
   const [tracks, setTracks] = useState([]);
   const [albums, setAlbums] = useState([]);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     async function fetchData() {
+      // If we already have artist data, just fetch tracks and albums
+      if (initialArtist) {
+        try {
+          setLoading(true);
+          setError(null);
+
+          console.log(`Starting API fetch for tracks and albums for artist ${artistId}`);
+          const startTime = Date.now();
+
+          const [tracksResponse, albumsResponse] = await Promise.all([
+            fetch(`/api/artists/${artistId}/tracks`),
+            fetch('/api/albums')
+          ]);
+
+          if (!tracksResponse.ok) {
+            const errorText = await tracksResponse.text();
+            console.error(`Tracks API error:`, errorText);
+            throw new Error(`Tracks API error: ${tracksResponse.status} - ${errorText}`);
+          }
+
+          if (!albumsResponse.ok) {
+            const errorText = await albumsResponse.text();
+            console.error(`Albums API error:`, errorText);
+            throw new Error(`Albums API error: ${albumsResponse.status} - ${errorText}`);
+          }
+
+          const [tracksData, albumsData] = await Promise.all([
+            tracksResponse.json(),
+            albumsResponse.json()
+          ]);
+
+          const fetchTime = Date.now() - startTime;
+          console.log(`API fetch completed in ${fetchTime}ms`);
+
+          const artistAlbums = albumsData.filter((album) => album.artist?.id === artistId);
+          const validatedTracks = Array.isArray(tracksData) ? tracksData : [];
+          const validatedAlbums = Array.isArray(artistAlbums) ? artistAlbums : [];
+
+          setTracks(validatedTracks);
+          setAlbums(validatedAlbums);
+        } catch (err) {
+          console.error("Error loading tracks and albums:", err);
+          setError(err.message);
+        } finally {
+          setLoading(false);
+        }
+        return;
+      }
+
       try {
         setLoading(true);
         setError(null);
@@ -105,7 +155,7 @@ export function ArtistDetailClient({ artistId }: ArtistDetailClientProps) {
     }
 
     fetchData();
-  }, [artistId]);
+  }, [artistId, initialArtist]);
 
   // Loading state - hiển thị ngay khi component mount
   if (loading) {

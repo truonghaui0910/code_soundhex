@@ -1,15 +1,34 @@
 @echo off
 
 REM Parse command line arguments
-set START_LOCAL=true
-if "%1"=="--no-start" set START_LOCAL=false
-if "%1"=="-n" set START_LOCAL=false
+set START_LOCAL=false
+set CREATE_BACKUP=false
+
+REM Check for start flags
+if "%1"=="--start" set START_LOCAL=true
+if "%1"=="-s" set START_LOCAL=true
+if "%2"=="--start" set START_LOCAL=true
+if "%2"=="-s" set START_LOCAL=true
+
+REM Check for backup flags
+if "%1"=="--backup" set CREATE_BACKUP=true
+if "%1"=="-b" set CREATE_BACKUP=true
+if "%2"=="--backup" set CREATE_BACKUP=true
+if "%2"=="-b" set CREATE_BACKUP=true
 
 echo ====================================
 echo Building SoundHex Application
 echo ====================================
-echo Usage: build.bat [--no-start or -n]
-echo   --no-start, -n : Skip starting local development environment
+echo Usage: build.bat [options]
+echo Options:
+echo   --start, -s  : Start local development environment after build
+echo   --backup, -b : Create backup before building new image
+echo   
+echo Examples:
+echo   build.bat                    (build and push only)
+echo   build.bat --start            (build, push and start local)
+echo   build.bat --backup           (create backup, build and push)
+echo   build.bat --start --backup   (full process with backup and start)
 echo ====================================
 
 echo.
@@ -23,7 +42,12 @@ if %errorlevel% neq 0 (
 )
 
 echo.
-echo [2/4] Creating backup from existing local image...
+if "%CREATE_BACKUP%"=="true" goto do_backup
+echo [2/4] Skipping backup (use --backup flag to create backup)...
+goto tag_image
+
+:do_backup
+echo [2/4] Creating backup from existing image...
 REM Tạo timestamp với format YYYYMMDD_HHMM
 for /f "tokens=2 delims==" %%a in ('wmic OS Get localdatetime /value') do set "dt=%%a"
 set "BACKUP_TAG=backup"
@@ -47,6 +71,8 @@ if %errorlevel% equ 0 (
         echo No existing image found, this is the first build. Skipping backup...
     )
 )
+
+:tag_image
 
 echo.
 echo [3/4] Tagging new image...
@@ -94,6 +120,13 @@ if "%START_LOCAL%"=="true" (
     echo To start manually: docker compose -f docker-compose.dev.yml up -d
     echo ====================================
 )
+
+echo.
+echo Summary of actions performed:
+echo - Built Docker image: YES
+echo - Created backup: %CREATE_BACKUP%
+echo - Pushed to registry: YES
+echo - Started local environment: %START_LOCAL%
 echo.
 echo Press any key to exit...
 pause >nul

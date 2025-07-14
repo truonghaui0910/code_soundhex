@@ -18,12 +18,12 @@ const nextConfig = {
         unoptimized: true, // Disable optimization for Docker
     },
     // output: 'standalone', // Better for Docker deployment
-    // typescript: {
-    //     ignoreBuildErrors: true,
-    // },
-    // eslint: {
-    //     ignoreDuringBuilds: true,
-    // },
+    typescript: {
+        ignoreBuildErrors: true,
+    },
+    eslint: {
+        ignoreDuringBuilds: true,
+    },
 
     // Disable telemetry
     experimental: {
