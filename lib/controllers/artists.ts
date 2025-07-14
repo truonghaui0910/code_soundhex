@@ -89,6 +89,8 @@ export class ArtistsController {
       } catch (e) {
         artist.social = [];
       }
+    } else if (!artist.social) {
+      artist.social = [];
     }
 
     return artist;
