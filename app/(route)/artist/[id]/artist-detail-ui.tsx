@@ -225,15 +225,17 @@ export function ArtistDetailUI({ artist, tracks, albums }: ArtistDetailUIProps) 
               <Badge className="bg-white/20 text-white border-white/30 w-fit mx-auto md:mx-0">
                 Artist
               </Badge>
-              <div className="flex items-center justify-center md:justify-start gap-4">
-                <h1 className="text-4xl md:text-6xl font-bold leading-tight">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-start gap-2 md:gap-4 items-center">
+                <h1 className="text-4xl md:text-6xl font-bold leading-tight text-center md:text-left">
                   {currentArtist.name}
                 </h1>
                 {currentUser?.id === currentArtist.user_id && (
-                  <EditArtistModal 
-                    artist={currentArtist} 
-                    onUpdate={handleArtistUpdate}
-                  />
+                  <div className="md:ml-0">
+                    <EditArtistModal 
+                      artist={currentArtist} 
+                      onUpdate={handleArtistUpdate}
+                    />
+                  </div>
                 )}
               </div>
               {currentArtist.bio && (
