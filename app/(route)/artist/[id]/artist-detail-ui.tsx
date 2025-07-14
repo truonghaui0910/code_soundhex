@@ -130,6 +130,15 @@ export function ArtistDetailUI({ artist, tracks, albums }: ArtistDetailUIProps) 
     }, 50);
   };
 
+  const handleArtistUpdate = (updatedArtist: Artist) => {
+    setCurrentArtist(updatedArtist);
+
+    // If custom URL was updated, change the browser URL
+    if (updatedArtist.custom_url && updatedArtist.custom_url !== artist.custom_url) {
+      window.history.replaceState({}, '', `/artist/${updatedArtist.custom_url}`);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20">
       {/* Header Section */}
@@ -161,7 +170,7 @@ export function ArtistDetailUI({ artist, tracks, albums }: ArtistDetailUIProps) 
                 {currentUser?.id === currentArtist.user_id && (
                   <EditArtistModal 
                     artist={currentArtist} 
-                    onUpdate={setCurrentArtist}
+                    onUpdate={handleArtistUpdate}
                   />
                 )}
               </div>

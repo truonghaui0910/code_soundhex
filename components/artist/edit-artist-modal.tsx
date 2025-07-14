@@ -125,8 +125,8 @@ export function EditArtistModal({ artist, onUpdate }: EditArtistModalProps) {
       
       // Redirect to custom URL if it was updated
       if (customUrl && customUrl !== artist.custom_url) {
-        router.replace(`/artist/${customUrl}`);
-        window.location.reload();
+        router.push(`/artist/${customUrl}`);
+        return; // Don't reload, let Next.js handle the navigation
       }
     } catch (error) {
       console.error("Error updating artist:", error);
