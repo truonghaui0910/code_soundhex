@@ -1,6 +1,8 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { ArtistsController } from "@/lib/controllers/artists";
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { cookies } from "next/headers";
 
 export async function GET(
   request: NextRequest,
@@ -34,10 +36,6 @@ export async function GET(
     );
   }
 }
-import { NextRequest, NextResponse } from "next/server";
-import { ArtistsController } from "@/lib/controllers/artists";
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
 
 export async function PUT(
   request: NextRequest,
