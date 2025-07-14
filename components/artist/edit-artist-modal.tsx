@@ -259,6 +259,7 @@ export function EditArtistModal({ artist, onUpdate }: EditArtistModalProps) {
                     addSocialLink();
                   }
                 }}
+                className="h-10"
               />
               <Button 
                 type="button" 
@@ -267,6 +268,7 @@ export function EditArtistModal({ artist, onUpdate }: EditArtistModalProps) {
                   addSocialLink();
                 }} 
                 size="sm"
+                className="h-10 w-10"
               >
                 <Plus className="w-4 h-4" />
               </Button>

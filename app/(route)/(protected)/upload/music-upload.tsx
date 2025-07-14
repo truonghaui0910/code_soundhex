@@ -1011,11 +1011,10 @@ export function MusicUpload() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20">
+        <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-gray-900 dark:via-purple-900/20dark:to-indigo-900/20">
             {/* Header */}
             <div className="relative overflow-hidden bg-gradient-to-r from-slate-800 via-purple-900 to-slate-900 text-white">
                 <div className="absolute inset-0 bg-black/10"></div>
-                ```
                 <div className="relative container mx-auto px-6 py-16">
                     <div className="text-center max-w-4xl mx-auto">
                         <div className="w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -1078,29 +1077,31 @@ export function MusicUpload() {
                                     <Label htmlFor="spotify-url">
                                         Spotify URL
                                     </Label>
-                                    <div className="flex gap-2">
-                                        <Input
-                                            id="spotify-url"
-                                            placeholder="Paste Spotify artist, album, playlist, or track URL here..."
-                                            value={spotifyUrl}
-                                            onChange={(e) =>
-                                                setSpotifyUrl(e.target.value)
-                                            }
-                                            className="flex-1"
-                                        />
-                                        <Button
-                                            onClick={handleSpotifySubmit}
-                                            disabled={
-                                                isLoading || !spotifyUrl.trim()
-                                            }
-                                        >
-                                            {isLoading ? (
-                                                <Loader2 className="h-4 w-4 animate-spin" />
-                                            ) : (
-                                                <Search className="h-4 w-4" />
-                                            )}
-                                        </Button>
-                                    </div>
+                                    
+<div className="flex gap-2">
+                  <Input
+                    id="spotify-url"
+                    placeholder="Paste Spotify artist, album, playlist, or track URL here..."
+                    value={spotifyUrl}
+                    onChange={(e) =>
+                        setSpotifyUrl(e.target.value)
+                    }
+                    className="flex-1 h-10"
+                  />
+                  <Button
+                    onClick={handleSpotifySubmit}
+                    disabled={
+                        isLoading || !spotifyUrl.trim()
+                    }
+                    className="px-4 h-10"
+                  >
+                    {isLoading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Search className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
                                 </div>
 
                                 <div className="grid md:grid-cols-4 gap-4 text-sm text-gray-600 dark:text-gray-400">
@@ -1941,8 +1942,7 @@ export function MusicUpload() {
                                 >
                                     <div className="text-center space-y-4">
                                         <div
-                                            className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500```
- rounded-full flex items-center justify-center mx-auto"
+                                            className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto"
                                         >
                                             <Upload className="h-8 w-8 text-white" />
                                         </div>
