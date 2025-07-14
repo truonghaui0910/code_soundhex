@@ -44,7 +44,20 @@ export function EditArtistModal({ artist, onUpdate }: EditArtistModalProps) {
   const [customUrl, setCustomUrl] = useState(artist.custom_url || "");
   const [customUrlStatus, setCustomUrlStatus] = useState<"idle" | "checking" | "available" | "taken" | "invalid">("idle");
   const [bio, setBio] = useState(artist.bio || "");
-  const [socialLinks, setSocialLinks] = useState<string[]>(artist.social || []);
+  const [socialLinks, setSocialLinks] = useState<string[]>(() => {
+    if (Array.isArray(artist.social)) {
+      return artist.social;
+    }
+    if (typeof artist.social === 'string') {
+      try {
+        const parsed = JSON.parse(artist.social);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  });
   const [newSocialLink, setNewSocialLink] = useState("");
 
   const checkCustomUrl = async (url: string) => {
@@ -260,7 +273,7 @@ export function EditArtistModal({ artist, onUpdate }: EditArtistModalProps) {
             </div>
 
             {/* Current Links */}
-            {socialLinks.length > 0 && (
+            {Array.isArray(socialLinks) && socialLinks.length > 0 && (
               <div className="space-y-2">
                 {socialLinks.map((link, index) => (
                   <div key={index} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
