@@ -54,7 +54,7 @@ export async function PUT(
     const { custom_url, social, bio } = body;
 
     // Validate custom_url format
-    if (custom_url && !/^[a-z0-9-_]+$/.test(custom_url)) {
+    if (custom_url && !/^[a-z0-9_-]+$/.test(custom_url)) {
       return NextResponse.json(
         { error: "Custom URL can only contain lowercase letters, numbers, hyphens, and underscores" },
         { status: 400 }

@@ -52,7 +52,7 @@ export function EditArtistModal({ artist, onUpdate }: EditArtistModalProps) {
       return;
     }
 
-    if (!/^[a-z0-9-_]+$/.test(url)) {
+    if (!/^[a-z0-9_-]+$/.test(url)) {
       setCustomUrlStatus("invalid");
       return;
     }
