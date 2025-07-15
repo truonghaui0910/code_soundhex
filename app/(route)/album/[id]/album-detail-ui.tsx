@@ -81,7 +81,7 @@ export function AlbumDetailUI({ album, tracks }: AlbumDetailUIProps) {
               </h1>
               <div className="flex items-center gap-3 text-lg text-purple-100 justify-center md:justify-start">
                 <Link
-                  href={`/artist/${safeAlbum.artist.id}`}
+                  href={`/artist/${safeAlbum.artist.custom_url || safeAlbum.artist.id}`}
                   prefetch={false} // Disable prefetch để tránh blocking
                   className="font-medium hover:underline"
                 >
