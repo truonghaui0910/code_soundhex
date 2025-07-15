@@ -286,10 +286,11 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                     Albums
                                 </h2>
                                 <Button
-                                    variant="outline"
+                                    variant="ghost"
                                     onClick={() => setCurrentView("library")}
+                                    className="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 font-medium"
                                 >
-                                    View All
+                                    View All →
                                 </Button>
                             </div>
 
@@ -301,7 +302,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                             .map((track) => track.album!.id),
                                     ),
                                 )
-                                    .slice(0, 25)
+                                    .slice(0, 10)
                                     .map((albumId) => {
                                         const track = filteredTracks.find(
                                             (t) =>
@@ -374,10 +375,17 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                     </div>
                                     Artists
                                 </h2>
+                                <Button
+                                    variant="ghost"
+                                    onClick={() => setCurrentView("library")}
+                                    className="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 font-medium"
+                                >
+                                    View All →
+                                </Button>
                             </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                                {uniqueArtists.slice(0, 25).map((artist) => {
+                                {uniqueArtists.slice(0, 10).map((artist) => {
                                     return (
                                         <div
                                             key={artist.id}
@@ -396,16 +404,19 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                     <Users className="h-12 w-12 text-white" />
                                                 )}
                                             </div>
-                                            <Link
-                                                href={`/artist/${artist.custom_url || artist.id}`}
-                                            >
-                                                <h3 className="font-semibold text-sm mb-1 truncate text-gray-900 dark:text-white hover:underline cursor-pointer">
-                                                    {artist.name}
-                                                </h3>
-                                            </Link>
-                                            <p className="text-gray-600 dark:text-gray-400 text-xs">
-                                                {artist.tracksCount} songs
-                                            </p>
+                                            <div className="space-y-1">
+                                                <Link
+                                                    href={`/artist/${artist.custom_url || artist.id}`}
+                                                    className="block"
+                                                >
+                                                    <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors truncate">
+                                                        {artist.name}
+                                                    </h3>
+                                                </Link>
+                                                <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                                                    {artist.tracksCount} songs
+                                                </p>
+                                            </div>
                                         </div>
                                     );
                                 })}
