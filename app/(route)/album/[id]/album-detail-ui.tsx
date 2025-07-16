@@ -12,6 +12,7 @@ import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 import { Track } from "@/lib/definitions/Track";
 import { useDownload } from "@/hooks/use-download";
 import AddToPlaylist from "@/components/playlist/add-to-playlist";
+import { TrackList } from "@/components/music/track-list";
 
 // Helper function to format time
 const formatDuration = (seconds: number | null | undefined) => {
@@ -132,161 +133,14 @@ export function AlbumDetailUI({ album, tracks }: AlbumDetailUIProps) {
 
       {/* Tracks Section */}
       <div className="container mx-auto px-6 py-12">
-        <Card className="border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm shadow-xl">
-          <CardContent className="p-0">
-            <div className="p-6 border-b border-gray-200/50 dark:border-gray-700/50">
-              <h2 className="text-xl font-bold flex items-center gap-3">
-                <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                  <Music className="h-4 w-4 text-white" />
-                </div>
-                Track List
-              </h2>
-            </div>
-
-            {safeTracks.length > 0 ? (
-              <div className="space-y-1">
-                {safeTracks.map((track, idx) => {
-                  // Additional safety check for each track
-                  if (!track || !track.id) {
-                    return null;
-                  }
-
-                  return (
-                    <div
-                      key={`track-${track.id}-${idx}`}
-                      className="group flex items-center gap-4 p-4 hover:bg-white/50 dark:hover:bg-gray-700/30 transition-colors cursor-pointer border-b border-gray-100/50 dark:border-gray-700/30 last:border-b-0"
-                    >
-                      <div className="w-8 text-center text-sm text-gray-500 dark:text-gray-400 group-hover:hidden">
-                        {currentTrack?.id === track.id && isPlaying ? (
-                          <div className="flex items-center justify-center">
-                            <div className="flex items-end space-x-0.5 h-4">
-                              <div className="w-0.5 bg-rose-600 animate-equalize-1" style={{ height: '30%' }}></div>
-                              <div className="w-0.5 bg-rose-600 animate-equalize-2" style={{ height: '100%' }}></div>
-                              <div className="w-0.5 bg-rose-600 animate-equalize-3" style={{ height: '60%' }}></div>
-                            </div>
-                          </div>
-                        ) : (
-                          idx + 1
-                        )}
-                      </div>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="w-8 h-8 p-0 hidden group-hover:flex rounded-full"
-                        onClick={() => {
-                          if (currentTrack?.id === track.id && isPlaying) {
-                            togglePlayPause();
-                            return;
-                          }
-                          
-                          setTrackList(safeTracks);
-                          setTimeout(() => {
-                            playTrack(track);
-                          }, 50);
-                        }}
-                      >
-                        {currentTrack?.id === track.id && isPlaying ? (
-                          <Pause className="h-4 w-4" />
-                        ) : (
-                          <Play className="h-4 w-4" />
-                        )}
-                      </Button>
-
-                      <div className="w-12 h-12 rounded-lg overflow-hidden bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0">
-                        {track.album?.cover_image_url ? (
-                          <Image
-                            src={track.album.cover_image_url}
-                            alt={track.title || "Track"}
-                            width={48}
-                            height={48}
-                            className="object-cover w-full h-full"
-                          />
-                        ) : (
-                          <Music className="h-5 w-5 text-white" />
-                        )}
-                      </div>
-
-                      <div className="flex-1 min-w-0">
-                        <div className="font-semibold text-gray-900 dark:text-white truncate hover:underline cursor-pointer">
-                          {track.title || "Unknown Track"}
-                        </div>
-                        <div className="text-sm text-gray-600 dark:text-gray-400 truncate hover:underline cursor-pointer">
-                          {track.artist?.name || "Unknown Artist"}
-                        </div>
-                      </div>
-
-                      <div className="hidden md:block">
-                        {track.genre?.name ? (
-                          <Badge variant="outline" className="text-xs">
-                            {track.genre.name}
-                          </Badge>
-                        ) : (
-                          <span className="text-xs text-gray-400">--</span>
-                        )}
-                      </div>
-
-                      <div className="hidden sm:flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                        <Clock className="h-3 w-3" />
-                        <span className="font-mono">
-                          {formatDuration(track.duration)}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        {/* Safe check for AddToPlaylist */}
-                        {track.id && track.title && (
-                          <AddToPlaylist trackId={track.id} trackTitle={track.title}>
-                            <button className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" title="Add to playlist">
-                              <Plus className="h-4 w-4" />
-                            </button>
-                          </AddToPlaylist>
-                        )}
-                        
-                        <Button 
-                          size="sm" 
-                          variant="ghost" 
-                          className={`p-2 relative overflow-hidden ${isTrackDownloading(track.id) ? 'bg-blue-50 dark:bg-blue-900/20' : ''}`}
-                          title="Download"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            downloadTrack(track);
-                          }}
-                          disabled={isTrackDownloading(track.id)}
-                        >
-                          {isTrackDownloading(track.id) ? (
-                            <>
-                              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-blue-600/20 animate-pulse"></div>
-                              <div className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-blue-500 to-blue-600 animate-loading-bar"></div>
-                              <Download className="h-4 w-4 text-blue-600 animate-bounce" />
-                            </>
-                          ) : (
-                            <Download className="h-4 w-4" />
-                          )}
-                        </Button>
-                        <Button size="sm" variant="ghost" className="p-2" title="Like">
-                          <Heart className="h-4 w-4" />
-                        </Button>
-                        <Button size="sm" variant="ghost" className="p-2" title="Share">
-                          <Share className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="py-16 text-center">
-                <Music className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                  No Songs
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  This album currently has no songs.
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <TrackList
+          tracks={safeTracks}
+          title="Track List"
+          showTrackNumber={true}
+          showAlbumInfo={false}
+          showArtistInfo={true}
+          onPlayAll={handlePlayAlbum}
+        />
       </div>
 
       {/* Music Player */}

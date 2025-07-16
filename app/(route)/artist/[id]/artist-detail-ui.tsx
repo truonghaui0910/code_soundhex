@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MusicPlayer } from "@/components/music/MusicPlayer";
+import { TrackList } from "@/components/music/track-list";
 import {
   Play,
   Clock,
@@ -248,7 +249,7 @@ export function ArtistDetailUI({ artist, tracks, albums }: ArtistDetailUIProps) 
               {(() => {
                 const socialLinks = currentArtist.social;
                 let parsedSocial = [];
-                
+
                 if (Array.isArray(socialLinks)) {
                   parsedSocial = socialLinks;
                 } else if (typeof socialLinks === 'string') {
@@ -258,7 +259,7 @@ export function ArtistDetailUI({ artist, tracks, albums }: ArtistDetailUIProps) 
                     parsedSocial = [];
                   }
                 }
-                
+
                 return parsedSocial.length > 0 && (
                   <div className="flex flex-wrap gap-3">
                     {parsedSocial.map((link, index) => (
@@ -375,145 +376,14 @@ export function ArtistDetailUI({ artist, tracks, albums }: ArtistDetailUIProps) 
 
         {/* Popular Tracks Section */}
         {tracks && tracks.length > 0 && (
-          <Card className="border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm shadow-xl">
-            <CardContent className="p-0">
-              <div className="p-6 border-b border-gray-200/50 dark:border-gray-700/50">
-                <h2 className="text-xl font-bold flex items-center gap-3">
-                  <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                    <Music className="h-4 w-4 text-white" />
-                  </div>
-                  Popular Tracks
-                </h2>
-              </div>
-
-              <div className="space-y-1">
-                {tracks.slice(0, 10).map((track, idx) => (
-                  <div
-                    key={track.id}
-                    className="group flex items-center gap-4 p-4 hover:bg-white/50 dark:hover:bg-gray-700/30 transition-colors cursor-pointer border-b border-gray-100/50 dark:border-gray-700/30 last:border-b-0"
-                    onClick={() => handlePlayTrack(track)}
-                  >
-                    <div className="w-8 text-center text-sm text-gray-500 dark:text-gray-400 group-hover:hidden">
-                      {currentTrack?.id === track.id && isPlaying ? (
-                        <div className="flex items-center justify-center">
-                          <div className="flex items-end space-x-0.5 h-4">
-                            <div
-                              className="w-0.5 bg-rose-600 animate-equalize-1"
-                              style={{ height: "30%" }}
-                            ></div>
-                            <div
-                              className="w-0.5 bg-rose-600 animate-equalize-2"
-                              style={{ height: "100%" }}
-                            ></div>
-                            <div
-                              className="w-0.5 bg-rose-600 animate-equalize-3"
-                              style={{ height: "60%" }}
-                            ></div>
-                            <div
-                              className="w-0.5 bg-rose-600 animate-equalize-1"
-                              style={{ height: "40%" }}
-                            ></div>
-                          </div>
-                        </div>
-                      ) : (
-                        idx + 1
-                      )}
-                    </div>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="w-8 h-8 p-0 hidden group-hover:flex rounded-full"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handlePlayTrack(track);
-                      }}
-                    >
-                      {currentTrack?.id === track.id && isPlaying ? (
-                        <Pause className="h-4 w-4" />
-                      ) : (
-                        <Play className="h-4 w-4" />
-                      )}
-                    </Button>
-
-                    <div className="w-12 h-12 rounded-lg overflow-hidden bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0">
-                      {track.album?.cover_image_url ? (
-                        <Image
-                          src={track.album.cover_image_url}
-                          alt={track.title}
-                          width={48}
-                          height={48}
-                          className="object-cover w-full h-full"
-                        />
-                      ) : (
-                        <Music className="h-5 w-5 text-white" />
-                      )}
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                      <div className="font-semibold text-gray-900 dark:text-white truncate">
-                        {track.title}
-                      </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400 truncate">
-                        {track.album?.title}
-                      </div>
-                    </div>
-
-                    <div className="hidden md:block">
-                      {track.genre ? (
-                        <Badge variant="outline" className="text-xs">
-                          {track.genre.name}
-                        </Badge>
-                      ) : (
-                        <span className="text-xs text-gray-400">--</span>
-                      )}
-                    </div>
-
-                    <div className="hidden sm:flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                      <Clock className="h-3 w-3" />
-                      <span className="font-mono">
-                        {formatDuration(track.duration)}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <AddToPlaylist trackId={track.id} trackTitle={track.title}>
-                        <button className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" title="Add to playlist">
-                          <Plus className="h-4 w-4" />
-                        </button>
-                      </AddToPlaylist>
-                      <Button 
-                        size="sm" 
-                        variant="ghost" 
-                        className={`p-2 relative overflow-hidden ${isTrackDownloading(track.id) ? 'bg-blue-50 dark:bg-blue-900/20' : ''}`}
-                        title="Download"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          downloadTrack(track);
-                        }}
-                        disabled={isTrackDownloading(track.id)}
-                      >
-                        {isTrackDownloading(track.id) ? (
-                          <>
-                            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-blue-600/20 animate-pulse"></div>
-                            <div className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-blue-500 to-blue-600 animate-loading-bar"></div>
-                            <Download className="h-4 w-4 text-blue-600 animate-bounce" />
-                          </>
-                        ) : (
-                          <Download className="h-4 w-4" />
-                        )}
-                      </Button>
-                      <Button size="sm" variant="ghost" className="p-2" title="Like">
-                        <Heart className="h-4 w-4" />
-                      </Button>
-                      <Button size="sm" variant="ghost" className="p-2" title="Share">
-                        <Share className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          <TrackList
+            tracks={tracks.slice(0, 10)}
+            title="Popular Tracks"
+            showTrackNumber={true}
+            showAlbumInfo={true}
+            showArtistInfo={false}
+            onPlayAll={handlePlayAllTracks}
+          />
         )}
       </div>
 
