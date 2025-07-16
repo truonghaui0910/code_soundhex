@@ -11,7 +11,6 @@ import {
   Clock, 
   Download, 
   Plus, 
-  MoreVertical,
   Volume2 
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -31,8 +30,8 @@ interface TrackListProps {
 }
 
 // Helper function to format time in minutes:seconds
-const formatDuration = (seconds: number | null) => {
-  if (!seconds) return "--:--";
+const formatDuration = (seconds: number | null | undefined) => {
+  if (!seconds || typeof seconds !== 'number') return "--:--";
   const mins = Math.floor(seconds / 60);
   const secs = Math.floor(seconds % 60);
   return `${mins}:${secs.toString().padStart(2, "0")}`;
@@ -60,7 +59,9 @@ export function TrackList({
 
   const handlePlayTrack = (track: Track, index: number) => {
     setTrackList(tracks);
-    playTrack(track, index);
+    setTimeout(() => {
+      playTrack(track);
+    }, 50);
   };
 
   const handleTogglePlay = (track: Track, index: number) => {
@@ -79,7 +80,7 @@ export function TrackList({
     }
   };
 
-  const safeTracks = Array.isArray(tracks) ? tracks : [];
+  const safeTracks = Array.isArray(tracks) ? tracks.filter(track => track && track.id) : [];
 
   if (safeTracks.length === 0) {
     return (
@@ -127,10 +128,6 @@ export function TrackList({
 
         <div className="space-y-1">
           {safeTracks.map((track, idx) => {
-            if (!track || !track.id) {
-              return null;
-            }
-
             const isCurrentTrack = currentTrack?.id === track.id;
             const isCurrentlyPlaying = isCurrentTrack && isPlaying;
 
@@ -211,8 +208,16 @@ export function TrackList({
                     >
                       {track.title}
                     </h3>
+                    {/* Playing indicator with wave animation */}
                     {isCurrentlyPlaying && (
-                      <Volume2 className="h-3 w-3 text-purple-600 animate-pulse" />
+                      <div className="flex items-center gap-1">
+                        <div className="flex items-end gap-[2px] h-4">
+                          <div className="w-[2px] bg-purple-500 rounded-full animate-pulse" style={{ height: '4px', animationDelay: '0ms', animationDuration: '1000ms' }}></div>
+                          <div className="w-[2px] bg-purple-500 rounded-full animate-pulse" style={{ height: '8px', animationDelay: '150ms', animationDuration: '1000ms' }}></div>
+                          <div className="w-[2px] bg-purple-500 rounded-full animate-pulse" style={{ height: '6px', animationDelay: '300ms', animationDuration: '1000ms' }}></div>
+                          <div className="w-[2px] bg-purple-500 rounded-full animate-pulse" style={{ height: '10px', animationDelay: '450ms', animationDuration: '1000ms' }}></div>
+                        </div>
+                      </div>
                     )}
                   </div>
                   <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
