@@ -11,7 +11,9 @@ import {
   Clock, 
   Download, 
   Plus, 
-  Volume2 
+  Volume2,
+  Heart,
+  Share
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -279,6 +281,24 @@ export function TrackList({
                     disabled={isTrackDownloading(track.id)}
                   >
                     <Download className="h-4 w-4 text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400" />
+                  </Button>
+
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0 hover:bg-purple-100 dark:hover:bg-purple-900/50"
+                    title="Like"
+                  >
+                    <Heart className="h-4 w-4 text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400" />
+                  </Button>
+
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0 hover:bg-purple-100 dark:hover:bg-purple-900/50"
+                    title="Share"
+                  >
+                    <Share className="h-4 w-4 text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400" />
                   </Button>
                 </div>
               </div>
