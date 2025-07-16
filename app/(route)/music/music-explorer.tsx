@@ -267,11 +267,13 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                         {/* Albums Section */}
                         <section>
                             <div className="flex items-center justify-between mb-8">
-                                <h2 className="text-xl font-bold flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                                        <Music className="h-5 w-5 text-white" />
+                                <h2 className="text-3xl font-bold flex items-center gap-4">
+                                    <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
+                                        <Music className="h-6 w-6 text-white" />
                                     </div>
-                                    Albums
+                                    <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                                        Albums
+                                    </span>
                                 </h2>
                                 <Button
                                     variant="ghost"
@@ -376,11 +378,13 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                         {/* Artists Section */}
                         <section>
                             <div className="flex items-center justify-between mb-8">
-                                <h2 className="text-xl font-bold flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-gradient-to-r from-pink-500 to-rose-500 rounded-full flex items-center justify-center">
-                                        <Users className="h-5 w-5 text-white" />
+                                <h2 className="text-3xl font-bold flex items-center gap-4">
+                                    <div className="w-12 h-12 bg-gradient-to-r from-pink-500 to-rose-500 rounded-2xl flex items-center justify-center shadow-lg">
+                                        <Users className="h-6 w-6 text-white" />
                                     </div>
-                                    Artists
+                                    <span className="bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">
+                                        Artists
+                                    </span>
                                 </h2>
                                 <Button
                                     variant="ghost"
@@ -448,7 +452,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                             </div>
 
                             {/* Featured track grid with new design */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8">
                                 {featuredTracks.slice(0, 8).map((track, index) => (
                                     <div
                                         key={track.id}
