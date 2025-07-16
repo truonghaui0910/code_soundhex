@@ -164,18 +164,6 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
         return shuffled.slice(0, 12);
     }, [filteredTracks]);
 
-    const handleUploadClick = () => {
-        fileInputRef.current?.click();
-    };
-
-    const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const files = event.target.files;
-        if (files && files.length > 0) {
-            console.log("Files selected:", files);
-            alert("Upload functionality will be implemented soon!");
-        }
-    };
-
     useEffect(() => {
         // Check for the 'tab' parameter in the URL
         const tab = searchParams.get("tab");
@@ -286,10 +274,11 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                     Albums
                                 </h2>
                                 <Button
-                                    variant="outline"
+                                    variant="ghost"
                                     onClick={() => setCurrentView("library")}
+                                    className="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 font-medium"
                                 >
-                                    View All
+                                    View All →
                                 </Button>
                             </div>
 
@@ -301,7 +290,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                             .map((track) => track.album!.id),
                                     ),
                                 )
-                                    .slice(0, 25)
+                                    .slice(0, 10)
                                     .map((albumId) => {
                                         const track = filteredTracks.find(
                                             (t) =>
@@ -311,11 +300,8 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                         if (!track || !track.album) return null;
 
                                         return (
-                                            <Card
-                                                key={track.album.id}
-                                                className="group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm"
-                                            >
-                                                <div className="relative aspect-square">
+                                            <div key={track.album.id} className="group text-center">
+                                                <div className="relative aspect-square mb-3">
                                                     <Link
                                                         href={`/album/${track.album.id}`}
                                                         prefetch={false}
@@ -333,94 +319,55 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                                 }
                                                                 fill
                                                                 sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
-                                                                className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                                                className="object-cover rounded-lg group-hover:scale-105 transition-transform duration-300"
                                                             />
                                                         ) : (
-                                                            <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
+                                                            <div className="bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center w-full h-full rounded-lg">
                                                                 <Music className="h-12 w-12 text-white" />
                                                             </div>
                                                         )}
                                                     </Link>
-
-                                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                                    
+                                                    {/* Play Album Button Overlay */}
+                                                    <div className="absolute inset-0 flex items-center justify-center rounded-lg">
                                                         <Button
                                                             size="lg"
                                                             onClick={(e) => {
+                                                                e.preventDefault();
                                                                 e.stopPropagation();
-                                                                // Check if this track is currently playing
-                                                                if (
-                                                                    currentTrack?.id ===
-                                                                        track.id &&
-                                                                    isPlaying
-                                                                ) {
-                                                                    // If playing, pause it
-                                                                    togglePlayPause();
-                                                                } else {
-                                                                    // If not playing or different track, play it
-                                                                    const albumTracks =
-                                                                        filteredTracks.filter(
-                                                                            (
-                                                                                t,
-                                                                            ) =>
-                                                                                t.album &&
-                                                                                track.album &&
-                                                                                t
-                                                                                    .album
-                                                                                    .id ===
-                                                                                    track
-                                                                                        .album
-                                                                                        .id,
-                                                                        );
-                                                                    if (
-                                                                        albumTracks.length >
-                                                                        0
-                                                                    ) {
-                                                                        setTrackList(
-                                                                            albumTracks,
-                                                                        );
-                                                                        setTimeout(
-                                                                            () => {
-                                                                                playTrack(
-                                                                                    track,
-                                                                                );
-                                                                            },
-                                                                            50,
-                                                                        );
-                                                                    } else {
-                                                                        playTrack(
-                                                                            track,
-                                                                        );
-                                                                    }
+                                                                const albumTracks = filteredTracks.filter(t => t.album?.id === track.album.id);
+                                                                if (albumTracks.length > 0) {
+                                                                    setTrackList(albumTracks);
+                                                                    playTrack(albumTracks[0]);
                                                                 }
                                                             }}
-                                                            className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full bg-white text-purple-600 hover:bg-white/90 pointer-events-auto"
+                                                            className="opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-full bg-white/90 text-purple-600 hover:bg-white hover:scale-110 shadow-lg backdrop-blur-sm"
                                                         >
-                                                            <Play className="h-5 w-5" />
+                                                            <Play className="h-6 w-6" />
                                                         </Button>
                                                     </div>
                                                 </div>
-                                                <CardContent className="p-3">
+                                                <div className="space-y-1">
                                                     <Link
                                                         href={`/album/${track.album.id}`}
+                                                        prefetch={false}
+                                                        className="block"
                                                     >
-                                                        <h3 className="font-semibold text-sm mb-1 truncate hover:underline cursor-pointer">
+                                                        <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors truncate">
                                                             {track.album.title}
                                                         </h3>
                                                     </Link>
-                                                    {track.artist && (
-                                                        <Link
-                                                            href={`/artist/${track.artist.custom_url || track.artist.id}`}
-                                                        >
-                                                            <p className="text-gray-600 dark:text-gray-400 truncate text-xs hover:underline cursor-pointer">
-                                                                {
-                                                                    track.artist
-                                                                        .name
-                                                                }
-                                                            </p>
-                                                        </Link>
-                                                    )}
-                                                </CardContent>
-                                            </Card>
+                                                    <Link
+                                                        href={`/artist/${track.artist?.custom_url || track.artist?.id}`}
+                                                        prefetch={false}
+                                                        className="block"
+                                                    >
+                                                        <p className="text-sm text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors truncate">
+                                                            {track.artist?.name}
+                                                        </p>
+                                                    </Link>
+                                                </div>
+                                            </div>
                                         );
                                     })}
                             </div>
@@ -435,10 +382,17 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                     </div>
                                     Artists
                                 </h2>
+                                <Button
+                                    variant="ghost"
+                                    onClick={() => setCurrentView("library")}
+                                    className="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 font-medium"
+                                >
+                                    View All →
+                                </Button>
                             </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                                {uniqueArtists.slice(0, 25).map((artist) => {
+                                {uniqueArtists.slice(0, 10).map((artist) => {
                                     return (
                                         <div
                                             key={artist.id}
@@ -457,16 +411,19 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                     <Users className="h-12 w-12 text-white" />
                                                 )}
                                             </div>
-                                            <Link
-                                                href={`/artist/${artist.custom_url || artist.id}`}
-                                            >
-                                                <h3 className="font-semibold text-sm mb-1 truncate text-gray-900 dark:text-white hover:underline cursor-pointer">
-                                                    {artist.name}
-                                                </h3>
-                                            </Link>
-                                            <p className="text-gray-600 dark:text-gray-400 text-xs">
-                                                {artist.tracksCount} songs
-                                            </p>
+                                            <div className="space-y-1">
+                                                <Link
+                                                    href={`/artist/${artist.custom_url || artist.id}`}
+                                                    className="block"
+                                                >
+                                                    <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors truncate">
+                                                        {artist.name}
+                                                    </h3>
+                                                </Link>
+                                                <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                                                    {artist.tracksCount} songs
+                                                </p>
+                                            </div>
                                         </div>
                                     );
                                 })}
