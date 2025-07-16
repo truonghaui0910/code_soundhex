@@ -267,9 +267,9 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                         {/* Albums Section */}
                         <section>
                             <div className="flex items-center justify-between mb-8">
-                                <h2 className="text-3xl font-bold flex items-center gap-4">
-                                    <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
-                                        <Music className="h-6 w-6 text-white" />
+                                <h2 className="text-xl font-bold flex items-center gap-3">
+                                    <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
+                                        <Music className="h-4 w-4 text-white" />
                                     </div>
                                     <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                                         Albums
@@ -329,7 +329,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                             </div>
                                                         )}
                                                     </Link>
-                                                    
+
                                                     {/* Play Album Button Overlay */}
                                                     <div className="absolute inset-0 flex items-center justify-center rounded-lg">
                                                         <Button
@@ -378,9 +378,9 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                         {/* Artists Section */}
                         <section>
                             <div className="flex items-center justify-between mb-8">
-                                <h2 className="text-3xl font-bold flex items-center gap-4">
-                                    <div className="w-12 h-12 bg-gradient-to-r from-pink-500 to-rose-500 rounded-2xl flex items-center justify-center shadow-lg">
-                                        <Users className="h-6 w-6 text-white" />
+                                <h2 className="text-xl font-bold flex items-center gap-3">
+                                    <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-rose-500 rounded-2xl flex items-center justify-center shadow-lg">
+                                        <Users className="h-4 w-4 text-white" />
                                     </div>
                                     <span className="bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">
                                         Artists
@@ -437,9 +437,9 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                         {/* Featured Tracks */}
                         <section>
                             <div className="flex items-center justify-between mb-8">
-                                <h2 className="text-3xl font-bold flex items-center gap-4">
-                                    <div className="w-12 h-12 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
-                                        <TrendingUp className="h-6 w-6 text-white" />
+                                <h2 className="text-xl font-bold flex items-center gap-3">
+                                    <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
+                                        <TrendingUp className="h-4 w-4 text-white" />
                                     </div>
                                     <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
                                         Featured Tracks
@@ -463,7 +463,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                     >
                                         {/* Main Card */}
                                         <div className="relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-500 transform hover:-translate-y-2 border border-white/20 dark:border-gray-700/30">
-                                            
+
                                             {/* Album Cover */}
                                             <div className="relative aspect-square overflow-hidden">
                                                 {track.album?.cover_image_url ? (
@@ -479,10 +479,10 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                         <Music className="h-20 w-20 text-white/80" />
                                                     </div>
                                                 )}
-                                                
+
                                                 {/* Gradient overlay */}
                                                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                                                
+
                                                 {/* Play button */}
                                                 <div className="absolute inset-0 flex items-center justify-center">
                                                     <Button
