@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -9,12 +10,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -25,6 +20,7 @@ import {
   Lock,
   Globe,
   Loader2,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -51,7 +47,7 @@ export default function AddToPlaylist({
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [newPlaylistName, setNewPlaylistName] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [togglingPrivacy, setTogglingPrivacy] = useState<number | null>(null);
 
   const fetchPlaylists = async () => {
@@ -88,6 +84,7 @@ export default function AddToPlaylist({
 
       const playlist = playlists.find((p) => p.id === playlistId);
       toast.success(`Added "${trackTitle}" to "${playlist?.name}"`);
+      setIsModalOpen(false);
     } catch (error: any) {
       console.error("Error adding track to playlist:", error);
 
@@ -169,12 +166,9 @@ export default function AddToPlaylist({
     }
   };
 
-  const handleDropdownOpenChange = (open: boolean) => {
-    setIsDropdownOpen(open);
-    if (open) {
-      // Always refresh playlists when dropdown opens
-      fetchPlaylists();
-    }
+  const handleModalOpen = () => {
+    setIsModalOpen(true);
+    fetchPlaylists();
   };
 
   const togglePlaylistPrivacy = async (
@@ -216,115 +210,106 @@ export default function AddToPlaylist({
 
   return (
     <>
-      <DropdownMenu
-        open={isDropdownOpen}
-        onOpenChange={handleDropdownOpenChange}
-      >
-        <DropdownMenuTrigger asChild>
-          <div
-            onClick={(e) => {
-              e.stopPropagation();
-            }}
-          >
-            {children}
-          </div>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent
-          align="center"
-          side="top"
-          className="w-80 z-[9999] max-h-80 overflow-y-auto bg-white dark:bg-gray-800 border shadow-lg focus:outline-none !transition-none !transform-none !animate-none"
-          style={{
-            zIndex: 9999,
-            position: "fixed",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            animation: "none !important",
-            transition: "none !important",
-          }}
-          onCloseAutoFocus={(e) => e.preventDefault()}
+      <div onClick={handleModalOpen}>
+        {children}
+      </div>
+
+      {/* Custom Modal */}
+      {isModalOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]"
+          onClick={() => setIsModalOpen(false)}
         >
-          <div className="p-2">
-            <div className="flex items-center gap-2 mb-2">
-              <Search className="h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="Search playlists..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-8"
-                onClick={(e) => e.stopPropagation()}
-              />
-            </div>
-          </div>
-
-          <DropdownMenuItem
-            className="focus:bg-gray-100 dark:focus:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setShowCreateDialog(true);
-              setIsDropdownOpen(false);
-            }}
+          <div
+            className="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-80 max-h-80 overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
           >
-            <Plus className="mr-2 h-4 w-4" />
-            Create new playlist
-          </DropdownMenuItem>
+            {/* Header */}
+            <div className="flex items-center justify-between p-3 border-b border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold">Add to Playlist</h3>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
 
-          {isLoading ? (
-            <div className="p-4 text-center text-sm text-gray-500">
-              Loading playlists...
+            {/* Search */}
+            <div className="p-2">
+              <div className="flex items-center gap-2 mb-2">
+                <Search className="h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Search playlists..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="h-8"
+                />
+              </div>
             </div>
-          ) : filteredPlaylists.length === 0 ? (
-            <div className="p-4 text-center text-sm text-gray-500">
-              {searchQuery ? "No playlists found" : "No playlists yet"}
-            </div>
-          ) : (
-            filteredPlaylists.map((playlist) => (
-              <DropdownMenuItem
-                key={playlist.id}
-                className="focus:bg-gray-100 dark:focus:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors p-0"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
+
+            {/* Content */}
+            <div className="max-h-48 overflow-y-auto">
+              {/* Create new playlist option */}
+              <div
+                className="flex items-center gap-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                onClick={() => {
+                  setShowCreateDialog(true);
+                  setIsModalOpen(false);
                 }}
               >
-                <div className="flex items-center w-full p-2">
-                  <ListMusic className="mr-2 h-4 w-4 flex-shrink-0" />
-                  <div
-                    className="flex-1 cursor-pointer"
-                    onClick={() => {
-                      handleAddToPlaylist(playlist.id);
-                      setIsDropdownOpen(false);
-                    }}
-                  >
-                    <div className="font-medium">{playlist.name}</div>
-                    <div className="text-xs text-gray-500">
-                      {playlist.track_count} tracks
-                    </div>
-                  </div>
-                  <button
-                    className="ml-2 p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex-shrink-0"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      togglePlaylistPrivacy(playlist.id, playlist.private);
-                    }}
-                    disabled={togglingPrivacy === playlist.id}
-                  >
-                    {togglingPrivacy === playlist.id ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : playlist.private ? (
-                      <Lock className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-                    ) : (
-                      <Globe className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-                    )}
-                  </button>
+                <Plus className="h-4 w-4" />
+                <span className="text-sm">Create new playlist</span>
+              </div>
+
+              {/* Playlists list */}
+              {isLoading ? (
+                <div className="p-4 text-center text-sm text-gray-500">
+                  Loading playlists...
                 </div>
-              </DropdownMenuItem>
-            ))
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
+              ) : filteredPlaylists.length === 0 ? (
+                <div className="p-4 text-center text-sm text-gray-500">
+                  {searchQuery ? "No playlists found" : "No playlists yet"}
+                </div>
+              ) : (
+                filteredPlaylists.map((playlist) => (
+                  <div
+                    key={playlist.id}
+                    className="flex items-center p-2 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    <ListMusic className="mr-2 h-4 w-4 flex-shrink-0" />
+                    <div
+                      className="flex-1 cursor-pointer"
+                      onClick={() => handleAddToPlaylist(playlist.id)}
+                    >
+                      <div className="font-medium text-sm">{playlist.name}</div>
+                      <div className="text-xs text-gray-500">
+                        {playlist.track_count} tracks
+                      </div>
+                    </div>
+                    <button
+                      className="ml-2 p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 flex-shrink-0"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        togglePlaylistPrivacy(playlist.id, playlist.private);
+                      }}
+                      disabled={togglingPrivacy === playlist.id}
+                    >
+                      {togglingPrivacy === playlist.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : playlist.private ? (
+                        <Lock className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                      ) : (
+                        <Globe className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                      )}
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Create Playlist Dialog */}
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
