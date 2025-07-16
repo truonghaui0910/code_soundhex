@@ -164,18 +164,6 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
         return shuffled.slice(0, 12);
     }, [filteredTracks]);
 
-    const handleUploadClick = () => {
-        fileInputRef.current?.click();
-    };
-
-    const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const files = event.target.files;
-        if (files && files.length > 0) {
-            console.log("Files selected:", files);
-            alert("Upload functionality will be implemented soon!");
-        }
-    };
-
     useEffect(() => {
         // Check for the 'tab' parameter in the URL
         const tab = searchParams.get("tab");
