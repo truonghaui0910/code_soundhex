@@ -217,12 +217,27 @@ export default function AddToPlaylist({
       {/* Custom Modal */}
       {isModalOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[99999]"
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[999999]"
           onClick={() => setIsModalOpen(false)}
+          style={{
+            zIndex: 999999,
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
         >
           <div
             className="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-96 max-h-96 overflow-hidden"
             onClick={(e) => e.stopPropagation()}
+            style={{
+              zIndex: 999999,
+              position: 'relative'
+            }}
           >
             {/* Header */}
             <div className="flex items-center justify-between p-3 border-b border-gray-200 dark:border-gray-700">
