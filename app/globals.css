@@ -308,10 +308,28 @@
 }
 
 @keyframes equalize-4 {
-  0%, 100% { transform: scaleY(0.8); }
-  25% { transform: scaleY(0.3); }
-  50% { transform: scaleY(0.9); }
-  75% { transform: scaleY(0.4); }
+  0%,
+  100% {
+    height: 80%;
+  }
+  50% {
+    height: 30%;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-equalize-4 {
+  animation: equalize-4 1.5s ease-in-out infinite;
 }
 
 /* Animation classes */
@@ -473,42 +491,30 @@ body {
     z-index: 9999 !important;
   }
 
-  /* Custom dropdown animation - slide from bottom to top */
+  /* Custom dropdown animation - completely disabled */
   [data-radix-dropdown-menu-content] {
     position: fixed !important;
-    will-change: transform !important;
-    animation-duration: 200ms !important;
-    animation-timing-function: ease-out !important;
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
   }
 
   [data-radix-dropdown-menu-content][data-state="open"] {
-    animation-name: slideInFromBottom !important;
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
   }
 
   [data-radix-dropdown-menu-content][data-state="closed"] {
-    animation-name: slideOutToBottom !important;
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
   }
 
-  @keyframes slideInFromBottom {
-    from {
-      opacity: 0;
-      transform: translateY(10px) scale(0.95);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
-  }
-
-  @keyframes slideOutToBottom {
-    from {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
-    to {
-      opacity: 0;
-      transform: translateY(10px) scale(0.95);
-    }
+  /* Force disable all animations for dropdown menu specifically */
+  [data-radix-dropdown-menu-content] * {
+    animation: none !important;
+    transition: none !important;
   }
 
   /* Remove all white borders and flashing effects from dropdown menu items */
