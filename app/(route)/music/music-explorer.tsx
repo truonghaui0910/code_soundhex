@@ -473,6 +473,10 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                         fill
                                                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                                                         className="object-cover group-hover:scale-110 transition-transform duration-700"
+                                                        style={{
+                                                            transform: 'translateZ(0)',
+                                                            willChange: 'transform'
+                                                        }}
                                                     />
                                                 ) : (
                                                     <div className="w-full h-full bg-gradient-to-br from-purple-400 via-pink-400 to-rose-400 flex items-center justify-center">
@@ -646,6 +650,10 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                     fill
                                                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                                                     className="object-cover group-hover:scale-110 transition-transform duration-700"
+                                                style={{
+                                                    transform: 'translateZ(0)',
+                                                    willChange: 'transform'
+                                                }}
                                                 />
                                             ) : (
                                                 <div className="w-full h-full bg-gradient-to-br from-purple-400 via-pink-400 to-rose-400 flex items-center justify-center">
