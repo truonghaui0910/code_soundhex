@@ -192,6 +192,14 @@ export function TrackList({
                       height={48}
                       className="w-full h-full object-cover"
                     />
+                  ) : track.album?.cover_image_url ? (
+                    <Image
+                      src={track.album.cover_image_url}
+                      alt={track.title}
+                      width={48}
+                      height={48}
+                      className="w-full h-full object-cover"
+                    />
                   ) : (
                     <Music className="h-5 w-5 text-white/80" />
                   )}
