@@ -339,6 +339,25 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                             </div>
                                                         )}
                                                     </Link>
+                                                    
+                                                    {/* Play Album Button Overlay */}
+                                                    <div className="absolute inset-0 flex items-center justify-center rounded-lg">
+                                                        <Button
+                                                            size="lg"
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                e.stopPropagation();
+                                                                const albumTracks = filteredTracks.filter(t => t.album?.id === track.album.id);
+                                                                if (albumTracks.length > 0) {
+                                                                    setTrackList(albumTracks);
+                                                                    playTrack(albumTracks[0]);
+                                                                }
+                                                            }}
+                                                            className="opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-full bg-white/90 text-purple-600 hover:bg-white hover:scale-110 shadow-lg backdrop-blur-sm"
+                                                        >
+                                                            <Play className="h-6 w-6" />
+                                                        </Button>
+                                                    </div>
                                                 </div>
                                                 <div className="space-y-1">
                                                     <Link
