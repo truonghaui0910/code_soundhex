@@ -433,126 +433,165 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                         {/* Featured Tracks */}
                         <section>
                             <div className="flex items-center justify-between mb-8">
-                                <h2 className="text-xl font-bold flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full flex items-center justify-center">
-                                        <TrendingUp className="h-5 w-5 text-white" />
+                                <h2 className="text-3xl font-bold flex items-center gap-4">
+                                    <div className="w-12 h-12 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
+                                        <TrendingUp className="h-6 w-6 text-white" />
                                     </div>
-                                    Featured Tracks
+                                    <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                                        Featured Tracks
+                                    </span>
                                 </h2>
+                                <Button variant="outline" className="hidden sm:flex items-center gap-2 hover:bg-purple-50 dark:hover:bg-purple-900/20">
+                                    <Shuffle className="h-4 w-4" />
+                                    Shuffle
+                                </Button>
                             </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-                                {featuredTracks.slice(0, 10).map((track) => (
-                                    <Card
+                            {/* Featured track grid with new design */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                                {featuredTracks.slice(0, 8).map((track, index) => (
+                                    <div
                                         key={track.id}
-                                        className="group hover:shadow-2xl transition-all duration-500 cursor-pointer overflow-hidden border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm"
+                                        className="group relative"
+                                        style={{
+                                            animation: `fadeInUp 0.6s ease-out ${index * 0.1}s both`
+                                        }}
                                     >
-                                        <div className="relative aspect-square">
-                                            {track.album?.cover_image_url ? (
-                                                <Image
-                                                    src={
-                                                        track.album
-                                                            .cover_image_url
-                                                    }
-                                                    alt={
-                                                        track.album?.title ||
-                                                        track.title
-                                                    }
-                                                    fill
-                                                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-                                                    className="object-cover group-hover:scale-110 transition-transform duration-500"
-                                                />
-                                            ) : (
-                                                <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
-                                                    <Music className="h-16 w-16 text-white" />
+                                        {/* Main Card */}
+                                        <div className="relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-700 transform hover:-translate-y-2 border border-white/20 dark:border-gray-700/30">
+                                            
+                                            {/* Album Cover */}
+                                            <div className="relative aspect-square overflow-hidden">
+                                                {track.album?.cover_image_url ? (
+                                                    <Image
+                                                        src={track.album.cover_image_url}
+                                                        alt={track.album?.title || track.title}
+                                                        fill
+                                                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                                                        className="object-cover group-hover:scale-110 transition-transform duration-700"
+                                                    />
+                                                ) : (
+                                                    <div className="w-full h-full bg-gradient-to-br from-purple-400 via-pink-400 to-rose-400 flex items-center justify-center">
+                                                        <Music className="h-20 w-20 text-white/80" />
+                                                    </div>
+                                                )}
+                                                
+                                                {/* Gradient overlay */}
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                                                
+                                                {/* Play button */}
+                                                <div className="absolute inset-0 flex items-center justify-center">
+                                                    <Button
+                                                        size="lg"
+                                                        onClick={() => {
+                                                            if (currentTrack?.id === track.id && isPlaying) {
+                                                                togglePlayPause();
+                                                            } else {
+                                                                setTrackList(featuredTracks);
+                                                                playTrack(track);
+                                                            }
+                                                        }}
+                                                        className="opacity-0 group-hover:opacity-100 transition-all duration-500 rounded-full bg-white/95 text-purple-600 hover:bg-white hover:scale-125 shadow-2xl w-16 h-16 backdrop-blur-sm"
+                                                    >
+                                                        {currentTrack?.id === track.id && isPlaying ? (
+                                                            <Pause className="h-8 w-8" />
+                                                        ) : (
+                                                            <Play className="h-8 w-8 ml-1" />
+                                                        )}
+                                                    </Button>
                                                 </div>
-                                            )}
 
-                                            {/* Play overlay */}
-                                            <div className="absolute inset-0 flex items-center justify-center">
-                                                <Button
-                                                    size="lg"
-                                                    onClick={() => {
-                                                        if (
-                                                            currentTrack?.id ===
-                                                                track.id &&
-                                                            isPlaying
-                                                        ) {
-                                                            togglePlayPause();
-                                                        } else {
-                                                            playTrack(track);
-                                                        }
-                                                    }}
-                                                    className="opacity-0 group-hover:opacity-100 transition-all duration-500 rounded-full bg-white text-purple-600 hover:bg-white/90 transform group-hover:scale-110"
-                                                >
-                                                    {currentTrack?.id ===
-                                                        track.id &&
-                                                    isPlaying ? (
-                                                        <Pause className="h-6 w-6" />
-                                                    ) : (
-                                                        <Play className="h-6 w-6" />
-                                                    )}
-                                                </Button>
-                                            </div>
-
-                                            {/* Currently playing indicator */}
-                                            {currentTrack?.id === track.id &&
-                                                isPlaying && (
-                                                    <div className="absolute top-3 right-3">
-                                                        <div className="w-8 h-8 bg-rose-500 rounded-full flex items-center justify-center">
-                                                            <div className="flex items-end space-x-0.5 h-4">
-                                                                <div
-                                                                    className="w-0.5 bg-white animate-equalize-1"
-                                                                    style={{
-                                                                        height: "30%",
-                                                                    }}
-                                                                ></div>
-                                                                <div
-                                                                    className="w-0.5 bg-white animate-equalize-2"
-                                                                    style={{
-                                                                        height: "100%",
-                                                                    }}
-                                                                ></div>
-                                                                <div
-                                                                    className="w-0.5 bg-white animate-equalize-3"
-                                                                    style={{
-                                                                        height: "60%",
-                                                                    }}
-                                                                ></div>
+                                                {/* Now playing indicator */}
+                                                {currentTrack?.id === track.id && isPlaying && (
+                                                    <div className="absolute top-4 right-4">
+                                                        <div className="w-10 h-10 bg-gradient-to-r from-rose-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg backdrop-blur-sm">
+                                                            <div className="flex items-end space-x-0.5 h-5">
+                                                                <div className="w-1 bg-white animate-equalize-1" style={{ height: "30%" }}></div>
+                                                                <div className="w-1 bg-white animate-equalize-2" style={{ height: "100%" }}></div>
+                                                                <div className="w-1 bg-white animate-equalize-3" style={{ height: "60%" }}></div>
+                                                                <div className="w-1 bg-white animate-equalize-4" style={{ height: "80%" }}></div>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 )}
-                                        </div>
 
-                                        <CardContent className="p-4">
-                                            <h3 className="font-semibold text-lg mb-1 truncate">
-                                                {track.title}
-                                            </h3>
-                                            <p className="text-gray-600 dark:text-gray-400 truncate text-sm">
-                                                {track.artist?.name ||
-                                                    "Unknown Artist"}
-                                            </p>
-                                            <div className="flex items-center justify-between mt-3">
-                                                <Badge
-                                                    variant="secondary"
-                                                    className="text-xs"
-                                                >
-                                                    {track.genre?.name ||
-                                                        "Unknown"}
-                                                </Badge>
-                                                <div className="flex items-center gap-1 text-xs text-gray-500">
-                                                    <Clock className="h-3 w-3" />
-                                                    <span>
-                                                        {formatDuration(
-                                                            track.duration,
-                                                        )}
-                                                    </span>
+                                                {/* Track number badge */}
+                                                <div className="absolute top-4 left-4">
+                                                    <div className="w-8 h-8 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center text-white text-sm font-bold">
+                                                        {index + 1}
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </CardContent>
-                                    </Card>
+
+                                            {/* Track Info */}
+                                            <div className="p-6">
+                                                <div className="space-y-3">
+                                                    <div>
+                                                        <h3 className="font-bold text-lg text-gray-900 dark:text-white truncate group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                                                            {track.title}
+                                                        </h3>
+                                                        <p className="text-gray-600 dark:text-gray-400 truncate text-sm font-medium">
+                                                            {track.artist?.name || "Unknown Artist"}
+                                                        </p>
+                                                        <p className="text-gray-500 dark:text-gray-500 truncate text-xs">
+                                                            {track.album?.title || "Unknown Album"}
+                                                        </p>
+                                                    </div>
+
+                                                    <div className="flex items-center justify-between">
+                                                        <Badge 
+                                                            variant="secondary" 
+                                                            className="text-xs bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 dark:from-purple-900/30 dark:to-pink-900/30 dark:text-purple-300 border-0"
+                                                        >
+                                                            {track.genre?.name || "Unknown"}
+                                                        </Badge>
+                                                        <div className="flex items-center gap-1 text-xs text-gray-500 bg-gray-100 dark:bg-gray-700/50 px-2 py-1 rounded-full">
+                                                            <Clock className="h-3 w-3" />
+                                                            <span className="font-mono">{formatDuration(track.duration)}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Action buttons */}
+                                                <div className="mt-4 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+                                                    <AddToPlaylist trackId={track.id} trackTitle={track.title}>
+                                                        <Button size="sm" variant="ghost" className="hover:bg-purple-100 dark:hover:bg-purple-900/30">
+                                                            <Plus className="h-4 w-4" />
+                                                        </Button>
+                                                    </AddToPlaylist>
+                                                    <Button 
+                                                        size="sm" 
+                                                        variant="ghost"
+                                                        onClick={() => downloadTrack(track)}
+                                                        className="hover:bg-purple-100 dark:hover:bg-purple-900/30"
+                                                    >
+                                                        <Download className="h-4 w-4" />
+                                                    </Button>
+                                                    <Button size="sm" variant="ghost" className="hover:bg-purple-100 dark:hover:bg-purple-900/30">
+                                                        <Heart className="h-4 w-4" />
+                                                    </Button>
+                                                    <Button size="sm" variant="ghost" className="hover:bg-purple-100 dark:hover:bg-purple-900/30">
+                                                        <Share className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Floating shadow effect */}
+                                        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 transform scale-105"></div>
+                                    </div>
                                 ))}
+                            </div>
+
+                            {/* View all button */}
+                            <div className="mt-12 text-center">
+                                <Button 
+                                    onClick={() => setCurrentView("library")}
+                                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                                >
+                                    Explore All Tracks
+                                    <TrendingUp className="ml-2 h-5 w-5" />
+                                </Button>
                             </div>
                         </section>
                     </div>
