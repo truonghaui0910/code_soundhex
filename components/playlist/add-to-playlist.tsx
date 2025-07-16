@@ -232,13 +232,15 @@ export default function AddToPlaylist({
         <DropdownMenuContent
           align="center"
           side="top"
-          className="w-80 z-[9999] max-h-80 overflow-y-auto bg-white dark:bg-gray-800 border shadow-lg focus:outline-none"
+          className="w-80 z-[9999] max-h-80 overflow-y-auto bg-white dark:bg-gray-800 border shadow-lg focus:outline-none !transition-none !transform-none !animate-none"
           style={{
             zIndex: 9999,
             position: "fixed",
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
+            animation: "none !important",
+            transition: "none !important",
           }}
           onCloseAutoFocus={(e) => e.preventDefault()}
         >

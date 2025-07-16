@@ -491,18 +491,30 @@ body {
     z-index: 9999 !important;
   }
 
-  /* Custom dropdown animation - disabled */
+  /* Custom dropdown animation - completely disabled */
   [data-radix-dropdown-menu-content] {
     position: fixed !important;
     animation: none !important;
+    transition: none !important;
+    transform: none !important;
   }
 
   [data-radix-dropdown-menu-content][data-state="open"] {
     animation: none !important;
+    transition: none !important;
+    transform: none !important;
   }
 
   [data-radix-dropdown-menu-content][data-state="closed"] {
     animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+
+  /* Force disable all animations for dropdown menu specifically */
+  [data-radix-dropdown-menu-content] * {
+    animation: none !important;
+    transition: none !important;
   }
 
   /* Remove all white borders and flashing effects from dropdown menu items */
