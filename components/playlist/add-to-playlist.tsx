@@ -214,45 +214,19 @@ export default function AddToPlaylist({
         {children}
       </div>
 
-      {/* Custom Modal */}
-      {isModalOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[999999]"
-          onClick={() => setIsModalOpen(false)}
-          style={{
-            zIndex: 999999,
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-        >
-          <div
-            className="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-96 max-h-96 overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              zIndex: 999999,
-              position: 'relative'
-            }}
-          >
-            {/* Header */}
-            <div className="flex items-center justify-between p-3 border-b border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-semibold">Add to Playlist</h3>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
+      {/* Add to Playlist Dialog */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Add to Playlist</DialogTitle>
+            <DialogDescription>
+              Select a playlist to add "{trackTitle}" to
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
             {/* Search */}
-            <div className="p-2">
-              <div className="flex items-center gap-2 mb-2">
+            <div className="mb-4">
+              <div className="flex items-center gap-2">
                 <Search className="h-4 w-4 text-gray-400" />
                 <Input
                   placeholder="Search playlists..."
@@ -264,10 +238,10 @@ export default function AddToPlaylist({
             </div>
 
             {/* Content */}
-            <div className="max-h-60 overflow-y-auto">
+            <div className="max-h-60 overflow-y-auto space-y-1">
               {/* Create new playlist option */}
               <div
-                className="flex items-center gap-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                className="flex items-center gap-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer rounded"
                 onClick={() => {
                   setShowCreateDialog(true);
                   setIsModalOpen(false);
@@ -290,7 +264,7 @@ export default function AddToPlaylist({
                 filteredPlaylists.map((playlist) => (
                   <div
                     key={playlist.id}
-                    className="flex items-center p-2 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    className="flex items-center p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
                   >
                     <ListMusic className="mr-2 h-4 w-4 flex-shrink-0" />
                     <div
@@ -323,8 +297,8 @@ export default function AddToPlaylist({
               )}
             </div>
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
 
       {/* Create Playlist Dialog */}
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
