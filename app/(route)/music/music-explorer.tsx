@@ -452,7 +452,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                             </div>
 
                             {/* Featured track grid with new design */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 2xl:grid-cols-6 gap-8">
                                 {featuredTracks.slice(0, 8).map((track, index) => (
                                     <div
                                         key={track.id}
