@@ -217,11 +217,11 @@ export default function AddToPlaylist({
       {/* Custom Modal */}
       {isModalOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]"
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[99999]"
           onClick={() => setIsModalOpen(false)}
         >
           <div
-            className="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-80 max-h-80 overflow-hidden"
+            className="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-96 max-h-96 overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
@@ -249,7 +249,7 @@ export default function AddToPlaylist({
             </div>
 
             {/* Content */}
-            <div className="max-h-48 overflow-y-auto">
+            <div className="max-h-60 overflow-y-auto">
               {/* Create new playlist option */}
               <div
                 className="flex items-center gap-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
