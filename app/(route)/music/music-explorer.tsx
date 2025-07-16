@@ -462,7 +462,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                         }}
                                     >
                                         {/* Main Card */}
-                                        <div className="relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-700 transform hover:-translate-y-2 border border-white/20 dark:border-gray-700/30">
+                                        <div className="relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-500 transform hover:-translate-y-2 border border-white/20 dark:border-gray-700/30">
                                             
                                             {/* Album Cover */}
                                             <div className="relative aspect-square overflow-hidden">
@@ -582,7 +582,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                         </div>
 
                                         {/* Floating shadow effect */}
-                                        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 transform scale-105"></div>
+                                        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-3xl blur-lg opacity-0 group-hover:opacity-60 transition-opacity duration-500 transform scale-102"></div>
                                     </div>
                                 ))}
                             </div>
