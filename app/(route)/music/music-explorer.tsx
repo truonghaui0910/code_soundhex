@@ -495,12 +495,12 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                                 playTrack(track);
                                                             }
                                                         }}
-                                                        className="opacity-0 group-hover:opacity-100 transition-all duration-500 rounded-full bg-white/95 text-purple-600 hover:bg-white hover:scale-125 shadow-2xl w-16 h-16 backdrop-blur-sm"
+                                                        className="opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-full bg-white/90 text-purple-600 hover:bg-white hover:scale-110 shadow-lg backdrop-blur-sm"
                                                     >
                                                         {currentTrack?.id === track.id && isPlaying ? (
-                                                            <Pause className="h-8 w-8" />
+                                                            <Pause className="h-6 w-6" />
                                                         ) : (
-                                                            <Play className="h-8 w-8 ml-1" />
+                                                            <Play className="h-6 w-6" />
                                                         )}
                                                     </Button>
                                                 </div>
