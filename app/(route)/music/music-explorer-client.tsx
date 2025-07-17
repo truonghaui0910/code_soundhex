@@ -284,12 +284,10 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
             console.log('🧹 Clearing search results');
             setSearchResults([]);
             setForceUpdateKey(prev => prev + 1);
-            // Switch back to featured view when search is cleared
-            if (currentView === "library") {
-                setCurrentView("featured");
-            }
+            // Only auto-switch back to featured if we were auto-switched to library during search
+            // Don't auto-switch if user manually clicked library button
         }
-    }, [searchQuery, currentView]);
+    }, [searchQuery]);
 
     // Function to fetch featured data
     const fetchFeaturedData = async () => {
