@@ -264,6 +264,10 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
         if (shouldSearch) {
             searchTracks(searchQuery);
             setShouldSearch(false);
+            // Auto switch to library view when searching
+            if (searchQuery.trim()) {
+                setCurrentView("library");
+            }
         }
     }, [shouldSearch, searchQuery, searchTracks]);
 
@@ -280,8 +284,12 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
             console.log('🧹 Clearing search results');
             setSearchResults([]);
             setForceUpdateKey(prev => prev + 1);
+            // Switch back to featured view when search is cleared
+            if (currentView === "library") {
+                setCurrentView("featured");
+            }
         }
-    }, [searchQuery]);
+    }, [searchQuery, currentView]);
 
     // Function to fetch featured data
     const fetchFeaturedData = async () => {
