@@ -897,10 +897,13 @@ export function MusicUpload() {
                         : undefined,
             });
 
-            // Load complete track info for recently uploaded tracks
-            if (tracksToImport.length > 0) {
+            // Load complete track info for recently imported tracks (only successful ones)
+            if (tracksToImport.length > 0 && successCount > 0) {
+                // Only show successfully imported tracks
+                const successfulTracks = tracksToImport.slice(0, successCount);
+                
                 // Convert SpotifyTrack to Track format
-                const importedTracks = tracksToImport.map((track) => ({
+                const importedTracks = successfulTracks.map((track) => ({
                     id: stringToHash(`spotify-${track.id}`),
                     title: track.name,
                     file_url: track.preview_url
