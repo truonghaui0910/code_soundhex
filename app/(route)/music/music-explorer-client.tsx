@@ -166,23 +166,18 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
 
         setIsLoadingAlbums(true);
         try {
-            // First fetch all albums to get total count
-            const response = await fetch(`/api/albums`);
+            const params = new URLSearchParams({
+                page: resetPage ? '1' : page.toString(),
+                limit: itemsPerPage.toString(),
+            });
+
+            const response = await fetch(`/api/albums?${params}`);
             if (response.ok) {
                 const data = await response.json();
-                if (Array.isArray(data)) {
-                    const totalCount = data.length;
-                    const totalPagesCount = Math.ceil(totalCount / itemsPerPage);
-                    
-                    // Calculate pagination for current page
-                    const currentPageToUse = resetPage ? 1 : page;
-                    const startIndex = (currentPageToUse - 1) * itemsPerPage;
-                    const endIndex = startIndex + itemsPerPage;
-                    const paginatedData = data.slice(startIndex, endIndex);
-                    
-                    setAllAlbums(paginatedData);
-                    setTotalAlbums(totalCount);
-                    setAlbumsTotalPages(totalPagesCount);
+                if (data.albums && Array.isArray(data.albums)) {
+                    setAllAlbums(data.albums);
+                    setTotalAlbums(data.total || 0);
+                    setAlbumsTotalPages(data.totalPages || 0);
                     if (resetPage) {
                         setAlbumsCurrentPage(1);
                     }
@@ -190,17 +185,22 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
                     setAllAlbums([]);
                     setTotalAlbums(0);
                     setAlbumsTotalPages(0);
+                    if (resetPage) {
+                        setAlbumsCurrentPage(1);
+                    }
                 }
             } else {
                 setAllAlbums([]);
                 setTotalAlbums(0);
                 setAlbumsTotalPages(0);
+                setAlbumsCurrentPage(1);
             }
         } catch (error) {
             console.error("Error fetching albums:", error);
             setAllAlbums([]);
             setTotalAlbums(0);
             setAlbumsTotalPages(0);
+            setAlbumsCurrentPage(1);
         } finally {
             setIsLoadingAlbums(false);
         }
@@ -212,29 +212,24 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
 
         setIsLoadingArtists(true);
         try {
-            // First fetch all artists to get total count
-            const response = await fetch(`/api/artists`);
+            const params = new URLSearchParams({
+                page: resetPage ? '1' : page.toString(),
+                limit: itemsPerPage.toString(),
+            });
+
+            const response = await fetch(`/api/artists?${params}`);
             if (response.ok) {
                 const data = await response.json();
-                if (Array.isArray(data)) {
+                if (data.artists && Array.isArray(data.artists)) {
                     // Add tracks count for each artist
-                    const artistsWithCount = data.map(artist => ({
+                    const artistsWithCount = data.artists.map(artist => ({
                         ...artist,
                         tracksCount: tracks.filter(t => t.artist?.id === artist.id).length
                     }));
                     
-                    const totalCount = artistsWithCount.length;
-                    const totalPagesCount = Math.ceil(totalCount / itemsPerPage);
-                    
-                    // Calculate pagination for current page
-                    const currentPageToUse = resetPage ? 1 : page;
-                    const startIndex = (currentPageToUse - 1) * itemsPerPage;
-                    const endIndex = startIndex + itemsPerPage;
-                    const paginatedData = artistsWithCount.slice(startIndex, endIndex);
-                    
-                    setAllArtists(paginatedData);
-                    setTotalArtists(totalCount);
-                    setArtistsTotalPages(totalPagesCount);
+                    setAllArtists(artistsWithCount);
+                    setTotalArtists(data.total || 0);
+                    setArtistsTotalPages(data.totalPages || 0);
                     if (resetPage) {
                         setArtistsCurrentPage(1);
                     }
@@ -242,17 +237,22 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
                     setAllArtists([]);
                     setTotalArtists(0);
                     setArtistsTotalPages(0);
+                    if (resetPage) {
+                        setArtistsCurrentPage(1);
+                    }
                 }
             } else {
                 setAllArtists([]);
                 setTotalArtists(0);
                 setArtistsTotalPages(0);
+                setArtistsCurrentPage(1);
             }
         } catch (error) {
             console.error("Error fetching artists:", error);
             setAllArtists([]);
             setTotalArtists(0);
             setArtistsTotalPages(0);
+            setArtistsCurrentPage(1);
         } finally {
             setIsLoadingArtists(false);
         }
@@ -353,16 +353,30 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
     // Fetch albums when albums view is active
     useEffect(() => {
         if (currentView === "albums") {
-            fetchAllAlbums(albumsCurrentPage);
+            fetchAllAlbums(1, true); // Reset to page 1 when view changes
         }
-    }, [currentView, albumsCurrentPage, fetchAllAlbums]);
+    }, [currentView, fetchAllAlbums]);
+
+    // Separate effect for albums page changes
+    useEffect(() => {
+        if (currentView === "albums" && albumsCurrentPage > 1) {
+            fetchAllAlbums(albumsCurrentPage, false);
+        }
+    }, [albumsCurrentPage]);
 
     // Fetch artists when artists view is active
     useEffect(() => {
         if (currentView === "artists") {
-            fetchAllArtists(artistsCurrentPage);
+            fetchAllArtists(1, true); // Reset to page 1 when view changes
         }
-    }, [currentView, artistsCurrentPage, fetchAllArtists]);
+    }, [currentView, fetchAllArtists]);
+
+    // Separate effect for artists page changes
+    useEffect(() => {
+        if (currentView === "artists" && artistsCurrentPage > 1) {
+            fetchAllArtists(artistsCurrentPage, false);
+        }
+    }, [artistsCurrentPage]);
 
     // Reset search when query is cleared
     useEffect(() => {

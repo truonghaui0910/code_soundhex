@@ -24,26 +24,38 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const limit = searchParams.get("limit");
+    const page = searchParams.get("page");
     
-    console.log("API: Starting albums fetch", { limit });
+    console.log("API: Starting albums fetch", { limit, page });
     const startTime = Date.now();
 
-    let albums;
-    if (limit) {
+    let result;
+    if (page) {
+      // Server-side pagination
+      const pageNum = parseInt(page) || 1;
+      const limitNum = parseInt(limit || "10");
+      
+      result = await AlbumsController.getAlbumsWithPagination(pageNum, limitNum);
+    } else if (limit) {
+      // Legacy limit-based fetch
       const limitNum = parseInt(limit);
       if (!isNaN(limitNum) && limitNum > 0) {
-        albums = await AlbumsController.getAlbumsWithLimit(limitNum);
+        const albums = await AlbumsController.getAlbumsWithLimit(limitNum);
+        result = { albums, total: albums.length, totalPages: 1 };
       } else {
-        albums = await AlbumsController.getAllAlbums();
+        const albums = await AlbumsController.getAllAlbums();
+        result = { albums, total: albums.length, totalPages: 1 };
       }
     } else {
-      albums = await AlbumsController.getAllAlbums();
+      // Get all albums
+      const albums = await AlbumsController.getAllAlbums();
+      result = { albums, total: albums.length, totalPages: 1 };
     }
 
     const fetchTime = Date.now() - startTime;
-    console.log(`API: Albums fetch completed in ${fetchTime}ms - Count: ${albums.length}`);
+    console.log(`API: Albums fetch completed in ${fetchTime}ms - Count: ${result.albums.length}`);
 
-    return NextResponse.json(albums, {
+    return NextResponse.json(result, {
       headers: {
         "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
       },
