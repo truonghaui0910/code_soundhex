@@ -186,4 +186,37 @@ export class ArtistsController {
 
     return artist;
   }
+
+  static async searchArtists(query: string, limit: number = 20): Promise<Artist[]> {
+    console.log(`🔍 ArtistsController.searchArtists - Starting search for: "${query}" with limit: ${limit}`);
+    const supabase = createServerComponentClient<Database>({ cookies });
+
+    const searchTerm = query.toLowerCase();
+
+    const { data, error } = await supabase
+      .from("artists")
+      .select(`id, name, profile_image_url, bio, created_at, custom_url, social, user_id`)
+      .ilike("name", `%${searchTerm}%`)
+      .order("created_at", { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      console.error("Error searching artists:", error);
+      throw new Error(`Failed to search artists: ${error.message}`);
+    }
+
+    // Convert social from database format to array if needed
+    const artists = (data ?? []).map(artist => {
+      if (artist.social && typeof artist.social === 'string') {
+        try {
+          artist.social = JSON.parse(artist.social);
+        } catch (e) {
+          artist.social = [];
+        }
+      }
+      return artist;
+    });
+
+    return artists;
+  }
 }
