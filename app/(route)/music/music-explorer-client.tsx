@@ -91,12 +91,6 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
         console.log('🔑 forceUpdateKey:', forceUpdateKey);
     }, [searchResults, forceUpdateKey]);
 
-    // Debug filteredTracks changes
-    useEffect(() => {
-        console.log('🔄 filteredTracks changed:', filteredTracks.length, 'items');
-        console.log('📄 filteredTracks:', filteredTracks.map(t => t.title));
-    }, [filteredTracks]);
-
     // Debug searchQuery changes
     useEffect(() => {
         console.log('📝 searchQuery changed to:', searchQuery);
@@ -141,6 +135,12 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
         console.log('📚 Using all tracks. Filtered length:', filtered.length);
         return filtered;
     }, [searchQuery, searchResults, tracks, selectedGenre, forceUpdateKey]);
+
+    // Debug filteredTracks changes
+    useEffect(() => {
+        console.log('🔄 filteredTracks changed:', filteredTracks.length, 'items');
+        console.log('📄 filteredTracks:', filteredTracks.map(t => t.title));
+    }, [filteredTracks]);
 
     // Memoize unique albums and artists to prevent re-renders
     const uniqueAlbums = useMemo(() => {
