@@ -472,7 +472,6 @@ export function MusicExplorerUI({
                                     className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
                                 >
                                     <Play className="mr-2 h-4 w-4" />
-This change reduces the gap between the featured tracks to match the albums section.
                                     Play Page
                                 </Button>
                             </div>

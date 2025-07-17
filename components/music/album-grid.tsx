@@ -38,21 +38,43 @@ export function AlbumGrid({
     const { setTrackList, playTrack } = useAudioPlayer();
 
     const handleAlbumPlay = async (album: Album) => {
+        console.log('AlbumGrid - handleAlbumPlay called with album:', album);
         if (onAlbumPlay) {
+            console.log('AlbumGrid - using custom onAlbumPlay callback');
             onAlbumPlay(album);
         } else {
             // Default play behavior - fetch album tracks
+            console.log('AlbumGrid - fetching album tracks from API');
             try {
                 const response = await fetch(`/api/albums/${album.id}/tracks`);
+                console.log('AlbumGrid - API response status:', response.status);
+                
                 if (response.ok) {
                     const data = await response.json();
-                    if (data.tracks && Array.isArray(data.tracks) && data.tracks.length > 0) {
-                        setTrackList(data.tracks);
-                        playTrack(data.tracks[0]);
+                    console.log('AlbumGrid - API response data:', data);
+                    console.log('AlbumGrid - Response structure:', {
+                        hasTracks: 'tracks' in data,
+                        tracksIsArray: Array.isArray(data.tracks),
+                        tracksLength: data.tracks?.length || 0,
+                        directArrayLength: Array.isArray(data) ? data.length : 'not an array'
+                    });
+                    
+                    // Handle both formats: { tracks: [...] } and direct array [...]
+                    const tracksArray = data.tracks || (Array.isArray(data) ? data : []);
+                    
+                    if (Array.isArray(tracksArray) && tracksArray.length > 0) {
+                        console.log('AlbumGrid - Setting trackList with tracks:', tracksArray);
+                        setTrackList(tracksArray);
+                        console.log('AlbumGrid - Playing first track:', tracksArray[0]);
+                        playTrack(tracksArray[0]);
+                    } else {
+                        console.log('AlbumGrid - No valid tracks found in response');
                     }
+                } else {
+                    console.log('AlbumGrid - API response not ok, status:', response.status);
                 }
             } catch (error) {
-                console.error("Error loading album tracks:", error);
+                console.error("AlbumGrid - Error loading album tracks:", error);
             }
         }
     };
@@ -105,6 +127,7 @@ export function AlbumGrid({
                             <Button
                                 size="lg"
                                 onClick={(e) => {
+                                    console.log('AlbumGrid - Play button clicked for album:', album);
                                     e.preventDefault();
                                     e.stopPropagation();
                                     handleAlbumPlay(album);
