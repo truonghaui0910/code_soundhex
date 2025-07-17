@@ -262,7 +262,10 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
     const fetchLibraryTracks = useCallback(async (page: number = 1, resetPage: boolean = false) => {
         if (currentView !== "library") return;
 
-        setIsSearching(true);
+        // Only show loading if it's a fresh search or view change, not pagination
+        if (resetPage || page === 1) {
+            setIsSearching(true);
+        }
         try {
             const params = new URLSearchParams({
                 page: resetPage ? '1' : page.toString(),
@@ -327,12 +330,19 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
         }
     };
 
-    // Fetch library tracks when view, genre, or page changes
+    // Fetch library tracks when view or genre changes (but not page changes)
     useEffect(() => {
         if (currentView === "library") {
-            fetchLibraryTracks(currentPage);
+            fetchLibraryTracks(1, true); // Reset to page 1 when view/genre changes
         }
-    }, [currentView, selectedGenre, currentPage, fetchLibraryTracks]);
+    }, [currentView, selectedGenre, fetchLibraryTracks]);
+
+    // Separate effect for page changes to avoid duplicate calls
+    useEffect(() => {
+        if (currentView === "library" && currentPage > 1) {
+            fetchLibraryTracks(currentPage, false);
+        }
+    }, [currentPage]);
 
     // Fetch albums when albums view is active
     useEffect(() => {
