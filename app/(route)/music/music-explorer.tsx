@@ -191,10 +191,10 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
     const fetchFeaturedData = async () => {
         setIsLoadingFeatured(true);
         try {
-            const genreParam = selectedGenre !== "all" ? `?genre=${encodeURIComponent(selectedGenre)}` : "";
+            const genreParam = selectedGenre !== "all" ? `genre=${encodeURIComponent(selectedGenre)}&` : "";
             
             // Fetch featured tracks
-            const tracksResponse = await fetch(`/api/tracks${genreParam}&limit=10`);
+            const tracksResponse = await fetch(`/api/tracks?${genreParam}limit=10`);
             if (tracksResponse.ok) {
                 const tracksData = await tracksResponse.json();
                 setFeaturedTracks(tracksData.slice(0, 10));
