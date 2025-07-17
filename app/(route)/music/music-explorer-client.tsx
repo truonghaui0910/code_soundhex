@@ -166,23 +166,23 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
 
         setIsLoadingAlbums(true);
         try {
-            const params = new URLSearchParams({
-                page: resetPage ? '1' : page.toString(),
-                limit: itemsPerPage.toString(),
-            });
-
-            const response = await fetch(`/api/albums?${params}`);
+            // First fetch all albums to get total count
+            const response = await fetch(`/api/albums`);
             if (response.ok) {
                 const data = await response.json();
                 if (Array.isArray(data)) {
-                    // For now, simulate pagination on client side since API doesn't support it yet
-                    const startIndex = (resetPage ? 0 : (page - 1)) * itemsPerPage;
+                    const totalCount = data.length;
+                    const totalPagesCount = Math.ceil(totalCount / itemsPerPage);
+                    
+                    // Calculate pagination for current page
+                    const currentPageToUse = resetPage ? 1 : page;
+                    const startIndex = (currentPageToUse - 1) * itemsPerPage;
                     const endIndex = startIndex + itemsPerPage;
                     const paginatedData = data.slice(startIndex, endIndex);
                     
                     setAllAlbums(paginatedData);
-                    setTotalAlbums(data.length);
-                    setAlbumsTotalPages(Math.ceil(data.length / itemsPerPage));
+                    setTotalAlbums(totalCount);
+                    setAlbumsTotalPages(totalPagesCount);
                     if (resetPage) {
                         setAlbumsCurrentPage(1);
                     }
@@ -212,12 +212,8 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
 
         setIsLoadingArtists(true);
         try {
-            const params = new URLSearchParams({
-                page: resetPage ? '1' : page.toString(),
-                limit: itemsPerPage.toString(),
-            });
-
-            const response = await fetch(`/api/artists?${params}`);
+            // First fetch all artists to get total count
+            const response = await fetch(`/api/artists`);
             if (response.ok) {
                 const data = await response.json();
                 if (Array.isArray(data)) {
@@ -227,14 +223,18 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
                         tracksCount: tracks.filter(t => t.artist?.id === artist.id).length
                     }));
                     
-                    // For now, simulate pagination on client side since API doesn't support it yet
-                    const startIndex = (resetPage ? 0 : (page - 1)) * itemsPerPage;
+                    const totalCount = artistsWithCount.length;
+                    const totalPagesCount = Math.ceil(totalCount / itemsPerPage);
+                    
+                    // Calculate pagination for current page
+                    const currentPageToUse = resetPage ? 1 : page;
+                    const startIndex = (currentPageToUse - 1) * itemsPerPage;
                     const endIndex = startIndex + itemsPerPage;
                     const paginatedData = artistsWithCount.slice(startIndex, endIndex);
                     
                     setAllArtists(paginatedData);
-                    setTotalArtists(artistsWithCount.length);
-                    setArtistsTotalPages(Math.ceil(artistsWithCount.length / itemsPerPage));
+                    setTotalArtists(totalCount);
+                    setArtistsTotalPages(totalPagesCount);
                     if (resetPage) {
                         setArtistsCurrentPage(1);
                     }
