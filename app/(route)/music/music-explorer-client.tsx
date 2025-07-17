@@ -140,6 +140,12 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
     useEffect(() => {
         console.log('🔄 filteredTracks changed:', filteredTracks.length, 'items');
         console.log('📄 filteredTracks:', filteredTracks.map(t => t.title));
+        console.log('🎯 Current state summary:');
+        console.log('  - searchQuery:', `"${searchQuery}"`);
+        console.log('  - searchResults.length:', searchResults.length);
+        console.log('  - filteredTracks.length:', filteredTracks.length);
+        console.log('  - selectedGenre:', selectedGenre);
+        console.log('  - currentView:', currentView);
     }, [filteredTracks]);
 
     // Memoize unique albums and artists to prevent re-renders
