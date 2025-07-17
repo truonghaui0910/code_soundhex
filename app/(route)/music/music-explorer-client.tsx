@@ -265,7 +265,7 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
                                 </h2>
                             </div>
                             <div className="h-10 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-                        </div></div>
+                        </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8">
                             {Array.from({ length: 10 }).map((_, index) => (
@@ -299,7 +299,7 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
                                 </h2>
                             </div>
                             <div className="h-6 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-                        </div></div>
+                        </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                             {Array.from({ length: 10 }).map((_, index) => (
@@ -324,7 +324,7 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
                                 </h2>
                             </div>
                             <div className="h-6 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-                        </div></div>
+                        </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                             {Array.from({ length: 10 }).map((_, index) => (
