@@ -355,7 +355,7 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
         if (currentView === "albums") {
             fetchAllAlbums(1, true); // Reset to page 1 when view changes
         }
-    }, [currentView, fetchAllAlbums]);
+    }, [currentView]);
 
     // Separate effect for albums page changes
     useEffect(() => {
@@ -369,7 +369,7 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
         if (currentView === "artists") {
             fetchAllArtists(1, true); // Reset to page 1 when view changes
         }
-    }, [currentView, fetchAllArtists]);
+    }, [currentView]);
 
     // Separate effect for artists page changes
     useEffect(() => {
@@ -395,21 +395,22 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
             const tracksResponse = await fetch(`/api/tracks?${genreParam}limit=10`);
             if (tracksResponse.ok) {
                 const tracksData = await tracksResponse.json();
-                setFeaturedTracks(tracksData.slice(0, 10));
+                const tracksArray = Array.isArray(tracksData) ? tracksData : tracksData.tracks || [];
+                setFeaturedTracks(tracksArray.slice(0, 10));
             }
 
-            // Fetch featured albums
-            const albumsResponse = await fetch(`/api/albums?limit=10`);
+            // Fetch featured albums using pagination API
+            const albumsResponse = await fetch(`/api/albums?page=1&limit=10`);
             if (albumsResponse.ok) {
                 const albumsData = await albumsResponse.json();
-                setFeaturedAlbums(albumsData);
+                setFeaturedAlbums(albumsData.albums || []);
             }
 
-            // Fetch featured artists
-            const artistsResponse = await fetch(`/api/artists?limit=10`);
+            // Fetch featured artists using pagination API
+            const artistsResponse = await fetch(`/api/artists?page=1&limit=10`);
             if (artistsResponse.ok) {
                 const artistsData = await artistsResponse.json();
-                const artistsWithCount = artistsData.map((artist: any) => ({
+                const artistsWithCount = (artistsData.artists || []).map((artist: any) => ({
                     ...artist,
                     tracksCount: tracks.filter(t => t.artist?.id === artist.id).length
                 }));
