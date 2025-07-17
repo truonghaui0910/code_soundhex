@@ -94,9 +94,9 @@ export function TrackGridSm({
     if (isLoading) {
         return (
             <div className={className}>
-                {Array.from({ length: Math.ceil(loadingCount / 2) }).map((_, rowIndex) => (
-                    <div key={rowIndex} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {Array.from({ length: 2 }).map((_, colIndex) => (
+                {Array.from({ length: Math.ceil(loadingCount / 3) }).map((_, rowIndex) => (
+                    <div key={rowIndex} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {Array.from({ length: 3 }).map((_, colIndex) => (
                             <div key={colIndex} className="flex items-center gap-4 p-6 bg-white/50 dark:bg-gray-800/50 rounded-xl animate-pulse">
                                 <div className="w-32 h-32 bg-gray-200 dark:bg-gray-700 rounded-lg flex-shrink-0"></div>
                                 <div className="flex-1 min-w-0 px-2">
@@ -113,17 +113,17 @@ export function TrackGridSm({
         );
     }
 
-    // Group tracks into pairs for 2-column layout
-    const trackPairs = [];
-    for (let i = 0; i < tracks.length; i += 2) {
-        trackPairs.push(tracks.slice(i, i + 2));
+    // Group tracks into groups of 3 for 3-column layout
+    const trackGroups = [];
+    for (let i = 0; i < tracks.length; i += 3) {
+        trackGroups.push(tracks.slice(i, i + 3));
     }
 
     return (
         <div className={className}>
-            {trackPairs.map((pair, rowIndex) => (
-                <div key={rowIndex} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {pair.map((track) => (
+            {trackGroups.map((group, rowIndex) => (
+                <div key={rowIndex} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {group.map((track) => (
                         <div
                             key={track.id}
                             className="group flex items-center gap-4 p-6 rounded-xl hover:bg-white/80 dark:hover:bg-gray-800/80 transition-all duration-200"
