@@ -97,11 +97,12 @@ export function TrackGridSm({
                 {Array.from({ length: Math.ceil(loadingCount / 2) }).map((_, rowIndex) => (
                     <div key={rowIndex} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {Array.from({ length: 2 }).map((_, colIndex) => (
-                            <div key={colIndex} className="flex items-center gap-3 p-3 bg-white/50 dark:bg-gray-800/50 rounded-xl animate-pulse">
+                            <div key={colIndex} className="flex items-center gap-4 p-6 bg-white/50 dark:bg-gray-800/50 rounded-xl animate-pulse">
                                 <div className="w-32 h-32 bg-gray-200 dark:bg-gray-700 rounded-lg flex-shrink-0"></div>
-                                <div className="flex-1 min-w-0">
-                                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-1"></div>
-                                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+                                <div className="flex-1 min-w-0 px-2">
+                                    <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
+                                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
+                                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
                                 </div>
                                 <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
                             </div>
@@ -125,7 +126,7 @@ export function TrackGridSm({
                     {pair.map((track) => (
                         <div
                             key={track.id}
-                            className="group flex items-center gap-3 p-3 rounded-xl hover:bg-white/80 dark:hover:bg-gray-800/80 transition-all duration-200"
+                            className="group flex items-center gap-4 p-6 rounded-xl hover:bg-white/80 dark:hover:bg-gray-800/80 transition-all duration-200"
                         >
                             {/* Album Cover */}
                             <div className="relative w-32 h-32 flex-shrink-0">
@@ -173,24 +174,48 @@ export function TrackGridSm({
                             </div>
 
                             {/* Track Info */}
-                            <div className="flex-1 min-w-0">
-                                <h4 className="font-semibold text-sm text-gray-900 dark:text-white truncate group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
-                                    {track.title}
+                            <div className="flex-1 min-w-0 px-2">
+                                <h4 className="font-semibold text-lg text-gray-900 dark:text-white truncate hover:text-purple-600 dark:hover:text-purple-400 transition-colors mb-1">
+                                    <Link
+                                        href={`/track/${track.id}`}
+                                        className="hover:underline"
+                                    >
+                                        {track.title}
+                                    </Link>
                                 </h4>
-                                <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
-                                    {track.artist?.name || "Unknown Artist"}
+                                <p className="text-base text-gray-600 dark:text-gray-400 truncate mb-1">
+                                    {track.artist ? (
+                                        <Link
+                                            href={`/artist/${track.artist.custom_url || track.artist.id}`}
+                                            className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors hover:underline"
+                                        >
+                                            {track.artist.name}
+                                        </Link>
+                                    ) : (
+                                        "Unknown Artist"
+                                    )}
                                 </p>
-                                <div className="flex items-center gap-2 mt-1">
+                                {track.album && (
+                                    <p className="text-sm text-gray-500 dark:text-gray-500 truncate mb-2">
+                                        <Link
+                                            href={`/album/${track.album.custom_url || track.album.id}`}
+                                            className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors hover:underline"
+                                        >
+                                            {track.album.title}
+                                        </Link>
+                                    </p>
+                                )}
+                                <div className="flex items-center gap-3 mt-2">
                                     {track.genre && (
                                         <Badge
                                             variant="secondary"
-                                            className="text-xs px-2 py-0 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 dark:from-purple-900/30 dark:to-pink-900/30 dark:text-purple-300 border-0"
+                                            className="text-sm px-3 py-1 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 dark:from-purple-900/30 dark:to-pink-900/30 dark:text-purple-300 border-0"
                                         >
                                             {track.genre.name}
                                         </Badge>
                                     )}
-                                    <div className="flex items-center gap-1 text-xs text-gray-500">
-                                        <Clock className="h-3 w-3" />
+                                    <div className="flex items-center gap-1 text-sm text-gray-500">
+                                        <Clock className="h-4 w-4" />
                                         <span className="font-mono">{formatDuration(track.duration)}</span>
                                     </div>
                                 </div>
