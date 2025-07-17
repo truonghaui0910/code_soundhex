@@ -228,9 +228,20 @@ export function MusicExplorerUI({
                                         Featured Tracks
                                     </span>
                                 </h2>
-                                <Button variant="outline" className="hidden sm:flex items-center gap-2 hover:bg-purple-50 dark:hover:bg-purple-900/20">
+                                <Button 
+                                    variant="outline" 
+                                    className="hidden sm:flex items-center gap-2 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 border-purple-200 dark:border-purple-700 text-purple-700 dark:text-purple-300 hover:from-purple-200 hover:to-pink-200 dark:hover:from-purple-800/50 dark:hover:to-pink-800/50 hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-300 shadow-sm hover:shadow-md"
+                                    onClick={() => {
+                                        if (featuredTracks.length > 0) {
+                                            // Shuffle the featured tracks array
+                                            const shuffledTracks = [...featuredTracks].sort(() => Math.random() - 0.5);
+                                            setTrackList(shuffledTracks);
+                                            playTrack(shuffledTracks[0]);
+                                        }
+                                    }}
+                                >
                                     <Shuffle className="h-4 w-4" />
-                                    Shuffle
+                                    Shuffle Play
                                 </Button>
                             </div>
 
@@ -548,7 +559,18 @@ export function MusicExplorerUI({
                                 </span>
                             </h2>
                             <div className="flex gap-2">
-                                <Button variant="outline" className="hover:bg-purple-50 dark:hover:bg-purple-900/20">
+                                <Button 
+                                    variant="outline" 
+                                    className="bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 border-purple-200 dark:border-purple-700 text-purple-700 dark:text-purple-300 hover:from-purple-200 hover:to-pink-200 dark:hover:from-purple-800/50 dark:hover:to-pink-800/50 hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-300 shadow-sm hover:shadow-md"
+                                    onClick={() => {
+                                        if (filteredTracks.length > 0) {
+                                            // Shuffle the filtered tracks array
+                                            const shuffledTracks = [...filteredTracks].sort(() => Math.random() - 0.5);
+                                            setTrackList(shuffledTracks);
+                                            playTrack(shuffledTracks[0]);
+                                        }
+                                    }}
+                                >
                                     <Shuffle className="mr-2 h-4 w-4" />
                                     Shuffle All
                                 </Button>
