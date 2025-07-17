@@ -149,8 +149,21 @@ export function MusicExplorerUI({
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 onKeyPress={onSearchKeyPress}
-                                className="pl-12 h-14 text-lg bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder-white/60"
+                                className="pl-12 pr-12 h-14 text-lg bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder-white/60"
                             />
+                            {/* Clear button - show when there's text and not searching */}
+                            {searchQuery && !isSearching && (
+                                <button
+                                    onClick={() => setSearchQuery("")}
+                                    className="absolute right-4 top-4 h-5 w-5 text-gray-400 hover:text-white transition-colors z-10"
+                                    title="Clear search"
+                                >
+                                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            )}
+                            {/* Loading spinner */}
                             {isSearching && (
                                 <div className="absolute right-4 top-4">
                                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
