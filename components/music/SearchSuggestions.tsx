@@ -108,7 +108,8 @@ export function SearchSuggestions({
   return (
     <div 
       ref={dropdownRef}
-      className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden z-50 max-h-96 overflow-y-auto"
+      className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden z-[9999] max-h-96 overflow-y-auto"
+      style={{ zIndex: 9999 }}
     >
       {loading ? (
         <div className="p-6 text-center">
