@@ -204,15 +204,45 @@ export class TracksController {
     // Convert query to lowercase for case-insensitive search
     const searchTerm = query.toLowerCase();
 
-    const { data, error } = await supabase
+    // First, get matching artist and album IDs
+    const { data: artistsData } = await supabase
+      .from("artists")
+      .select("id")
+      .ilike("name", `%${searchTerm}%`);
+
+    const { data: albumsData } = await supabase
+      .from("albums")
+      .select("id")
+      .ilike("title", `%${searchTerm}%`);
+
+    const artistIds = artistsData?.map(a => a.id) || [];
+    const albumIds = albumsData?.map(a => a.id) || [];
+
+    // Build the query conditions
+    let query_builder = supabase
       .from("tracks")
       .select(`
         *,
         artist:artist_id(id, name, profile_image_url, custom_url),
         album:album_id(id, title, cover_image_url, custom_url),
         genre:genre_id(id, name)
-      `)
-      .or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,artist_id.in.(select id from artists where name ilike '%${searchTerm}%'),album_id.in.(select id from albums where title ilike '%${searchTerm}%')`)
+      `);
+
+    // Create OR conditions array
+    const conditions = [];
+    conditions.push(`title.ilike.%${searchTerm}%`);
+    conditions.push(`description.ilike.%${searchTerm}%`);
+    
+    if (artistIds.length > 0) {
+      conditions.push(`artist_id.in.(${artistIds.join(',')})`);
+    }
+    
+    if (albumIds.length > 0) {
+      conditions.push(`album_id.in.(${albumIds.join(',')})`);
+    }
+
+    const { data, error } = await query_builder
+      .or(conditions.join(','))
       .order("created_at", { ascending: false });
 
     if (error) {
