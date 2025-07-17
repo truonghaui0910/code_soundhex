@@ -237,7 +237,7 @@ export function MusicExplorerUI({
                                             playTrack(shuffledTracks[0]);
                                         }
                                     }}
-                                    className="hidden sm:flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                                    className="hidden sm:flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
                                 >
                                     <Shuffle className="h-4 w-4" />
                                     Shuffle Play
@@ -567,7 +567,7 @@ export function MusicExplorerUI({
                                             playTrack(shuffledTracks[0]);
                                         }
                                     }}
-                                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
                                 >
                                     <Shuffle className="mr-2 h-4 w-4" />
                                     Shuffle All
