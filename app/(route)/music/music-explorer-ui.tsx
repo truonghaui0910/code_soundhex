@@ -229,8 +229,6 @@ export function MusicExplorerUI({
                                     </span>
                                 </h2>
                                 <Button 
-                                    variant="outline" 
-                                    className="hidden sm:flex items-center gap-2 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 border-purple-200 dark:border-purple-700 text-purple-700 dark:text-purple-300 hover:from-purple-200 hover:to-pink-200 dark:hover:from-purple-800/50 dark:hover:to-pink-800/50 hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-300 shadow-sm hover:shadow-md"
                                     onClick={() => {
                                         if (featuredTracks.length > 0) {
                                             // Shuffle the featured tracks array
@@ -239,6 +237,7 @@ export function MusicExplorerUI({
                                             playTrack(shuffledTracks[0]);
                                         }
                                     }}
+                                    className="hidden sm:flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
                                 >
                                     <Shuffle className="h-4 w-4" />
                                     Shuffle Play
@@ -560,8 +559,6 @@ export function MusicExplorerUI({
                             </h2>
                             <div className="flex gap-2">
                                 <Button 
-                                    variant="outline" 
-                                    className="bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 border-purple-200 dark:border-purple-700 text-purple-700 dark:text-purple-300 hover:from-purple-200 hover:to-pink-200 dark:hover:from-purple-800/50 dark:hover:to-pink-800/50 hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-300 shadow-sm hover:shadow-md"
                                     onClick={() => {
                                         if (filteredTracks.length > 0) {
                                             // Shuffle the filtered tracks array
@@ -570,6 +567,7 @@ export function MusicExplorerUI({
                                             playTrack(shuffledTracks[0]);
                                         }
                                     }}
+                                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
                                 >
                                     <Shuffle className="mr-2 h-4 w-4" />
                                     Shuffle All
