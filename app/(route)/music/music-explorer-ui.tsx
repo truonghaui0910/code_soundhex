@@ -96,6 +96,8 @@ interface MusicExplorerUIProps {
     currentView: "featured" | "library" | "upload";
     setCurrentView: (view: "featured" | "library" | "upload") => void;
     isLoadingFeatured: boolean;
+    onSearchKeyPress?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+    isSearching?: boolean;
 }
 
 export function MusicExplorerUI({
@@ -115,6 +117,8 @@ export function MusicExplorerUI({
     currentView,
     setCurrentView,
     isLoadingFeatured,
+    onSearchKeyPress,
+    isSearching = false,
 }: MusicExplorerUIProps) {
     const {
         currentTrack,
@@ -141,11 +145,17 @@ export function MusicExplorerUI({
                         <div className="relative max-w-2xl mx-auto mb-8">
                             <Search className="absolute left-4 top-4 h-5 w-5 text-gray-400 z-10" />
                             <Input
-                                placeholder="Search songs, artists, albums..."
+                                placeholder="Search songs, artists, albums... (Press Enter to search)"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
+                                onKeyPress={onSearchKeyPress}
                                 className="pl-12 h-14 text-lg bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder-white/60"
                             />
+                            {isSearching && (
+                                <div className="absolute right-4 top-4">
+                                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                                </div>
+                            )}
                         </div>
 
                         {/* Action Buttons */}

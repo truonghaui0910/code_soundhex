@@ -179,14 +179,30 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
         }
     }, []);
 
-    // Debounced search effect
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            searchTracks(searchQuery);
-        }, 300);
+    // State for search trigger
+    const [shouldSearch, setShouldSearch] = useState(false);
 
-        return () => clearTimeout(timer);
-    }, [searchQuery, searchTracks]);
+    // Search effect when triggered
+    useEffect(() => {
+        if (shouldSearch) {
+            searchTracks(searchQuery);
+            setShouldSearch(false);
+        }
+    }, [shouldSearch, searchQuery, searchTracks]);
+
+    // Handle Enter key press
+    const handleSearchKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            setShouldSearch(true);
+        }
+    };
+
+    // Clear search results when search query is cleared
+    useEffect(() => {
+        if (!searchQuery.trim()) {
+            setSearchResults([]);
+        }
+    }, [searchQuery]);
 
     // Function to fetch featured data
     const fetchFeaturedData = async () => {
@@ -386,6 +402,8 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
             currentView={currentView}
             setCurrentView={setCurrentView}
             isLoadingFeatured={isLoadingFeatured}
+            onSearchKeyPress={handleSearchKeyPress}
+            isSearching={isSearching}
         />
     );
 }

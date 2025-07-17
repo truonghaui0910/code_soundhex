@@ -212,12 +212,7 @@ export class TracksController {
         album:album_id(id, title, cover_image_url, custom_url),
         genre:genre_id(id, name)
       `)
-      .or(`
-        title.ilike.%${searchTerm}%,
-        description.ilike.%${searchTerm}%,
-        artist_id.in.(select id from artists where name ilike '%${searchTerm}%'),
-        album_id.in.(select id from albums where title ilike '%${searchTerm}%')
-      `)
+      .or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,artist_id.in.(select id from artists where name ilike '%${searchTerm}%'),album_id.in.(select id from albums where title ilike '%${searchTerm}%')`)
       .order("created_at", { ascending: false });
 
     if (error) {
