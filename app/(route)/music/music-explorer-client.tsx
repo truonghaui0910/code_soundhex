@@ -259,11 +259,13 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
                     <section>
                         <div className="flex items-center justify-between mb-8">
                             <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-2xl animate-pulse"></div>
-                                <div className="h-6 w-40 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                                <TrendingUp className="w-8 h-8 p-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-2xl" />
+                                <h2 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+                                    Featured Tracks
+                                </h2>
                             </div>
                             <div className="h-10 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-                        </div>
+                        </div></div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8">
                             {Array.from({ length: 10 }).map((_, index) => (
@@ -291,11 +293,13 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
                     <section>
                         <div className="flex items-center justify-between mb-8">
                             <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-2xl animate-pulse"></div>
-                                <div className="h-6 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                                <Album className="w-8 h-8 p-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-2xl" />
+                                <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                                    Albums
+                                </h2>
                             </div>
                             <div className="h-6 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-                        </div>
+                        </div></div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                             {Array.from({ length: 10 }).map((_, index) => (
@@ -314,11 +318,13 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
                     <section>
                         <div className="flex items-center justify-between mb-8">
                             <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-2xl animate-pulse"></div>
-                                <div className="h-6 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                                <Users className="w-8 h-8 p-2 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-2xl" />
+                                <h2 className="text-2xl font-bold bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">
+                                    Artists
+                                </h2>
                             </div>
                             <div className="h-6 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-                        </div>
+                        </div></div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                             {Array.from({ length: 10 }).map((_, index) => (
