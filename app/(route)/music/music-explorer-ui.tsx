@@ -182,11 +182,6 @@ export function MusicExplorerUI({
                 <div className="container mx-auto px-6 py-4">
                     <div className="flex flex-wrap gap-4 items-center justify-between">
                         <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-2">
-                                <Filter className="h-4 w-4" />
-                                <span className="font-medium">Filters:</span>
-                            </div>
-
                             {/* Genre Filter */}
                             <select
                                 value={selectedGenre}
