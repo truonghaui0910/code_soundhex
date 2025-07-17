@@ -175,7 +175,7 @@ export function TrackGridSm({
 
                             {/* Track Info */}
                             <div className="flex-1 min-w-0 px-2">
-                                <h4 className="font-semibold text-lg text-gray-900 dark:text-white truncate hover:text-purple-600 dark:hover:text-purple-400 transition-colors mb-1">
+                                <h4 className="font-semibold text-gray-900 dark:text-white truncate hover:text-purple-600 dark:hover:text-purple-400 transition-colors mb-1">
                                     <Link
                                         href={`/track/${track.id}`}
                                         className="hover:underline"
@@ -183,7 +183,7 @@ export function TrackGridSm({
                                         {track.title}
                                     </Link>
                                 </h4>
-                                <p className="text-base text-gray-600 dark:text-gray-400 truncate mb-1">
+                                <p className="text-sm text-gray-600 dark:text-gray-400 truncate mb-1">
                                     {track.artist ? (
                                         <Link
                                             href={`/artist/${track.artist.custom_url || track.artist.id}`}
