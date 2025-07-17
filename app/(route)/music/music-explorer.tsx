@@ -118,6 +118,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                             id: track.album!.id,
                             title: track.album!.title,
                             cover_image_url: track.album!.cover_image_url,
+                            custom_url: track.album!.custom_url,
                             artist: track.artist,
                             tracksCount: tracks.filter(
                                 (t) =>
