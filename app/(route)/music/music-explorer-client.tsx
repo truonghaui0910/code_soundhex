@@ -91,6 +91,12 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
         console.log('🔑 forceUpdateKey:', forceUpdateKey);
     }, [searchResults, forceUpdateKey]);
 
+    // Debug filteredTracks changes
+    useEffect(() => {
+        console.log('🔄 filteredTracks changed:', filteredTracks.length, 'items');
+        console.log('📄 filteredTracks:', filteredTracks.map(t => t.title));
+    }, [filteredTracks]);
+
     // Debug searchQuery changes
     useEffect(() => {
         console.log('📝 searchQuery changed to:', searchQuery);
@@ -105,8 +111,8 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
         console.log('📚 Current tracks length:', tracks.length);
         console.log('🎨 Current selectedGenre:', selectedGenre);
         
-        // If there's a search query, use search results
-        if (searchQuery.trim()) {
+        // If there's a search query AND we have search results, use search results
+        if (searchQuery.trim() && searchResults.length > 0) {
             console.log('🔍 Search mode - using searchResults');
             const filtered = searchResults.filter((track) => {
                 const matchesGenre =
@@ -117,6 +123,12 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
             console.log('🔍 Using search results. Filtered length:', filtered.length);
             console.log('🔍 Filtered results:', filtered.map(t => t.title));
             return filtered;
+        }
+        
+        // If there's a search query but no results yet (still searching), return empty array
+        if (searchQuery.trim() && searchResults.length === 0) {
+            console.log('🔍 Search mode - no results yet');
+            return [];
         }
 
         // Otherwise, filter from all tracks

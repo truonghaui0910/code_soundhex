@@ -212,7 +212,7 @@ export function MusicExplorerUI({
                         <div className="text-sm text-gray-600 dark:text-gray-400">
                             {currentView === "featured" 
                                 ? `${featuredTracks.length} featured tracks` 
-                                : `${filteredTracks.length} tracks found${searchQuery ? ` for "${searchQuery}"` : ""} ${searchQuery ? `(Search mode)` : `(Normal mode)`}`}
+                                : `${filteredTracks.length} tracks found${searchQuery ? ` for "${searchQuery}"` : ""} ${searchQuery ? `(Search mode)` : `(Normal mode)`} - Debug: filteredTracks.length = ${filteredTracks.length}`}
                         </div>
                     </div>
                 </div>
