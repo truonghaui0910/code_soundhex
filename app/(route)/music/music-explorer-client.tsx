@@ -84,21 +84,30 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
 
     // Filter tracks based on search and filters
     const filteredTracks = useMemo(() => {
+        console.log('🔄 Recalculating filteredTracks');
+        console.log('📝 Current searchQuery:', searchQuery);
+        console.log('🎵 Current searchResults length:', searchResults.length);
+        console.log('📚 Current tracks length:', tracks.length);
+        
         // If there's a search query, use search results
         if (searchQuery.trim()) {
-            return searchResults.filter((track) => {
+            const filtered = searchResults.filter((track) => {
                 const matchesGenre =
                     selectedGenre === "all" || track.genre?.name === selectedGenre;
                 return matchesGenre;
             });
+            console.log('🔍 Using search results. Filtered length:', filtered.length);
+            return filtered;
         }
 
         // Otherwise, filter from all tracks
-        return tracks.filter((track) => {
+        const filtered = tracks.filter((track) => {
             const matchesGenre =
                 selectedGenre === "all" || track.genre?.name === selectedGenre;
             return matchesGenre;
         });
+        console.log('📚 Using all tracks. Filtered length:', filtered.length);
+        return filtered;
     }, [searchQuery, searchResults, tracks, selectedGenre]);
 
     // Memoize unique albums and artists to prevent re-renders
@@ -165,24 +174,28 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
             return;
         }
 
-        console.log('Starting search for:', query);
+        console.log('🔍 Starting search for:', query);
         setIsSearching(true);
         try {
             const response = await fetch(`/api/tracks/search?q=${encodeURIComponent(query)}`);
-            console.log('Search response status:', response.status);
+            console.log('🔍 Search response status:', response.status);
             
             if (response.ok) {
                 const data = await response.json();
-                console.log('Search results received:', data?.length || 0, 'tracks');
-                console.log('First result:', data?.[0]);
+                console.log('✅ Search results received:', data?.length || 0, 'tracks');
+                console.log('📋 Search data:', data);
+                console.log('🎵 First result:', data?.[0]);
                 setSearchResults(data || []);
+                console.log('🎯 Search results state updated. Current searchResults length:', (data || []).length);
             } else {
-                console.error('Search failed with status:', response.status);
+                console.error('❌ Search failed with status:', response.status);
                 const errorData = await response.text();
-                console.error('Error response:', errorData);
+                console.error('❌ Error response:', errorData);
+                setSearchResults([]);
             }
         } catch (error) {
-            console.error("Error searching tracks:", error);
+            console.error("❌ Error searching tracks:", error);
+            setSearchResults([]);
         } finally {
             setIsSearching(false);
         }
