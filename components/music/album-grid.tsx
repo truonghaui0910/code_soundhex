@@ -52,17 +52,26 @@ export function AlbumGrid({
                 if (response.ok) {
                     const data = await response.json();
                     console.log('AlbumGrid - API response data:', data);
+                    console.log('AlbumGrid - Response structure:', {
+                        hasTracks: 'tracks' in data,
+                        tracksIsArray: Array.isArray(data.tracks),
+                        tracksLength: data.tracks?.length || 0,
+                        directArrayLength: Array.isArray(data) ? data.length : 'not an array'
+                    });
                     
-                    if (data.tracks && Array.isArray(data.tracks) && data.tracks.length > 0) {
-                        console.log('AlbumGrid - Setting trackList with tracks:', data.tracks);
-                        setTrackList(data.tracks);
-                        console.log('AlbumGrid - Playing first track:', data.tracks[0]);
-                        playTrack(data.tracks[0]);
+                    // Handle both formats: { tracks: [...] } and direct array [...]
+                    const tracksArray = data.tracks || (Array.isArray(data) ? data : []);
+                    
+                    if (Array.isArray(tracksArray) && tracksArray.length > 0) {
+                        console.log('AlbumGrid - Setting trackList with tracks:', tracksArray);
+                        setTrackList(tracksArray);
+                        console.log('AlbumGrid - Playing first track:', tracksArray[0]);
+                        playTrack(tracksArray[0]);
                     } else {
-                        console.log('AlbumGrid - No tracks found in response');
+                        console.log('AlbumGrid - No valid tracks found in response');
                     }
                 } else {
-                    console.log('AlbumGrid - API response not ok');
+                    console.log('AlbumGrid - API response not ok, status:', response.status);
                 }
             } catch (error) {
                 console.error("AlbumGrid - Error loading album tracks:", error);
