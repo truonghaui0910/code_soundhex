@@ -78,23 +78,28 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
         new Set(tracks.map((track) => track.genre?.name).filter(Boolean)),
     );
 
+    // State for search results
+    const [searchResults, setSearchResults] = useState<Track[]>([]);
+    const [isSearching, setIsSearching] = useState(false);
+
     // Filter tracks based on search and filters
-    const filteredTracks = tracks.filter((track) => {
-        const matchesSearch =
-            !searchQuery ||
-            track.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            (track.artist?.name || "")
-                .toLowerCase()
-                .includes(searchQuery.toLowerCase()) ||
-            (track.album?.title || "")
-                .toLowerCase()
-                .includes(searchQuery.toLowerCase());
+    const filteredTracks = useMemo(() => {
+        // If there's a search query, use search results
+        if (searchQuery.trim()) {
+            return searchResults.filter((track) => {
+                const matchesGenre =
+                    selectedGenre === "all" || track.genre?.name === selectedGenre;
+                return matchesGenre;
+            });
+        }
 
-        const matchesGenre =
-            selectedGenre === "all" || track.genre?.name === selectedGenre;
-
-        return matchesSearch && matchesGenre;
-    });
+        // Otherwise, filter from all tracks
+        return tracks.filter((track) => {
+            const matchesGenre =
+                selectedGenre === "all" || track.genre?.name === selectedGenre;
+            return matchesGenre;
+        });
+    }, [searchQuery, searchResults, tracks, selectedGenre]);
 
     // Memoize unique albums and artists to prevent re-renders
     const uniqueAlbums = useMemo(() => {
@@ -152,6 +157,36 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
         });
         return shuffled.slice(0, 12);
     }, [filteredTracks]);
+
+    // Function to search tracks
+    const searchTracks = useCallback(async (query: string) => {
+        if (!query.trim()) {
+            setSearchResults([]);
+            return;
+        }
+
+        setIsSearching(true);
+        try {
+            const response = await fetch(`/api/tracks/search?q=${encodeURIComponent(query)}`);
+            if (response.ok) {
+                const data = await response.json();
+                setSearchResults(data);
+            }
+        } catch (error) {
+            console.error("Error searching tracks:", error);
+        } finally {
+            setIsSearching(false);
+        }
+    }, []);
+
+    // Debounced search effect
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            searchTracks(searchQuery);
+        }, 300);
+
+        return () => clearTimeout(timer);
+    }, [searchQuery, searchTracks]);
 
     // Function to fetch featured data
     const fetchFeaturedData = async () => {

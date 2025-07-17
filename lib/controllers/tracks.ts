@@ -196,7 +196,7 @@ export class TracksController {
   }
 
   /**
-   * Tìm kiếm bài hát theo từ khóa
+   * Tìm kiếm bài hát theo từ khóa (tên bài hát, nghệ sỹ, album)
    */
   static async searchTracks(query: string): Promise<Track[]> {
     const supabase = createServerComponentClient<Database>({ cookies });
@@ -208,13 +208,15 @@ export class TracksController {
       .from("tracks")
       .select(`
         *,
-        artist:artist_id(id, name),
-        album:album_id(id, name, cover_url),
+        artist:artist_id(id, name, profile_image_url, custom_url),
+        album:album_id(id, title, cover_image_url, custom_url),
         genre:genre_id(id, name)
       `)
       .or(`
         title.ilike.%${searchTerm}%,
-        description.ilike.%${searchTerm}%
+        description.ilike.%${searchTerm}%,
+        artist_id.in.(select id from artists where name ilike '%${searchTerm}%'),
+        album_id.in.(select id from albums where title ilike '%${searchTerm}%')
       `)
       .order("created_at", { ascending: false });
 
