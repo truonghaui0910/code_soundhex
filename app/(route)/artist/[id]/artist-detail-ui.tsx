@@ -324,17 +324,19 @@ export function ArtistDetailUI({ artist, tracks, albums }: ArtistDetailUIProps) 
       <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-12">
         {/* Albums Section */}
         {albums && albums.length > 0 && (
-          <Card className="border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm shadow-xl">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                  <Album className="h-4 w-4 text-white" />
+          <section>
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-xl font-bold flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
+                  <Album className="h-5 w-5 text-white" />
                 </div>
-                <h2 className="text-xl font-bold">Albums</h2>
-              </div>
-              <AlbumGrid albums={albums} />
-            </CardContent>
-          </Card>
+                <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  Albums
+                </span>
+              </h2>
+            </div>
+            <AlbumGrid albums={albums} />
+          </section>
         )}
 
         {/* Popular Tracks Section */}
