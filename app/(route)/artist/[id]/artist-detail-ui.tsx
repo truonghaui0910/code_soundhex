@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { MusicPlayer } from "@/components/music/MusicPlayer";
 import { TrackList } from "@/components/music/track-list";
 import { AlbumGrid } from "@/components/music/album-grid";
+import { TrackGridSm } from "@/components/music/track-grid-sm";
 import {
   Play,
   Clock,
@@ -349,6 +350,26 @@ export function ArtistDetailUI({ artist, tracks, albums }: ArtistDetailUIProps) 
             showArtistInfo={false}
             onPlayAll={handlePlayAllTracks}
           />
+        )}
+
+        {/* All Tracks in Small Grid Format */}
+        {tracks && tracks.length > 0 && (
+          <section>
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-xl font-bold flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
+                  <Music className="h-5 w-5 text-white" />
+                </div>
+                <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  All Songs
+                </span>
+              </h2>
+            </div>
+            <TrackGridSm 
+              tracks={tracks}
+              onTrackPlay={handlePlayTrack}
+            />
+          </section>
         )}
       </div>
 
