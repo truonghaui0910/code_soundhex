@@ -37,5 +37,5 @@ export default async function AlbumDetailPage({
   }
 
   // Pass both albumId and album data to client
-  return <AlbumDetailClient albumId={albumId} album={album} />;
+  return <AlbumDetailClient albumId={albumId} initialAlbum={album} />;
 }
