@@ -572,7 +572,15 @@ export function MusicExplorerUI({
                                     <Shuffle className="mr-2 h-4 w-4" />
                                     Shuffle All
                                 </Button>
-                                <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
+                                <Button 
+                                    onClick={() => {
+                                        if (filteredTracks.length > 0) {
+                                            setTrackList(filteredTracks);
+                                            playTrack(filteredTracks[0]);
+                                        }
+                                    }}
+                                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
+                                >
                                     <Play className="mr-2 h-4 w-4" />
                                     Play All
                                 </Button>
