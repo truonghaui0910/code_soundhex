@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { 
@@ -15,12 +16,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 import { useDownload } from "@/hooks/use-download";
 import AddToPlaylist from "@/components/playlist/add-to-playlist";
@@ -69,6 +64,9 @@ export function TrackGridSm({
     onTrackPlay,
     className = "space-y-2"
 }: TrackGridSmProps) {
+    const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+    const menuRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
+
     const {
         currentTrack,
         isPlaying,
@@ -78,17 +76,25 @@ export function TrackGridSm({
     } = useAudioPlayer();
     const { downloadTrack } = useDownload();
 
-    const handleTrackPlay = (track: Track) => {
-        if (onTrackPlay) {
-            onTrackPlay(track, tracks);
-        } else {
-            if (currentTrack?.id === track.id && isPlaying) {
-                togglePlayPause();
-            } else {
-                setTrackList(tracks);
-                playTrack(track);
+    // Handle click outside to close menu
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (openMenuId !== null) {
+                const menuElement = menuRefs.current[openMenuId];
+                if (menuElement && !menuElement.contains(event.target as Node)) {
+                    setOpenMenuId(null);
+                }
             }
-        }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [openMenuId]);
+
+    const toggleMenu = (trackId: number) => {
+        setOpenMenuId(openMenuId === trackId ? null : trackId);
     };
 
     if (isLoading) {
@@ -222,60 +228,74 @@ export function TrackGridSm({
                             </div>
 
                             {/* Action Menu */}
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button
-                                        size="sm"
-                                        variant="ghost"
-                                        className="w-8 h-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-purple-100 dark:hover:bg-purple-900/30 focus:opacity-100"
-                                    >
-                                        <MoreHorizontal className="h-4 w-4" />
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent 
-                                    align="end" 
-                                    className="w-48 z-[100] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg"
-                                    sideOffset={5}
+                            <div className="relative">
+                                <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="w-8 h-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-purple-100 dark:hover:bg-purple-900/30 focus:opacity-100"
+                                    onClick={() => toggleMenu(track.id)}
                                 >
-                                    <DropdownMenuItem 
-                                        onClick={() => handleTrackPlay(track)}
-                                        className="cursor-pointer"
+                                    <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                                <div
+                                    ref={(el) => (menuRefs.current[track.id] = el)}
+                                    className={`absolute right-0 mt-2 w-48 z-[100] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg rounded-md overflow-hidden ${openMenuId === track.id ? '' : 'hidden'}`}
+                                >
+                                    <button
+                                        onClick={() => {
+                                            handleTrackPlay(track);
+                                            setOpenMenuId(null);
+                                        }}
+                                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
                                     >
                                         {currentTrack?.id === track.id && isPlaying ? (
                                             <>
-                                                <Pause className="h-4 w-4 mr-2" />
+                                                <Pause className="h-4 w-4 mr-2 inline-block" />
                                                 Pause
                                             </>
                                         ) : (
                                             <>
-                                                <Play className="h-4 w-4 mr-2" />
+                                                <Play className="h-4 w-4 mr-2 inline-block" />
                                                 Play
                                             </>
                                         )}
-                                    </DropdownMenuItem>
+                                    </button>
                                     <AddToPlaylist trackId={track.id} trackTitle={track.title}>
-                                        <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="cursor-pointer">
-                                            <Plus className="h-4 w-4 mr-2" />
+                                        <button
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                setOpenMenuId(null);
+                                            }}
+                                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                                        >
+                                            <Plus className="h-4 w-4 mr-2 inline-block" />
                                             Add to Playlist
-                                        </DropdownMenuItem>
+                                        </button>
                                     </AddToPlaylist>
-                                    <DropdownMenuItem 
-                                        onClick={() => downloadTrack(track)}
-                                        className="cursor-pointer"
+                                    <button
+                                        onClick={() => {
+                                            downloadTrack(track);
+                                            setOpenMenuId(null);
+                                        }}
+                                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
                                     >
-                                        <Download className="h-4 w-4 mr-2" />
+                                        <Download className="h-4 w-4 mr-2 inline-block" />
                                         Download
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem className="cursor-pointer">
-                                        <Heart className="h-4 w-4 mr-2" />
+                                    </button>
+                                    <button
+                                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                                    >
+                                        <Heart className="h-4 w-4 mr-2 inline-block" />
                                         Like
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem className="cursor-pointer">
-                                        <Share className="h-4 w-4 mr-2" />
+                                    </button>
+                                    <button
+                                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                                    >
+                                        <Share className="h-4 w-4 mr-2 inline-block" />
                                         Share
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     ))}
                 </div>
