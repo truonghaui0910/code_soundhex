@@ -2848,12 +2848,45 @@ export function MusicUpload() {
                                             <span>
                                                 {formatDuration(track.duration)}
                                             </span>
-                                            <Badge
-                                                variant="outline"
-                                                className="text-xs bg-purple-50 text-purple-700 border-purple-200"
-                                            >
-                                                Imported from Spotify
-                                            </Badge>
+                                            
+                                            {/* Play Button */}
+                                            {track.file_url && (
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="h-8 w-8 p-0 hover:bg-purple-100 dark:hover:bg-purple-900/50"
+                                                    onClick={() => {
+                                                        const currentTrackId = currentTrack?.id;
+                                                        const newTrackId = track.id;
+                                                        if (currentTrackId === newTrackId && isPlaying) {
+                                                            togglePlayPause();
+                                                        } else {
+                                                            setTrackList([track]);
+                                                            playTrack(track);
+                                                        }
+                                                    }}
+                                                    title="Play track"
+                                                >
+                                                    {currentTrack?.id === track.id && isPlaying ? (
+                                                        <Pause className="h-4 w-4 text-purple-600" />
+                                                    ) : (
+                                                        <Play className="h-4 w-4 text-purple-600" />
+                                                    )}
+                                                </Button>
+                                            )}
+                                            
+                                            {/* Success indicator with checkmark */}
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-5 h-5 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
+                                                    <Check className="h-3 w-3 text-green-600 dark:text-green-400" />
+                                                </div>
+                                                <Badge
+                                                    variant="outline"
+                                                    className="text-xs bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-700"
+                                                >
+                                                    Imported Successfully
+                                                </Badge>
+                                            </div>
                                         </div>
                                     </div>
                                 ))}
