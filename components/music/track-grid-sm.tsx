@@ -97,6 +97,25 @@ export function TrackGridSm({
         setOpenMenuId(openMenuId === trackId ? null : trackId);
     };
 
+    const handleTrackPlay = (track: Track) => {
+        if (onTrackPlay) {
+            onTrackPlay(track, tracks);
+        } else {
+            setTrackList(tracks);
+            setTimeout(() => {
+                playTrack(track);
+            }, 50);
+        }
+    };
+
+    const handleTogglePlay = (track: Track) => {
+        if (currentTrack?.id === track.id) {
+            togglePlayPause();
+        } else {
+            handleTrackPlay(track);
+        }
+    };
+
     if (isLoading) {
         return (
             <div className={className}>
@@ -154,7 +173,7 @@ export function TrackGridSm({
                                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 rounded-lg">
                                     <Button
                                         size="sm"
-                                        onClick={() => handleTrackPlay(track)}
+                                        onClick={() => handleTogglePlay(track)}
                                         className="w-8 h-8 rounded-full bg-white/90 text-purple-600 hover:bg-white hover:scale-110 p-0"
                                     >
                                         {currentTrack?.id === track.id && isPlaying ? (
@@ -243,7 +262,7 @@ export function TrackGridSm({
                                 >
                                     <button
                                         onClick={() => {
-                                            handleTrackPlay(track);
+                                            handleTogglePlay(track);
                                             setOpenMenuId(null);
                                         }}
                                         className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
