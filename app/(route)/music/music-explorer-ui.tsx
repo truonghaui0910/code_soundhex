@@ -144,8 +144,8 @@ export function MusicExplorerUI({
                         </p>
 
                         {/* Search Bar */}
-                        <div className="max-w-2xl mx-auto mb-8">
-                            <Search className="absolute left-4 top-4 h-5 w-5 text-gray-400 z-10" />
+                        <div className="relative max-w-2xl mx-auto mb-8">
+                            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 z-10 pointer-events-none" />
                             <Input
                                 placeholder="Search songs, artists, albums..."
                                 value={searchQuery}
@@ -164,7 +164,7 @@ export function MusicExplorerUI({
                                         setSearchQuery("");
                                         setShowSuggestions(false);
                                     }}
-                                    className="absolute right-4 top-4 h-5 w-5 text-gray-400 hover:text-white transition-colors z-10"
+                                    className="absolute right-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 hover:text-white transition-colors z-10"
                                     title="Clear search"
                                 >
                                     <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -174,7 +174,7 @@ export function MusicExplorerUI({
                             )}
                             {/* Loading spinner */}
                             {isSearching && (
-                                <div className="absolute right-4 top-4">
+                                <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
                                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
                                 </div>
                             )}
