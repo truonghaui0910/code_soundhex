@@ -81,13 +81,15 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
     // State for search results
     const [searchResults, setSearchResults] = useState<Track[]>([]);
     const [isSearching, setIsSearching] = useState(false);
+    const [forceUpdateKey, setForceUpdateKey] = useState(0); // Add force update key
 
     // Debug search results changes
     useEffect(() => {
         console.log('🎯 searchResults state changed:', searchResults.length, 'items');
         console.log('🔍 Current searchQuery:', searchQuery);
         console.log('📄 Search results:', searchResults);
-    }, [searchResults]);
+        console.log('🔑 forceUpdateKey:', forceUpdateKey);
+    }, [searchResults, forceUpdateKey]);
 
     // Debug searchQuery changes
     useEffect(() => {
@@ -126,7 +128,7 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
         });
         console.log('📚 Using all tracks. Filtered length:', filtered.length);
         return filtered;
-    }, [searchQuery, searchResults, tracks, selectedGenre, searchResults.length]);
+    }, [searchQuery, searchResults, tracks, selectedGenre, forceUpdateKey]);
 
     // Memoize unique albums and artists to prevent re-renders
     const uniqueAlbums = useMemo(() => {
@@ -207,11 +209,20 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
                 // Force array update with new reference
                 const newResults = Array.isArray(data) ? [...data] : [];
                 console.log('🔄 Setting new search results:', newResults.length, 'items');
-                setSearchResults(newResults);
                 
-                // Force state update
+                // Force state update with callback
+                setSearchResults(prevResults => {
+                    console.log('🔄 Previous results:', prevResults.length);
+                    console.log('🔄 New results:', newResults.length);
+                    return newResults;
+                });
+                
+                // Force component re-render
+                setForceUpdateKey(prev => prev + 1);
+                
+                // Debug after state update
                 setTimeout(() => {
-                    console.log('⏰ After timeout - searchResults.length:', searchResults.length);
+                    console.log('⏰ After timeout - searchResults should be updated');
                 }, 100);
             } else {
                 console.error('❌ Search failed with status:', response.status);
@@ -248,7 +259,9 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
     // Clear search results when search query is cleared
     useEffect(() => {
         if (!searchQuery.trim()) {
+            console.log('🧹 Clearing search results');
             setSearchResults([]);
+            setForceUpdateKey(prev => prev + 1);
         }
     }, [searchQuery]);
 
