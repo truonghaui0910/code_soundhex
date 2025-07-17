@@ -1,4 +1,3 @@
-
 "use client";
 
 import Image from "next/image";
@@ -203,13 +202,20 @@ export function TrackGridSm({
                                     <Button
                                         size="sm"
                                         variant="ghost"
-                                        className="w-8 h-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-purple-100 dark:hover:bg-purple-900/30"
+                                        className="w-8 h-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-purple-100 dark:hover:bg-purple-900/30 focus:opacity-100"
                                     >
                                         <MoreHorizontal className="h-4 w-4" />
                                     </Button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="w-48">
-                                    <DropdownMenuItem onClick={() => handleTrackPlay(track)}>
+                                <DropdownMenuContent 
+                                    align="end" 
+                                    className="w-48 z-[100] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg"
+                                    sideOffset={5}
+                                >
+                                    <DropdownMenuItem 
+                                        onClick={() => handleTrackPlay(track)}
+                                        className="cursor-pointer"
+                                    >
                                         {currentTrack?.id === track.id && isPlaying ? (
                                             <>
                                                 <Pause className="h-4 w-4 mr-2" />
@@ -223,20 +229,23 @@ export function TrackGridSm({
                                         )}
                                     </DropdownMenuItem>
                                     <AddToPlaylist trackId={track.id} trackTitle={track.title}>
-                                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                        <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="cursor-pointer">
                                             <Plus className="h-4 w-4 mr-2" />
                                             Add to Playlist
                                         </DropdownMenuItem>
                                     </AddToPlaylist>
-                                    <DropdownMenuItem onClick={() => downloadTrack(track)}>
+                                    <DropdownMenuItem 
+                                        onClick={() => downloadTrack(track)}
+                                        className="cursor-pointer"
+                                    >
                                         <Download className="h-4 w-4 mr-2" />
                                         Download
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem>
+                                    <DropdownMenuItem className="cursor-pointer">
                                         <Heart className="h-4 w-4 mr-2" />
                                         Like
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem>
+                                    <DropdownMenuItem className="cursor-pointer">
                                         <Share className="h-4 w-4 mr-2" />
                                         Share
                                     </DropdownMenuItem>
