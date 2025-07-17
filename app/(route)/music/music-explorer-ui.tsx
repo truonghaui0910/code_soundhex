@@ -99,6 +99,7 @@ interface MusicExplorerUIProps {
     isLoadingFeatured: boolean;
     onSearchKeyPress?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
     isSearching?: boolean;
+    onSearchTrigger?: () => void;
 }
 
 export function MusicExplorerUI({
@@ -120,6 +121,7 @@ export function MusicExplorerUI({
     isLoadingFeatured,
     onSearchKeyPress,
     isSearching = false,
+    onSearchTrigger,
 }: MusicExplorerUIProps) {
     const {
         currentTrack,
@@ -153,7 +155,12 @@ export function MusicExplorerUI({
                                     setSearchQuery(e.target.value);
                                     setShowSuggestions(true);
                                 }}
-                                onKeyPress={onSearchKeyPress}
+                                onKeyPress={(e) => {
+                                    if (e.key === 'Enter') {
+                                        setShowSuggestions(false);
+                                    }
+                                    onSearchKeyPress?.(e);
+                                }}
                                 onFocus={() => setShowSuggestions(true)}
                                 className="pl-12 pr-12 h-14 text-lg bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder-white/60"
                             />
@@ -187,9 +194,7 @@ export function MusicExplorerUI({
                                     setSearchQuery(suggestion);
                                     setShowSuggestions(false);
                                     // Trigger search
-                                    if (onSearchKeyPress) {
-                                        onSearchKeyPress({ key: 'Enter' } as React.KeyboardEvent<HTMLInputElement>);
-                                    }
+                                    onSearchTrigger?.();
                                 }}
                                 onTrackPlay={(track) => {
                                     setTrackList([track]);

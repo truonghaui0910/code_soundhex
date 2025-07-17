@@ -481,6 +481,7 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
             isLoadingFeatured={isLoadingFeatured}
             onSearchKeyPress={handleSearchKeyPress}
             isSearching={isSearching}
+            onSearchTrigger={() => setShouldSearch(true)}
         />
     );
 }
