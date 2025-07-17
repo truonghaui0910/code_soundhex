@@ -98,7 +98,7 @@ export function TrackGridSm({
                     <div key={rowIndex} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {Array.from({ length: 2 }).map((_, colIndex) => (
                             <div key={colIndex} className="flex items-center gap-3 p-3 bg-white/50 dark:bg-gray-800/50 rounded-xl animate-pulse">
-                                <div className="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-lg flex-shrink-0"></div>
+                                <div className="w-32 h-32 bg-gray-200 dark:bg-gray-700 rounded-lg flex-shrink-0"></div>
                                 <div className="flex-1 min-w-0">
                                     <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-1"></div>
                                     <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
