@@ -38,21 +38,34 @@ export function AlbumGrid({
     const { setTrackList, playTrack } = useAudioPlayer();
 
     const handleAlbumPlay = async (album: Album) => {
+        console.log('AlbumGrid - handleAlbumPlay called with album:', album);
         if (onAlbumPlay) {
+            console.log('AlbumGrid - using custom onAlbumPlay callback');
             onAlbumPlay(album);
         } else {
             // Default play behavior - fetch album tracks
+            console.log('AlbumGrid - fetching album tracks from API');
             try {
                 const response = await fetch(`/api/albums/${album.id}/tracks`);
+                console.log('AlbumGrid - API response status:', response.status);
+                
                 if (response.ok) {
                     const data = await response.json();
+                    console.log('AlbumGrid - API response data:', data);
+                    
                     if (data.tracks && Array.isArray(data.tracks) && data.tracks.length > 0) {
+                        console.log('AlbumGrid - Setting trackList with tracks:', data.tracks);
                         setTrackList(data.tracks);
+                        console.log('AlbumGrid - Playing first track:', data.tracks[0]);
                         playTrack(data.tracks[0]);
+                    } else {
+                        console.log('AlbumGrid - No tracks found in response');
                     }
+                } else {
+                    console.log('AlbumGrid - API response not ok');
                 }
             } catch (error) {
-                console.error("Error loading album tracks:", error);
+                console.error("AlbumGrid - Error loading album tracks:", error);
             }
         }
     };
@@ -105,6 +118,7 @@ export function AlbumGrid({
                             <Button
                                 size="lg"
                                 onClick={(e) => {
+                                    console.log('AlbumGrid - Play button clicked for album:', album);
                                     e.preventDefault();
                                     e.stopPropagation();
                                     handleAlbumPlay(album);
