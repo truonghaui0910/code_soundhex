@@ -87,8 +87,7 @@ interface MusicExplorerUIProps {
     featuredTracks: Track[];
     featuredAlbums: FeaturedAlbum[];
     featuredArtists: FeaturedArtist[];
-    filteredTracks: Track[];
-    allFilteredTracks: Track[];
+    libraryTracks: Track[];
     trendingTracks: Track[];
     uniqueAlbums: any[];
     uniqueArtists: any[];
@@ -107,6 +106,7 @@ interface MusicExplorerUIProps {
     setCurrentPage: (page: number) => void;
     itemsPerPage: number;
     totalPages: number;
+    totalTracks: number;
 }
 
 export function MusicExplorerUI({
@@ -114,8 +114,7 @@ export function MusicExplorerUI({
     featuredTracks,
     featuredAlbums,
     featuredArtists,
-    filteredTracks,
-    allFilteredTracks,
+    libraryTracks,
     trendingTracks,
     uniqueAlbums,
     uniqueArtists,
@@ -134,6 +133,7 @@ export function MusicExplorerUI({
     setCurrentPage,
     itemsPerPage,
     totalPages,
+    totalTracks,
 }: MusicExplorerUIProps) {
     const {
         currentTrack,
@@ -272,8 +272,8 @@ export function MusicExplorerUI({
                             {currentView === "featured" 
                                 ? `${featuredTracks.length} featured tracks` 
                                 : currentView === "library" 
-                                    ? `Showing ${Math.min((currentPage - 1) * itemsPerPage + 1, allFilteredTracks.length)}-${Math.min(currentPage * itemsPerPage, allFilteredTracks.length)} of ${allFilteredTracks.length} tracks${searchQuery ? ` for "${searchQuery}"` : ""}`
-                                    : `${filteredTracks.length} tracks found${searchQuery ? ` for "${searchQuery}"` : ""}`}
+                                    ? `Showing ${Math.min((currentPage - 1) * itemsPerPage + 1, totalTracks)}-${Math.min(currentPage * itemsPerPage, totalTracks)} of ${totalTracks} tracks${searchQuery ? ` for "${searchQuery}"` : ""}`
+                                    : `${libraryTracks.length} tracks found${searchQuery ? ` for "${searchQuery}"` : ""}`}
                         </div>
                     </div>
                 </div>
@@ -626,9 +626,9 @@ export function MusicExplorerUI({
                             <div className="flex gap-2">
                                 <Button 
                                     onClick={() => {
-                                        if (allFilteredTracks.length > 0) {
-                                            // Shuffle the filtered tracks array
-                                            const shuffledTracks = [...allFilteredTracks].sort(() => Math.random() - 0.5);
+                                        if (libraryTracks.length > 0) {
+                                            // Shuffle the library tracks array
+                                            const shuffledTracks = [...libraryTracks].sort(() => Math.random() - 0.5);
                                             setTrackList(shuffledTracks);
                                             playTrack(shuffledTracks[0]);
                                         }
@@ -636,29 +636,29 @@ export function MusicExplorerUI({
                                     className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
                                 >
                                     <Shuffle className="mr-2 h-4 w-4" />
-                                    Shuffle All
+                                    Shuffle Page
                                 </Button>
                                 <Button 
                                     onClick={() => {
-                                        if (allFilteredTracks.length > 0) {
-                                            setTrackList(allFilteredTracks);
-                                            playTrack(allFilteredTracks[0]);
+                                        if (libraryTracks.length > 0) {
+                                            setTrackList(libraryTracks);
+                                            playTrack(libraryTracks[0]);
                                         }
                                     }}
                                     className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
                                 >
                                     <Play className="mr-2 h-4 w-4" />
-                                    Play All
+                                    Play Page
                                 </Button>
                             </div>
                         </div>
 
                         {/* Grid view for library */}
                         <div 
-                            key={`library-${filteredTracks.length}-${searchQuery}`}
+                            key={`library-${libraryTracks.length}-${searchQuery}-${currentPage}`}
                             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8"
                         >
-                            {filteredTracks.map((track, index) => (
+                            {libraryTracks.map((track, index) => (
                                 <div
                                     key={track.id}
                                     className="group relative"
@@ -696,7 +696,7 @@ export function MusicExplorerUI({
                                                         if (currentTrack?.id === track.id && isPlaying) {
                                                             togglePlayPause();
                                                         } else {
-                                                            setTrackList(allFilteredTracks);
+                                                            setTrackList(libraryTracks);
                                                             playTrack(track);
                                                         }
                                                     }}
