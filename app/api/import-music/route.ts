@@ -3,6 +3,47 @@ import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { Database } from "@/types/supabase";
 
+// Helper function to generate slug from text
+function generateSlug(text: string): string {
+    return text
+        .toLowerCase()
+        .trim()
+        .replace(/[^\w\s-]/g, '') // Remove special characters
+        .replace(/[\s_-]+/g, '-') // Replace spaces and underscores with hyphens
+        .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
+}
+
+// Helper function to ensure unique custom_url
+async function generateUniqueCustomUrl(supabase: any, tableName: string, baseSlug: string, excludeId?: number): Promise<string> {
+    let customUrl = baseSlug;
+    let counter = 1;
+    
+    while (true) {
+        let query = supabase
+            .from(tableName)
+            .select("id")
+            .eq("custom_url", customUrl);
+            
+        if (excludeId) {
+            query = query.neq("id", excludeId);
+        }
+        
+        const { data, error } = await query;
+        
+        if (error) {
+            console.error(`Error checking custom_url uniqueness:`, error);
+            throw new Error(`Failed to check custom_url uniqueness: ${error.message}`);
+        }
+        
+        if (data.length === 0) {
+            return customUrl;
+        }
+        
+        customUrl = `${baseSlug}-${counter}`;
+        counter++;
+    }
+}
+
 interface ImportTrack {
     id: string;
     name: string;
@@ -111,7 +152,10 @@ async function importSingleTrack(
         }
     }
 
-    // 2. Create or get artist
+    // 2. Check if artist exists and belongs to another user
+    await checkArtistOwnership(supabase, trackData.artist, userId);
+
+    // 3. Create or get artist
     const artistSpotifyId = trackData.artists?.[0]?.id;
 
     let artist;
@@ -172,6 +216,10 @@ async function importSingleTrack(
         throw new Error("Track already exists");
     }
 
+    // Generate custom_url for track
+    const trackSlug = generateSlug(trackData.name);
+    const trackCustomUrl = await generateUniqueCustomUrl(supabase, "tracks", trackSlug);
+
     const trackInsertData = {
         title: trackData.name,
         description: null,
@@ -186,6 +234,7 @@ async function importSingleTrack(
         popularity: 0,
         isrc: trackData.isrc || null,
         user_id: userId,
+        custom_url: trackCustomUrl,
     };
 
     const { data: newTrack, error: trackError } = await supabase
@@ -199,6 +248,25 @@ async function importSingleTrack(
         throw new Error(`Failed to create track: ${trackError.message}`);
     }
     return newTrack;
+}
+
+async function checkArtistOwnership(supabase: any, artistName: string, userId: string) {
+    // Check if artist exists with this name
+    const { data: existingArtist, error: findError } = await supabase
+        .from("artists")
+        .select("id, name, user_id")
+        .ilike("name", artistName)
+        .single();
+
+    if (findError && findError.code !== "PGRST116") {
+        console.error("Error checking artist ownership:", findError);
+        throw new Error(`Failed to check artist ownership: ${findError.message}`);
+    }
+
+    // If artist exists and belongs to another user, throw error
+    if (existingArtist && existingArtist.user_id !== userId) {
+        throw new Error(`Artist "${artistName}" already exists and belongs to another user. You cannot import tracks for this artist.`);
+    }
 }
 
 async function getOrCreateGenre(supabase: any, genreName: string) {
@@ -307,6 +375,10 @@ async function getOrCreateAlbum(
         return existingAlbum;
     }
 
+    // Generate custom_url for album
+    const albumSlug = generateSlug(albumData.title);
+    const albumCustomUrl = await generateUniqueCustomUrl(supabase, "albums", albumSlug);
+
     // Create new album
     const insertData = {
         title: albumData.title,
@@ -316,6 +388,7 @@ async function getOrCreateAlbum(
         release_date: albumData.release_date || null,
         description: albumData.description || null,
         user_id: albumData.user_id,
+        custom_url: albumCustomUrl,
     };
 
     const { data: newAlbum, error } = await supabase
