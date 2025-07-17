@@ -8,12 +8,13 @@ import { AlbumDetailUI } from "./album-detail-ui";
 
 interface AlbumDetailClientProps {
   albumId: number;
+  initialAlbum?: any;
 }
 
-export function AlbumDetailClient({ albumId }: AlbumDetailClientProps) {
-  const [loading, setLoading] = useState(true);
-  const [album, setAlbum] = useState(null);
-  const [tracks, setTracks] = useState([]);
+export function AlbumDetailClient({ albumId, initialAlbum }: AlbumDetailClientProps) {
+  const [album, setAlbum] = useState<any>(initialAlbum || null);
+  const [tracks, setTracks] = useState<any[]>([]);
+  const [loading, setLoading] = useState(!initialAlbum);
   const [error, setError] = useState(null);
   const [retryCount, setRetryCount] = useState(0);
 
@@ -38,54 +39,74 @@ export function AlbumDetailClient({ albumId }: AlbumDetailClientProps) {
           ]);
         };
 
-        // Fetch album và tracks từ API với timeout
-        const [albumsResponse, tracksResponse] = await Promise.all([
-          fetchWithTimeout("/api/albums"),
-          fetchWithTimeout(`/api/albums/${albumId}/tracks`),
-        ]);
+        // Nếu đã có initialAlbum, chỉ fetch tracks
+        if (initialAlbum) {
+          console.log("Using initial album data, only fetching tracks");
+          
+          const tracksResponse = await fetchWithTimeout(`/api/albums/${albumId}/tracks`);
+          
+          if (!tracksResponse.ok) {
+            throw new Error(`Tracks API error: ${tracksResponse.status}`);
+          }
 
-        if (!albumsResponse.ok) {
-          throw new Error(`Albums API error: ${albumsResponse.status}`);
+          const tracksData = await tracksResponse.json();
+          const validatedTracks = Array.isArray(tracksData) ? tracksData : [];
+
+          console.log(
+            `Successfully loaded ${validatedTracks.length} tracks for album: ${initialAlbum.title}`,
+          );
+
+          setTracks(validatedTracks);
+        } else {
+          // Fetch album và tracks từ API với timeout
+          const [albumsResponse, tracksResponse] = await Promise.all([
+            fetchWithTimeout("/api/albums"),
+            fetchWithTimeout(`/api/albums/${albumId}/tracks`),
+          ]);
+
+          if (!albumsResponse.ok) {
+            throw new Error(`Albums API error: ${albumsResponse.status}`);
+          }
+
+          if (!tracksResponse.ok) {
+            throw new Error(`Tracks API error: ${tracksResponse.status}`);
+          }
+
+          const [albumsData, tracksData] = await Promise.all([
+            albumsResponse.json(),
+            tracksResponse.json(),
+          ]);
+
+          const fetchTime = Date.now() - startTime;
+          console.log(`⚡ API fetch completed in ${fetchTime}ms`);
+
+          const albumData = albumsData.find((a) => a.id === albumId);
+
+          if (!albumData) {
+            console.log(`Album not found with ID: ${albumId}`);
+            notFound();
+            return;
+          }
+
+          // Validate data structure
+          const validatedAlbum = {
+            id: albumData.id,
+            title: albumData.title || "Unknown Album",
+            artist: albumData.artist || { id: 0, name: "Unknown Artist" },
+            cover_image_url: albumData.cover_image_url || null,
+            release_date: albumData.release_date || null,
+            genre: albumData.genre || null,
+          };
+
+          const validatedTracks = Array.isArray(tracksData) ? tracksData : [];
+
+          console.log(
+            `Successfully loaded album: ${validatedAlbum.title} with ${validatedTracks.length} tracks`,
+          );
+
+          setAlbum(validatedAlbum);
+          setTracks(validatedTracks);
         }
-
-        if (!tracksResponse.ok) {
-          throw new Error(`Tracks API error: ${tracksResponse.status}`);
-        }
-
-        const [albumsData, tracksData] = await Promise.all([
-          albumsResponse.json(),
-          tracksResponse.json(),
-        ]);
-
-        const fetchTime = Date.now() - startTime;
-        console.log(`⚡ API fetch completed in ${fetchTime}ms`);
-
-        const albumData = albumsData.find((a) => a.id === albumId);
-
-        if (!albumData) {
-          console.log(`Album not found with ID: ${albumId}`);
-          notFound();
-          return;
-        }
-
-        // Validate data structure
-        const validatedAlbum = {
-          id: albumData.id,
-          title: albumData.title || "Unknown Album",
-          artist: albumData.artist || { id: 0, name: "Unknown Artist" },
-          cover_image_url: albumData.cover_image_url || null,
-          release_date: albumData.release_date || null,
-          genre: albumData.genre || null,
-        };
-
-        const validatedTracks = Array.isArray(tracksData) ? tracksData : [];
-
-        console.log(
-          `Successfully loaded album: ${validatedAlbum.title} with ${validatedTracks.length} tracks`,
-        );
-
-        setAlbum(validatedAlbum);
-        setTracks(validatedTracks);
       } catch (err) {
         console.error("Error loading album:", err);
         setError(err.message);
@@ -95,7 +116,7 @@ export function AlbumDetailClient({ albumId }: AlbumDetailClientProps) {
     }
 
     fetchData();
-  }, [albumId, retryCount]);
+  }, [albumId, retryCount, initialAlbum]);
 
   const handleRetry = () => {
     setRetryCount((prev) => prev + 1);

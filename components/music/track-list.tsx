@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 import { useDownload } from "@/hooks/use-download";
 import AddToPlaylist from "@/components/playlist/add-to-playlist";
@@ -211,7 +212,7 @@ export function TrackList({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <h3 
-                      className={`font-medium text-sm truncate cursor-pointer hover:text-purple-600 dark:hover:text-purple-400 transition-colors ${
+                      className={`font-semibold text-lg truncate cursor-pointer hover:text-purple-600 dark:hover:text-purple-400 transition-colors ${
                         isCurrentTrack ? 'text-purple-600 dark:text-purple-400' : 'text-gray-900 dark:text-gray-100'
                       }`}
                       onClick={() => handleTogglePlay(track, idx)}
@@ -230,11 +231,11 @@ export function TrackList({
                       </div>
                     )}
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                  <div className="flex items-center gap-3 text-base text-gray-500 dark:text-gray-400">
                     {showArtistInfo && track.artist && (
                       <Link
                         href={`/artist/${track.artist.custom_url || track.artist.id}`}
-                        className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors truncate"
+                        className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors truncate font-medium"
                       >
                         {track.artist.name}
                       </Link>
@@ -243,7 +244,7 @@ export function TrackList({
                       <>
                         {showArtistInfo && <span>•</span>}
                         <Link
-                          href={`/album/${track.album.id}`}
+                          href={`/album/${track.album.custom_url || track.album.id}`}
                           className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors truncate"
                         >
                           {track.album.title}
@@ -253,12 +254,22 @@ export function TrackList({
                   </div>
                 </div>
 
-                {/* Duration */}
+                {/* Duration and Genre */}
                 <div className="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
-                  <Clock className="h-4 w-4" />
-                  <span className="font-mono">
-                    {formatDuration(track.duration)}
-                  </span>
+                  {track.genre && (
+                    <Badge 
+                      variant="secondary" 
+                      className="text-xs bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 dark:from-purple-900/30 dark:to-pink-900/30 dark:text-purple-300 border-0"
+                    >
+                      {track.genre.name}
+                    </Badge>
+                  )}
+                  <div className="flex items-center gap-1">
+                    <Clock className="h-4 w-4" />
+                    <span className="font-mono">
+                      {formatDuration(track.duration)}
+                    </span>
+                  </div>
                 </div>
 
                 {/* Actions */}

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, useEffect, useMemo, useCallback } from "react";
@@ -58,17 +59,63 @@ function UploadRedirect() {
     );
 }
 
-interface MusicExplorerProps {
-    initialTracks: Track[];
+interface FeaturedAlbum {
+    id: number;
+    title: string;
+    cover_image_url: string | null;
+    custom_url: string | null;
+    artist: {
+        id: number;
+        name: string;
+        custom_url: string | null;
+    };
 }
 
-export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
-    const [tracks] = useState<Track[]>(initialTracks);
-    const [searchQuery, setSearchQuery] = useState("");
-    const [selectedGenre, setSelectedGenre] = useState<string>("all");
-    const [currentView, setCurrentView] = useState<
-        "featured" | "library" | "upload"
-    >("featured");
+interface FeaturedArtist {
+    id: number;
+    name: string;
+    profile_image_url: string | null;
+    custom_url: string | null;
+    tracksCount: number;
+}
+
+interface MusicExplorerUIProps {
+    tracks: Track[];
+    featuredTracks: Track[];
+    featuredAlbums: FeaturedAlbum[];
+    featuredArtists: FeaturedArtist[];
+    filteredTracks: Track[];
+    trendingTracks: Track[];
+    uniqueAlbums: any[];
+    uniqueArtists: any[];
+    genres: string[];
+    searchQuery: string;
+    setSearchQuery: (query: string) => void;
+    selectedGenre: string;
+    setSelectedGenre: (genre: string) => void;
+    currentView: "featured" | "library" | "upload";
+    setCurrentView: (view: "featured" | "library" | "upload") => void;
+    isLoadingFeatured: boolean;
+}
+
+export function MusicExplorerUI({
+    tracks,
+    featuredTracks,
+    featuredAlbums,
+    featuredArtists,
+    filteredTracks,
+    trendingTracks,
+    uniqueAlbums,
+    uniqueArtists,
+    genres,
+    searchQuery,
+    setSearchQuery,
+    selectedGenre,
+    setSelectedGenre,
+    currentView,
+    setCurrentView,
+    isLoadingFeatured,
+}: MusicExplorerUIProps) {
     const {
         currentTrack,
         isPlaying,
@@ -76,103 +123,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
         setTrackList,
         togglePlayPause,
     } = useAudioPlayer();
-    const fileInputRef = useRef<HTMLInputElement>(null);
     const { downloadTrack, isTrackDownloading } = useDownload();
-    const searchParams = useSearchParams();
-
-    // Get unique genres from tracks
-    const genres = Array.from(
-        new Set(tracks.map((track) => track.genre?.name).filter(Boolean)),
-    );
-
-    // Filter tracks based on search and filters
-    const filteredTracks = tracks.filter((track) => {
-        const matchesSearch =
-            !searchQuery ||
-            track.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            (track.artist?.name || "")
-                .toLowerCase()
-                .includes(searchQuery.toLowerCase()) ||
-            (track.album?.title || "")
-                .toLowerCase()
-                .includes(searchQuery.toLowerCase());
-
-        const matchesGenre =
-            selectedGenre === "all" || track.genre?.name === selectedGenre;
-
-        return matchesSearch && matchesGenre;
-    });
-
-    // Get featured tracks (first 8)
-    const featuredTracks = filteredTracks.slice(0, 8);
-
-    // Memoize unique albums and artists to prevent re-renders
-    const uniqueAlbums = useMemo(() => {
-        return Array.from(
-            new Map(
-                tracks
-                    .filter((track) => track.album) // Filter out tracks without album
-                    .map((track) => [
-                        track.album!.id,
-                        {
-                            id: track.album!.id,
-                            title: track.album!.title,
-                            cover_image_url: track.album!.cover_image_url,
-                            artist: track.artist,
-                            tracksCount: tracks.filter(
-                                (t) =>
-                                    t.album && t.album.id === track.album!.id,
-                            ).length,
-                        },
-                    ]),
-            ).values(),
-        );
-    }, [tracks]);
-
-    const uniqueArtists = useMemo(() => {
-        return Array.from(
-            new Map(
-                tracks
-                    .filter((track) => track.artist) // Filter out tracks without artist
-                    .map((track) => [
-                        track.artist!.id,
-                        {
-                            id: track.artist!.id,
-                            name: track.artist!.name,
-                            profile_image_url: track.artist!.profile_image_url,
-                            custom_url: track.artist!.custom_url,
-                            tracksCount: tracks.filter(
-                                (t) =>
-                                    t.artist &&
-                                    t.artist.id === track.artist!.id,
-                            ).length,
-                        },
-                    ]),
-            ).values(),
-        );
-    }, [tracks]);
-
-    // Get trending tracks (memoized stable random selection)
-    const trendingTracks = useMemo(() => {
-        // Create a stable random order based on track IDs
-        const shuffled = [...filteredTracks].sort((a, b) => {
-            // Use track IDs to create a stable sort
-            const seedA = a.id * 9301 + 49297;
-            const seedB = b.id * 9301 + 49297;
-            return (seedA % 233280) - (seedB % 233280);
-        });
-        return shuffled.slice(0, 12);
-    }, [filteredTracks]);
-
-    useEffect(() => {
-        // Check for the 'tab' parameter in the URL
-        const tab = searchParams.get("tab");
-        if (tab === "upload") {
-            setCurrentView("upload");
-            // Clear the URL parameter after setting the state
-            window.history.replaceState({}, "", "/music");
-        }
-    }, [searchParams]);
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20">
@@ -231,11 +182,6 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                 <div className="container mx-auto px-6 py-4">
                     <div className="flex flex-wrap gap-4 items-center justify-between">
                         <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-2">
-                                <Filter className="h-4 w-4" />
-                                <span className="font-medium">Filters:</span>
-                            </div>
-
                             {/* Genre Filter */}
                             <select
                                 value={selectedGenre}
@@ -254,7 +200,9 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                         </div>
 
                         <div className="text-sm text-gray-600 dark:text-gray-400">
-                            {filteredTracks.length} tracks found
+                            {currentView === "featured" 
+                                ? `${featuredTracks.length} featured tracks` 
+                                : `${filteredTracks.length} tracks found`}
                         </div>
                     </div>
                 </div>
@@ -264,176 +212,6 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
             <div className="container mx-auto px-4 sm:px-6 pb-32 space-y-8 sm:space-y-16 pt-8 sm:pt-12">
                 {currentView === "featured" && (
                     <div className="space-y-16">
-                        {/* Albums Section */}
-                        <section>
-                            <div className="flex items-center justify-between mb-8">
-                                <h2 className="text-xl font-bold flex items-center gap-3">
-                                    <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
-                                        <Music className="h-4 w-4 text-white" />
-                                    </div>
-                                    <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                                        Albums
-                                    </span>
-                                </h2>
-                                <Button
-                                    variant="ghost"
-                                    onClick={() => setCurrentView("library")}
-                                    className="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 font-medium"
-                                >
-                                    View All →
-                                </Button>
-                            </div>
-
-                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                                {Array.from(
-                                    new Set(
-                                        filteredTracks
-                                            .filter((track) => track.album)
-                                            .map((track) => track.album!.id),
-                                    ),
-                                )
-                                    .slice(0, 10)
-                                    .map((albumId) => {
-                                        const track = filteredTracks.find(
-                                            (t) =>
-                                                t.album &&
-                                                t.album.id === albumId,
-                                        );
-                                        if (!track || !track.album) return null;
-
-                                        return (
-                                            <div key={track.album.id} className="group text-center">
-                                                <div className="relative aspect-square mb-3">
-                                                    <Link
-                                                        href={`/album/${track.album.id}`}
-                                                        prefetch={false}
-                                                    >
-                                                        {track.album
-                                                            .cover_image_url ? (
-                                                            <Image
-                                                                src={
-                                                                    track.album
-                                                                        .cover_image_url
-                                                                }
-                                                                alt={
-                                                                    track.album
-                                                                        .title
-                                                                }
-                                                                fill
-                                                                sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
-                                                                className="object-cover rounded-lg group-hover:scale-105 transition-transform duration-300"
-                                                            />
-                                                        ) : (
-                                                            <div className="bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center w-full h-full rounded-lg">
-                                                                <Music className="h-12 w-12 text-white" />
-                                                            </div>
-                                                        )}
-                                                    </Link>
-
-                                                    {/* Play Album Button Overlay */}
-                                                    <div className="absolute inset-0 flex items-center justify-center rounded-lg">
-                                                        <Button
-                                                            size="lg"
-                                                            onClick={(e) => {
-                                                                e.preventDefault();
-                                                                e.stopPropagation();
-                                                                const albumTracks = filteredTracks.filter(t => t.album?.id === track.album.id);
-                                                                if (albumTracks.length > 0) {
-                                                                    setTrackList(albumTracks);
-                                                                    playTrack(albumTracks[0]);
-                                                                }
-                                                            }}
-                                                            className="opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-full bg-white/90 text-purple-600 hover:bg-white hover:scale-110 shadow-lg backdrop-blur-sm"
-                                                        >
-                                                            <Play className="h-6 w-6" />
-                                                        </Button>
-                                                    </div>
-                                                </div>
-                                                <div className="space-y-1">
-                                                    <Link
-                                                        href={`/album/${track.album.id}`}
-                                                        prefetch={false}
-                                                        className="block"
-                                                    >
-                                                        <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors truncate">
-                                                            {track.album.title}
-                                                        </h3>
-                                                    </Link>
-                                                    <Link
-                                                        href={`/artist/${track.artist?.custom_url || track.artist?.id}`}
-                                                        prefetch={false}
-                                                        className="block"
-                                                    >
-                                                        <p className="text-sm text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors truncate">
-                                                            {track.artist?.name}
-                                                        </p>
-                                                    </Link>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                            </div>
-                        </section>
-
-                        {/* Artists Section */}
-                        <section>
-                            <div className="flex items-center justify-between mb-8">
-                                <h2 className="text-xl font-bold flex items-center gap-3">
-                                    <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-rose-500 rounded-2xl flex items-center justify-center shadow-lg">
-                                        <Users className="h-4 w-4 text-white" />
-                                    </div>
-                                    <span className="bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">
-                                        Artists
-                                    </span>
-                                </h2>
-                                <Button
-                                    variant="ghost"
-                                    onClick={() => setCurrentView("library")}
-                                    className="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 font-medium"
-                                >
-                                    View All →
-                                </Button>
-                            </div>
-
-                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                                {uniqueArtists.slice(0, 10).map((artist) => {
-                                    return (
-                                        <div
-                                            key={artist.id}
-                                            className="group cursor-pointer text-center"
-                                        >
-                                            <div className="aspect-square mx-auto mb-3 rounded-full overflow-hidden bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center relative group-hover:scale-105 transition-transform duration-300">
-                                                {artist.profile_image_url ? (
-                                                    <Image
-                                                        src={artist.profile_image_url}
-                                                        alt={artist.name}
-                                                        fill
-                                                        sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
-                                                        className="object-cover"
-                                                    />
-                                                ) : (
-                                                    <Users className="h-12 w-12 text-white" />
-                                                )}
-                                            </div>
-                                            <div className="space-y-1">
-                                                <Link
-                                                    href={`/artist/${artist.custom_url || artist.id}`}
-                                                    className="block"
-                                                >
-                                                    <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors truncate">
-                                                        {artist.name}
-                                                    </h3>
-                                                </Link>
-                                                <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
-                                                    {artist.tracksCount} songs
-                                                </p>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </section>
-
                         {/* Featured Tracks */}
                         <section>
                             <div className="flex items-center justify-between mb-8">
@@ -445,15 +223,24 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                         Featured Tracks
                                     </span>
                                 </h2>
-                                <Button variant="outline" className="hidden sm:flex items-center gap-2 hover:bg-purple-50 dark:hover:bg-purple-900/20">
+                                <Button 
+                                    onClick={() => {
+                                        if (featuredTracks.length > 0) {
+                                            // Shuffle the featured tracks array
+                                            const shuffledTracks = [...featuredTracks].sort(() => Math.random() - 0.5);
+                                            setTrackList(shuffledTracks);
+                                            playTrack(shuffledTracks[0]);
+                                        }
+                                    }}
+                                    className="hidden sm:flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
+                                >
                                     <Shuffle className="h-4 w-4" />
-                                    Shuffle
+                                    Shuffle Play
                                 </Button>
                             </div>
 
-                            {/* Featured track grid with new design */}
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8">
-                                {featuredTracks.slice(0, 8).map((track, index) => (
+                                {featuredTracks.map((track, index) => (
                                     <div
                                         key={track.id}
                                         className="group relative"
@@ -542,7 +329,12 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                             {track.artist?.name || "Unknown Artist"}
                                                         </p>
                                                         <p className="text-gray-500 dark:text-gray-500 truncate text-xs">
-                                                            {track.album?.title || "Unknown Album"}
+                                                            <Link
+                                                                href={`/album/${track.album?.custom_url || track.album?.id}`}
+                                                                className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+                                                            >
+                                                                {track.album?.title || "Unknown Album"}
+                                                            </Link>
                                                         </p>
                                                     </div>
 
@@ -602,6 +394,150 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                 </Button>
                             </div>
                         </section>
+
+                        {/* Albums Section */}
+                        <section>
+                            <div className="flex items-center justify-between mb-8">
+                                <h2 className="text-xl font-bold flex items-center gap-3">
+                                    <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
+                                        <Music className="h-4 w-4 text-white" />
+                                    </div>
+                                    <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                                        Albums
+                                    </span>
+                                </h2>
+                                <Button
+                                    variant="ghost"
+                                    onClick={() => setCurrentView("library")}
+                                    className="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 font-medium"
+                                >
+                                    View All →
+                                </Button>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                                {featuredAlbums.map((album) => (
+                                    <div key={album.id} className="group text-center">
+                                        <div className="relative aspect-square mb-3">
+                                            <Link
+                                                href={`/album/${album.custom_url || album.id}`}
+                                                prefetch={false}
+                                            >
+                                                {album.cover_image_url ? (
+                                                    <Image
+                                                        src={album.cover_image_url}
+                                                        alt={album.title}
+                                                        fill
+                                                        sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
+                                                        className="object-cover rounded-lg group-hover:scale-105 transition-transform duration-300"
+                                                    />
+                                                ) : (
+                                                    <div className="bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center w-full h-full rounded-lg">
+                                                        <Music className="h-12 w-12 text-white" />
+                                                    </div>
+                                                )}
+                                            </Link>
+
+                                            {/* Play Album Button Overlay */}
+                                            <div className="absolute inset-0 flex items-center justify-center rounded-lg">
+                                                <Button
+                                                    size="lg"
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                        const albumTracks = featuredTracks.filter(t => t.album?.id === album.id);
+                                                        if (albumTracks.length > 0) {
+                                                            setTrackList(albumTracks);
+                                                            playTrack(albumTracks[0]);
+                                                        }
+                                                    }}
+                                                    className="opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-full bg-white/90 text-purple-600 hover:bg-white hover:scale-110 shadow-lg backdrop-blur-sm"
+                                                >
+                                                    <Play className="h-6 w-6" />
+                                                </Button>
+                                            </div>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <Link
+                                                href={`/album/${album.custom_url || album.id}`}
+                                                prefetch={false}
+                                                className="block"
+                                            >
+                                                <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors truncate">
+                                                    {album.title}
+                                                </h3>
+                                            </Link>
+                                            <Link
+                                                href={`/artist/${album.artist?.custom_url || album.artist?.id}`}
+                                                prefetch={false}
+                                                className="block"
+                                            >
+                                                <p className="text-sm text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors truncate">
+                                                    {album.artist?.name}
+                                                </p>
+                                            </Link>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
+
+                        {/* Artists Section */}
+                        <section>
+                            <div className="flex items-center justify-between mb-8">
+                                <h2 className="text-xl font-bold flex items-center gap-3">
+                                    <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-rose-500 rounded-2xl flex items-center justify-center shadow-lg">
+                                        <Users className="h-4 w-4 text-white" />
+                                    </div>
+                                    <span className="bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">
+                                        Artists
+                                    </span>
+                                </h2>
+                                <Button
+                                    variant="ghost"
+                                    onClick={() => setCurrentView("library")}
+                                    className="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 font-medium"
+                                >
+                                    View All →
+                                </Button>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                                {featuredArtists.map((artist) => (
+                                    <div
+                                        key={artist.id}
+                                        className="group cursor-pointer text-center"
+                                    >
+                                        <div className="aspect-square mx-auto mb-3 rounded-full overflow-hidden bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center relative group-hover:scale-105 transition-transform duration-300">
+                                            {artist.profile_image_url ? (
+                                                <Image
+                                                    src={artist.profile_image_url}
+                                                    alt={artist.name}
+                                                    fill
+                                                    sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
+                                                    className="object-cover"
+                                                />
+                                            ) : (
+                                                <Users className="h-12 w-12 text-white" />
+                                            )}
+                                        </div>
+                                        <div className="space-y-1">
+                                            <Link
+                                                href={`/artist/${artist.custom_url || artist.id}`}
+                                                className="block"
+                                            >
+                                                <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors truncate">
+                                                    {artist.name}
+                                                </h3>
+                                            </Link>
+                                            <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                                                {artist.tracksCount} songs
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
                     </div>
                 )}
 
@@ -617,18 +553,36 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                 </span>
                             </h2>
                             <div className="flex gap-2">
-                                <Button variant="outline" className="hover:bg-purple-50 dark:hover:bg-purple-900/20">
+                                <Button 
+                                    onClick={() => {
+                                        if (filteredTracks.length > 0) {
+                                            // Shuffle the filtered tracks array
+                                            const shuffledTracks = [...filteredTracks].sort(() => Math.random() - 0.5);
+                                            setTrackList(shuffledTracks);
+                                            playTrack(shuffledTracks[0]);
+                                        }
+                                    }}
+                                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
+                                >
                                     <Shuffle className="mr-2 h-4 w-4" />
                                     Shuffle All
                                 </Button>
-                                <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
+                                <Button 
+                                    onClick={() => {
+                                        if (filteredTracks.length > 0) {
+                                            setTrackList(filteredTracks);
+                                            playTrack(filteredTracks[0]);
+                                        }
+                                    }}
+                                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
+                                >
                                     <Play className="mr-2 h-4 w-4" />
                                     Play All
                                 </Button>
                             </div>
                         </div>
 
-                        {/* Grid view for library with Featured Tracks style */}
+                        {/* Grid view for library */}
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8">
                             {filteredTracks.map((track, index) => (
                                 <div
@@ -638,9 +592,8 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                         animation: `fadeInUp 0.6s ease-out ${index * 0.05}s both`
                                     }}
                                 >
-                                    {/* Main Card */}
+                                    {/* Same card structure as featured tracks */}
                                     <div className="relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-500 transform hover:-translate-y-2 border border-white/20 dark:border-gray-700/30">
-
                                         {/* Album Cover */}
                                         <div className="relative aspect-square overflow-hidden">
                                             {track.album?.cover_image_url ? (
@@ -650,19 +603,16 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                     fill
                                                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                                                     className="object-cover group-hover:scale-110 transition-transform duration-700"
-                                                style={{
-                                                    transform: 'translateZ(0)',
-                                                    willChange: 'transform'
-                                                }}
+                                                    style={{
+                                                        transform: 'translateZ(0)',
+                                                        willChange: 'transform'
+                                                    }}
                                                 />
                                             ) : (
                                                 <div className="w-full h-full bg-gradient-to-br from-purple-400 via-pink-400 to-rose-400 flex items-center justify-center">
                                                     <Music className="h-20 w-20 text-white/80" />
                                                 </div>
                                             )}
-
-                                            {/* Gradient overlay */}
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                                             {/* Play button */}
                                             <div className="absolute inset-0 flex items-center justify-center">
@@ -686,21 +636,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                 </Button>
                                             </div>
 
-                                            {/* Now playing indicator */}
-                                            {currentTrack?.id === track.id && isPlaying && (
-                                                <div className="absolute top-4 right-4">
-                                                    <div className="w-10 h-10 bg-gradient-to-r from-rose-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg backdrop-blur-sm">
-                                                        <div className="flex items-end space-x-0.5 h-5">
-                                                            <div className="w-1 bg-white animate-equalize-1" style={{ height: "30%" }}></div>
-                                                            <div className="w-1 bg-white animate-equalize-2" style={{ height: "100%" }}></div>
-                                                            <div className="w-1 bg-white animate-equalize-3" style={{ height: "60%" }}></div>
-                                                            <div className="w-1 bg-white animate-equalize-4" style={{ height: "80%" }}></div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            {/* Track number badge */}
+                                            {/* Track number */}
                                             <div className="absolute top-4 left-4">
                                                 <div className="w-8 h-8 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center text-white text-sm font-bold">
                                                     {index + 1}
@@ -712,10 +648,10 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                         <div className="p-6">
                                             <div className="space-y-3">
                                                 <div>
-                                                    <h3 className="font-bold text-lg text-gray-900 dark:text-white truncate group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                                                    <h3 className="font-bold text-lg text-gray-900 dark:text-white truncate">
                                                         {track.title}
                                                     </h3>
-                                                    <p className="text-gray-600 dark:text-gray-400 truncate text-sm font-medium">
+                                                    <p className="text-gray-600 dark:text-gray-400 truncate text-sm">
                                                         {track.artist?.name || "Unknown Artist"}
                                                     </p>
                                                     <p className="text-gray-500 dark:text-gray-500 truncate text-xs">
@@ -724,23 +660,20 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                 </div>
 
                                                 <div className="flex items-center justify-between">
-                                                    <Badge 
-                                                        variant="secondary" 
-                                                        className="text-xs bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 dark:from-purple-900/30 dark:to-pink-900/30 dark:text-purple-300 border-0"
-                                                    >
+                                                    <Badge variant="secondary" className="text-xs">
                                                         {track.genre?.name || "Unknown"}
                                                     </Badge>
-                                                    <div className="flex items-center gap-1 text-xs text-gray-500 bg-gray-100 dark:bg-gray-700/50 px-2 py-1 rounded-full">
+                                                    <div className="flex items-center gap-1 text-xs text-gray-500">
                                                         <Clock className="h-3 w-3" />
-                                                        <span className="font-mono">{formatDuration(track.duration)}</span>
+                                                        <span>{formatDuration(track.duration)}</span>
                                                     </div>
                                                 </div>
                                             </div>
 
                                             {/* Action buttons */}
-                                            <div className="mt-4 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+                                            <div className="mt-4 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
                                                 <AddToPlaylist trackId={track.id} trackTitle={track.title}>
-                                                    <Button size="sm" variant="ghost" className="hover:bg-purple-100 dark:hover:bg-purple-900/30">
+                                                    <Button size="sm" variant="ghost">
                                                         <Plus className="h-4 w-4" />
                                                     </Button>
                                                 </AddToPlaylist>
@@ -748,31 +681,19 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                     size="sm" 
                                                     variant="ghost"
                                                     onClick={() => downloadTrack(track)}
-                                                    className={`hover:bg-purple-100 dark:hover:bg-purple-900/30 relative overflow-hidden ${isTrackDownloading(track.id) ? "bg-blue-50 dark:bg-blue-900/20" : ""}`}
                                                     disabled={isTrackDownloading(track.id)}
                                                 >
-                                                    {isTrackDownloading(track.id) ? (
-                                                        <>
-                                                            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-blue-600/20 animate-pulse"></div>
-                                                            <div className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-blue-500 to-blue-600 animate-loading-bar"></div>
-                                                            <Download className="h-4 w-4 text-blue-600 animate-bounce" />
-                                                        </>
-                                                    ) : (
-                                                        <Download className="h-4 w-4" />
-                                                    )}
+                                                    <Download className="h-4 w-4" />
                                                 </Button>
-                                                <Button size="sm" variant="ghost" className="hover:bg-purple-100 dark:hover:bg-purple-900/30">
+                                                <Button size="sm" variant="ghost">
                                                     <Heart className="h-4 w-4" />
                                                 </Button>
-                                                <Button size="sm" variant="ghost" className="hover:bg-purple-100 dark:hover:bg-purple-900/30">
+                                                <Button size="sm" variant="ghost">
                                                     <Share className="h-4 w-4" />
                                                 </Button>
                                             </div>
                                         </div>
                                     </div>
-
-                                    {/* Floating shadow effect */}
-                                    <div className="absolute inset-0 -z-10 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-3xl blur-lg opacity-0 group-hover:opacity-60 transition-opacity duration-500 transform scale-102"></div>
                                 </div>
                             ))}
                         </div>

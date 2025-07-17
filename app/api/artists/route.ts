@@ -1,13 +1,28 @@
 // app/api/artists/route.ts
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { ArtistsController } from "@/lib/controllers/artists";
 
-export async function GET() {
+export const dynamic = "force-dynamic";
+
+export async function GET(request: NextRequest) {
   try {
-    console.log("API: Starting artists fetch");
+    const { searchParams } = new URL(request.url);
+    const limit = searchParams.get("limit");
+    
+    console.log("API: Starting artists fetch", { limit });
     const startTime = Date.now();
 
-    const artists = await ArtistsController.getAllArtists();
+    let artists;
+    if (limit) {
+      const limitNum = parseInt(limit);
+      if (!isNaN(limitNum) && limitNum > 0) {
+        artists = await ArtistsController.getArtistsWithLimit(limitNum);
+      } else {
+        artists = await ArtistsController.getAllArtists();
+      }
+    } else {
+      artists = await ArtistsController.getAllArtists();
+    }
 
     const fetchTime = Date.now() - startTime;
     console.log(`API: Artists fetch completed in ${fetchTime}ms - Count: ${artists.length}`);

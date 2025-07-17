@@ -10,6 +10,8 @@ export async function GET(request: NextRequest) {
     const ids = searchParams.get('ids');
     const albumId = searchParams.get("albumId");
     const artistId = searchParams.get("artistId");
+    const genre = searchParams.get("genre");
+    const limit = searchParams.get("limit");
 
     // If specific track IDs are requested
     if (ids) {
@@ -33,7 +35,21 @@ export async function GET(request: NextRequest) {
     }
 
     // Default: get all tracks
-    const tracks = await TracksController.getAllTracks();
+    let tracks = await TracksController.getAllTracks();
+    
+    // Filter by genre if specified
+    if (genre) {
+      tracks = tracks.filter(track => track.genre?.name === genre);
+    }
+    
+    // Apply limit if specified
+    if (limit) {
+      const limitNum = parseInt(limit);
+      if (!isNaN(limitNum) && limitNum > 0) {
+        tracks = tracks.slice(0, limitNum);
+      }
+    }
+
     return NextResponse.json(tracks);
   } catch (error) {
     console.error("Error fetching tracks:", error);

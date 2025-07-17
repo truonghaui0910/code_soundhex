@@ -9,6 +9,7 @@ export interface Album {
   id: number;
   title: string;
   cover_image_url: string | null;
+  custom_url?: string | null;
   artist: {
     id: number;
     name: string;
@@ -24,7 +25,7 @@ export class AlbumsController {
 
     const { data, error } = await supabase
       .from("albums")
-      .select(`id, title, cover_image_url, release_date, created_at, artist_id, user_id`)
+      .select(`id, title, cover_image_url, custom_url, release_date, created_at, artist_id, user_id`)
       .eq('user_id', userId)
       // .eq('import_source', 'direct') // Chỉ lấy albums được tạo direct, không phải import từ Spotify
       .order("created_at", { ascending: false });
@@ -67,10 +68,52 @@ export class AlbumsController {
     const supabase = createServerComponentClient<Database>({ cookies });
     const { data, error } = await supabase
       .from("albums")
-      .select(`id, title, cover_image_url, release_date, created_at, artist_id, user_id, artists(id, name, custom_url)`)
+      .select(`id, title, cover_image_url, custom_url, release_date, created_at, artist_id, user_id, artists(id, name, custom_url)`)
       .order("created_at", { ascending: false });
     if (error) {
       console.error("❌ Error fetching albums:", error);
+      throw new Error(`Failed to fetch albums: ${error.message}`);
+    }
+
+    // Lấy danh sách artist_id duy nhất
+    const artistIds = Array.from(
+      new Set((data ?? []).map((album: any) => album.artist_id)),
+    );
+    let artistsMap: Record<number, { id: number; name: string; custom_url?: string }> = {};
+    if (artistIds.length > 0) {
+      const { data: artistsData, error: artistError } = await supabase
+        .from("artists")
+        .select("id, name, custom_url")
+        .in("id", artistIds);
+      if (!artistError && artistsData) {
+        for (const artist of artistsData) {
+          artistsMap[artist.id] = { id: artist.id, name: artist.name, custom_url: artist.custom_url };
+        }
+      }
+    }
+
+    // Gán thông tin artist vào album
+    const albumsWithArtist = (data ?? []).map((album: any) => ({
+      ...album,
+      artist: artistsMap[album.artist_id] || {
+        id: album.artist_id,
+        name: "Unknown Artist",
+      },
+    }));
+    return albumsWithArtist;
+  }
+
+  static async getAlbumsWithLimit(limit: number): Promise<Album[]> {
+    console.log(`🎵 AlbumsController.getAlbumsWithLimit - Starting fetch with limit: ${limit}`);
+    const supabase = createServerComponentClient<Database>({ cookies });
+    const { data, error } = await supabase
+      .from("albums")
+      .select(`id, title, cover_image_url, custom_url, release_date, created_at, artist_id, user_id`)
+      .order("created_at", { ascending: false })
+      .limit(limit);
+    
+    if (error) {
+      console.error("❌ Error fetching albums with limit:", error);
       throw new Error(`Failed to fetch albums: ${error.message}`);
     }
 
@@ -112,6 +155,7 @@ export class AlbumsController {
         id, 
         title, 
         cover_image_url, 
+        custom_url,
         release_date, 
         created_at, 
         artist_id, 
@@ -123,6 +167,47 @@ export class AlbumsController {
 
     if (error) {
       console.error("❌ Error fetching album:", error);
+      return null;
+    }
+
+    if (!data) {
+      return null;
+    }
+
+    return {
+      ...data,
+      artist: data.artist || {
+        id: data.artist_id,
+        name: "Unknown Artist",
+      },
+    };
+  }
+
+  static async getAlbumByCustomUrl(customUrl: string): Promise<Album | null> {
+    console.log("🎵 AlbumsController.getAlbumByCustomUrl - Starting fetch for custom_url:", customUrl);
+    const supabase = createServerComponentClient<Database>({ cookies });
+
+    const { data, error } = await supabase
+      .from("albums")
+      .select(`
+        id, 
+        title, 
+        cover_image_url, 
+        custom_url,
+        release_date, 
+        created_at, 
+        artist_id, 
+        user_id,
+        artist:artist_id(id, name, custom_url)
+      `)
+      .eq("custom_url", customUrl)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return null; // No rows found
+      }
+      console.error("❌ Error fetching album by custom_url:", error);
       return null;
     }
 

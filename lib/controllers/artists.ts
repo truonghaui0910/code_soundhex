@@ -68,6 +68,36 @@ export class ArtistsController {
     return artists;
   }
 
+  static async getArtistsWithLimit(limit: number): Promise<Artist[]> {
+    console.log(`🎵 ArtistsController.getArtistsWithLimit - Starting fetch with limit: ${limit}`);
+    const supabase = createServerComponentClient<Database>({ cookies });
+
+    const { data, error } = await supabase
+      .from("artists")
+      .select(`id, name, profile_image_url, bio, created_at, custom_url, social, user_id`)
+      .order("created_at", { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      console.error("Error fetching artists with limit:", error);
+      throw new Error(`Failed to fetch artists: ${error.message}`);
+    }
+
+    // Convert social from database format to array if needed
+    const artists = (data ?? []).map(artist => {
+      if (artist.social && typeof artist.social === 'string') {
+        try {
+          artist.social = JSON.parse(artist.social);
+        } catch (e) {
+          artist.social = [];
+        }
+      }
+      return artist;
+    });
+
+    return artists;
+  }
+
   static async getArtistById(id: number): Promise<Artist | null> {
     const supabase = createServerComponentClient<Database>({ cookies });
     const { data, error } = await supabase
