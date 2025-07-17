@@ -45,7 +45,7 @@ export function ArtistDetailClient({ artistId, artist: initialArtist }: ArtistDe
             throw new Error(`Albums API error: ${albumsResponse.status} - ${errorText}`);
           }
 
-          const [tracksData, albumsData] = await Promise.all([
+          const [tracksData, albumsResponseData] = await Promise.all([
             tracksResponse.json(),
             albumsResponse.json()
           ]);
@@ -53,7 +53,9 @@ export function ArtistDetailClient({ artistId, artist: initialArtist }: ArtistDe
           const fetchTime = Date.now() - startTime;
           console.log(`API fetch completed in ${fetchTime}ms`);
 
-          const artistAlbums = albumsData.filter((album) => album.artist?.id === artistId);
+          // Fix: Access albums array from response object
+          const albumsArray = albumsResponseData.albums || albumsResponseData;
+          const artistAlbums = Array.isArray(albumsArray) ? albumsArray.filter((album) => album.artist?.id === artistId) : [];
           const validatedTracks = Array.isArray(tracksData) ? tracksData : [];
           const validatedAlbums = Array.isArray(artistAlbums) ? artistAlbums : [];
 
@@ -100,7 +102,7 @@ export function ArtistDetailClient({ artistId, artist: initialArtist }: ArtistDe
           throw new Error(`Albums API error: ${albumsResponse.status} - ${errorText}`);
         }
 
-        const [artistsData, tracksData, albumsData] = await Promise.all([
+        const [artistsData, tracksData, albumsResponseData] = await Promise.all([
           artistsResponse.json(),
           tracksResponse.json(),
           albumsResponse.json()
@@ -109,18 +111,20 @@ export function ArtistDetailClient({ artistId, artist: initialArtist }: ArtistDe
         const fetchTime = Date.now() - startTime;
         console.log(`API fetch completed in ${fetchTime}ms`);
 
-        const artistData = artistsData.find((a) => a.id === artistId);
+        const artistData = artistsData.artists ? artistsData.artists.find((a) => a.id === artistId) : artistsData.find((a) => a.id === artistId);
         console.log(`Looking for artist ID ${artistId}:`, artistData ? 'Found' : 'Not found');
 
         // Giống album: Không dùng notFound(), chỉ log
         if (!artistData) {
           console.log(`Artist not found with ID: ${artistId}`);
-          console.log('Available artist IDs:', artistsData.map(a => a.id));
+          const availableIds = artistsData.artists ? artistsData.artists.map(a => a.id) : artistsData.map(a => a.id);
+          console.log('Available artist IDs:', availableIds);
           // Không gọi notFound() ở đây
         }
 
-        // Filter albums cho artist này
-        const artistAlbums = albumsData.filter((album) => album.artist?.id === artistId);
+        // Fix: Access albums array from response object
+        const albumsArray = albumsResponseData.albums || albumsResponseData;
+        const artistAlbums = Array.isArray(albumsArray) ? albumsArray.filter((album) => album.artist?.id === artistId) : [];
 
         // Validate data structure - với fallback values
         const validatedArtist = artistData ? {

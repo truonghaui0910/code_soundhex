@@ -98,6 +98,56 @@ export class ArtistsController {
     return artists;
   }
 
+  static async getArtistsWithPagination(page: number = 1, limit: number = 10): Promise<{ artists: Artist[], total: number, totalPages: number }> {
+    console.log(`🎵 ArtistsController.getArtistsWithPagination - Starting fetch with page: ${page}, limit: ${limit}`);
+    const supabase = createServerComponentClient<Database>({ cookies });
+    
+    const offset = (page - 1) * limit;
+
+    // Get total count first
+    const { count, error: countError } = await supabase
+      .from("artists")
+      .select("*", { count: "exact", head: true });
+
+    if (countError) {
+      console.error("❌ Error fetching artists count:", countError);
+      throw new Error(`Failed to fetch artists count: ${countError.message}`);
+    }
+
+    // Get paginated data
+    const { data, error } = await supabase
+      .from("artists")
+      .select(`id, name, profile_image_url, bio, created_at, custom_url, social, user_id`)
+      .order("created_at", { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (error) {
+      console.error("❌ Error fetching artists with pagination:", error);
+      throw new Error(`Failed to fetch artists: ${error.message}`);
+    }
+
+    // Convert social from database format to array if needed
+    const artists = (data ?? []).map(artist => {
+      if (artist.social && typeof artist.social === 'string') {
+        try {
+          artist.social = JSON.parse(artist.social);
+        } catch (e) {
+          artist.social = [];
+        }
+      }
+      return artist;
+    });
+
+    const total = count || 0;
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      artists,
+      total,
+      totalPages
+    };
+  }
+
   static async getArtistById(id: number): Promise<Artist | null> {
     const supabase = createServerComponentClient<Database>({ cookies });
     const { data, error } = await supabase

@@ -174,15 +174,10 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
             const response = await fetch(`/api/albums?${params}`);
             if (response.ok) {
                 const data = await response.json();
-                if (Array.isArray(data)) {
-                    // For now, simulate pagination on client side since API doesn't support it yet
-                    const startIndex = (resetPage ? 0 : (page - 1)) * itemsPerPage;
-                    const endIndex = startIndex + itemsPerPage;
-                    const paginatedData = data.slice(startIndex, endIndex);
-                    
-                    setAllAlbums(paginatedData);
-                    setTotalAlbums(data.length);
-                    setAlbumsTotalPages(Math.ceil(data.length / itemsPerPage));
+                if (data.albums && Array.isArray(data.albums)) {
+                    setAllAlbums(data.albums);
+                    setTotalAlbums(data.total || 0);
+                    setAlbumsTotalPages(data.totalPages || 0);
                     if (resetPage) {
                         setAlbumsCurrentPage(1);
                     }
@@ -190,17 +185,22 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
                     setAllAlbums([]);
                     setTotalAlbums(0);
                     setAlbumsTotalPages(0);
+                    if (resetPage) {
+                        setAlbumsCurrentPage(1);
+                    }
                 }
             } else {
                 setAllAlbums([]);
                 setTotalAlbums(0);
                 setAlbumsTotalPages(0);
+                setAlbumsCurrentPage(1);
             }
         } catch (error) {
             console.error("Error fetching albums:", error);
             setAllAlbums([]);
             setTotalAlbums(0);
             setAlbumsTotalPages(0);
+            setAlbumsCurrentPage(1);
         } finally {
             setIsLoadingAlbums(false);
         }
@@ -220,21 +220,16 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
             const response = await fetch(`/api/artists?${params}`);
             if (response.ok) {
                 const data = await response.json();
-                if (Array.isArray(data)) {
+                if (data.artists && Array.isArray(data.artists)) {
                     // Add tracks count for each artist
-                    const artistsWithCount = data.map(artist => ({
+                    const artistsWithCount = data.artists.map(artist => ({
                         ...artist,
                         tracksCount: tracks.filter(t => t.artist?.id === artist.id).length
                     }));
                     
-                    // For now, simulate pagination on client side since API doesn't support it yet
-                    const startIndex = (resetPage ? 0 : (page - 1)) * itemsPerPage;
-                    const endIndex = startIndex + itemsPerPage;
-                    const paginatedData = artistsWithCount.slice(startIndex, endIndex);
-                    
-                    setAllArtists(paginatedData);
-                    setTotalArtists(artistsWithCount.length);
-                    setArtistsTotalPages(Math.ceil(artistsWithCount.length / itemsPerPage));
+                    setAllArtists(artistsWithCount);
+                    setTotalArtists(data.total || 0);
+                    setArtistsTotalPages(data.totalPages || 0);
                     if (resetPage) {
                         setArtistsCurrentPage(1);
                     }
@@ -242,17 +237,22 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
                     setAllArtists([]);
                     setTotalArtists(0);
                     setArtistsTotalPages(0);
+                    if (resetPage) {
+                        setArtistsCurrentPage(1);
+                    }
                 }
             } else {
                 setAllArtists([]);
                 setTotalArtists(0);
                 setArtistsTotalPages(0);
+                setArtistsCurrentPage(1);
             }
         } catch (error) {
             console.error("Error fetching artists:", error);
             setAllArtists([]);
             setTotalArtists(0);
             setArtistsTotalPages(0);
+            setArtistsCurrentPage(1);
         } finally {
             setIsLoadingArtists(false);
         }
@@ -262,7 +262,10 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
     const fetchLibraryTracks = useCallback(async (page: number = 1, resetPage: boolean = false) => {
         if (currentView !== "library") return;
 
-        setIsSearching(true);
+        // Only show loading if it's a fresh search or view change, not pagination
+        if (resetPage || page === 1) {
+            setIsSearching(true);
+        }
         try {
             const params = new URLSearchParams({
                 page: resetPage ? '1' : page.toString(),
@@ -289,17 +292,23 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
                     setLibraryTracks([]);
                     setTotalTracks(0);
                     setTotalPages(0);
+                    if (resetPage) {
+                        setCurrentPage(1);
+                    }
                 }
             } else {
+                // If error response, reset everything and go back to page 1
                 setLibraryTracks([]);
                 setTotalTracks(0);
                 setTotalPages(0);
+                setCurrentPage(1);
             }
         } catch (error) {
             console.error("Error fetching library tracks:", error);
             setLibraryTracks([]);
             setTotalTracks(0);
             setTotalPages(0);
+            setCurrentPage(1);
         } finally {
             setIsSearching(false);
         }
@@ -327,26 +336,47 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
         }
     };
 
-    // Fetch library tracks when view, genre, or page changes
+    // Fetch library tracks when view or genre changes (but not page changes)
     useEffect(() => {
         if (currentView === "library") {
-            fetchLibraryTracks(currentPage);
+            fetchLibraryTracks(1, true); // Reset to page 1 when view/genre changes
         }
-    }, [currentView, selectedGenre, currentPage, fetchLibraryTracks]);
+    }, [currentView, selectedGenre, fetchLibraryTracks]);
+
+    // Separate effect for page changes to avoid duplicate calls
+    useEffect(() => {
+        if (currentView === "library" && totalPages > 0 && currentPage <= totalPages) {
+            fetchLibraryTracks(currentPage, false);
+        }
+    }, [currentPage, totalPages]);
 
     // Fetch albums when albums view is active
     useEffect(() => {
         if (currentView === "albums") {
-            fetchAllAlbums(albumsCurrentPage);
+            fetchAllAlbums(1, true); // Reset to page 1 when view changes
         }
-    }, [currentView, albumsCurrentPage, fetchAllAlbums]);
+    }, [currentView]);
+
+    // Separate effect for albums page changes
+    useEffect(() => {
+        if (currentView === "albums" && albumsCurrentPage >= 1) {
+            fetchAllAlbums(albumsCurrentPage, false);
+        }
+    }, [albumsCurrentPage]);
 
     // Fetch artists when artists view is active
     useEffect(() => {
         if (currentView === "artists") {
-            fetchAllArtists(artistsCurrentPage);
+            fetchAllArtists(1, true); // Reset to page 1 when view changes
         }
-    }, [currentView, artistsCurrentPage, fetchAllArtists]);
+    }, [currentView]);
+
+    // Separate effect for artists page changes
+    useEffect(() => {
+        if (currentView === "artists" && artistsCurrentPage >= 1) {
+            fetchAllArtists(artistsCurrentPage, false);
+        }
+    }, [artistsCurrentPage]);
 
     // Reset search when query is cleared
     useEffect(() => {
@@ -365,21 +395,22 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
             const tracksResponse = await fetch(`/api/tracks?${genreParam}limit=10`);
             if (tracksResponse.ok) {
                 const tracksData = await tracksResponse.json();
-                setFeaturedTracks(tracksData.slice(0, 10));
+                const tracksArray = Array.isArray(tracksData) ? tracksData : tracksData.tracks || [];
+                setFeaturedTracks(tracksArray.slice(0, 10));
             }
 
-            // Fetch featured albums
-            const albumsResponse = await fetch(`/api/albums?limit=10`);
+            // Fetch featured albums using pagination API
+            const albumsResponse = await fetch(`/api/albums?page=1&limit=10`);
             if (albumsResponse.ok) {
                 const albumsData = await albumsResponse.json();
-                setFeaturedAlbums(albumsData);
+                setFeaturedAlbums(albumsData.albums || []);
             }
 
-            // Fetch featured artists
-            const artistsResponse = await fetch(`/api/artists?limit=10`);
+            // Fetch featured artists using pagination API
+            const artistsResponse = await fetch(`/api/artists?page=1&limit=10`);
             if (artistsResponse.ok) {
                 const artistsData = await artistsResponse.json();
-                const artistsWithCount = artistsData.map((artist: any) => ({
+                const artistsWithCount = (artistsData.artists || []).map((artist: any) => ({
                     ...artist,
                     tracksCount: tracks.filter(t => t.artist?.id === artist.id).length
                 }));
