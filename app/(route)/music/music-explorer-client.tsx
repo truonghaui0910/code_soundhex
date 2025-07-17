@@ -266,7 +266,7 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8">
-                            {Array.from({ length: 8 }).map((_, index) => (
+                            {Array.from({ length: 10 }).map((_, index) => (
                                 <div key={index} className="group relative">
                                     <div className="relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl overflow-hidden shadow-lg border border-white/20 dark:border-gray-700/30">
                                         <div className="aspect-square bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
