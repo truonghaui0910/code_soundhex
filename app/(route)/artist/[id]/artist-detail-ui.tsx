@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MusicPlayer } from "@/components/music/MusicPlayer";
 import { TrackList } from "@/components/music/track-list";
+import { AlbumGrid } from "@/components/music/album-grid";
 import {
   Play,
   Clock,
@@ -331,45 +332,7 @@ export function ArtistDetailUI({ artist, tracks, albums }: ArtistDetailUIProps) 
                 </div>
                 <h2 className="text-xl font-bold">Albums</h2>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-                {albums.map((album) => (
-                  <Link 
-                    key={album.id} 
-                    href={`/album/${album.id}`}
-                    prefetch={false}
-                  >
-                    <Card className="group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border-0 bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm">
-                      <CardContent className="p-0">
-                        <div className="aspect-square w-full overflow-hidden">
-                          {album.cover_image_url ? (
-                            <Image
-                              src={album.cover_image_url}
-                              alt={album.title}
-                              width={200}
-                              height={200}
-                              className="object-cover w-full h-full group-hover:scale-105 transition-transform"
-                            />
-                          ) : (
-                            <div className="bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center w-full h-full">
-                              <Music className="h-12 w-12 text-white" />
-                            </div>
-                          )}
-                        </div>
-                        <div className="p-3">
-                          <div className="font-semibold truncate text-gray-900 dark:text-white group-hover:underline">
-                            {album.title}
-                          </div>
-                          {album.release_date && (
-                            <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                              {new Date(album.release_date).getFullYear()}
-                            </div>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                ))}
-              </div>
+              <AlbumGrid albums={albums} />
             </CardContent>
           </Card>
         )}
