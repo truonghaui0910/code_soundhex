@@ -90,7 +90,7 @@ export function SearchSuggestions({
       if (searchInput) {
         const rect = searchInput.getBoundingClientRect();
         setPosition({
-          top: rect.bottom + window.scrollY + 8,
+          top: rect.bottom + window.scrollY + 2, // Reduced from 8 to 2
           left: rect.left + window.scrollX,
           width: rect.width
         });
@@ -143,28 +143,9 @@ export function SearchSuggestions({
         </div>
       ) : (
         <div className="py-2">
-          {/* Search Suggestions */}
-          {data.suggestions.length > 0 && (
-            <div className="px-4 py-2">
-              <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-                Search Suggestions
-              </h3>
-              {data.suggestions.map((suggestion, index) => (
-                <button
-                  key={index}
-                  onClick={() => onSuggestionClick(suggestion)}
-                  className="w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors flex items-center gap-3"
-                >
-                  <Search className="h-4 w-4 text-gray-400" />
-                  <span className="text-sm text-gray-700 dark:text-gray-200">{suggestion}</span>
-                </button>
-              ))}
-            </div>
-          )}
-
           {/* Tracks */}
           {data.tracks.length > 0 && (
-            <div className="px-4 py-2 border-t border-gray-200 dark:border-gray-700">
+            <div className="px-4 py-2">
               <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-2">
                 <Music className="h-3 w-3" />
                 Songs

@@ -24,19 +24,11 @@ export async function GET(request: NextRequest) {
       ArtistsController.searchArtists(query, 5)
     ]);
 
-    // Generate search suggestions based on the query
-    const suggestions = [
-      `Find "${query}"`,
-      `Search tracks: "${query}"`,
-      `Search albums: "${query}"`,
-      `Search artists: "${query}"`
-    ];
-
     return NextResponse.json({
       tracks: tracks.slice(0, 5),
       albums: albums.slice(0, 5), 
       artists: artists.slice(0, 5),
-      suggestions: suggestions.slice(0, 4)
+      suggestions: [] // Remove text suggestions
     });
   } catch (error) {
     console.error('Suggestions API error:', error);
