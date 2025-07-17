@@ -304,7 +304,3 @@ export function SearchSuggestions({
     </div>
   );
 }
-```
-
-```
-The code has been modified to left-align the text in the Album and Artist sections of the search suggestions dropdown.
