@@ -105,8 +105,8 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
         console.log('📚 Current tracks length:', tracks.length);
         console.log('🎨 Current selectedGenre:', selectedGenre);
         
-        // If there's a search query AND we have search results, use search results
-        if (searchQuery.trim() && searchResults.length > 0) {
+        // Only use search results if we have actual search results (after Enter was pressed)
+        if (searchResults.length > 0) {
             console.log('🔍 Search mode - using searchResults');
             const filtered = searchResults.filter((track) => {
                 const matchesGenre =
@@ -118,14 +118,8 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
             console.log('🔍 Filtered results:', filtered.map(t => t.title));
             return filtered;
         }
-        
-        // If there's a search query but no results yet (still searching), return empty array
-        if (searchQuery.trim() && searchResults.length === 0) {
-            console.log('🔍 Search mode - no results yet');
-            return [];
-        }
 
-        // Otherwise, filter from all tracks
+        // Otherwise, always filter from all tracks (even if there's a searchQuery)
         console.log('📚 Normal mode - using all tracks');
         const filtered = tracks.filter((track) => {
             const matchesGenre =
@@ -134,7 +128,7 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
         });
         console.log('📚 Using all tracks. Filtered length:', filtered.length);
         return filtered;
-    }, [searchQuery, searchResults, tracks, selectedGenre, forceUpdateKey]);
+    }, [searchResults, tracks, selectedGenre, forceUpdateKey]);
 
     // Debug filteredTracks changes
     useEffect(() => {
@@ -284,8 +278,6 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
             console.log('🧹 Clearing search results');
             setSearchResults([]);
             setForceUpdateKey(prev => prev + 1);
-            // Only auto-switch back to featured if we were auto-switched to library during search
-            // Don't auto-switch if user manually clicked library button
         }
     }, [searchQuery]);
 
