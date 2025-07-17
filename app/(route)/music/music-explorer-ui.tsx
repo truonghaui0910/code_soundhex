@@ -352,7 +352,7 @@ export function MusicExplorerUI({
                                 </Button>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
                                 {featuredTracks.map((track, index) => (
                                     <div
                                         key={track.id}
@@ -690,6 +690,7 @@ export function MusicExplorerUI({
                                     className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
                                 >
                                     <Play className="mr-2 h-4 w-4" />
+This change reduces the gap between the featured tracks to match the albums section.
                                     Play Page
                                 </Button>
                             </div>
@@ -745,7 +746,7 @@ export function MusicExplorerUI({
                         ) : (
                             <div
                                 key={`library-${libraryTracks.length}-${searchQuery}-${currentPage}`}
-                                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8"
+                                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6"
                             >
                                 {libraryTracks.map((track, index) => (
                                 <div
@@ -1015,7 +1016,7 @@ export function MusicExplorerUI({
                         ) : (
                             <div
                                 key={`albums-${allAlbums.length}-${searchQuery}-${albumsCurrentPage}`}
-                                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8"
+                                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6"
                             >
                                 {allAlbums.map((album, index) => (
                                     <div key={album.id} className="group text-center">
