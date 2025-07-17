@@ -654,11 +654,58 @@ export function MusicExplorerUI({
                         </div>
 
                         {/* Grid view for library */}
-                        <div 
-                            key={`library-${libraryTracks.length}-${searchQuery}-${currentPage}`}
-                            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8"
-                        >
-                            {libraryTracks.map((track, index) => (
+                        {libraryTracks.length === 0 && !isSearching ? (
+                            <div className="text-center py-20">
+                                <div className="w-24 h-24 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center mx-auto mb-6">
+                                    <Music className="h-12 w-12 text-white" />
+                                </div>
+                                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                                    {searchQuery ? 'No tracks found' : 'No tracks available'}
+                                </h3>
+                                <p className="text-gray-600 dark:text-gray-400 text-lg mb-8 max-w-md mx-auto">
+                                    {searchQuery 
+                                        ? `We couldn't find any tracks matching "${searchQuery}"${selectedGenre !== 'all' ? ` in ${selectedGenre} genre` : ''}.`
+                                        : selectedGenre !== 'all' 
+                                            ? `No tracks available in ${selectedGenre} genre.`
+                                            : 'No tracks are available in the library at the moment.'
+                                    }
+                                </p>
+                                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                                    {searchQuery && (
+                                        <Button
+                                            onClick={() => {
+                                                setSearchQuery("");
+                                                setSelectedGenre("all");
+                                            }}
+                                            variant="outline"
+                                            className="px-6 py-3 rounded-2xl"
+                                        >
+                                            Clear Search & Filters
+                                        </Button>
+                                    )}
+                                    {selectedGenre !== 'all' && !searchQuery && (
+                                        <Button
+                                            onClick={() => setSelectedGenre("all")}
+                                            variant="outline"
+                                            className="px-6 py-3 rounded-2xl"
+                                        >
+                                            Show All Genres
+                                        </Button>
+                                    )}
+                                    <Button
+                                        onClick={() => setCurrentView("featured")}
+                                        className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-2xl"
+                                    >
+                                        Explore Featured
+                                    </Button>
+                                </div>
+                            </div>
+                        ) : (
+                            <div 
+                                key={`library-${libraryTracks.length}-${searchQuery}-${currentPage}`}
+                                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8"
+                            >
+                                {libraryTracks.map((track, index) => (
                                 <div
                                     key={track.id}
                                     className="group relative"
@@ -770,7 +817,8 @@ export function MusicExplorerUI({
                                     </div>
                                 </div>
                             ))}
-                        </div>
+                            </div>
+                        )}
 
                         {/* Pagination Controls */}
                         {totalPages > 1 && (
