@@ -86,50 +86,24 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(50);
 
-    // Debug search results changes
-    useEffect(() => {
-        console.log('🎯 searchResults state changed:', searchResults.length, 'items');
-        console.log('🔍 Current searchQuery:', searchQuery);
-        console.log('📄 Search results:', searchResults);
-        console.log('🔑 forceUpdateKey:', forceUpdateKey);
-    }, [searchResults, forceUpdateKey]);
-
-    // Debug searchQuery changes
-    useEffect(() => {
-        console.log('📝 searchQuery changed to:', searchQuery);
-    }, [searchQuery]);
-
     // Filter tracks based on search and filters
     const filteredTracks = useMemo(() => {
-        console.log('🔄 Recalculating filteredTracks');
-        console.log('📝 Current searchQuery:', `"${searchQuery}"`);
-        console.log('🎵 Current searchResults length:', searchResults.length);
-        console.log('🎵 Current searchResults:', searchResults);
-        console.log('📚 Current tracks length:', tracks.length);
-        console.log('🎨 Current selectedGenre:', selectedGenre);
-
         // Only use search results if we have actual search results (after Enter was pressed)
         if (searchResults.length > 0) {
-            console.log('🔍 Search mode - using searchResults');
             const filtered = searchResults.filter((track) => {
                 const matchesGenre =
                     selectedGenre === "all" || track.genre?.name === selectedGenre;
-                console.log(`Track "${track.title}" - Genre match:`, matchesGenre);
                 return matchesGenre;
             });
-            console.log('🔍 Using search results. Filtered length:', filtered.length);
-            console.log('🔍 Filtered results:', filtered.map(t => t.title));
             return filtered;
         }
 
         // Otherwise, always filter from all tracks (even if there's a searchQuery)
-        console.log('📚 Normal mode - using all tracks');
         const filtered = tracks.filter((track) => {
             const matchesGenre =
                 selectedGenre === "all" || track.genre?.name === selectedGenre;
             return matchesGenre;
         });
-        console.log('📚 Using all tracks. Filtered length:', filtered.length);
         return filtered;
     }, [searchResults, tracks, selectedGenre, forceUpdateKey]);
 
@@ -148,17 +122,7 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
         return Math.ceil(filteredTracks.length / itemsPerPage);
     }, [filteredTracks, itemsPerPage]);
 
-    // Debug filteredTracks changes
-    useEffect(() => {
-        console.log('🔄 filteredTracks changed:', filteredTracks.length, 'items');
-        console.log('📄 filteredTracks:', filteredTracks.map(t => t.title));
-        console.log('🎯 Current state summary:');
-        console.log('  - searchQuery:', `"${searchQuery}"`);
-        console.log('  - searchResults.length:', searchResults.length);
-        console.log('  - filteredTracks.length:', filteredTracks.length);
-        console.log('  - selectedGenre:', selectedGenre);
-        console.log('  - currentView:', currentView);
-    }, [filteredTracks]);
+    
 
     // Memoize unique albums and artists to prevent re-renders
     const uniqueAlbums = useMemo(() => {
@@ -224,44 +188,20 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
             return;
         }
 
-        console.log('🔍 Starting search for:', query);
         setIsSearching(true);
         try {
             const response = await fetch(`/api/tracks/search?q=${encodeURIComponent(query)}`);
-            console.log('🔍 Search response status:', response.status);
 
             if (response.ok) {
                 const data = await response.json();
-                console.log('✅ Search results received:', data?.length || 0, 'tracks');
-                console.log('📋 Search data:', data);
-                console.log('🎵 First result:', data?.[0]);
-
-                // Force array update with new reference
                 const newResults = Array.isArray(data) ? [...data] : [];
-                console.log('🔄 Setting new search results:', newResults.length, 'items');
-
-                // Force state update with callback
-                setSearchResults(prevResults => {
-                    console.log('🔄 Previous results:', prevResults.length);
-                    console.log('🔄 New results:', newResults.length);
-                    return newResults;
-                });
-
-                // Force component re-render
+                setSearchResults(newResults);
                 setForceUpdateKey(prev => prev + 1);
-
-                // Debug after state update
-                setTimeout(() => {
-                    console.log('⏰ After timeout - searchResults should be updated');
-                }, 100);
             } else {
-                console.error('❌ Search failed with status:', response.status);
-                const errorData = await response.text();
-                console.error('❌ Error response:', errorData);
                 setSearchResults([]);
             }
         } catch (error) {
-            console.error("❌ Error searching tracks:", error);
+            console.error("Error searching tracks:", error);
             setSearchResults([]);
         } finally {
             setIsSearching(false);
@@ -293,7 +233,6 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
     // Clear search results when search query is cleared
     useEffect(() => {
         if (!searchQuery.trim()) {
-            console.log('🧹 Clearing search results');
             setSearchResults([]);
             setForceUpdateKey(prev => prev + 1);
         }
@@ -485,7 +424,7 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
             featuredTracks={featuredTracks}
             featuredAlbums={featuredAlbums}
             featuredArtists={featuredArtists}
-            filteredTracks={filteredTracks}
+            filteredTracks={paginatedTracks}
             allFilteredTracks={allFilteredTracks}
             trendingTracks={trendingTracks}
             uniqueAlbums={uniqueAlbums}
