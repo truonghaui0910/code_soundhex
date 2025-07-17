@@ -292,17 +292,23 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
                     setLibraryTracks([]);
                     setTotalTracks(0);
                     setTotalPages(0);
+                    if (resetPage) {
+                        setCurrentPage(1);
+                    }
                 }
             } else {
+                // If error response, reset everything and go back to page 1
                 setLibraryTracks([]);
                 setTotalTracks(0);
                 setTotalPages(0);
+                setCurrentPage(1);
             }
         } catch (error) {
             console.error("Error fetching library tracks:", error);
             setLibraryTracks([]);
             setTotalTracks(0);
             setTotalPages(0);
+            setCurrentPage(1);
         } finally {
             setIsSearching(false);
         }
@@ -339,10 +345,10 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
 
     // Separate effect for page changes to avoid duplicate calls
     useEffect(() => {
-        if (currentView === "library" && currentPage > 1) {
+        if (currentView === "library" && currentPage > 1 && totalPages > 0 && currentPage <= totalPages) {
             fetchLibraryTracks(currentPage, false);
         }
-    }, [currentPage]);
+    }, [currentPage, totalPages]);
 
     // Fetch albums when albums view is active
     useEffect(() => {
