@@ -231,7 +231,7 @@ export function TrackList({
                       </div>
                     )}
                   </div>
-                  <div className="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400 mb-2">
+                  <div className="flex items-center gap-3 text-base text-gray-500 dark:text-gray-400">
                     {showArtistInfo && track.artist && (
                       <Link
                         href={`/artist/${track.artist.custom_url || track.artist.id}`}
@@ -252,25 +252,24 @@ export function TrackList({
                       </>
                     )}
                   </div>
-                  {/* Genre Badge */}
-                  {track.genre && (
-                    <div className="flex items-center gap-2">
-                      <Badge 
-                        variant="secondary" 
-                        className="text-xs bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 dark:from-purple-900/30 dark:to-pink-900/30 dark:text-purple-300 border-0"
-                      >
-                        {track.genre.name}
-                      </Badge>
-                    </div>
-                  )}
                 </div>
 
-                {/* Duration */}
+                {/* Duration and Genre */}
                 <div className="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
-                  <Clock className="h-4 w-4" />
-                  <span className="font-mono">
-                    {formatDuration(track.duration)}
-                  </span>
+                  {track.genre && (
+                    <Badge 
+                      variant="secondary" 
+                      className="text-xs bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 dark:from-purple-900/30 dark:to-pink-900/30 dark:text-purple-300 border-0"
+                    >
+                      {track.genre.name}
+                    </Badge>
+                  )}
+                  <div className="flex items-center gap-1">
+                    <Clock className="h-4 w-4" />
+                    <span className="font-mono">
+                      {formatDuration(track.duration)}
+                    </span>
+                  </div>
                 </div>
 
                 {/* Actions */}
