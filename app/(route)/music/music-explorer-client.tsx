@@ -82,25 +82,43 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
     const [searchResults, setSearchResults] = useState<Track[]>([]);
     const [isSearching, setIsSearching] = useState(false);
 
+    // Debug search results changes
+    useEffect(() => {
+        console.log('🎯 searchResults state changed:', searchResults.length, 'items');
+        console.log('🔍 Current searchQuery:', searchQuery);
+        console.log('📄 Search results:', searchResults);
+    }, [searchResults]);
+
+    // Debug searchQuery changes
+    useEffect(() => {
+        console.log('📝 searchQuery changed to:', searchQuery);
+    }, [searchQuery]);
+
     // Filter tracks based on search and filters
     const filteredTracks = useMemo(() => {
         console.log('🔄 Recalculating filteredTracks');
-        console.log('📝 Current searchQuery:', searchQuery);
+        console.log('📝 Current searchQuery:', `"${searchQuery}"`);
         console.log('🎵 Current searchResults length:', searchResults.length);
+        console.log('🎵 Current searchResults:', searchResults);
         console.log('📚 Current tracks length:', tracks.length);
+        console.log('🎨 Current selectedGenre:', selectedGenre);
         
         // If there's a search query, use search results
         if (searchQuery.trim()) {
+            console.log('🔍 Search mode - using searchResults');
             const filtered = searchResults.filter((track) => {
                 const matchesGenre =
                     selectedGenre === "all" || track.genre?.name === selectedGenre;
+                console.log(`Track "${track.title}" - Genre match:`, matchesGenre);
                 return matchesGenre;
             });
             console.log('🔍 Using search results. Filtered length:', filtered.length);
+            console.log('🔍 Filtered results:', filtered.map(t => t.title));
             return filtered;
         }
 
         // Otherwise, filter from all tracks
+        console.log('📚 Normal mode - using all tracks');
         const filtered = tracks.filter((track) => {
             const matchesGenre =
                 selectedGenre === "all" || track.genre?.name === selectedGenre;
@@ -108,7 +126,7 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
         });
         console.log('📚 Using all tracks. Filtered length:', filtered.length);
         return filtered;
-    }, [searchQuery, searchResults, tracks, selectedGenre]);
+    }, [searchQuery, searchResults, tracks, selectedGenre, searchResults.length]);
 
     // Memoize unique albums and artists to prevent re-renders
     const uniqueAlbums = useMemo(() => {
@@ -185,8 +203,16 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
                 console.log('✅ Search results received:', data?.length || 0, 'tracks');
                 console.log('📋 Search data:', data);
                 console.log('🎵 First result:', data?.[0]);
-                setSearchResults(data || []);
-                console.log('🎯 Search results state updated. Current searchResults length:', (data || []).length);
+                
+                // Force array update with new reference
+                const newResults = Array.isArray(data) ? [...data] : [];
+                console.log('🔄 Setting new search results:', newResults.length, 'items');
+                setSearchResults(newResults);
+                
+                // Force state update
+                setTimeout(() => {
+                    console.log('⏰ After timeout - searchResults.length:', searchResults.length);
+                }, 100);
             } else {
                 console.error('❌ Search failed with status:', response.status);
                 const errorData = await response.text();

@@ -593,7 +593,10 @@ export function MusicExplorerUI({
                         </div>
 
                         {/* Grid view for library */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8">
+                        <div 
+                            key={`library-${filteredTracks.length}-${searchQuery}`}
+                            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8"
+                        >
                             {filteredTracks.map((track, index) => (
                                 <div
                                     key={track.id}
