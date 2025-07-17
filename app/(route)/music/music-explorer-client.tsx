@@ -210,7 +210,137 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
 
     // Show loading if still loading
     if (loading) {
-        return null; // Let the loading component handle this
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20">
+                {/* Hero Section Skeleton */}
+                <div className="relative overflow-hidden bg-gradient-to-r from-slate-800 via-purple-900 to-slate-900 text-white">
+                    <div className="absolute inset-0 bg-black/10"></div>
+                    <div className="relative container mx-auto px-6 py-20">
+                        <div className="text-center max-w-4xl mx-auto">
+                            <div className="h-8 bg-white/20 rounded-lg mb-8 animate-pulse"></div>
+
+                            {/* Search Bar Skeleton */}
+                            <div className="relative max-w-2xl mx-auto mb-8">
+                                <div className="h-14 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg animate-pulse flex items-center px-4">
+                                    <Search className="h-5 w-5 text-white/40 mr-3" />
+                                    <div className="h-5 bg-white/20 rounded flex-1 animate-pulse"></div>
+                                </div>
+                            </div>
+
+                            {/* Action Buttons Skeleton */}
+                            <div className="flex flex-wrap gap-4 justify-center">
+                                <div className="h-12 w-40 bg-white/20 rounded-lg animate-pulse"></div>
+                                <div className="h-12 w-36 bg-white/20 rounded-lg animate-pulse"></div>
+                                <div className="h-12 w-40 bg-white/20 rounded-lg animate-pulse"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Filters Skeleton */}
+                <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-b">
+                    <div className="container mx-auto px-6 py-4">
+                        <div className="flex flex-wrap gap-4 items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-2">
+                                    <Filter className="h-4 w-4 text-gray-400" />
+                                    <div className="h-4 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                                </div>
+                                <div className="h-10 w-32 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse"></div>
+                            </div>
+                            <div className="h-4 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Main Content Skeleton */}
+                <div className="container mx-auto px-4 sm:px-6 pb-32 space-y-16 pt-12">
+                    {/* Featured Tracks Skeleton */}
+                    <section>
+                        <div className="flex items-center justify-between mb-8">
+                            <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
+                                    <TrendingUp className="h-4 w-4 text-white" />
+                                </div>
+                                <div className="h-6 w-40 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                            </div>
+                            <div className="h-10 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8">
+                            {Array.from({ length: 8 }).map((_, index) => (
+                                <div key={index} className="group relative">
+                                    <div className="relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl overflow-hidden shadow-lg border border-white/20 dark:border-gray-700/30">
+                                        <div className="aspect-square bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+                                        <div className="p-6 space-y-3">
+                                            <div className="space-y-2">
+                                                <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                                                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-3/4"></div>
+                                                <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-1/2"></div>
+                                            </div>
+                                            <div className="flex items-center justify-between">
+                                                <div className="h-6 w-16 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse"></div>
+                                                <div className="h-6 w-12 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+
+                    {/* Albums Skeleton */}
+                    <section>
+                        <div className="flex items-center justify-between mb-8">
+                            <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
+                                    <Music className="h-4 w-4 text-white" />
+                                </div>
+                                <div className="h-6 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                            </div>
+                            <div className="h-6 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                            {Array.from({ length: 10 }).map((_, index) => (
+                                <div key={index} className="group text-center">
+                                    <div className="aspect-square bg-gray-200 dark:bg-gray-700 rounded-lg mb-3 animate-pulse"></div>
+                                    <div className="space-y-1">
+                                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                                        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-3/4 mx-auto"></div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+
+                    {/* Artists Skeleton */}
+                    <section>
+                        <div className="flex items-center justify-between mb-8">
+                            <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-rose-500 rounded-2xl flex items-center justify-center shadow-lg">
+                                    <Users className="h-4 w-4 text-white" />
+                                </div>
+                                <div className="h-6 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                            </div>
+                            <div className="h-6 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                            {Array.from({ length: 10 }).map((_, index) => (
+                                <div key={index} className="group text-center">
+                                    <div className="aspect-square bg-gray-200 dark:bg-gray-700 rounded-full mb-3 animate-pulse"></div>
+                                    <div className="space-y-1">
+                                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                                        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-2/3 mx-auto"></div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+                </div>
+            </div>
+        );
     }
 
     return (
