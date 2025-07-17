@@ -259,9 +259,7 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
                     <section>
                         <div className="flex items-center justify-between mb-8">
                             <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
-                                    <TrendingUp className="h-4 w-4 text-white" />
-                                </div>
+                                <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-2xl animate-pulse"></div>
                                 <div className="h-6 w-40 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
                             </div>
                             <div className="h-10 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
@@ -293,9 +291,7 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
                     <section>
                         <div className="flex items-center justify-between mb-8">
                             <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
-                                    <Music className="h-4 w-4 text-white" />
-                                </div>
+                                <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-2xl animate-pulse"></div>
                                 <div className="h-6 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
                             </div>
                             <div className="h-6 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
@@ -318,9 +314,7 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
                     <section>
                         <div className="flex items-center justify-between mb-8">
                             <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-rose-500 rounded-2xl flex items-center justify-center shadow-lg">
-                                    <Users className="h-4 w-4 text-white" />
-                                </div>
+                                <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-2xl animate-pulse"></div>
                                 <div className="h-6 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
                             </div>
                             <div className="h-6 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
