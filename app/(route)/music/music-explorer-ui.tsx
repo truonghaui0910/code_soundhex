@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, useEffect, useMemo, useCallback } from "react";
@@ -96,8 +95,8 @@ interface MusicExplorerUIProps {
     setSearchQuery: (query: string) => void;
     selectedGenre: string;
     setSelectedGenre: (genre: string) => void;
-    currentView: "featured" | "library" | "upload";
-    setCurrentView: (view: "featured" | "library" | "upload") => void;
+    currentView: "featured" | "library" | "upload" | "albums" | "artists";
+    setCurrentView: (view: "featured" | "library" | "upload" | "albums" | "artists") => void;
     isLoadingFeatured: boolean;
     onSearchKeyPress?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
     isSearching?: boolean;
@@ -235,12 +234,23 @@ export function MusicExplorerUI({
                                 <Headphones className="mr-2 h-5 w-5" />
                                 Full Library
                             </Button>
-                            <Link href="/upload">
-                                <Button size="lg">
-                                    <Upload className="mr-2 h-5 w-5" />
-                                    Upload Music
-                                </Button>
-                            </Link>
+                            <Button
+                                size="lg"
+                                onClick={() => setCurrentView("albums")}
+                                className={`${currentView === "albums" ? "bg-white text-purple-600 hover:bg-red-500 hover:text-white" : "bg-white/20 text-white hover:bg-white/30"}`}
+                            >
+                                <Album className="mr-2 h-5 w-5" />
+                                All Albums
+                            </Button>
+                            <Button
+                                size="lg"
+                                onClick={() => setCurrentView("artists")}
+                                className={`${currentView === "artists" ? "bg-white text-purple-600 hover:bg-red-500 hover:text-white" : "bg-white/20 text-white hover:bg-white/30"}`}
+                            >
+                                <Users className="mr-2 h-5 w-5" />
+                                All Artists
+                            </Button>
+                            {/* Removed Upload Music button as requested */}
                         </div>
                     </div>
                 </div>
@@ -269,11 +279,15 @@ export function MusicExplorerUI({
                         </div>
 
                         <div className="text-sm text-gray-600 dark:text-gray-400">
-                            {currentView === "featured" 
-                                ? `${featuredTracks.length} featured tracks` 
-                                : currentView === "library" 
+                            {currentView === "featured"
+                                ? `${featuredTracks.length} featured tracks`
+                                : currentView === "library"
                                     ? `Showing ${Math.min((currentPage - 1) * itemsPerPage + 1, totalTracks)}-${Math.min(currentPage * itemsPerPage, totalTracks)} of ${totalTracks} tracks${searchQuery ? ` for "${searchQuery}"` : ""}`
-                                    : `${libraryTracks.length} tracks found${searchQuery ? ` for "${searchQuery}"` : ""}`}
+                                    : currentView === "albums"
+                                        ? `${uniqueAlbums.length} albums found`
+                                        : currentView === "artists"
+                                            ? `${uniqueArtists.length} artists found`
+                                            : `${libraryTracks.length} tracks found${searchQuery ? ` for "${searchQuery}"` : ""}`}
                         </div>
                     </div>
                 </div>
@@ -294,7 +308,7 @@ export function MusicExplorerUI({
                                         Featured Tracks
                                     </span>
                                 </h2>
-                                <Button 
+                                <Button
                                     onClick={() => {
                                         if (featuredTracks.length > 0) {
                                             // Shuffle the featured tracks array
@@ -410,8 +424,8 @@ export function MusicExplorerUI({
                                                     </div>
 
                                                     <div className="flex items-center justify-between">
-                                                        <Badge 
-                                                            variant="secondary" 
+                                                        <Badge
+                                                            variant="secondary"
                                                             className="text-xs bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 dark:from-purple-900/30 dark:to-pink-900/30 dark:text-purple-300 border-0"
                                                         >
                                                             {track.genre?.name || "Unknown"}
@@ -430,8 +444,8 @@ export function MusicExplorerUI({
                                                             <Plus className="h-4 w-4" />
                                                         </Button>
                                                     </AddToPlaylist>
-                                                    <Button 
-                                                        size="sm" 
+                                                    <Button
+                                                        size="sm"
                                                         variant="ghost"
                                                         onClick={() => downloadTrack(track)}
                                                         className="hover:bg-purple-100 dark:hover:bg-purple-900/30"
@@ -456,7 +470,7 @@ export function MusicExplorerUI({
 
                             {/* View all button */}
                             <div className="mt-12 text-center">
-                                <Button 
+                                <Button
                                     onClick={() => setCurrentView("library")}
                                     className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
                                 >
@@ -479,7 +493,7 @@ export function MusicExplorerUI({
                                 </h2>
                                 <Button
                                     variant="ghost"
-                                    onClick={() => setCurrentView("library")}
+                                    onClick={() => setCurrentView("albums")}
                                     className="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 font-medium"
                                 >
                                     View All →
@@ -566,7 +580,7 @@ export function MusicExplorerUI({
                                 </h2>
                                 <Button
                                     variant="ghost"
-                                    onClick={() => setCurrentView("library")}
+                                    onClick={() => setCurrentView("artists")}
                                     className="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 font-medium"
                                 >
                                     View All →
@@ -624,7 +638,7 @@ export function MusicExplorerUI({
                                 </span>
                             </h2>
                             <div className="flex gap-2">
-                                <Button 
+                                <Button
                                     onClick={() => {
                                         if (libraryTracks.length > 0) {
                                             // Shuffle the library tracks array
@@ -638,7 +652,7 @@ export function MusicExplorerUI({
                                     <Shuffle className="mr-2 h-4 w-4" />
                                     Shuffle Page
                                 </Button>
-                                <Button 
+                                <Button
                                     onClick={() => {
                                         if (libraryTracks.length > 0) {
                                             setTrackList(libraryTracks);
@@ -663,9 +677,9 @@ export function MusicExplorerUI({
                                     {searchQuery ? 'No tracks found' : 'No tracks available'}
                                 </h3>
                                 <p className="text-gray-600 dark:text-gray-400 text-lg mb-8 max-w-md mx-auto">
-                                    {searchQuery 
+                                    {searchQuery
                                         ? `We couldn't find any tracks matching "${searchQuery}"${selectedGenre !== 'all' ? ` in ${selectedGenre} genre` : ''}.`
-                                        : selectedGenre !== 'all' 
+                                        : selectedGenre !== 'all'
                                             ? `No tracks available in ${selectedGenre} genre.`
                                             : 'No tracks are available in the library at the moment.'
                                     }
@@ -701,7 +715,7 @@ export function MusicExplorerUI({
                                 </div>
                             </div>
                         ) : (
-                            <div 
+                            <div
                                 key={`library-${libraryTracks.length}-${searchQuery}-${currentPage}`}
                                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8"
                             >
@@ -798,8 +812,8 @@ export function MusicExplorerUI({
                                                         <Plus className="h-4 w-4" />
                                                     </Button>
                                                 </AddToPlaylist>
-                                                <Button 
-                                                    size="sm" 
+                                                <Button
+                                                    size="sm"
                                                     variant="ghost"
                                                     onClick={() => downloadTrack(track)}
                                                     disabled={isTrackDownloading(track.id)}
@@ -854,7 +868,451 @@ export function MusicExplorerUI({
                                     {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                                         const pageNumber = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
                                         if (pageNumber > totalPages) return null;
-                                        
+
+                                        return (
+                                            <Button
+                                                key={pageNumber}
+                                                variant={pageNumber === currentPage ? "default" : "outline"}
+                                                size="sm"
+                                                onClick={() => setCurrentPage(pageNumber)}
+                                                className="w-10 h-10"
+                                            >
+                                                {pageNumber}
+                                            </Button>
+                                        );
+                                    })}
+
+                                    {/* Last page */}
+                                    {currentPage < totalPages - 2 && (
+                                        <>
+                                            {currentPage < totalPages - 3 && <span className="text-gray-500">...</span>}
+                                            <Button
+                                                variant={totalPages === currentPage ? "default" : "outline"}
+                                                size="sm"
+                                                onClick={() => setCurrentPage(totalPages)}
+                                                className="w-10 h-10"
+                                            >
+                                                {totalPages}
+                                            </Button>
+                                        </>
+                                    )}
+                                </div>
+
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                                    disabled={currentPage === totalPages}
+                                    className="flex items-center gap-2"
+                                >
+                                    Next
+                                    <ChevronRight className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        )}
+                    </div>
+                )}
+                 {currentView === "albums" && (
+                    <div className="space-y-6">
+                        <div className="flex items-center justify-between">
+                            <h2 className="text-xl font-bold flex items-center gap-3">
+                                <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-2xl flex items-center justify-center shadow-lg">
+                                    <Headphones className="h-5 w-5 text-white" />
+                                </div>
+                                <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                                    All Albums
+                                </span>
+                            </h2>
+                            <div className="flex gap-2">
+                                <Button
+                                    onClick={() => {
+                                        if (uniqueAlbums.length > 0) {
+                                            // Shuffle the albums array
+                                            const shuffledAlbums = [...uniqueAlbums].sort(() => Math.random() - 0.5);
+                                            //setTrackList(shuffledTracks); //Todo: need to get the tracklist from the album
+                                            //playTrack(shuffledTracks[0]); //Todo: need to get the tracklist from the album
+                                        }
+                                    }}
+                                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
+                                >
+                                    <Shuffle className="mr-2 h-4 w-4" />
+                                    Shuffle Page
+                                </Button>
+                                <Button
+                                    onClick={() => {
+                                        if (uniqueAlbums.length > 0) {
+                                            //setTrackList(libraryTracks);
+                                            //playTrack(libraryTracks[0]);
+                                        }
+                                    }}
+                                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
+                                >
+                                    <Play className="mr-2 h-4 w-4" />
+                                    Play Page
+                                </Button>
+                            </div>
+                        </div>
+
+                        {/* Grid view for albums */}
+                        {uniqueAlbums.length === 0 && !isSearching ? (
+                            <div className="text-center py-20">
+                                <div className="w-24 h-24 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center mx-auto mb-6">
+                                    <Music className="h-12 w-12 text-white" />
+                                </div>
+                                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                                    {searchQuery ? 'No albums found' : 'No albums available'}
+                                </h3>
+                                <p className="text-gray-600 dark:text-gray-400 text-lg mb-8 max-w-md mx-auto">
+                                    {searchQuery
+                                        ? `We couldn't find any albums matching "${searchQuery}"${selectedGenre !== 'all' ? ` in ${selectedGenre} genre` : ''}.`
+                                        : selectedGenre !== 'all'
+                                            ? `No albums available in ${selectedGenre} genre.`
+                                            : 'No albums are available in the library at the moment.'
+                                    }
+                                </p>
+                                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                                    {searchQuery && (
+                                        <Button
+                                            onClick={() => {
+                                                setSearchQuery("");
+                                                setSelectedGenre("all");
+                                            }}
+                                            variant="outline"
+                                            className="px-6 py-3 rounded-2xl"
+                                        >
+                                            Clear Search & Filters
+                                        </Button>
+                                    )}
+                                    {selectedGenre !== 'all' && !searchQuery && (
+                                        <Button
+                                            onClick={() => setSelectedGenre("all")}
+                                            variant="outline"
+                                            className="px-6 py-3 rounded-2xl"
+                                        >
+                                            Show All Genres
+                                        </Button>
+                                    )}
+                                    <Button
+                                        onClick={() => setCurrentView("featured")}
+                                        className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-2xl"
+                                    >
+                                        Explore Featured
+                                    </Button>
+                                </div>
+                            </div>
+                        ) : (
+                            <div
+                                key={`albums-${uniqueAlbums.length}-${searchQuery}-${currentPage}`}
+                                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8"
+                            >
+                                {uniqueAlbums.map((album, index) => (
+                                    <div key={album.id} className="group text-center">
+                                    <div className="relative aspect-square mb-3">
+                                        <Link
+                                            href={`/album/${album.custom_url || album.id}`}
+                                            prefetch={false}
+                                        >
+                                            {album.cover_image_url ? (
+                                                <Image
+                                                    src={album.cover_image_url}
+                                                    alt={album.title}
+                                                    fill
+                                                    sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
+                                                    className="object-cover rounded-lg group-hover:scale-105 transition-transform duration-300"
+                                                />
+                                            ) : (
+                                                <div className="bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center w-full h-full rounded-lg">
+                                                    <Music className="h-12 w-12 text-white" />
+                                                </div>
+                                            )}
+                                        </Link>
+
+                                        {/* Play Album Button Overlay */}
+                                        <div className="absolute inset-0 flex items-center justify-center rounded-lg">
+                                            <Button
+                                                size="lg"
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    e.stopPropagation();
+                                                    //const albumTracks = featuredTracks.filter(t => t.album?.id === album.id);
+                                                    //if (albumTracks.length > 0) {
+                                                    //    setTrackList(albumTracks);
+                                                    //    playTrack(albumTracks[0]);
+                                                    //}
+                                                }}
+                                                className="opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-full bg-white/90 text-purple-600 hover:bg-white hover:scale-110 shadow-lg backdrop-blur-sm"
+                                            >
+                                                <Play className="h-6 w-6" />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <Link
+                                            href={`/album/${album.custom_url || album.id}`}
+                                            prefetch={false}
+                                            className="block"
+                                        >
+                                            <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors truncate">
+                                                {album.title}
+                                            </h3>
+                                        </Link>
+                                        <Link
+                                            href={`/artist/${album.artist?.custom_url || album.artist?.id}`}
+                                            prefetch={false}
+                                            className="block"
+                                        >
+                                            <p className="text-sm text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors truncate">
+                                                {album.artist?.name}
+                                            </p>
+                                        </Link>
+                                    </div>
+                                </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Pagination Controls */}
+                        {totalPages > 1 && (
+                            <div className="mt-12 flex items-center justify-center gap-4">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                                    disabled={currentPage === 1}
+                                    className="flex items-center gap-2"
+                                >
+                                    <ChevronLeft className="h-4 w-4" />
+                                    Previous
+                                </Button>
+
+                                <div className="flex items-center gap-2">
+                                    {/* First page */}
+                                    {currentPage > 3 && (
+                                        <>
+                                            <Button
+                                                variant={1 === currentPage ? "default" : "outline"}
+                                                size="sm"
+                                                onClick={() => setCurrentPage(1)}
+                                                className="w-10 h-10"
+                                            >
+                                                1
+                                            </Button>
+                                            {currentPage > 4 && <span className="text-gray-500">...</span>}
+                                        </>
+                                    )}
+
+                                    {/* Page numbers around current page */}
+                                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                                        const pageNumber = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
+                                        if (pageNumber > totalPages) return null;
+
+                                        return (
+                                            <Button
+                                                key={pageNumber}
+                                                variant={pageNumber === currentPage ? "default" : "outline"}
+                                                size="sm"
+                                                onClick={() => setCurrentPage(pageNumber)}
+                                                className="w-10 h-10"
+                                            >
+                                                {pageNumber}
+                                            </Button>
+                                        );
+                                    })}
+
+                                    {/* Last page */}
+                                    {currentPage < totalPages - 2 && (
+                                        <>
+                                            {currentPage < totalPages - 3 && <span className="text-gray-500">...</span>}
+                                            <Button
+                                                variant={totalPages === currentPage ? "default" : "outline"}
+                                                size="sm"
+                                                onClick={() => setCurrentPage(totalPages)}
+                                                className="w-10 h-10"
+                                            >
+                                                {totalPages}
+                                            </Button>
+                                        </>
+                                    )}
+                                </div>
+
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                                    disabled={currentPage === totalPages}
+                                    className="flex items-center gap-2"
+                                >
+                                    Next
+                                    <ChevronRight className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        )}
+                    </div>
+                )}
+                {currentView === "artists" && (
+                    <div className="space-y-6">
+                        <div className="flex items-center justify-between">
+                            <h2 className="text-xl font-bold flex items-center gap-3">
+                                <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-2xl flex items-center justify-center shadow-lg">
+                                    <Headphones className="h-5 w-5 text-white" />
+                                </div>
+                                <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                                    All Artists
+                                </span>
+                            </h2>
+                            <div className="flex gap-2">
+                                <Button
+                                    onClick={() => {
+                                        if (uniqueArtists.length > 0) {
+                                            // Shuffle the library tracks array
+                                            const shuffledArtists = [...uniqueArtists].sort(() => Math.random() - 0.5);
+                                            //setTrackList(shuffledTracks);
+                                            //playTrack(shuffledTracks[0]);
+                                        }
+                                    }}
+                                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
+                                >
+                                    <Shuffle className="mr-2 h-4 w-4" />
+                                    Shuffle Page
+                                </Button>
+                                <Button
+                                    onClick={() => {
+                                        if (uniqueArtists.length > 0) {
+                                            //setTrackList(libraryTracks);
+                                            //playTrack(libraryTracks[0]);
+                                        }
+                                    }}
+                                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
+                                >
+                                    <Play className="mr-2 h-4 w-4" />
+                                    Play Page
+                                </Button>
+                            </div>
+                        </div>
+
+                        {/* Grid view for library */}
+                        {uniqueArtists.length === 0 && !isSearching ? (
+                            <div className="text-center py-20">
+                                <div className="w-24 h-24 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center mx-auto mb-6">
+                                    <Music className="h-12 w-12 text-white" />
+                                </div>
+                                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                                    {searchQuery ? 'No artists found' : 'No artists available'}
+                                </h3>
+                                <p className="text-gray-600 dark:text-gray-400 text-lg mb-8 max-w-md mx-auto">
+                                    {searchQuery
+                                        ? `We couldn't find any artists matching "${searchQuery}"${selectedGenre !== 'all' ? ` in ${selectedGenre} genre` : ''}.`
+                                        : selectedGenre !== 'all'
+                                            ? `No artists available in ${selectedGenre} genre.`
+                                            : 'No artists are available in the library at the moment.'
+                                    }
+                                </p>
+                                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                                    {searchQuery && (
+                                        <Button
+                                            onClick={() => {
+                                                setSearchQuery("");
+                                                setSelectedGenre("all");
+                                            }}
+                                            variant="outline"
+                                            className="px-6 py-3 rounded-2xl"
+                                        >
+                                            Clear Search & Filters
+                                        </Button>
+                                    )}
+                                    {selectedGenre !== 'all' && !searchQuery && (
+                                        <Button
+                                            onClick={() => setSelectedGenre("all")}
+                                            variant="outline"
+                                            className="px-6 py-3 rounded-2xl"
+                                        >
+                                            Show All Genres
+                                        </Button>
+                                    )}
+                                    <Button
+                                        onClick={() => setCurrentView("featured")}
+                                        className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-2xl"
+                                    >
+                                        Explore Featured
+                                    </Button>
+                                </div>
+                            </div>
+                        ) : (
+                            <div
+                                key={`artists-${uniqueArtists.length}-${searchQuery}-${currentPage}`}
+                                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6"
+                            >
+                                 {featuredArtists.map((artist) => (
+                                    <div
+                                        key={artist.id}
+                                        className="group cursor-pointer text-center"
+                                    >
+                                        <div className="aspect-square mx-auto mb-3 rounded-full overflow-hidden bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center relative group-hover:scale-105 transition-transform duration-300">
+                                            {artist.profile_image_url ? (
+                                                <Image
+                                                    src={artist.profile_image_url}
+                                                    alt={artist.name}
+                                                    fill
+                                                    sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
+                                                    className="object-cover"
+                                                />
+                                            ) : (
+                                                <Users className="h-12 w-12 text-white" />
+                                            )}
+                                        </div>
+                                        <div className="space-y-1">
+                                            <Link
+                                                href={`/artist/${artist.custom_url || artist.id}`}
+                                                className="block"
+                                            >
+                                                <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors truncate">
+                                                    {artist.name}
+                                                </h3>
+                                            </Link>
+                                            <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                                                {artist.tracksCount} songs
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Pagination Controls */}
+                        {totalPages > 1 && (
+                            <div className="mt-12 flex items-center justify-center gap-4">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                                    disabled={currentPage === 1}
+                                    className="flex items-center gap-2"
+                                >
+                                    <ChevronLeft className="h-4 w-4" />
+                                    Previous
+                                </Button>
+
+                                <div className="flex items-center gap-2">
+                                    {/* First page */}
+                                    {currentPage > 3 && (
+                                        <>
+                                            <Button
+                                                variant={1 === currentPage ? "default" : "outline"}
+                                                size="sm"
+                                                onClick={() => setCurrentPage(1)}
+                                                className="w-10 h-10"
+                                            >
+                                                1
+                                            </Button>
+                                            {currentPage > 4 && <span className="text-gray-500">...</span>}
+                                        </>
+                                    )}
+
+                                    {/* Page numbers around current page */}
+                                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                                        const pageNumber = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
+                                        if (pageNumber > totalPages) return null;
+
                                         return (
                                             <Button
                                                 key={pageNumber}

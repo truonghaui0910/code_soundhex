@@ -66,7 +66,7 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedGenre, setSelectedGenre] = useState<string>("all");
     const [currentView, setCurrentView] = useState<
-        "featured" | "library" | "upload"
+        "featured" | "library" | "albums" | "artists"
     >("featured");
     const [isLoadingFeatured, setIsLoadingFeatured] = useState(true);
     const [loading, setLoading] = useState(true);
@@ -86,6 +86,20 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(50);
     const [totalPages, setTotalPages] = useState(0);
+
+    // Albums view state
+    const [allAlbums, setAllAlbums] = useState<FeaturedAlbum[]>([]);
+    const [albumsCurrentPage, setAlbumsCurrentPage] = useState(1);
+    const [albumsTotalPages, setAlbumsTotalPages] = useState(0);
+    const [totalAlbums, setTotalAlbums] = useState(0);
+    const [isLoadingAlbums, setIsLoadingAlbums] = useState(false);
+
+    // Artists view state  
+    const [allArtists, setAllArtists] = useState<FeaturedArtist[]>([]);
+    const [artistsCurrentPage, setArtistsCurrentPage] = useState(1);
+    const [artistsTotalPages, setArtistsTotalPages] = useState(0);
+    const [totalArtists, setTotalArtists] = useState(0);
+    const [isLoadingArtists, setIsLoadingArtists] = useState(false);
 
     
 
@@ -145,6 +159,104 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
         });
         return shuffled.slice(0, 12);
     }, [tracks]);
+
+    // Function to fetch albums with pagination
+    const fetchAllAlbums = useCallback(async (page: number = 1, resetPage: boolean = false) => {
+        if (currentView !== "albums") return;
+
+        setIsLoadingAlbums(true);
+        try {
+            const params = new URLSearchParams({
+                page: resetPage ? '1' : page.toString(),
+                limit: itemsPerPage.toString(),
+            });
+
+            const response = await fetch(`/api/albums?${params}`);
+            if (response.ok) {
+                const data = await response.json();
+                if (Array.isArray(data)) {
+                    // For now, simulate pagination on client side since API doesn't support it yet
+                    const startIndex = (resetPage ? 0 : (page - 1)) * itemsPerPage;
+                    const endIndex = startIndex + itemsPerPage;
+                    const paginatedData = data.slice(startIndex, endIndex);
+                    
+                    setAllAlbums(paginatedData);
+                    setTotalAlbums(data.length);
+                    setAlbumsTotalPages(Math.ceil(data.length / itemsPerPage));
+                    if (resetPage) {
+                        setAlbumsCurrentPage(1);
+                    }
+                } else {
+                    setAllAlbums([]);
+                    setTotalAlbums(0);
+                    setAlbumsTotalPages(0);
+                }
+            } else {
+                setAllAlbums([]);
+                setTotalAlbums(0);
+                setAlbumsTotalPages(0);
+            }
+        } catch (error) {
+            console.error("Error fetching albums:", error);
+            setAllAlbums([]);
+            setTotalAlbums(0);
+            setAlbumsTotalPages(0);
+        } finally {
+            setIsLoadingAlbums(false);
+        }
+    }, [currentView, itemsPerPage]);
+
+    // Function to fetch artists with pagination
+    const fetchAllArtists = useCallback(async (page: number = 1, resetPage: boolean = false) => {
+        if (currentView !== "artists") return;
+
+        setIsLoadingArtists(true);
+        try {
+            const params = new URLSearchParams({
+                page: resetPage ? '1' : page.toString(),
+                limit: itemsPerPage.toString(),
+            });
+
+            const response = await fetch(`/api/artists?${params}`);
+            if (response.ok) {
+                const data = await response.json();
+                if (Array.isArray(data)) {
+                    // Add tracks count for each artist
+                    const artistsWithCount = data.map(artist => ({
+                        ...artist,
+                        tracksCount: tracks.filter(t => t.artist?.id === artist.id).length
+                    }));
+                    
+                    // For now, simulate pagination on client side since API doesn't support it yet
+                    const startIndex = (resetPage ? 0 : (page - 1)) * itemsPerPage;
+                    const endIndex = startIndex + itemsPerPage;
+                    const paginatedData = artistsWithCount.slice(startIndex, endIndex);
+                    
+                    setAllArtists(paginatedData);
+                    setTotalArtists(artistsWithCount.length);
+                    setArtistsTotalPages(Math.ceil(artistsWithCount.length / itemsPerPage));
+                    if (resetPage) {
+                        setArtistsCurrentPage(1);
+                    }
+                } else {
+                    setAllArtists([]);
+                    setTotalArtists(0);
+                    setArtistsTotalPages(0);
+                }
+            } else {
+                setAllArtists([]);
+                setTotalArtists(0);
+                setArtistsTotalPages(0);
+            }
+        } catch (error) {
+            console.error("Error fetching artists:", error);
+            setAllArtists([]);
+            setTotalArtists(0);
+            setArtistsTotalPages(0);
+        } finally {
+            setIsLoadingArtists(false);
+        }
+    }, [currentView, itemsPerPage, tracks]);
 
     // Function to fetch library tracks with pagination, search and filters
     const fetchLibraryTracks = useCallback(async (page: number = 1, resetPage: boolean = false) => {
@@ -221,6 +333,20 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
             fetchLibraryTracks(currentPage);
         }
     }, [currentView, selectedGenre, currentPage, fetchLibraryTracks]);
+
+    // Fetch albums when albums view is active
+    useEffect(() => {
+        if (currentView === "albums") {
+            fetchAllAlbums(albumsCurrentPage);
+        }
+    }, [currentView, albumsCurrentPage, fetchAllAlbums]);
+
+    // Fetch artists when artists view is active
+    useEffect(() => {
+        if (currentView === "artists") {
+            fetchAllArtists(artistsCurrentPage);
+        }
+    }, [currentView, artistsCurrentPage, fetchAllArtists]);
 
     // Reset search when query is cleared
     useEffect(() => {
@@ -435,6 +561,18 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
             itemsPerPage={itemsPerPage}
             totalPages={totalPages}
             totalTracks={totalTracks}
+            allAlbums={allAlbums}
+            allArtists={allArtists}
+            albumsCurrentPage={albumsCurrentPage}
+            setAlbumsCurrentPage={setAlbumsCurrentPage}
+            albumsTotalPages={albumsTotalPages}
+            totalAlbums={totalAlbums}
+            artistsCurrentPage={artistsCurrentPage}
+            setArtistsCurrentPage={setArtistsCurrentPage}
+            artistsTotalPages={artistsTotalPages}
+            totalArtists={totalArtists}
+            isLoadingAlbums={isLoadingAlbums}
+            isLoadingArtists={isLoadingArtists}
         />
     );
 }
