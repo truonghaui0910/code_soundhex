@@ -340,18 +340,6 @@ export function ArtistDetailUI({ artist, tracks, albums }: ArtistDetailUIProps) 
           </section>
         )}
 
-        {/* Popular Tracks Section */}
-        {tracks && tracks.length > 0 && (
-          <TrackList
-            tracks={tracks.slice(0, 10)}
-            title="Popular Tracks"
-            showTrackNumber={true}
-            showAlbumInfo={true}
-            showArtistInfo={false}
-            onPlayAll={handlePlayAllTracks}
-          />
-        )}
-
         {/* All Tracks in Small Grid Format */}
         {tracks && tracks.length > 0 && (
           <section>
@@ -370,6 +358,18 @@ export function ArtistDetailUI({ artist, tracks, albums }: ArtistDetailUIProps) 
               onTrackPlay={handlePlayTrack}
             />
           </section>
+        )}
+
+        {/* Popular Tracks Section */}
+        {tracks && tracks.length > 0 && (
+          <TrackList
+            tracks={tracks.slice(0, 10)}
+            title="Popular Tracks"
+            showTrackNumber={true}
+            showAlbumInfo={true}
+            showArtistInfo={false}
+            onPlayAll={handlePlayAllTracks}
+          />
         )}
       </div>
 
