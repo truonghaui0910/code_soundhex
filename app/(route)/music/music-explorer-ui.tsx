@@ -951,70 +951,6 @@ export function MusicExplorerUI({
                                     All Albums
                                 </span>
                             </h2>
-                            <div className="flex gap-2">
-                                <Button
-                                    onClick={async () => {
-                                        if (allAlbums.length > 0) {
-                                            try {
-                                                // Get all tracks from all albums in current page
-                                                const allAlbumTracks = [];
-                                                for (const album of allAlbums) {
-                                                    const response = await fetch(`/api/albums/${album.id}/tracks`);
-                                                    if (response.ok) {
-                                                        const data = await response.json();
-                                                        if (data.tracks && Array.isArray(data.tracks)) {
-                                                            allAlbumTracks.push(...data.tracks);
-                                                        }
-                                                    }
-                                                }
-                                                
-                                                if (allAlbumTracks.length > 0) {
-                                                    // Shuffle the tracks
-                                                    const shuffledTracks = [...allAlbumTracks].sort(() => Math.random() - 0.5);
-                                                    setTrackList(shuffledTracks);
-                                                    playTrack(shuffledTracks[0]);
-                                                }
-                                            } catch (error) {
-                                                console.error("Error loading album tracks:", error);
-                                            }
-                                        }
-                                    }}
-                                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
-                                >
-                                    <Shuffle className="mr-2 h-4 w-4" />
-                                    Shuffle Page
-                                </Button>
-                                <Button
-                                    onClick={async () => {
-                                        if (allAlbums.length > 0) {
-                                            try {
-                                                // Get all tracks from all albums in current page
-                                                const allAlbumTracks = [];
-                                                for (const album of allAlbums) {
-                                                    const response = await fetch(`/api/albums/${album.id}/tracks`);
-                                                    if (response.ok) {
-                                                        const data = await response.json();
-                                                        if (data.tracks && Array.isArray(data.tracks)) {
-                                                            allAlbumTracks.push(...data.tracks);
-                                                        }
-                                                    }
-                                                }
-                                                
-                                                if (allAlbumTracks.length > 0) {
-                                                    setTrackList(allAlbumTracks);
-                                                    playTrack(allAlbumTracks[0]);
-                                                }
-                                            } catch (error) {
-                                                console.error("Error loading album tracks:", error);
-                                            }
-                                        }
-                                    }}
-                                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
-                                >
-                                    <Play className="mr-2 h-4 w-4" />
-                                    Play Page
-                                </Button>
-                            </div>
                         </div>
 
                         {/* Grid view for albums */}
@@ -1102,6 +1038,9 @@ export function MusicExplorerUI({
                                                     </div>
                                                 )}
                                             </Link>
+
+                                            {/* Gradient overlay */}
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg" />
 
                                             {/* Play Album Button Overlay */}
                                             <div className="absolute inset-0 flex items-center justify-center rounded-lg">
@@ -1243,70 +1182,6 @@ export function MusicExplorerUI({
                                     All Artists
                                 </span>
                             </h2>
-                            <div className="flex gap-2">
-                                <Button
-                                    onClick={async () => {
-                                        if (allArtists.length > 0) {
-                                            try {
-                                                // Get all tracks from all artists in current page
-                                                const allArtistTracks = [];
-                                                for (const artist of allArtists) {
-                                                    const response = await fetch(`/api/artists/${artist.id}/tracks`);
-                                                    if (response.ok) {
-                                                        const data = await response.json();
-                                                        if (data.tracks && Array.isArray(data.tracks)) {
-                                                            allArtistTracks.push(...data.tracks);
-                                                        }
-                                                    }
-                                                }
-                                                
-                                                if (allArtistTracks.length > 0) {
-                                                    // Shuffle the tracks
-                                                    const shuffledTracks = [...allArtistTracks].sort(() => Math.random() - 0.5);
-                                                    setTrackList(shuffledTracks);
-                                                    playTrack(shuffledTracks[0]);
-                                                }
-                                            } catch (error) {
-                                                console.error("Error loading artist tracks:", error);
-                                            }
-                                        }
-                                    }}
-                                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
-                                >
-                                    <Shuffle className="mr-2 h-4 w-4" />
-                                    Shuffle Page
-                                </Button>
-                                <Button
-                                    onClick={async () => {
-                                        if (allArtists.length > 0) {
-                                            try {
-                                                // Get all tracks from all artists in current page
-                                                const allArtistTracks = [];
-                                                for (const artist of allArtists) {
-                                                    const response = await fetch(`/api/artists/${artist.id}/tracks`);
-                                                    if (response.ok) {
-                                                        const data = await response.json();
-                                                        if (data.tracks && Array.isArray(data.tracks)) {
-                                                            allArtistTracks.push(...data.tracks);
-                                                        }
-                                                    }
-                                                }
-                                                
-                                                if (allArtistTracks.length > 0) {
-                                                    setTrackList(allArtistTracks);
-                                                    playTrack(allArtistTracks[0]);
-                                                }
-                                            } catch (error) {
-                                                console.error("Error loading artist tracks:", error);
-                                            }
-                                        }
-                                    }}
-                                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
-                                >
-                                    <Play className="mr-2 h-4 w-4" />
-                                    Play Page
-                                </Button>
-                            </div>
                         </div>
 
                         {/* Grid view for artists */}
