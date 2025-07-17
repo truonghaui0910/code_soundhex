@@ -4,14 +4,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Album } from "@/lib/controllers/albums";
 
 interface AlbumsListProps {
-  initialAlbums: Album[];
+  initialAlbums: (Album & { custom_url?: string })[];
 }
 
 export function AlbumsList({ initialAlbums }: Readonly<AlbumsListProps>) {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
       {initialAlbums.map((album) => (
-        <Link key={album.id} href={`/album/${album.id}`}>
+        <Link key={album.id} href={`/album/${album.custom_url || album.id}`}>
           <Card className="hover:scale-105 transition-transform cursor-pointer">
             <CardContent className="p-0">
               <div className="aspect-square w-full overflow-hidden rounded-t-xl">

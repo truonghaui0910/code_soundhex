@@ -244,7 +244,7 @@ export function TrackList({
                       <>
                         {showArtistInfo && <span>•</span>}
                         <Link
-                          href={`/album/${track.album.id}`}
+                          href={`/album/${track.album.custom_url || track.album.id}`}
                           className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors truncate"
                         >
                           {track.album.title}
