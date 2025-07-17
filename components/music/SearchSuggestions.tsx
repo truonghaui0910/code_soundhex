@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -157,7 +156,7 @@ export function SearchSuggestions({
         const element = e.currentTarget;
         const isScrolledToTop = element.scrollTop === 0;
         const isScrolledToBottom = element.scrollTop + element.clientHeight >= element.scrollHeight;
-        
+
         if ((isScrolledToTop && e.deltaY < 0) || (isScrolledToBottom && e.deltaY > 0)) {
           e.preventDefault();
         }
@@ -246,10 +245,10 @@ export function SearchSuggestions({
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate text-left">
                         {album.title}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate text-left">
                         Album • {album.artist?.name}
                       </p>
                     </div>
@@ -288,10 +287,10 @@ export function SearchSuggestions({
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate text-left">
                         {artist.name}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate text-left">
                         Artist
                       </p>
                     </div>
@@ -305,3 +304,7 @@ export function SearchSuggestions({
     </div>
   );
 }
+```
+
+```
+The code has been modified to left-align the text in the Album and Artist sections of the search suggestions dropdown.
