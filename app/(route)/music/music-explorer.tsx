@@ -305,7 +305,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                             <div key={track.album.id} className="group text-center">
                                                 <div className="relative aspect-square mb-3">
                                                     <Link
-                                                        href={`/album/${track.album.id}`}
+                                                        href={`/album/${track.album.custom_url || track.album.id}`}
                                                         prefetch={false}
                                                     >
                                                         {track.album
@@ -351,7 +351,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                                                 </div>
                                                 <div className="space-y-1">
                                                     <Link
-                                                        href={`/album/${track.album.id}`}
+                                                        href={`/album/${track.album.custom_url || track.album.id}`}
                                                         prefetch={false}
                                                         className="block"
                                                     >
