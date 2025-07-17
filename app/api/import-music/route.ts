@@ -153,11 +153,10 @@ async function importSingleTrack(
     }
 
     // 2. Check if artist exists and belongs to another user
-    await checkArtistOwnership(supabase, trackData.artist, userId);
+    const artistSpotifyId = trackData.artists?.[0]?.id || `generated_artist_${trackData.id}`;
+    await checkArtistOwnership(supabase, artistSpotifyId, trackData.artist, userId);
 
     // 3. Create or get artist
-    const artistSpotifyId = trackData.artists?.[0]?.id;
-
     let artist;
     if (artistSpotifyId && !artistSpotifyId.startsWith('artist_')) {
         // Use real Spotify ID if available and not generated
@@ -250,12 +249,12 @@ async function importSingleTrack(
     return newTrack;
 }
 
-async function checkArtistOwnership(supabase: any, artistName: string, userId: string) {
-    // Check if artist exists with this name
+async function checkArtistOwnership(supabase: any, spotifyId: string, artistName: string, userId: string) {
+    // Check if artist exists with this spotify_id
     const { data: existingArtist, error: findError } = await supabase
         .from("artists")
-        .select("id, name, user_id")
-        .ilike("name", artistName)
+        .select("id, name, user_id, spotify_id")
+        .eq("spotify_id", spotifyId)
         .single();
 
     if (findError && findError.code !== "PGRST116") {
@@ -265,7 +264,7 @@ async function checkArtistOwnership(supabase: any, artistName: string, userId: s
 
     // If artist exists and belongs to another user, throw error
     if (existingArtist && existingArtist.user_id !== userId) {
-        throw new Error(`Artist "${artistName}" already exists and belongs to another user. You cannot import tracks for this artist.`);
+        throw new Error(`Artist "${artistName}" (Spotify ID: ${spotifyId}) already exists and belongs to another user. You cannot import tracks for this artist.`);
     }
 }
 
