@@ -56,6 +56,7 @@ export function SearchSuggestions({
   });
   const [loading, setLoading] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [position, setPosition] = useState({ top: 0, left: 0, width: 0 });
 
   useEffect(() => {
     const fetchSuggestions = async () => {
@@ -81,6 +82,21 @@ export function SearchSuggestions({
     const debounceTimer = setTimeout(fetchSuggestions, 300);
     return () => clearTimeout(debounceTimer);
   }, [query]);
+
+  // Calculate position based on search input
+  useEffect(() => {
+    if (isVisible) {
+      const searchInput = document.querySelector('input[placeholder*="Search songs"]') as HTMLInputElement;
+      if (searchInput) {
+        const rect = searchInput.getBoundingClientRect();
+        setPosition({
+          top: rect.bottom + window.scrollY + 8,
+          left: rect.left + window.scrollX,
+          width: rect.width
+        });
+      }
+    }
+  }, [isVisible]);
 
   // Handle click outside to close
   useEffect(() => {
@@ -108,8 +124,13 @@ export function SearchSuggestions({
   return (
     <div 
       ref={dropdownRef}
-      className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden z-[9999] max-h-96 overflow-y-auto"
-      style={{ zIndex: 9999 }}
+      className="fixed bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden max-h-96 overflow-y-auto"
+      style={{ 
+        zIndex: 99999,
+        top: `${position.top}px`,
+        left: `${position.left}px`,
+        width: `${position.width}px`
+      }}
     >
       {loading ? (
         <div className="p-6 text-center">
