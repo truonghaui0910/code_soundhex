@@ -1,19 +1,12 @@
+
 import { Metadata } from "next";
-import dynamic from 'next/dynamic';
 import { TracksController } from "@/lib/controllers/tracks";
+import { MusicExplorerClient } from "./music-explorer-client";
 
 export const metadata: Metadata = {
   title: "SoundHex Music Platform",
   description: "Discover, stream, and upload music for free",
 };
-
-const MusicExplorer = dynamic(() => import('./music-explorer').then(mod => ({ default: mod.MusicExplorer })), {
-  loading: () => (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="animate-spin w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full"></div>
-    </div>
-  ),
-});
 
 export default async function MusicPage() {
   try {
@@ -22,7 +15,7 @@ export default async function MusicPage() {
 
     return (
       <div className="min-h-screen">
-        <MusicExplorer initialTracks={tracks} />
+        <MusicExplorerClient initialTracks={tracks} />
       </div>
     );
   } catch (error) {
