@@ -8,12 +8,13 @@ import { AlbumDetailUI } from "./album-detail-ui";
 
 interface AlbumDetailClientProps {
   albumId: number;
+  initialAlbum?: any;
 }
 
-export function AlbumDetailClient({ albumId }: AlbumDetailClientProps) {
-  const [loading, setLoading] = useState(true);
-  const [album, setAlbum] = useState(null);
-  const [tracks, setTracks] = useState([]);
+export function AlbumDetailClient({ albumId, initialAlbum }: AlbumDetailClientProps) {
+  const [album, setAlbum] = useState<any>(initialAlbum || null);
+  const [tracks, setTracks] = useState<any[]>([]);
+  const [loading, setLoading] = useState(!initialAlbum);
   const [error, setError] = useState(null);
   const [retryCount, setRetryCount] = useState(0);
 

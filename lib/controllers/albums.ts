@@ -182,4 +182,45 @@ export class AlbumsController {
       },
     };
   }
+
+  static async getAlbumByCustomUrl(customUrl: string): Promise<Album | null> {
+    console.log("🎵 AlbumsController.getAlbumByCustomUrl - Starting fetch for custom_url:", customUrl);
+    const supabase = createServerComponentClient<Database>({ cookies });
+
+    const { data, error } = await supabase
+      .from("albums")
+      .select(`
+        id, 
+        title, 
+        cover_image_url, 
+        custom_url,
+        release_date, 
+        created_at, 
+        artist_id, 
+        user_id,
+        artist:artist_id(id, name, custom_url)
+      `)
+      .eq("custom_url", customUrl)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return null; // No rows found
+      }
+      console.error("❌ Error fetching album by custom_url:", error);
+      return null;
+    }
+
+    if (!data) {
+      return null;
+    }
+
+    return {
+      ...data,
+      artist: data.artist || {
+        id: data.artist_id,
+        name: "Unknown Artist",
+      },
+    };
+  }
 }
