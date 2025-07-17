@@ -241,6 +241,10 @@ export class TracksController {
       conditions.push(`album_id.in.(${albumIds.join(',')})`);
     }
 
+    console.log('Search conditions:', conditions);
+    console.log('Artist IDs found:', artistIds);
+    console.log('Album IDs found:', albumIds);
+
     const { data, error } = await query_builder
       .or(conditions.join(','))
       .order("created_at", { ascending: false });
@@ -250,6 +254,7 @@ export class TracksController {
       throw new Error(`Failed to search tracks: ${error.message}`);
     }
 
+    console.log('Search results:', data?.length || 0, 'tracks found');
     return data as unknown as Track[];
   }
 

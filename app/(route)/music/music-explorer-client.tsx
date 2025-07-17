@@ -165,12 +165,21 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
             return;
         }
 
+        console.log('Starting search for:', query);
         setIsSearching(true);
         try {
             const response = await fetch(`/api/tracks/search?q=${encodeURIComponent(query)}`);
+            console.log('Search response status:', response.status);
+            
             if (response.ok) {
                 const data = await response.json();
-                setSearchResults(data);
+                console.log('Search results received:', data?.length || 0, 'tracks');
+                console.log('First result:', data?.[0]);
+                setSearchResults(data || []);
+            } else {
+                console.error('Search failed with status:', response.status);
+                const errorData = await response.text();
+                console.error('Error response:', errorData);
             }
         } catch (error) {
             console.error("Error searching tracks:", error);
