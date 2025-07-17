@@ -345,7 +345,7 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
 
     // Separate effect for page changes to avoid duplicate calls
     useEffect(() => {
-        if (currentView === "library" && currentPage > 1 && totalPages > 0 && currentPage <= totalPages) {
+        if (currentView === "library" && totalPages > 0 && currentPage <= totalPages) {
             fetchLibraryTracks(currentPage, false);
         }
     }, [currentPage, totalPages]);
@@ -359,7 +359,7 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
 
     // Separate effect for albums page changes
     useEffect(() => {
-        if (currentView === "albums" && albumsCurrentPage > 1) {
+        if (currentView === "albums" && albumsCurrentPage >= 1) {
             fetchAllAlbums(albumsCurrentPage, false);
         }
     }, [albumsCurrentPage]);
@@ -373,7 +373,7 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
 
     // Separate effect for artists page changes
     useEffect(() => {
-        if (currentView === "artists" && artistsCurrentPage > 1) {
+        if (currentView === "artists" && artistsCurrentPage >= 1) {
             fetchAllArtists(artistsCurrentPage, false);
         }
     }, [artistsCurrentPage]);
