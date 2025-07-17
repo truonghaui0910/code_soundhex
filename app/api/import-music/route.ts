@@ -324,6 +324,10 @@ async function getOrCreateArtist(
         return existingArtist;
     }
 
+    // Generate custom_url for artist
+    const artistSlug = generateSlug(artistData.name);
+    const artistCustomUrl = await generateUniqueCustomUrl(supabase, "artists", artistSlug);
+
     // Create new artist
     const insertData = {
         name: artistData.name,
@@ -331,6 +335,7 @@ async function getOrCreateArtist(
         profile_image_url: artistData.profile_image_url || null,
         bio: null,
         user_id: artistData.user_id,
+        custom_url: artistCustomUrl,
     };
 
     const { data: newArtist, error } = await supabase
