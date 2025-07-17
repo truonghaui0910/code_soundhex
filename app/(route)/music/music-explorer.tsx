@@ -336,18 +336,32 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                         {/* Featured Tracks */}
                         <section>
                             <div className="flex items-center justify-between mb-8">
-                                <h2 className="text-xl font-bold flex items-center gap-3">
-                                    <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
-                                        <TrendingUp className="h-4 w-4 text-white" />
-                                    </div>
-                                    <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                                        Featured Tracks
-                                    </span>
-                                </h2>
-                                <Button variant="outline" className="hidden sm:flex items-center gap-2 hover:bg-purple-50 dark:hover:bg-purple-900/20">
-                                    <Shuffle className="h-4 w-4" />
-                                    Shuffle
-                                </Button>
+                                {isLoadingFeatured ? (
+                                    <>
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-2xl animate-pulse"></div>
+                                            <div className="h-6 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                                        </div>
+                                        <div className="hidden sm:flex">
+                                            <div className="h-10 w-20 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse"></div>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <>
+                                        <h2 className="text-xl font-bold flex items-center gap-3">
+                                            <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
+                                                <TrendingUp className="h-4 w-4 text-white" />
+                                            </div>
+                                            <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                                                Featured Tracks
+                                            </span>
+                                        </h2>
+                                        <Button variant="outline" className="hidden sm:flex items-center gap-2 hover:bg-purple-50 dark:hover:bg-purple-900/20">
+                                            <Shuffle className="h-4 w-4" />
+                                            Shuffle
+                                        </Button>
+                                    </>
+                                )}
                             </div>
 
                             {isLoadingFeatured ? (
@@ -510,34 +524,50 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
 
                             {/* View all button */}
                             <div className="mt-12 text-center">
-                                <Button 
-                                    onClick={() => setCurrentView("library")}
-                                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-                                >
-                                    Explore All Tracks
-                                    <TrendingUp className="ml-2 h-5 w-5" />
-                                </Button>
+                                {isLoadingFeatured ? (
+                                    <div className="h-12 w-48 bg-gray-200 dark:bg-gray-700 rounded-2xl animate-pulse mx-auto"></div>
+                                ) : (
+                                    <Button 
+                                        onClick={() => setCurrentView("library")}
+                                        className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                                    >
+                                        Explore All Tracks
+                                        <TrendingUp className="ml-2 h-5 w-5" />
+                                    </Button>
+                                )}
                             </div>
                         </section>
 
                         {/* Albums Section */}
                         <section>
                             <div className="flex items-center justify-between mb-8">
-                                <h2 className="text-xl font-bold flex items-center gap-3">
-                                    <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
-                                        <Music className="h-4 w-4 text-white" />
-                                    </div>
-                                    <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                                        Albums
-                                    </span>
-                                </h2>
-                                <Button
-                                    variant="ghost"
-                                    onClick={() => setCurrentView("library")}
-                                    className="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 font-medium"
-                                >
-                                    View All →
-                                </Button>
+                                {isLoadingFeatured ? (
+                                    <>
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-2xl animate-pulse"></div>
+                                            <div className="h-6 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                                        </div>
+                                        <div className="h-8 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                                    </>
+                                ) : (
+                                    <>
+                                        <h2 className="text-xl font-bold flex items-center gap-3">
+                                            <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
+                                                <Music className="h-4 w-4 text-white" />
+                                            </div>
+                                            <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                                                Albums
+                                            </span>
+                                        </h2>
+                                        <Button
+                                            variant="ghost"
+                                            onClick={() => setCurrentView("library")}
+                                            className="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 font-medium"
+                                        >
+                                            View All →
+                                        </Button>
+                                    </>
+                                )}
                             </div>
 
                             {isLoadingFeatured ? (
@@ -624,21 +654,33 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
                         {/* Artists Section */}
                         <section>
                             <div className="flex items-center justify-between mb-8">
-                                <h2 className="text-xl font-bold flex items-center gap-3">
-                                    <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-rose-500 rounded-2xl flex items-center justify-center shadow-lg">
-                                        <Users className="h-4 w-4 text-white" />
-                                    </div>
-                                    <span className="bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">
-                                        Artists
-                                    </span>
-                                </h2>
-                                <Button
-                                    variant="ghost"
-                                    onClick={() => setCurrentView("library")}
-                                    className="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 font-medium"
-                                >
-                                    View All →
-                                </Button>
+                                {isLoadingFeatured ? (
+                                    <>
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-2xl animate-pulse"></div>
+                                            <div className="h-6 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                                        </div>
+                                        <div className="h-8 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                                    </>
+                                ) : (
+                                    <>
+                                        <h2 className="text-xl font-bold flex items-center gap-3">
+                                            <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-rose-500 rounded-2xl flex items-center justify-center shadow-lg">
+                                                <Users className="h-4 w-4 text-white" />
+                                            </div>
+                                            <span className="bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">
+                                                Artists
+                                            </span>
+                                        </h2>
+                                        <Button
+                                            variant="ghost"
+                                            onClick={() => setCurrentView("library")}
+                                            className="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 font-medium"
+                                        >
+                                            View All →
+                                        </Button>
+                                    </>
+                                )}
                             </div>
 
                             {isLoadingFeatured ? (
