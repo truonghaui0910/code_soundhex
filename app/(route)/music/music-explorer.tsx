@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, useEffect, useMemo, useCallback } from "react";
@@ -192,7 +191,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
         setIsLoadingFeatured(true);
         try {
             const genreParam = selectedGenre !== "all" ? `genre=${encodeURIComponent(selectedGenre)}&` : "";
-            
+
             // Fetch featured tracks
             const tracksResponse = await fetch(`/api/tracks?${genreParam}limit=10`);
             if (tracksResponse.ok) {
@@ -204,7 +203,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
             const albumsResponse = await fetch(`/api/albums?limit=10`);
             if (albumsResponse.ok) {
                 const albumsData = await albumsResponse.json();
-                setFeaturedAlbums(albumsData.slice(0, 10));
+                setFeaturedAlbums(albumsData);
             }
 
             // Fetch featured artists
@@ -212,7 +211,7 @@ export function MusicExplorer({ initialTracks }: MusicExplorerProps) {
             if (artistsResponse.ok) {
                 const artistsData = await artistsResponse.json();
                 // Add tracks count for each artist
-                const artistsWithCount = artistsData.slice(0, 10).map((artist: any) => ({
+                const artistsWithCount = artistsData.map((artist: any) => ({
                     ...artist,
                     tracksCount: tracks.filter(t => t.artist?.id === artist.id).length
                 }));

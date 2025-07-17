@@ -15,18 +15,33 @@
 // }
 
 // app/api/albums/route.ts
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { AlbumsController } from "@/lib/controllers/albums";
 
-export async function GET() {
+export const dynamic = "force-dynamic";
+
+export async function GET(request: NextRequest) {
   try {
-    console.log("API: Starting albums fetch");
+    const { searchParams } = new URL(request.url);
+    const limit = searchParams.get("limit");
+    
+    console.log("API: Starting albums fetch", { limit });
     const startTime = Date.now();
 
-    const albums = await AlbumsController.getAllAlbums();
+    let albums;
+    if (limit) {
+      const limitNum = parseInt(limit);
+      if (!isNaN(limitNum) && limitNum > 0) {
+        albums = await AlbumsController.getAlbumsWithLimit(limitNum);
+      } else {
+        albums = await AlbumsController.getAllAlbums();
+      }
+    } else {
+      albums = await AlbumsController.getAllAlbums();
+    }
 
     const fetchTime = Date.now() - startTime;
-    console.log(`API: Albums fetch completed in ${fetchTime}ms`);
+    console.log(`API: Albums fetch completed in ${fetchTime}ms - Count: ${albums.length}`);
 
     return NextResponse.json(albums, {
       headers: {
