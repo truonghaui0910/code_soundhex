@@ -22,6 +22,8 @@ import {
     Upload,
     Share,
     Shuffle,
+    ChevronLeft,
+    ChevronRight,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -85,7 +87,7 @@ interface MusicExplorerUIProps {
     featuredTracks: Track[];
     featuredAlbums: FeaturedAlbum[];
     featuredArtists: FeaturedArtist[];
-    filteredTracks: Track[];
+    libraryTracks: Track[];
     trendingTracks: Track[];
     uniqueAlbums: any[];
     uniqueArtists: any[];
@@ -99,6 +101,12 @@ interface MusicExplorerUIProps {
     isLoadingFeatured: boolean;
     onSearchKeyPress?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
     isSearching?: boolean;
+    onSearchTrigger?: () => void;
+    currentPage: number;
+    setCurrentPage: (page: number) => void;
+    itemsPerPage: number;
+    totalPages: number;
+    totalTracks: number;
 }
 
 export function MusicExplorerUI({
@@ -106,7 +114,7 @@ export function MusicExplorerUI({
     featuredTracks,
     featuredAlbums,
     featuredArtists,
-    filteredTracks,
+    libraryTracks,
     trendingTracks,
     uniqueAlbums,
     uniqueArtists,
@@ -120,6 +128,12 @@ export function MusicExplorerUI({
     isLoadingFeatured,
     onSearchKeyPress,
     isSearching = false,
+    onSearchTrigger,
+    currentPage,
+    setCurrentPage,
+    itemsPerPage,
+    totalPages,
+    totalTracks,
 }: MusicExplorerUIProps) {
     const {
         currentTrack,
@@ -153,7 +167,12 @@ export function MusicExplorerUI({
                                     setSearchQuery(e.target.value);
                                     setShowSuggestions(true);
                                 }}
-                                onKeyPress={onSearchKeyPress}
+                                onKeyPress={(e) => {
+                                    if (e.key === 'Enter') {
+                                        setShowSuggestions(false);
+                                    }
+                                    onSearchKeyPress?.(e);
+                                }}
                                 onFocus={() => setShowSuggestions(true)}
                                 className="pl-12 pr-12 h-14 text-lg bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder-white/60"
                             />
@@ -187,9 +206,7 @@ export function MusicExplorerUI({
                                     setSearchQuery(suggestion);
                                     setShowSuggestions(false);
                                     // Trigger search
-                                    if (onSearchKeyPress) {
-                                        onSearchKeyPress({ key: 'Enter' } as React.KeyboardEvent<HTMLInputElement>);
-                                    }
+                                    onSearchTrigger?.();
                                 }}
                                 onTrackPlay={(track) => {
                                     setTrackList([track]);
@@ -254,7 +271,9 @@ export function MusicExplorerUI({
                         <div className="text-sm text-gray-600 dark:text-gray-400">
                             {currentView === "featured" 
                                 ? `${featuredTracks.length} featured tracks` 
-                                : `${filteredTracks.length} tracks found${searchQuery ? ` for "${searchQuery}"` : ""}`}
+                                : currentView === "library" 
+                                    ? `Showing ${Math.min((currentPage - 1) * itemsPerPage + 1, totalTracks)}-${Math.min(currentPage * itemsPerPage, totalTracks)} of ${totalTracks} tracks${searchQuery ? ` for "${searchQuery}"` : ""}`
+                                    : `${libraryTracks.length} tracks found${searchQuery ? ` for "${searchQuery}"` : ""}`}
                         </div>
                     </div>
                 </div>
@@ -607,9 +626,9 @@ export function MusicExplorerUI({
                             <div className="flex gap-2">
                                 <Button 
                                     onClick={() => {
-                                        if (filteredTracks.length > 0) {
-                                            // Shuffle the filtered tracks array
-                                            const shuffledTracks = [...filteredTracks].sort(() => Math.random() - 0.5);
+                                        if (libraryTracks.length > 0) {
+                                            // Shuffle the library tracks array
+                                            const shuffledTracks = [...libraryTracks].sort(() => Math.random() - 0.5);
                                             setTrackList(shuffledTracks);
                                             playTrack(shuffledTracks[0]);
                                         }
@@ -617,29 +636,29 @@ export function MusicExplorerUI({
                                     className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
                                 >
                                     <Shuffle className="mr-2 h-4 w-4" />
-                                    Shuffle All
+                                    Shuffle Page
                                 </Button>
                                 <Button 
                                     onClick={() => {
-                                        if (filteredTracks.length > 0) {
-                                            setTrackList(filteredTracks);
-                                            playTrack(filteredTracks[0]);
+                                        if (libraryTracks.length > 0) {
+                                            setTrackList(libraryTracks);
+                                            playTrack(libraryTracks[0]);
                                         }
                                     }}
                                     className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
                                 >
                                     <Play className="mr-2 h-4 w-4" />
-                                    Play All
+                                    Play Page
                                 </Button>
                             </div>
                         </div>
 
                         {/* Grid view for library */}
                         <div 
-                            key={`library-${filteredTracks.length}-${searchQuery}`}
+                            key={`library-${libraryTracks.length}-${searchQuery}-${currentPage}`}
                             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8"
                         >
-                            {filteredTracks.map((track, index) => (
+                            {libraryTracks.map((track, index) => (
                                 <div
                                     key={track.id}
                                     className="group relative"
@@ -677,7 +696,7 @@ export function MusicExplorerUI({
                                                         if (currentTrack?.id === track.id && isPlaying) {
                                                             togglePlayPause();
                                                         } else {
-                                                            setTrackList(filteredTracks);
+                                                            setTrackList(libraryTracks);
                                                             playTrack(track);
                                                         }
                                                     }}
@@ -752,6 +771,83 @@ export function MusicExplorerUI({
                                 </div>
                             ))}
                         </div>
+
+                        {/* Pagination Controls */}
+                        {totalPages > 1 && (
+                            <div className="mt-12 flex items-center justify-center gap-4">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                                    disabled={currentPage === 1}
+                                    className="flex items-center gap-2"
+                                >
+                                    <ChevronLeft className="h-4 w-4" />
+                                    Previous
+                                </Button>
+
+                                <div className="flex items-center gap-2">
+                                    {/* First page */}
+                                    {currentPage > 3 && (
+                                        <>
+                                            <Button
+                                                variant={1 === currentPage ? "default" : "outline"}
+                                                size="sm"
+                                                onClick={() => setCurrentPage(1)}
+                                                className="w-10 h-10"
+                                            >
+                                                1
+                                            </Button>
+                                            {currentPage > 4 && <span className="text-gray-500">...</span>}
+                                        </>
+                                    )}
+
+                                    {/* Page numbers around current page */}
+                                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                                        const pageNumber = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
+                                        if (pageNumber > totalPages) return null;
+                                        
+                                        return (
+                                            <Button
+                                                key={pageNumber}
+                                                variant={pageNumber === currentPage ? "default" : "outline"}
+                                                size="sm"
+                                                onClick={() => setCurrentPage(pageNumber)}
+                                                className="w-10 h-10"
+                                            >
+                                                {pageNumber}
+                                            </Button>
+                                        );
+                                    })}
+
+                                    {/* Last page */}
+                                    {currentPage < totalPages - 2 && (
+                                        <>
+                                            {currentPage < totalPages - 3 && <span className="text-gray-500">...</span>}
+                                            <Button
+                                                variant={totalPages === currentPage ? "default" : "outline"}
+                                                size="sm"
+                                                onClick={() => setCurrentPage(totalPages)}
+                                                className="w-10 h-10"
+                                            >
+                                                {totalPages}
+                                            </Button>
+                                        </>
+                                    )}
+                                </div>
+
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                                    disabled={currentPage === totalPages}
+                                    className="flex items-center gap-2"
+                                >
+                                    Next
+                                    <ChevronRight className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        )}
                     </div>
                 )}
 

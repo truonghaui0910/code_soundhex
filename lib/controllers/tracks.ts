@@ -282,4 +282,101 @@ export class TracksController {
 
     return data as unknown as Track[];
   }
+
+  /**
+   * Lấy danh sách bài hát với phân trang, tìm kiếm và filter từ server
+   */
+  static async getTracksWithPagination({
+    page = 1,
+    limit = 50,
+    search = '',
+    genre = 'all'
+  }: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    genre?: string;
+  }): Promise<{ tracks: Track[]; total: number; totalPages: number }> {
+    const supabase = createServerComponentClient<Database>({ cookies });
+
+    // Calculate offset
+    const offset = (page - 1) * limit;
+
+    // Build base query
+    let query = supabase
+      .from("tracks")
+      .select(`
+        *,
+        artist:artist_id(id, name, profile_image_url, custom_url),
+        album:album_id(id, title, cover_image_url, custom_url),
+        genre:genre_id(id, name)
+      `, { count: 'exact' });
+
+    // Apply search filter if provided
+    if (search && search.trim()) {
+      const searchTerm = search.toLowerCase();
+
+      // First, get matching artist and album IDs
+      const { data: artistsData } = await supabase
+        .from("artists")
+        .select("id")
+        .ilike("name", `%${searchTerm}%`);
+
+      const { data: albumsData } = await supabase
+        .from("albums")
+        .select("id")
+        .ilike("title", `%${searchTerm}%`);
+
+      const artistIds = artistsData?.map(a => a.id) || [];
+      const albumIds = albumsData?.map(a => a.id) || [];
+
+      // Create OR conditions array
+      const conditions = [];
+      conditions.push(`title.ilike.%${searchTerm}%`);
+      conditions.push(`description.ilike.%${searchTerm}%`);
+      
+      if (artistIds.length > 0) {
+        conditions.push(`artist_id.in.(${artistIds.join(',')})`);
+      }
+      
+      if (albumIds.length > 0) {
+        conditions.push(`album_id.in.(${albumIds.join(',')})`);
+      }
+
+      query = query.or(conditions.join(','));
+    }
+
+    // Apply genre filter if provided and not 'all'
+    if (genre && genre !== 'all') {
+      // Get genre ID by name
+      const { data: genreData } = await supabase
+        .from("genres")
+        .select("id")
+        .eq("name", genre)
+        .single();
+
+      if (genreData) {
+        query = query.eq("genre_id", genreData.id);
+      }
+    }
+
+    // Apply pagination and ordering
+    const { data, error, count } = await query
+      .order("created_at", { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (error) {
+      console.error("Error fetching tracks with pagination:", error);
+      throw new Error(`Failed to fetch tracks: ${error.message}`);
+    }
+
+    const total = count || 0;
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      tracks: data as unknown as Track[],
+      total,
+      totalPages
+    };
+  }
 }

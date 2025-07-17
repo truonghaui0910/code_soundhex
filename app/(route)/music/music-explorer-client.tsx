@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, useEffect, useMemo, useCallback } from "react";
@@ -78,75 +77,17 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
         new Set(tracks.map((track) => track.genre?.name).filter(Boolean)),
     );
 
-    // State for search results
-    const [searchResults, setSearchResults] = useState<Track[]>([]);
+    // State for library tracks (server-side pagination)
+    const [libraryTracks, setLibraryTracks] = useState<Track[]>([]);
     const [isSearching, setIsSearching] = useState(false);
-    const [forceUpdateKey, setForceUpdateKey] = useState(0); // Add force update key
+    const [totalTracks, setTotalTracks] = useState(0);
 
-    // Debug search results changes
-    useEffect(() => {
-        console.log('🎯 searchResults state changed:', searchResults.length, 'items');
-        console.log('🔍 Current searchQuery:', searchQuery);
-        console.log('📄 Search results:', searchResults);
-        console.log('🔑 forceUpdateKey:', forceUpdateKey);
-    }, [searchResults, forceUpdateKey]);
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(50);
+    const [totalPages, setTotalPages] = useState(0);
 
-    // Debug searchQuery changes
-    useEffect(() => {
-        console.log('📝 searchQuery changed to:', searchQuery);
-    }, [searchQuery]);
-
-    // Filter tracks based on search and filters
-    const filteredTracks = useMemo(() => {
-        console.log('🔄 Recalculating filteredTracks');
-        console.log('📝 Current searchQuery:', `"${searchQuery}"`);
-        console.log('🎵 Current searchResults length:', searchResults.length);
-        console.log('🎵 Current searchResults:', searchResults);
-        console.log('📚 Current tracks length:', tracks.length);
-        console.log('🎨 Current selectedGenre:', selectedGenre);
-        
-        // If there's a search query AND we have search results, use search results
-        if (searchQuery.trim() && searchResults.length > 0) {
-            console.log('🔍 Search mode - using searchResults');
-            const filtered = searchResults.filter((track) => {
-                const matchesGenre =
-                    selectedGenre === "all" || track.genre?.name === selectedGenre;
-                console.log(`Track "${track.title}" - Genre match:`, matchesGenre);
-                return matchesGenre;
-            });
-            console.log('🔍 Using search results. Filtered length:', filtered.length);
-            console.log('🔍 Filtered results:', filtered.map(t => t.title));
-            return filtered;
-        }
-        
-        // If there's a search query but no results yet (still searching), return empty array
-        if (searchQuery.trim() && searchResults.length === 0) {
-            console.log('🔍 Search mode - no results yet');
-            return [];
-        }
-
-        // Otherwise, filter from all tracks
-        console.log('📚 Normal mode - using all tracks');
-        const filtered = tracks.filter((track) => {
-            const matchesGenre =
-                selectedGenre === "all" || track.genre?.name === selectedGenre;
-            return matchesGenre;
-        });
-        console.log('📚 Using all tracks. Filtered length:', filtered.length);
-        return filtered;
-    }, [searchQuery, searchResults, tracks, selectedGenre, forceUpdateKey]);
-
-    // Debug filteredTracks changes
-    useEffect(() => {
-        console.log('🔄 filteredTracks changed:', filteredTracks.length, 'items');
-        console.log('📄 filteredTracks:', filteredTracks.map(t => t.title));
-        console.log('🎯 Current state summary:');
-        console.log('  - searchQuery:', `"${searchQuery}"`);
-        console.log('  - searchResults.length:', searchResults.length);
-        console.log('  - filteredTracks.length:', filteredTracks.length);
-        console.log('  - selectedGenre:', selectedGenre);
-        console.log('  - currentView:', currentView);
-    }, [filteredTracks]);
+    
 
     // Memoize unique albums and artists to prevent re-renders
     const uniqueAlbums = useMemo(() => {
@@ -197,64 +138,60 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
 
     // Get trending tracks (memoized stable random selection)
     const trendingTracks = useMemo(() => {
-        const shuffled = [...filteredTracks].sort((a, b) => {
+        const shuffled = [...tracks].sort((a, b) => {
             const seedA = a.id * 9301 + 49297;
             const seedB = b.id * 9301 + 49297;
             return (seedA % 233280) - (seedB % 233280);
         });
         return shuffled.slice(0, 12);
-    }, [filteredTracks]);
+    }, [tracks]);
 
-    // Function to search tracks
-    const searchTracks = useCallback(async (query: string) => {
-        if (!query.trim()) {
-            setSearchResults([]);
-            return;
-        }
+    // Function to fetch library tracks with pagination, search and filters
+    const fetchLibraryTracks = useCallback(async (page: number = 1, resetPage: boolean = false) => {
+        if (currentView !== "library") return;
 
-        console.log('🔍 Starting search for:', query);
         setIsSearching(true);
         try {
-            const response = await fetch(`/api/tracks/search?q=${encodeURIComponent(query)}`);
-            console.log('🔍 Search response status:', response.status);
-            
+            const params = new URLSearchParams({
+                page: resetPage ? '1' : page.toString(),
+                limit: itemsPerPage.toString(),
+                genre: selectedGenre,
+            });
+
+            if (searchQuery.trim()) {
+                params.append('search', searchQuery);
+            }
+
+            const response = await fetch(`/api/tracks?${params}`);
+
             if (response.ok) {
                 const data = await response.json();
-                console.log('✅ Search results received:', data?.length || 0, 'tracks');
-                console.log('📋 Search data:', data);
-                console.log('🎵 First result:', data?.[0]);
-                
-                // Force array update with new reference
-                const newResults = Array.isArray(data) ? [...data] : [];
-                console.log('🔄 Setting new search results:', newResults.length, 'items');
-                
-                // Force state update with callback
-                setSearchResults(prevResults => {
-                    console.log('🔄 Previous results:', prevResults.length);
-                    console.log('🔄 New results:', newResults.length);
-                    return newResults;
-                });
-                
-                // Force component re-render
-                setForceUpdateKey(prev => prev + 1);
-                
-                // Debug after state update
-                setTimeout(() => {
-                    console.log('⏰ After timeout - searchResults should be updated');
-                }, 100);
+                if (data.tracks && Array.isArray(data.tracks)) {
+                    setLibraryTracks(data.tracks);
+                    setTotalTracks(data.total || 0);
+                    setTotalPages(data.totalPages || 0);
+                    if (resetPage) {
+                        setCurrentPage(1);
+                    }
+                } else {
+                    setLibraryTracks([]);
+                    setTotalTracks(0);
+                    setTotalPages(0);
+                }
             } else {
-                console.error('❌ Search failed with status:', response.status);
-                const errorData = await response.text();
-                console.error('❌ Error response:', errorData);
-                setSearchResults([]);
+                setLibraryTracks([]);
+                setTotalTracks(0);
+                setTotalPages(0);
             }
         } catch (error) {
-            console.error("❌ Error searching tracks:", error);
-            setSearchResults([]);
+            console.error("Error fetching library tracks:", error);
+            setLibraryTracks([]);
+            setTotalTracks(0);
+            setTotalPages(0);
         } finally {
             setIsSearching(false);
         }
-    }, []);
+    }, [currentView, searchQuery, selectedGenre, itemsPerPage]);
 
     // State for search trigger
     const [shouldSearch, setShouldSearch] = useState(false);
@@ -262,14 +199,14 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
     // Search effect when triggered
     useEffect(() => {
         if (shouldSearch) {
-            searchTracks(searchQuery);
-            setShouldSearch(false);
             // Auto switch to library view when searching
             if (searchQuery.trim()) {
                 setCurrentView("library");
             }
+            fetchLibraryTracks(1, true);
+            setShouldSearch(false);
         }
-    }, [shouldSearch, searchQuery, searchTracks]);
+    }, [shouldSearch, fetchLibraryTracks, searchQuery]);
 
     // Handle Enter key press
     const handleSearchKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -278,16 +215,19 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
         }
     };
 
-    // Clear search results when search query is cleared
+    // Fetch library tracks when view, genre, or page changes
     useEffect(() => {
-        if (!searchQuery.trim()) {
-            console.log('🧹 Clearing search results');
-            setSearchResults([]);
-            setForceUpdateKey(prev => prev + 1);
-            // Only auto-switch back to featured if we were auto-switched to library during search
-            // Don't auto-switch if user manually clicked library button
+        if (currentView === "library") {
+            fetchLibraryTracks(currentPage);
         }
-    }, [searchQuery]);
+    }, [currentView, selectedGenre, currentPage, fetchLibraryTracks]);
+
+    // Reset search when query is cleared
+    useEffect(() => {
+        if (!searchQuery.trim() && currentView === "library") {
+            fetchLibraryTracks(1, true);
+        }
+    }, [searchQuery, currentView, fetchLibraryTracks]);
 
     // Function to fetch featured data
     const fetchFeaturedData = async () => {
@@ -475,7 +415,7 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
             featuredTracks={featuredTracks}
             featuredAlbums={featuredAlbums}
             featuredArtists={featuredArtists}
-            filteredTracks={filteredTracks}
+            libraryTracks={libraryTracks}
             trendingTracks={trendingTracks}
             uniqueAlbums={uniqueAlbums}
             uniqueArtists={uniqueArtists}
@@ -489,6 +429,12 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
             isLoadingFeatured={isLoadingFeatured}
             onSearchKeyPress={handleSearchKeyPress}
             isSearching={isSearching}
+            onSearchTrigger={() => setShouldSearch(true)}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+            itemsPerPage={itemsPerPage}
+            totalPages={totalPages}
+            totalTracks={totalTracks}
         />
     );
 }

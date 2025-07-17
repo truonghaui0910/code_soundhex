@@ -12,6 +12,8 @@ export async function GET(request: NextRequest) {
     const artistId = searchParams.get("artistId");
     const genre = searchParams.get("genre");
     const limit = searchParams.get("limit");
+    const page = searchParams.get("page");
+    const search = searchParams.get("search");
 
     // If specific track IDs are requested
     if (ids) {
@@ -34,15 +36,32 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(tracks);
     }
 
-    // Default: get all tracks
+    // Check if this is a paginated request
+    if (page || search || (genre && genre !== 'all')) {
+      const pageNum = page ? parseInt(page) : 1;
+      const limitNum = limit ? parseInt(limit) : 50;
+      const searchQuery = search || '';
+      const genreFilter = genre || 'all';
+
+      const result = await TracksController.getTracksWithPagination({
+        page: pageNum,
+        limit: limitNum,
+        search: searchQuery,
+        genre: genreFilter
+      });
+
+      return NextResponse.json(result);
+    }
+
+    // Default: get all tracks (for featured tracks and backwards compatibility)
     let tracks = await TracksController.getAllTracks();
     
-    // Filter by genre if specified
+    // Filter by genre if specified (for featured tracks)
     if (genre) {
       tracks = tracks.filter(track => track.genre?.name === genre);
     }
     
-    // Apply limit if specified
+    // Apply limit if specified (for featured tracks)
     if (limit) {
       const limitNum = parseInt(limit);
       if (!isNaN(limitNum) && limitNum > 0) {
