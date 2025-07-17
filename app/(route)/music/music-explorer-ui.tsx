@@ -953,12 +953,30 @@ export function MusicExplorerUI({
                             </h2>
                             <div className="flex gap-2">
                                 <Button
-                                    onClick={() => {
+                                    onClick={async () => {
                                         if (allAlbums.length > 0) {
-                                            // Shuffle the albums array
-                                            const shuffledAlbums = [...allAlbums].sort(() => Math.random() - 0.5);
-                                            //setTrackList(shuffledTracks); //Todo: need to get the tracklist from the album
-                                            //playTrack(shuffledTracks[0]); //Todo: need to get the tracklist from the album
+                                            try {
+                                                // Get all tracks from all albums in current page
+                                                const allAlbumTracks = [];
+                                                for (const album of allAlbums) {
+                                                    const response = await fetch(`/api/albums/${album.id}/tracks`);
+                                                    if (response.ok) {
+                                                        const data = await response.json();
+                                                        if (data.tracks && Array.isArray(data.tracks)) {
+                                                            allAlbumTracks.push(...data.tracks);
+                                                        }
+                                                    }
+                                                }
+                                                
+                                                if (allAlbumTracks.length > 0) {
+                                                    // Shuffle the tracks
+                                                    const shuffledTracks = [...allAlbumTracks].sort(() => Math.random() - 0.5);
+                                                    setTrackList(shuffledTracks);
+                                                    playTrack(shuffledTracks[0]);
+                                                }
+                                            } catch (error) {
+                                                console.error("Error loading album tracks:", error);
+                                            }
                                         }
                                     }}
                                     className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
@@ -967,10 +985,28 @@ export function MusicExplorerUI({
                                     Shuffle Page
                                 </Button>
                                 <Button
-                                    onClick={() => {
+                                    onClick={async () => {
                                         if (allAlbums.length > 0) {
-                                            //setTrackList(libraryTracks);
-                                            //playTrack(libraryTracks[0]);
+                                            try {
+                                                // Get all tracks from all albums in current page
+                                                const allAlbumTracks = [];
+                                                for (const album of allAlbums) {
+                                                    const response = await fetch(`/api/albums/${album.id}/tracks`);
+                                                    if (response.ok) {
+                                                        const data = await response.json();
+                                                        if (data.tracks && Array.isArray(data.tracks)) {
+                                                            allAlbumTracks.push(...data.tracks);
+                                                        }
+                                                    }
+                                                }
+                                                
+                                                if (allAlbumTracks.length > 0) {
+                                                    setTrackList(allAlbumTracks);
+                                                    playTrack(allAlbumTracks[0]);
+                                                }
+                                            } catch (error) {
+                                                console.error("Error loading album tracks:", error);
+                                            }
                                         }
                                     }}
                                     className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
@@ -1071,14 +1107,21 @@ export function MusicExplorerUI({
                                             <div className="absolute inset-0 flex items-center justify-center rounded-lg">
                                                 <Button
                                                     size="lg"
-                                                    onClick={(e) => {
+                                                    onClick={async (e) => {
                                                         e.preventDefault();
                                                         e.stopPropagation();
-                                                        //const albumTracks = featuredTracks.filter(t => t.album?.id === album.id);
-                                                        //if (albumTracks.length > 0) {
-                                                        //    setTrackList(albumTracks);
-                                                        //    playTrack(albumTracks[0]);
-                                                        //}
+                                                        try {
+                                                            const response = await fetch(`/api/albums/${album.id}/tracks`);
+                                                            if (response.ok) {
+                                                                const data = await response.json();
+                                                                if (data.tracks && Array.isArray(data.tracks) && data.tracks.length > 0) {
+                                                                    setTrackList(data.tracks);
+                                                                    playTrack(data.tracks[0]);
+                                                                }
+                                                            }
+                                                        } catch (error) {
+                                                            console.error("Error loading album tracks:", error);
+                                                        }
                                                     }}
                                                     className="opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-full bg-white/90 text-purple-600 hover:bg-white hover:scale-110 shadow-lg backdrop-blur-sm"
                                                 >
@@ -1202,12 +1245,30 @@ export function MusicExplorerUI({
                             </h2>
                             <div className="flex gap-2">
                                 <Button
-                                    onClick={() => {
+                                    onClick={async () => {
                                         if (allArtists.length > 0) {
-                                            // Shuffle the artists array
-                                            const shuffledArtists = [...allArtists].sort(() => Math.random() - 0.5);
-                                            //setTrackList(shuffledTracks);
-                                            //playTrack(shuffledTracks[0]);
+                                            try {
+                                                // Get all tracks from all artists in current page
+                                                const allArtistTracks = [];
+                                                for (const artist of allArtists) {
+                                                    const response = await fetch(`/api/artists/${artist.id}/tracks`);
+                                                    if (response.ok) {
+                                                        const data = await response.json();
+                                                        if (data.tracks && Array.isArray(data.tracks)) {
+                                                            allArtistTracks.push(...data.tracks);
+                                                        }
+                                                    }
+                                                }
+                                                
+                                                if (allArtistTracks.length > 0) {
+                                                    // Shuffle the tracks
+                                                    const shuffledTracks = [...allArtistTracks].sort(() => Math.random() - 0.5);
+                                                    setTrackList(shuffledTracks);
+                                                    playTrack(shuffledTracks[0]);
+                                                }
+                                            } catch (error) {
+                                                console.error("Error loading artist tracks:", error);
+                                            }
                                         }
                                     }}
                                     className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
@@ -1216,10 +1277,28 @@ export function MusicExplorerUI({
                                     Shuffle Page
                                 </Button>
                                 <Button
-                                    onClick={() => {
+                                    onClick={async () => {
                                         if (allArtists.length > 0) {
-                                            //setTrackList(libraryTracks);
-                                            //playTrack(libraryTracks[0]);
+                                            try {
+                                                // Get all tracks from all artists in current page
+                                                const allArtistTracks = [];
+                                                for (const artist of allArtists) {
+                                                    const response = await fetch(`/api/artists/${artist.id}/tracks`);
+                                                    if (response.ok) {
+                                                        const data = await response.json();
+                                                        if (data.tracks && Array.isArray(data.tracks)) {
+                                                            allArtistTracks.push(...data.tracks);
+                                                        }
+                                                    }
+                                                }
+                                                
+                                                if (allArtistTracks.length > 0) {
+                                                    setTrackList(allArtistTracks);
+                                                    playTrack(allArtistTracks[0]);
+                                                }
+                                            } catch (error) {
+                                                console.error("Error loading artist tracks:", error);
+                                            }
                                         }
                                     }}
                                     className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
