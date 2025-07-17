@@ -1071,82 +1071,8 @@ export function MusicExplorerUI({
                             </div>
                         )}
 
-                        {/* Pagination Controls */}
-                        {totalPages > 1 && (
-                            <div className="mt-12 flex items-center justify-center gap-4">
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                                    disabled={currentPage === 1}
-                                    className="flex items-center gap-2"
-                                >
-                                    <ChevronLeft className="h-4 w-4" />
-                                    Previous
-                                </Button>
-
-                                <div className="flex items-center gap-2">
-                                    {/* First page */}
-                                    {currentPage > 3 && (
-                                        <>
-                                            <Button
-                                                variant={1 === currentPage ? "default" : "outline"}
-                                                size="sm"
-                                                onClick={() => setCurrentPage(1)}
-                                                className="w-10 h-10"
-                                            >
-                                                1
-                                            </Button>
-                                            {currentPage > 4 && <span className="text-gray-500">...</span>}
-                                        </>
-                                    )}
-
-                                    {/* Page numbers around current page */}
-                                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                                        const pageNumber = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
-                                        if (pageNumber > totalPages) return null;
-
-                                        return (
-                                            <Button
-                                                key={pageNumber}
-                                                variant={pageNumber === currentPage ? "default" : "outline"}
-                                                size="sm"
-                                                onClick={() => setCurrentPage(pageNumber)}
-                                                className="w-10 h-10"
-                                            >
-                                                {pageNumber}
-                                            </Button>
-                                        );
-                                    })}
-
-                                    {/* Last page */}
-                                    {currentPage < totalPages - 2 && (
-                                        <>
-                                            {currentPage < totalPages - 3 && <span className="text-gray-500">...</span>}
-                                            <Button
-                                                variant={totalPages === currentPage ? "default" : "outline"}
-                                                size="sm"
-                                                onClick={() => setCurrentPage(totalPages)}
-                                                className="w-10 h-10"
-                                            >
-                                                {totalPages}
-                                            </Button>
-                                        </>
-                                    )}
-                                </div>
-
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                                    disabled={currentPage === totalPages}
-                                    className="flex items-center gap-2"
-                                >
-                                    Next
-                                    <ChevronRight className="h-4 w-4" />
-                                </Button>
-                            </div>
-                        )}
+                        {/* Pagination Controls - only show for albums view when there are multiple pages */}
+                        {/* Note: Currently albums view is using client-side pagination with uniqueAlbums, so no pagination needed yet */}
                     </div>
                 )}
                 {currentView === "artists" && (
@@ -1278,82 +1204,8 @@ export function MusicExplorerUI({
                             </div>
                         )}
 
-                        {/* Pagination Controls */}
-                        {totalPages > 1 && (
-                            <div className="mt-12 flex items-center justify-center gap-4">
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                                    disabled={currentPage === 1}
-                                    className="flex items-center gap-2"
-                                >
-                                    <ChevronLeft className="h-4 w-4" />
-                                    Previous
-                                </Button>
-
-                                <div className="flex items-center gap-2">
-                                    {/* First page */}
-                                    {currentPage > 3 && (
-                                        <>
-                                            <Button
-                                                variant={1 === currentPage ? "default" : "outline"}
-                                                size="sm"
-                                                onClick={() => setCurrentPage(1)}
-                                                className="w-10 h-10"
-                                            >
-                                                1
-                                            </Button>
-                                            {currentPage > 4 && <span className="text-gray-500">...</span>}
-                                        </>
-                                    )}
-
-                                    {/* Page numbers around current page */}
-                                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                                        const pageNumber = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
-                                        if (pageNumber > totalPages) return null;
-
-                                        return (
-                                            <Button
-                                                key={pageNumber}
-                                                variant={pageNumber === currentPage ? "default" : "outline"}
-                                                size="sm"
-                                                onClick={() => setCurrentPage(pageNumber)}
-                                                className="w-10 h-10"
-                                            >
-                                                {pageNumber}
-                                            </Button>
-                                        );
-                                    })}
-
-                                    {/* Last page */}
-                                    {currentPage < totalPages - 2 && (
-                                        <>
-                                            {currentPage < totalPages - 3 && <span className="text-gray-500">...</span>}
-                                            <Button
-                                                variant={totalPages === currentPage ? "default" : "outline"}
-                                                size="sm"
-                                                onClick={() => setCurrentPage(totalPages)}
-                                                className="w-10 h-10"
-                                            >
-                                                {totalPages}
-                                            </Button>
-                                        </>
-                                    )}
-                                </div>
-
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                                    disabled={currentPage === totalPages}
-                                    className="flex items-center gap-2"
-                                >
-                                    Next
-                                    <ChevronRight className="h-4 w-4" />
-                                </Button>
-                            </div>
-                        )}
+                        {/* Pagination Controls - only show for artists view when there are multiple pages */}
+                        {/* Note: Currently artists view is using client-side pagination with uniqueArtists, so no pagination needed yet */}
                     </div>
                 )}
 
