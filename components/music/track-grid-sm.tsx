@@ -125,16 +125,16 @@ export function TrackGridSm({
                     {pair.map((track) => (
                         <div
                             key={track.id}
-                            className="group flex items-center gap-3 p-3 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-xl hover:bg-white/80 dark:hover:bg-gray-800/80 transition-all duration-200 border border-white/20 dark:border-gray-700/30"
+                            className="group flex items-center gap-3 p-3 rounded-xl hover:bg-white/80 dark:hover:bg-gray-800/80 transition-all duration-200"
                         >
                             {/* Album Cover */}
-                            <div className="relative w-16 h-16 flex-shrink-0">
+                            <div className="relative w-32 h-32 flex-shrink-0">
                                 {track.album?.cover_image_url ? (
                                     <Image
                                         src={track.album.cover_image_url}
                                         alt={track.album?.title || track.title}
                                         fill
-                                        sizes="64px"
+                                        sizes="128px"
                                         className="object-cover rounded-lg"
                                     />
                                 ) : (
