@@ -13,7 +13,7 @@ interface Artist {
   custom_url: string | null;
 }
 
-interface Album {
+interface AlbumSuggestion {
   id: number;
   title: string;
   cover_image_url: string | null;
@@ -27,7 +27,7 @@ interface Album {
 
 interface SearchSuggestionsData {
   tracks: Track[];
-  albums: Album[];
+  albums: AlbumSuggestion[];
   artists: Artist[];
   suggestions: string[];
 }

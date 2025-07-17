@@ -138,13 +138,13 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
 
     // Get trending tracks (memoized stable random selection)
     const trendingTracks = useMemo(() => {
-        const shuffled = [...filteredTracks].sort((a, b) => {
+        const shuffled = [...tracks].sort((a, b) => {
             const seedA = a.id * 9301 + 49297;
             const seedB = b.id * 9301 + 49297;
             return (seedA % 233280) - (seedB % 233280);
         });
         return shuffled.slice(0, 12);
-    }, [filteredTracks]);
+    }, [tracks]);
 
     // Function to fetch library tracks with pagination, search and filters
     const fetchLibraryTracks = useCallback(async (page: number = 1, resetPage: boolean = false) => {
