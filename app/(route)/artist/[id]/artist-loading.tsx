@@ -98,7 +98,7 @@ export default function ArtistDetailLoading() {
                             <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center">
                                 <Album className="h-5 w-5 text-white" />
                             </div>
-                            <div className="h-8 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Albums</h2>
                         </div>
                         <div className="h-6 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
                     </div>
@@ -127,7 +127,7 @@ export default function ArtistDetailLoading() {
                             <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center">
                                 <Music className="h-5 w-5 text-white" />
                             </div>
-                            <div className="h-8 w-28 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">All Tracks</h2>
                         </div>
                         <div className="h-6 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
                     </div>
@@ -159,7 +159,7 @@ export default function ArtistDetailLoading() {
                             <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center">
                                 <Music className="h-5 w-5 text-white" />
                             </div>
-                            <div className="h-8 w-40 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Popular Tracks</h2>
                         </div>
                         <div className="h-10 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
                     </div>
