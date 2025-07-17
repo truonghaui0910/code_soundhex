@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, useEffect, useMemo, useCallback } from "react";
@@ -83,6 +82,10 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
     const [isSearching, setIsSearching] = useState(false);
     const [forceUpdateKey, setForceUpdateKey] = useState(0); // Add force update key
 
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(50);
+
     // Debug search results changes
     useEffect(() => {
         console.log('🎯 searchResults state changed:', searchResults.length, 'items');
@@ -104,7 +107,7 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
         console.log('🎵 Current searchResults:', searchResults);
         console.log('📚 Current tracks length:', tracks.length);
         console.log('🎨 Current selectedGenre:', selectedGenre);
-        
+
         // Only use search results if we have actual search results (after Enter was pressed)
         if (searchResults.length > 0) {
             console.log('🔍 Search mode - using searchResults');
@@ -129,6 +132,21 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
         console.log('📚 Using all tracks. Filtered length:', filtered.length);
         return filtered;
     }, [searchResults, tracks, selectedGenre, forceUpdateKey]);
+
+    // All filtered tracks without pagination
+    const allFilteredTracks = useMemo(() => filteredTracks, [filteredTracks]);
+
+    // Paginated tracks
+    const paginatedTracks = useMemo(() => {
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        return filteredTracks.slice(startIndex, endIndex);
+    }, [filteredTracks, currentPage, itemsPerPage]);
+
+    // Total pages
+    const totalPages = useMemo(() => {
+        return Math.ceil(filteredTracks.length / itemsPerPage);
+    }, [filteredTracks, itemsPerPage]);
 
     // Debug filteredTracks changes
     useEffect(() => {
@@ -211,27 +229,27 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
         try {
             const response = await fetch(`/api/tracks/search?q=${encodeURIComponent(query)}`);
             console.log('🔍 Search response status:', response.status);
-            
+
             if (response.ok) {
                 const data = await response.json();
                 console.log('✅ Search results received:', data?.length || 0, 'tracks');
                 console.log('📋 Search data:', data);
                 console.log('🎵 First result:', data?.[0]);
-                
+
                 // Force array update with new reference
                 const newResults = Array.isArray(data) ? [...data] : [];
                 console.log('🔄 Setting new search results:', newResults.length, 'items');
-                
+
                 // Force state update with callback
                 setSearchResults(prevResults => {
                     console.log('🔄 Previous results:', prevResults.length);
                     console.log('🔄 New results:', newResults.length);
                     return newResults;
                 });
-                
+
                 // Force component re-render
                 setForceUpdateKey(prev => prev + 1);
-                
+
                 // Debug after state update
                 setTimeout(() => {
                     console.log('⏰ After timeout - searchResults should be updated');
@@ -468,6 +486,7 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
             featuredAlbums={featuredAlbums}
             featuredArtists={featuredArtists}
             filteredTracks={filteredTracks}
+            allFilteredTracks={allFilteredTracks}
             trendingTracks={trendingTracks}
             uniqueAlbums={uniqueAlbums}
             uniqueArtists={uniqueArtists}
@@ -482,6 +501,10 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
             onSearchKeyPress={handleSearchKeyPress}
             isSearching={isSearching}
             onSearchTrigger={() => setShouldSearch(true)}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+            itemsPerPage={itemsPerPage}
+            totalPages={totalPages}
         />
     );
 }

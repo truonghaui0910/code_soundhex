@@ -22,6 +22,8 @@ import {
     Upload,
     Share,
     Shuffle,
+    ChevronLeft,
+    ChevronRight,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -86,6 +88,7 @@ interface MusicExplorerUIProps {
     featuredAlbums: FeaturedAlbum[];
     featuredArtists: FeaturedArtist[];
     filteredTracks: Track[];
+    allFilteredTracks: Track[];
     trendingTracks: Track[];
     uniqueAlbums: any[];
     uniqueArtists: any[];
@@ -100,6 +103,10 @@ interface MusicExplorerUIProps {
     onSearchKeyPress?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
     isSearching?: boolean;
     onSearchTrigger?: () => void;
+    currentPage: number;
+    setCurrentPage: (page: number) => void;
+    itemsPerPage: number;
+    totalPages: number;
 }
 
 export function MusicExplorerUI({
@@ -108,6 +115,7 @@ export function MusicExplorerUI({
     featuredAlbums,
     featuredArtists,
     filteredTracks,
+    allFilteredTracks,
     trendingTracks,
     uniqueAlbums,
     uniqueArtists,
@@ -122,6 +130,10 @@ export function MusicExplorerUI({
     onSearchKeyPress,
     isSearching = false,
     onSearchTrigger,
+    currentPage,
+    setCurrentPage,
+    itemsPerPage,
+    totalPages,
 }: MusicExplorerUIProps) {
     const {
         currentTrack,
@@ -259,7 +271,9 @@ export function MusicExplorerUI({
                         <div className="text-sm text-gray-600 dark:text-gray-400">
                             {currentView === "featured" 
                                 ? `${featuredTracks.length} featured tracks` 
-                                : `${filteredTracks.length} tracks found${searchQuery ? ` for "${searchQuery}"` : ""}`}
+                                : currentView === "library" 
+                                    ? `Showing ${Math.min((currentPage - 1) * itemsPerPage + 1, allFilteredTracks.length)}-${Math.min(currentPage * itemsPerPage, allFilteredTracks.length)} of ${allFilteredTracks.length} tracks${searchQuery ? ` for "${searchQuery}"` : ""}`
+                                    : `${filteredTracks.length} tracks found${searchQuery ? ` for "${searchQuery}"` : ""}`}
                         </div>
                     </div>
                 </div>
@@ -612,9 +626,9 @@ export function MusicExplorerUI({
                             <div className="flex gap-2">
                                 <Button 
                                     onClick={() => {
-                                        if (filteredTracks.length > 0) {
+                                        if (allFilteredTracks.length > 0) {
                                             // Shuffle the filtered tracks array
-                                            const shuffledTracks = [...filteredTracks].sort(() => Math.random() - 0.5);
+                                            const shuffledTracks = [...allFilteredTracks].sort(() => Math.random() - 0.5);
                                             setTrackList(shuffledTracks);
                                             playTrack(shuffledTracks[0]);
                                         }
@@ -626,9 +640,9 @@ export function MusicExplorerUI({
                                 </Button>
                                 <Button 
                                     onClick={() => {
-                                        if (filteredTracks.length > 0) {
-                                            setTrackList(filteredTracks);
-                                            playTrack(filteredTracks[0]);
+                                        if (allFilteredTracks.length > 0) {
+                                            setTrackList(allFilteredTracks);
+                                            playTrack(allFilteredTracks[0]);
                                         }
                                     }}
                                     className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
@@ -682,7 +696,7 @@ export function MusicExplorerUI({
                                                         if (currentTrack?.id === track.id && isPlaying) {
                                                             togglePlayPause();
                                                         } else {
-                                                            setTrackList(filteredTracks);
+                                                            setTrackList(allFilteredTracks);
                                                             playTrack(track);
                                                         }
                                                     }}
@@ -757,6 +771,83 @@ export function MusicExplorerUI({
                                 </div>
                             ))}
                         </div>
+
+                        {/* Pagination Controls */}
+                        {totalPages > 1 && (
+                            <div className="mt-12 flex items-center justify-center gap-4">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                                    disabled={currentPage === 1}
+                                    className="flex items-center gap-2"
+                                >
+                                    <ChevronLeft className="h-4 w-4" />
+                                    Previous
+                                </Button>
+
+                                <div className="flex items-center gap-2">
+                                    {/* First page */}
+                                    {currentPage > 3 && (
+                                        <>
+                                            <Button
+                                                variant={1 === currentPage ? "default" : "outline"}
+                                                size="sm"
+                                                onClick={() => setCurrentPage(1)}
+                                                className="w-10 h-10"
+                                            >
+                                                1
+                                            </Button>
+                                            {currentPage > 4 && <span className="text-gray-500">...</span>}
+                                        </>
+                                    )}
+
+                                    {/* Page numbers around current page */}
+                                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                                        const pageNumber = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
+                                        if (pageNumber > totalPages) return null;
+                                        
+                                        return (
+                                            <Button
+                                                key={pageNumber}
+                                                variant={pageNumber === currentPage ? "default" : "outline"}
+                                                size="sm"
+                                                onClick={() => setCurrentPage(pageNumber)}
+                                                className="w-10 h-10"
+                                            >
+                                                {pageNumber}
+                                            </Button>
+                                        );
+                                    })}
+
+                                    {/* Last page */}
+                                    {currentPage < totalPages - 2 && (
+                                        <>
+                                            {currentPage < totalPages - 3 && <span className="text-gray-500">...</span>}
+                                            <Button
+                                                variant={totalPages === currentPage ? "default" : "outline"}
+                                                size="sm"
+                                                onClick={() => setCurrentPage(totalPages)}
+                                                className="w-10 h-10"
+                                            >
+                                                {totalPages}
+                                            </Button>
+                                        </>
+                                    )}
+                                </div>
+
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                                    disabled={currentPage === totalPages}
+                                    className="flex items-center gap-2"
+                                >
+                                    Next
+                                    <ChevronRight className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        )}
                     </div>
                 )}
 
