@@ -85,17 +85,38 @@ export function SearchSuggestions({
 
   // Calculate position based on search input
   useEffect(() => {
-    if (isVisible) {
-      const searchInput = document.querySelector('input[placeholder*="Search songs"]') as HTMLInputElement;
-      if (searchInput) {
-        const rect = searchInput.getBoundingClientRect();
-        setPosition({
-          top: rect.bottom + window.scrollY + 2, // Reduced from 8 to 2
-          left: rect.left + window.scrollX,
-          width: rect.width
-        });
+    const updatePosition = () => {
+      if (isVisible) {
+        const searchInput = document.querySelector('input[placeholder*="Search songs"]') as HTMLInputElement;
+        if (searchInput) {
+          const rect = searchInput.getBoundingClientRect();
+          setPosition({
+            top: rect.bottom + window.scrollY + 2, // Reduced from 8 to 2
+            left: rect.left + window.scrollX,
+            width: rect.width
+          });
+        }
       }
+    };
+
+    updatePosition();
+
+    // Update position on scroll to prevent floating
+    const handleScroll = () => {
+      if (isVisible) {
+        updatePosition();
+      }
+    };
+
+    if (isVisible) {
+      window.addEventListener('scroll', handleScroll, { passive: true });
+      window.addEventListener('resize', updatePosition);
     }
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', updatePosition);
+    };
   }, [isVisible]);
 
   // Handle click outside to close
@@ -130,6 +151,16 @@ export function SearchSuggestions({
         top: `${position.top}px`,
         left: `${position.left}px`,
         width: `${position.width}px`
+      }}
+      onWheel={(e) => {
+        // Prevent scroll bubbling to page when dropdown is scrolled
+        const element = e.currentTarget;
+        const isScrolledToTop = element.scrollTop === 0;
+        const isScrolledToBottom = element.scrollTop + element.clientHeight >= element.scrollHeight;
+        
+        if ((isScrolledToTop && e.deltaY < 0) || (isScrolledToBottom && e.deltaY > 0)) {
+          e.preventDefault();
+        }
       }}
     >
       {loading ? (
