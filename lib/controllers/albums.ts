@@ -111,7 +111,7 @@ export class AlbumsController {
       .select(`id, title, cover_image_url, custom_url, release_date, created_at, artist_id, user_id`)
       .order("created_at", { ascending: false })
       .limit(limit);
-    
+
     if (error) {
       console.error("❌ Error fetching albums with limit:", error);
       throw new Error(`Failed to fetch albums: ${error.message}`);
@@ -222,5 +222,49 @@ export class AlbumsController {
         name: "Unknown Artist",
       },
     };
+  }
+
+  static async updateAlbum(id: number, albumData: Partial<Album>): Promise<Album> {
+    const supabase = createServerComponentClient<Database>({ cookies });
+
+    const { data, error } = await supabase
+      .from('albums')
+      .update(albumData)
+      .eq('id', id)
+      .select(`
+        *,
+        artist:artist_id(id, name, custom_url)
+      `)
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to update album: ${error.message}`);
+    }
+
+    return data;
+  }
+
+  static async searchAlbums(query: string, limit: number = 20): Promise<Album[]> {
+    console.log(`🔍 AlbumsController.searchAlbums - Starting search for: "${query}" with limit: ${limit}`);
+    const supabase = createServerComponentClient<Database>({ cookies });
+
+    const searchTerm = query.toLowerCase();
+
+    const { data, error } = await supabase
+      .from("albums")
+      .select(`
+        *,
+        artist:artist_id(id, name, profile_image_url, custom_url)
+      `)
+      .ilike("title", `%${searchTerm}%`)
+      .order("created_at", { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      console.error("Error searching albums:", error);
+      throw new Error(`Failed to search albums: ${error.message}`);
+    }
+
+    return data ?? [];
   }
 }

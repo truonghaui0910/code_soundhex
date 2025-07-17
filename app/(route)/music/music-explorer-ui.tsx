@@ -33,6 +33,7 @@ import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 import { useDownload } from "@/hooks/use-download";
 import { useRouter } from "next/navigation";
 import AddToPlaylist from "@/components/playlist/add-to-playlist";
+import { SearchSuggestions } from "@/components/music/SearchSuggestions";
 
 // Helper function to format time
 const formatDuration = (seconds: number | null) => {
@@ -128,6 +129,7 @@ export function MusicExplorerUI({
         togglePlayPause,
     } = useAudioPlayer();
     const { downloadTrack, isTrackDownloading } = useDownload();
+    const [showSuggestions, setShowSuggestions] = useState(false);
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20">
@@ -145,16 +147,23 @@ export function MusicExplorerUI({
                         <div className="relative max-w-2xl mx-auto mb-8">
                             <Search className="absolute left-4 top-4 h-5 w-5 text-gray-400 z-10" />
                             <Input
-                                placeholder="Search songs, artists, albums... (Press Enter to search)"
+                                placeholder="Search songs, artists, albums..."
                                 value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
+                                onChange={(e) => {
+                                    setSearchQuery(e.target.value);
+                                    setShowSuggestions(true);
+                                }}
                                 onKeyPress={onSearchKeyPress}
+                                onFocus={() => setShowSuggestions(true)}
                                 className="pl-12 pr-12 h-14 text-lg bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder-white/60"
                             />
                             {/* Clear button - show when there's text and not searching */}
                             {searchQuery && !isSearching && (
                                 <button
-                                    onClick={() => setSearchQuery("")}
+                                    onClick={() => {
+                                        setSearchQuery("");
+                                        setShowSuggestions(false);
+                                    }}
                                     className="absolute right-4 top-4 h-5 w-5 text-gray-400 hover:text-white transition-colors z-10"
                                     title="Clear search"
                                 >
@@ -169,6 +178,26 @@ export function MusicExplorerUI({
                                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
                                 </div>
                             )}
+
+                            {/* Search Suggestions Dropdown */}
+                            <SearchSuggestions
+                                query={searchQuery}
+                                isVisible={showSuggestions}
+                                onSuggestionClick={(suggestion) => {
+                                    setSearchQuery(suggestion);
+                                    setShowSuggestions(false);
+                                    // Trigger search
+                                    if (onSearchKeyPress) {
+                                        onSearchKeyPress({ key: 'Enter' } as React.KeyboardEvent<HTMLInputElement>);
+                                    }
+                                }}
+                                onTrackPlay={(track) => {
+                                    setTrackList([track]);
+                                    playTrack(track);
+                                    setShowSuggestions(false);
+                                }}
+                                onClose={() => setShowSuggestions(false)}
+                            />
                         </div>
 
                         {/* Action Buttons */}
