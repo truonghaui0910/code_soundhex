@@ -37,10 +37,6 @@ export default function MusicExplorerLoading() {
         <div className="container mx-auto px-6 py-4">
           <div className="flex flex-wrap gap-4 items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <Filter className="h-4 w-4" />
-                <span className="font-medium">Filters:</span>
-              </div>
               <div className="h-10 w-32 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse"></div>
             </div>
             <div className="h-5 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>

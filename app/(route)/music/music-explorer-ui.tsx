@@ -96,6 +96,8 @@ interface MusicExplorerUIProps {
     currentView: "featured" | "library" | "upload";
     setCurrentView: (view: "featured" | "library" | "upload") => void;
     isLoadingFeatured: boolean;
+    onSearchKeyPress?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+    isSearching?: boolean;
 }
 
 export function MusicExplorerUI({
@@ -115,6 +117,8 @@ export function MusicExplorerUI({
     currentView,
     setCurrentView,
     isLoadingFeatured,
+    onSearchKeyPress,
+    isSearching = false,
 }: MusicExplorerUIProps) {
     const {
         currentTrack,
@@ -141,11 +145,30 @@ export function MusicExplorerUI({
                         <div className="relative max-w-2xl mx-auto mb-8">
                             <Search className="absolute left-4 top-4 h-5 w-5 text-gray-400 z-10" />
                             <Input
-                                placeholder="Search songs, artists, albums..."
+                                placeholder="Search songs, artists, albums... (Press Enter to search)"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="pl-12 h-14 text-lg bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder-white/60"
+                                onKeyPress={onSearchKeyPress}
+                                className="pl-12 pr-12 h-14 text-lg bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder-white/60"
                             />
+                            {/* Clear button - show when there's text and not searching */}
+                            {searchQuery && !isSearching && (
+                                <button
+                                    onClick={() => setSearchQuery("")}
+                                    className="absolute right-4 top-4 h-5 w-5 text-gray-400 hover:text-white transition-colors z-10"
+                                    title="Clear search"
+                                >
+                                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            )}
+                            {/* Loading spinner */}
+                            {isSearching && (
+                                <div className="absolute right-4 top-4">
+                                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                                </div>
+                            )}
                         </div>
 
                         {/* Action Buttons */}
@@ -202,7 +225,7 @@ export function MusicExplorerUI({
                         <div className="text-sm text-gray-600 dark:text-gray-400">
                             {currentView === "featured" 
                                 ? `${featuredTracks.length} featured tracks` 
-                                : `${filteredTracks.length} tracks found`}
+                                : `${filteredTracks.length} tracks found${searchQuery ? ` for "${searchQuery}"` : ""}`}
                         </div>
                     </div>
                 </div>
@@ -216,8 +239,8 @@ export function MusicExplorerUI({
                         <section>
                             <div className="flex items-center justify-between mb-8">
                                 <h2 className="text-xl font-bold flex items-center gap-3">
-                                    <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
-                                        <TrendingUp className="h-4 w-4 text-white" />
+                                    <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
+                                        <TrendingUp className="h-5 w-5 text-white" />
                                     </div>
                                     <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
                                         Featured Tracks
@@ -399,8 +422,8 @@ export function MusicExplorerUI({
                         <section>
                             <div className="flex items-center justify-between mb-8">
                                 <h2 className="text-xl font-bold flex items-center gap-3">
-                                    <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
-                                        <Music className="h-4 w-4 text-white" />
+                                    <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
+                                        <Music className="h-5 w-5 text-white" />
                                     </div>
                                     <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                                         Albums
@@ -486,8 +509,8 @@ export function MusicExplorerUI({
                         <section>
                             <div className="flex items-center justify-between mb-8">
                                 <h2 className="text-xl font-bold flex items-center gap-3">
-                                    <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-rose-500 rounded-2xl flex items-center justify-center shadow-lg">
-                                        <Users className="h-4 w-4 text-white" />
+                                    <div className="w-10 h-10 bg-gradient-to-r from-pink-500 to-rose-500 rounded-2xl flex items-center justify-center shadow-lg">
+                                        <Users className="h-5 w-5 text-white" />
                                     </div>
                                     <span className="bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">
                                         Artists
@@ -545,8 +568,8 @@ export function MusicExplorerUI({
                     <div className="space-y-6">
                         <div className="flex items-center justify-between">
                             <h2 className="text-xl font-bold flex items-center gap-3">
-                                <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-2xl flex items-center justify-center shadow-lg">
-                                    <Headphones className="h-4 w-4 text-white" />
+                                <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-2xl flex items-center justify-center shadow-lg">
+                                    <Headphones className="h-5 w-5 text-white" />
                                 </div>
                                 <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
                                     Music Library
@@ -583,7 +606,10 @@ export function MusicExplorerUI({
                         </div>
 
                         {/* Grid view for library */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8">
+                        <div 
+                            key={`library-${filteredTracks.length}-${searchQuery}`}
+                            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8"
+                        >
                             {filteredTracks.map((track, index) => (
                                 <div
                                     key={track.id}
