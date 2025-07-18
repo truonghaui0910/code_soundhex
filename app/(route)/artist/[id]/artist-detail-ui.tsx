@@ -360,17 +360,7 @@ export function ArtistDetailUI({ artist, tracks, albums }: ArtistDetailUIProps) 
           </section>
         )}
 
-        {/* Popular Tracks Section */}
-        {tracks && tracks.length > 0 && (
-          <TrackList
-            tracks={tracks.slice(0, 10)}
-            title="Popular Tracks"
-            showTrackNumber={true}
-            showAlbumInfo={true}
-            showArtistInfo={false}
-            onPlayAll={handlePlayAllTracks}
-          />
-        )}
+        
       </div>
 
       {/* Music Player */}

@@ -50,6 +50,9 @@ export function AlbumDetailClient({ albumId, initialAlbum }: AlbumDetailClientPr
           }
 
           const tracksData = await tracksResponse.json();
+          console.log('Raw tracks data from API:', tracksData);
+          
+          // API trả về array trực tiếp, không wrap trong object
           const validatedTracks = Array.isArray(tracksData) ? tracksData : [];
 
           console.log(
@@ -79,6 +82,7 @@ export function AlbumDetailClient({ albumId, initialAlbum }: AlbumDetailClientPr
 
           const fetchTime = Date.now() - startTime;
           console.log(`⚡ API fetch completed in ${fetchTime}ms`);
+          console.log('Raw tracks data from API (non-initial):', tracksData);
 
           const albumData = albumsData.find((a) => a.id === albumId);
 
@@ -98,6 +102,7 @@ export function AlbumDetailClient({ albumId, initialAlbum }: AlbumDetailClientPr
             genre: albumData.genre || null,
           };
 
+          // API trả về array trực tiếp
           const validatedTracks = Array.isArray(tracksData) ? tracksData : [];
 
           console.log(
@@ -174,5 +179,5 @@ export function AlbumDetailClient({ albumId, initialAlbum }: AlbumDetailClientPr
   }
 
   // Render UI component với data
-  return <AlbumDetailUI album={album} tracks={tracks} />;
+  return <AlbumDetailUI album={album} tracks={tracks} isLoading={loading} />;
 }

@@ -12,7 +12,7 @@ import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 import { Track } from "@/lib/definitions/Track";
 import { useDownload } from "@/hooks/use-download";
 import AddToPlaylist from "@/components/playlist/add-to-playlist";
-import { TrackList } from "@/components/music/track-list";
+import { TrackGridSm } from "@/components/music/track-grid-sm";
 
 // Helper function to format time
 const formatDuration = (seconds: number | null | undefined) => {
@@ -25,9 +25,10 @@ const formatDuration = (seconds: number | null | undefined) => {
 interface AlbumDetailUIProps {
   album: any;
   tracks: Track[];
+  isLoading?: boolean;
 }
 
-export function AlbumDetailUI({ album, tracks }: AlbumDetailUIProps) {
+export function AlbumDetailUI({ album, tracks, isLoading = false }: AlbumDetailUIProps) {
   const { currentTrack, isPlaying, playTrack, setTrackList, togglePlayPause } = useAudioPlayer();
   const { downloadTrack, downloadMultipleTracks, isDownloading, isTrackDownloading } = useDownload();
 
@@ -133,12 +134,18 @@ export function AlbumDetailUI({ album, tracks }: AlbumDetailUIProps) {
 
       {/* Tracks Section */}
       <div className="container mx-auto px-6 py-12">
-        <TrackList
+        {/* Section Title */}
+        <div className="flex items-center gap-3 mb-8">
+          <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center">
+            <Music className="h-5 w-5 text-white" />
+          </div>
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Track List</h2>
+        </div>
+        
+        <TrackGridSm
           tracks={safeTracks}
-          title="Track List"
-          showTrackNumber={true}
-          showAlbumInfo={false}
-          showArtistInfo={true}
+          isLoading={isLoading}
+          loadingCount={15}
           onPlayAll={handlePlayAlbum}
         />
       </div>
