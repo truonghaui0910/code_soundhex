@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MusicPlayer } from "@/components/music/MusicPlayer";
-import { Play, Pause, Clock, Music, Heart, Share, Download, Plus } from "lucide-react";
+import { Play, Pause, Clock, Music, Heart, Share, Download, Plus, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 import { Track } from "@/lib/definitions/Track";
@@ -26,9 +26,10 @@ interface AlbumDetailUIProps {
   album: any;
   tracks: Track[];
   isLoading?: boolean;
+  tracksLoading?: boolean;
 }
 
-export function AlbumDetailUI({ album, tracks, isLoading = false }: AlbumDetailUIProps) {
+export function AlbumDetailUI({ album, tracks, isLoading = false, tracksLoading = false }: AlbumDetailUIProps) {
   const { currentTrack, isPlaying, playTrack, setTrackList, togglePlayPause } = useAudioPlayer();
   const { downloadTrack, downloadMultipleTracks, isDownloading, isTrackDownloading } = useDownload();
 
@@ -60,6 +61,18 @@ export function AlbumDetailUI({ album, tracks, isLoading = false }: AlbumDetailU
       <div className="relative overflow-hidden bg-gradient-to-r from-slate-800 via-purple-900 to-slate-900 text-white">
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="relative container mx-auto px-6 py-16">
+          {/* Back to Music Button */}
+          <div className="mb-6">
+            <Link href="/music">
+              <Button
+                size="sm"
+                className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all duration-200 border-0"
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Music
+              </Button>
+            </Link>
+          </div>
           <div className="flex flex-col md:flex-row gap-8 items-center md:items-end">
             <div className="w-48 h-48 md:w-64 md:h-64 rounded-xl overflow-hidden bg-white/10 backdrop-blur-sm flex items-center justify-center shadow-2xl">
               {safeAlbum.cover_image_url ? (
@@ -139,12 +152,12 @@ export function AlbumDetailUI({ album, tracks, isLoading = false }: AlbumDetailU
           <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center">
             <Music className="h-5 w-5 text-white" />
           </div>
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Track List</h2>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Track List</h2>
         </div>
         
         <TrackGridSm
           tracks={safeTracks}
-          isLoading={isLoading}
+          isLoading={tracksLoading}
           loadingCount={15}
           onPlayAll={handlePlayAlbum}
         />
