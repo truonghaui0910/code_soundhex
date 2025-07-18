@@ -18,7 +18,7 @@ export class AudioService {
   private currentTrack: Track | null = null;
   private eventListeners: AudioEventCallback[] = [];
   private volume: number = 80;
-  
+
   // Constructor private để thực hiện pattern singleton
   private constructor() {
     // Khởi tạo chỉ ở phía client
@@ -27,7 +27,7 @@ export class AudioService {
       this.setupAudioEvents();
     }
   }
-  
+
   /**
    * Lấy instance singleton
    */
@@ -37,13 +37,13 @@ export class AudioService {
     }
     return AudioService.instance;
   }
-  
+
   /**
    * Thiết lập các event listeners cho đối tượng audio
    */
   private setupAudioEvents(): void {
     if (!this.audio) return;
-    
+
     this.audio.addEventListener('play', () => this.notifyListeners({ type: 'play' }));
     this.audio.addEventListener('pause', () => this.notifyListeners({ type: 'pause' }));
     this.audio.addEventListener('ended', () => this.notifyListeners({ type: 'ended' }));
@@ -69,34 +69,43 @@ export class AudioService {
       });
     });
   }
-  
+
   /**
-   * Thông báo cho tất cả listeners về một event
+   * Thông báo đến các listener về sự kiện
    */
   private notifyListeners(event: AudioEvent): void {
-    this.eventListeners.forEach(callback => callback(event));
+    this.eventListeners.forEach(callback => {
+      if (typeof callback === 'function') {
+        callback(event);
+      }
+    });
   }
-  
+
   /**
-   * Thêm event listener
+   * Đăng ký lắng nghe sự kiện
    */
   public addEventListener(callback: AudioEventCallback): void {
-    this.eventListeners.push(callback);
+    if (typeof callback === 'function') {
+      this.eventListeners.push(callback);
+    }
   }
-  
+
   /**
-   * Xóa event listener
+   * Hủy đăng ký lắng nghe sự kiện
    */
   public removeEventListener(callback: AudioEventCallback): void {
-    this.eventListeners = this.eventListeners.filter(cb => cb !== callback);
+    const index = this.eventListeners.indexOf(callback);
+    if (index > -1) {
+      this.eventListeners.splice(index, 1);
+    }
   }
-  
+
   /**
    * Tải và phát một bài hát
    */
   public playTrack(track: Track): void {
     if (!this.audio || !track.file_url) return;
-    
+
     this.currentTrack = track;
     this.audio.src = track.file_url;
     this.audio.volume = this.volume / 100;
@@ -105,7 +114,7 @@ export class AudioService {
       this.notifyListeners({ type: 'error', detail: { error: err } });
     });
   }
-  
+
   /**
    * Tạm dừng phát nhạc
    */
@@ -113,7 +122,7 @@ export class AudioService {
     if (!this.audio) return;
     this.audio.pause();
   }
-  
+
   /**
    * Tiếp tục phát nhạc
    */
@@ -124,46 +133,46 @@ export class AudioService {
       this.notifyListeners({ type: 'error', detail: { error: err } });
     });
   }
-  
+
   /**
    * Chuyển đổi giữa phát/tạm dừng
    */
   public togglePlayPause(): void {
     if (!this.audio) return;
-    
+
     if (this.audio.paused) {
       this.play();
     } else {
       this.pause();
     }
   }
-  
+
   /**
    * Thiết lập âm lượng (0-100)
    */
   public setVolume(volume: number): void {
     if (!this.audio) return;
-    
+
     this.volume = Math.max(0, Math.min(100, volume));
     this.audio.volume = this.volume / 100;
   }
-  
+
   /**
    * Di chuyển đến vị trí cụ thể trong bài hát
    */
   public seek(time: number): void {
     if (!this.audio) return;
-    
+
     this.audio.currentTime = Math.max(0, Math.min(time, this.audio.duration || 0));
   }
-  
+
   /**
    * Lấy thông tin bài hát hiện tại
    */
   public getCurrentTrack(): Track | null {
     return this.currentTrack;
   }
-  
+
   /**
    * Lấy trạng thái phát hiện tại
    */
@@ -181,7 +190,7 @@ export class AudioService {
         volume: this.volume
       };
     }
-    
+
     return {
       isPlaying: !this.audio.paused,
       currentTime: this.audio.currentTime,
@@ -189,13 +198,13 @@ export class AudioService {
       volume: this.volume
     };
   }
-  
+
   /**
    * Giải phóng tài nguyên
    */
   public dispose(): void {
     if (!this.audio) return;
-    
+
     this.audio.pause();
     this.audio.src = '';
     this.eventListeners = [];
