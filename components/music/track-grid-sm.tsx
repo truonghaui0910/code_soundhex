@@ -263,7 +263,7 @@ export function TrackGridSm({
                                 <Button
                                     size="sm"
                                     variant="ghost"
-                                    className="w-8 h-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-purple-100 dark:hover:bg-purple-900/30 focus:opacity-100"
+                                    className="w-8 h-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-purple-200 dark:hover:bg-purple-800/50 focus:opacity-100"
                                     onClick={() => toggleMenu(track.id)}
                                 >
                                     <MoreHorizontal className="h-4 w-4" />
