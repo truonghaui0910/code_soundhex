@@ -72,118 +72,41 @@ export default function AlbumLoadingComponent() {
           </div>
         </div>
 
-        {/* TrackGridSm Layout Skeleton - 3 rows of cards */}
+        {/* TrackGridSm Layout Skeleton - Copy from actual TrackGridSm component */}
         <div className="space-y-2">
-          {/* Row 1 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {Array.from({ length: 3 }).map((_, index) => (
-              <div key={`row1-${index}`} className="group relative">
-                <div className="relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl overflow-hidden shadow-lg border border-white/20 dark:border-gray-700/30">
-                  {/* Track Cover */}
-                  <div className="aspect-square bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
-                    <Music className="h-12 w-12 text-white/60" />
+          {Array.from({ length: Math.ceil(10 / 3) }).map((_, rowIndex) => (
+            <div key={rowIndex} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {Array.from({ length: 3 }).map((_, colIndex) => (
+                <div key={colIndex} className="group flex items-center gap-4 p-6 rounded-xl hover:bg-white/80 dark:hover:bg-gray-800/80 transition-all duration-200">
+                  {/* Album Cover */}
+                  <div className="relative w-32 h-32 flex-shrink-0">
+                    <div className="w-full h-full bg-gradient-to-br from-purple-400 via-pink-400 to-rose-400 rounded-lg flex items-center justify-center animate-pulse">
+                      <Music className="h-6 w-6 text-white/80" />
+                    </div>
                   </div>
 
                   {/* Track Info */}
-                  <div className="p-4 space-y-3">
-                    <div className="space-y-2">
-                      {/* Track Title */}
-                      <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-                      {/* Artist Name */}
-                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-3/4"></div>
+                  <div className="flex-1 min-w-0 px-2">
+                    <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded mb-2 animate-pulse"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2 animate-pulse"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mb-2 animate-pulse"></div>
+                    <div className="flex items-center gap-3 mt-2">
+                      <div className="h-6 w-16 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse"></div>
+                      <div className="flex items-center gap-1">
+                        <Clock className="h-4 w-4 text-gray-400" />
+                        <div className="h-4 w-12 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                      </div>
                     </div>
+                  </div>
 
-                    {/* Bottom Row - Duration and Actions */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-3 w-3 text-gray-400" />
-                        <div className="h-3 w-12 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-                        <div className="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-                        <div className="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-                      </div>
-                    </div>
+                  {/* Action Menu */}
+                  <div className="relative">
+                    <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Row 2 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {Array.from({ length: 3 }).map((_, index) => (
-              <div key={`row2-${index}`} className="group relative">
-                <div className="relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl overflow-hidden shadow-lg border border-white/20 dark:border-gray-700/30">
-                  {/* Track Cover */}
-                  <div className="aspect-square bg-gradient-to-br from-blue-400 to-purple-400 flex items-center justify-center">
-                    <Music className="h-12 w-12 text-white/60" />
-                  </div>
-
-                  {/* Track Info */}
-                  <div className="p-4 space-y-3">
-                    <div className="space-y-2">
-                      {/* Track Title */}
-                      <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-                      {/* Artist Name */}
-                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-2/3"></div>
-                    </div>
-
-                    {/* Bottom Row - Duration and Actions */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-3 w-3 text-gray-400" />
-                        <div className="h-3 w-12 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-                        <div className="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-                        <div className="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Row 3 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {Array.from({ length: 2 }).map((_, index) => (
-              <div key={`row3-${index}`} className="group relative">
-                <div className="relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl overflow-hidden shadow-lg border border-white/20 dark:border-gray-700/30">
-                  {/* Track Cover */}
-                  <div className="aspect-square bg-gradient-to-br from-green-400 to-blue-400 flex items-center justify-center">
-                    <Music className="h-12 w-12 text-white/60" />
-                  </div>
-
-                  {/* Track Info */}
-                  <div className="p-4 space-y-3">
-                    <div className="space-y-2">
-                      {/* Track Title */}
-                      <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-                      {/* Artist Name */}
-                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-4/5"></div>
-                    </div>
-
-                    {/* Bottom Row - Duration and Actions */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-3 w-3 text-gray-400" />
-                        <div className="h-3 w-12 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-                        <div className="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-                        <div className="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ))}
         </div>
       </div>
 
