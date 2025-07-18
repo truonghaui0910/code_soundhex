@@ -219,9 +219,9 @@ export function TrackGrid({
                             </div>
 
                             {/* Action buttons */}
-                            <div className="mt-4 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+                            <div className="mt-4 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
                                 <AddToPlaylist trackId={track.id} trackTitle={track.title}>
-                                    <Button size="sm" variant="ghost" className="hover:bg-purple-100 dark:hover:bg-purple-900/30">
+                                    <Button size="sm" variant="ghost" className="hover:bg-purple-100 dark:hover:bg-purple-900/30 flex-1">
                                         <Plus className="h-4 w-4" />
                                     </Button>
                                 </AddToPlaylist>
@@ -229,14 +229,14 @@ export function TrackGrid({
                                     size="sm"
                                     variant="ghost"
                                     onClick={() => downloadTrack(track)}
-                                    className="hover:bg-purple-100 dark:hover:bg-purple-900/30"
+                                    className="hover:bg-purple-100 dark:hover:bg-purple-900/30 flex-1"
                                 >
                                     <Download className="h-4 w-4" />
                                 </Button>
-                                <Button size="sm" variant="ghost" className="hover:bg-purple-100 dark:hover:bg-purple-900/30">
+                                <Button size="sm" variant="ghost" className="hover:bg-purple-100 dark:hover:bg-purple-900/30 flex-1">
                                     <Heart className="h-4 w-4" />
                                 </Button>
-                                <Button size="sm" variant="ghost" className="hover:bg-purple-100 dark:hover:bg-purple-900/30">
+                                <Button size="sm" variant="ghost" className="hover:bg-purple-100 dark:hover:bg-purple-900/30 flex-1">
                                     <Share className="h-4 w-4" />
                                 </Button>
                             </div>
