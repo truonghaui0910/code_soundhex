@@ -206,7 +206,7 @@ export function MusicExplorerUI({
                                     onSearchKeyPress?.(e);
                                 }}
                                 onFocus={() => setShowSuggestions(true)}
-                                className="pl-12 pr-12 h-14 text-lg bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder-white/60"
+                                className="pl-12 pr-12 h-14 text-lg bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder-white/60 rounded-2xl"
                             />
                             {/* Clear button - show when there's text and not searching */}
                             {searchQuery && !isSearching && (
