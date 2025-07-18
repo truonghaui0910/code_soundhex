@@ -125,7 +125,7 @@ export async function GET(
       }));
 
       const textFields = fields.filter((field: any) =>
-        field.type === "text" &&
+        field.type === "text" && (field.readonly === undefined || field.readonly === "false" || field.readonly === false) &&
         fields.findIndex((f: any) => f.uuid === field.uuid) === fields.indexOf(field)
       );
 
