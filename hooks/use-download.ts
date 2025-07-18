@@ -3,12 +3,23 @@ import { useState } from 'react';
 import { Track } from '@/lib/definitions/Track';
 import { DownloadService } from '@/lib/services/download-service';
 import { toast } from 'sonner';
+import { useCurrentUser } from './use-current-user';
+import { showWarning } from '@/lib/services/notification-service';
 
 export function useDownload() {
+  const { user } = useCurrentUser();
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState<Record<string, boolean>>({});
 
   const downloadTrack = async (track: Track) => {
+    if (!user) {
+      showWarning({
+        title: "Login Required",
+        message: "You need to login to download tracks"
+      });
+      return;
+    }
+
     if (!track.file_url) {
       toast.error('This track is not available for download');
       return;
@@ -35,6 +46,14 @@ export function useDownload() {
   };
 
   const downloadMultipleTracks = async (tracks: Track[]) => {
+    if (!user) {
+      showWarning({
+        title: "Login Required",
+        message: "You need to login to download tracks"
+      });
+      return;
+    }
+
     if (!DownloadService.isDownloadSupported()) {
       alert('Download is not supported in your browser');
       return;

@@ -3,6 +3,8 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { useCurrentUser } from "@/hooks/use-current-user";
+import { showWarning } from '@/lib/services/notification-service';
 import {
   Dialog,
   DialogContent,
@@ -42,6 +44,7 @@ export default function AddToPlaylist({
   trackTitle,
   children,
 }: AddToPlaylistProps) {
+  const { user } = useCurrentUser();
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -167,6 +170,14 @@ export default function AddToPlaylist({
   };
 
   const handleModalOpen = () => {
+    if (!user) {
+      showWarning({
+        title: "Login Required",
+        message: "You need to login to add tracks to playlists"
+      });
+      return;
+    }
+    
     setIsModalOpen(true);
     fetchPlaylists();
   };
