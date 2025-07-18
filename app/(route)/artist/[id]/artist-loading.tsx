@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -16,6 +15,7 @@ import {
     Download,
     Plus,
     Search,
+    ArrowLeft,
 } from "lucide-react";
 
 export default function ArtistDetailLoading() {
@@ -24,7 +24,7 @@ export default function ArtistDetailLoading() {
             {/* Hero Section Skeleton */}
             <div className="relative overflow-hidden bg-gradient-to-r from-slate-800 via-purple-900 to-slate-900 text-white">
                 <div className="absolute inset-0 bg-black/10"></div>
-                <div className="relative container mx-auto px-6 py-20">
+                <div className="relative container mx-auto px-6 py-16">
                     <div className="flex flex-col md:flex-row gap-8 items-center md:items-end">
                         {/* Artist Profile Image Skeleton */}
                         <div className="w-48 h-48 md:w-64 md:h-64 rounded-full overflow-hidden bg-white/10 backdrop-blur-sm flex items-center justify-center shadow-2xl">
@@ -83,6 +83,9 @@ export default function ArtistDetailLoading() {
                                 <div className="h-12 w-20 bg-white/20 rounded-lg animate-pulse flex items-center justify-center">
                                     <Share className="mr-2 h-5 w-5 text-white/40" />
                                 </div>
+                                <div className="h-12 w-32 bg-white/20 rounded-lg animate-pulse flex items-center justify-center">
+                                    <ArrowLeft className="mr-2 h-5 w-5 text-white/40" />
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -90,22 +93,23 @@ export default function ArtistDetailLoading() {
             </div>
 
             {/* Main Content Skeleton */}
-            <div className="container mx-auto px-4 sm:px-6 pb-32 space-y-16 pt-12">
+            <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-12">
                 {/* Albums Section Skeleton */}
                 <section>
                     <div className="flex items-center justify-between mb-8">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center">
+                        <h2 className="text-xl font-bold flex items-center gap-3">
+                            <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
                                 <Album className="h-5 w-5 text-white" />
                             </div>
-                            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Albums</h2>
-                        </div>
-                        <div className="h-6 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                            <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                                Albums
+                            </span>
+                        </h2>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                         {Array.from({ length: 5 }).map((_, index) => (
-                            <div key={index} className="group text-center">
+                            <div key={index} className="group cursor-pointer text-center">
                                 <div className="relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl overflow-hidden shadow-lg border border-white/20 dark:border-gray-700/30">
                                     <div className="aspect-square bg-gray-200 dark:bg-gray-700 animate-pulse flex items-center justify-center">
                                         <Music className="h-12 w-12 text-gray-400" />
@@ -120,16 +124,17 @@ export default function ArtistDetailLoading() {
                     </div>
                 </section>
 
-                {/* Track Grid Small Section Skeleton */}
+                {/* All Songs Section Skeleton (TrackGridSm style) */}
                 <section>
                     <div className="flex items-center justify-between mb-8">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center">
+                        <h2 className="text-xl font-bold flex items-center gap-3">
+                            <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
                                 <Music className="h-5 w-5 text-white" />
                             </div>
-                            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">All Tracks</h2>
-                        </div>
-                        <div className="h-6 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                            <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                                All Songs
+                            </span>
+                        </h2>
                     </div>
 
                     <div className="space-y-4">
@@ -145,99 +150,13 @@ export default function ArtistDetailLoading() {
                                             <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-1/2"></div>
                                             <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-2/3"></div>
                                         </div>
+                                        <div className="flex flex-col gap-2">
+                                            <div className="h-8 w-8 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                                        </div>
                                     </div>
                                 ))}
                             </div>
                         ))}
-                    </div>
-                </section>
-
-                {/* Popular Tracks Section Skeleton */}
-                <section>
-                    <div className="flex items-center justify-between mb-8">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center">
-                                <Music className="h-5 w-5 text-white" />
-                            </div>
-                            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Popular Tracks</h2>
-                        </div>
-                        <div className="h-10 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-                    </div>
-
-                    <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl overflow-hidden shadow-lg border border-white/20 dark:border-gray-700/30">
-                        {/* Track List Header Skeleton */}
-                        <div className="p-6 border-b border-gray-200/50 dark:border-gray-700/50">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-4">
-                                    <div className="h-12 w-28 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse"></div>
-                                    <div className="h-6 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <div className="h-8 w-8 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-                                    <div className="h-8 w-8 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Track List Skeleton */}
-                        <div className="space-y-0">
-                            {Array.from({ length: 10 }).map((_, index) => (
-                                <div
-                                    key={index}
-                                    className="group flex items-center gap-4 p-4 border-b border-gray-100/50 dark:border-gray-700/30 last:border-b-0 hover:bg-gray-50/50 dark:hover:bg-gray-700/30"
-                                >
-                                    {/* Track Number Skeleton */}
-                                    <div className="w-8 text-center text-sm text-gray-500 dark:text-gray-400">
-                                        <div className="h-4 w-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mx-auto"></div>
-                                    </div>
-
-                                    {/* Play Button Space */}
-                                    <div className="w-8 h-8 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse flex items-center justify-center">
-                                            <Play className="h-4 w-4 text-gray-400" />
-                                        </div>
-                                    </div>
-
-                                    {/* Track Cover Skeleton */}
-                                    <div className="w-12 h-12 rounded-lg bg-gray-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0 animate-pulse">
-                                        <Music className="h-5 w-5 text-gray-400" />
-                                    </div>
-
-                                    {/* Track Info Skeleton */}
-                                    <div className="flex-1 min-w-0 space-y-2">
-                                        <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-3/4"></div>
-                                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-1/2"></div>
-                                    </div>
-
-                                    {/* Genre Badge Skeleton */}
-                                    <div className="hidden md:block">
-                                        <div className="h-6 w-16 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse"></div>
-                                    </div>
-
-                                    {/* Duration Skeleton */}
-                                    <div className="hidden sm:flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                                        <Clock className="h-3 w-3" />
-                                        <div className="h-4 w-10 bg-gray-200 dark:bg-gray-700 rounded animate-pulse font-mono"></div>
-                                    </div>
-
-                                    {/* Action Buttons Skeleton */}
-                                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <div className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800">
-                                            <div className="w-4 h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-                                        </div>
-                                        <div className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800">
-                                            <div className="w-4 h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-                                        </div>
-                                        <div className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800">
-                                            <div className="w-4 h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-                                        </div>
-                                        <div className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800">
-                                            <div className="w-4 h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
                     </div>
                 </section>
             </div>
