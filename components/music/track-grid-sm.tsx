@@ -12,7 +12,8 @@ import {
     Download, 
     Heart, 
     Share,
-    MoreHorizontal
+    MoreHorizontal,
+    Eye
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -39,6 +40,7 @@ interface Track {
         id: number;
         name: string;
     } | null;
+    view_count?: number;
 }
 
 interface TrackGridSmProps {
@@ -254,6 +256,13 @@ export function TrackGridSm({
                                     <div className="flex items-center gap-1 text-sm text-gray-500">
                                         <Clock className="h-4 w-4" />
                                         <span className="font-mono">{formatDuration(track.duration)}</span>
+                                        {track.view_count !== undefined && (
+                                            <>
+                                                <span>•</span>
+                                                <Eye className="h-3 w-3" />
+                                                <span>{track.view_count.toLocaleString()} views</span>
+                                            </>
+                                        )}
                                     </div>
                                 </div>
                             </div>
