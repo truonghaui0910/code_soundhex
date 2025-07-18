@@ -9,6 +9,18 @@ export class DownloadLogger {
   }
 
   /**
+   * Validate IP address format
+   */
+  private static isValidIP(ip: string): boolean {
+    // IPv4 regex
+    const ipv4Regex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+    // IPv6 regex (simplified)
+    const ipv6Regex = /^(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$|^::1$|^::$/;
+    
+    return ipv4Regex.test(ip) || ipv6Regex.test(ip);
+  }
+
+  /**
    * Log a download activity
    */
   static async logDownload({
@@ -33,12 +45,23 @@ export class DownloadLogger {
     try {
       const supabase = await this.getSupabaseClient();
       
+      // Validate and clean IP address
+      let cleanIpAddress = null;
+      if (ipAddress && ipAddress !== 'unknown') {
+        // Take only the first IP if multiple IPs are present
+        const cleanIp = ipAddress.split(',')[0].trim();
+        // Basic IP validation (IPv4 or IPv6)
+        if (this.isValidIP(cleanIp)) {
+          cleanIpAddress = cleanIp;
+        }
+      }
+      
       const { data, error } = await supabase
         .from('track_downloads')
         .insert({
           track_id: trackId,
           user_id: userId || null,
-          ip_address: ipAddress || null,
+          ip_address: cleanIpAddress,
           user_agent: userAgent || null,
           download_type: downloadType,
           file_size_bytes: fileSizeBytes || null,
@@ -81,10 +104,21 @@ export class DownloadLogger {
     try {
       const supabase = await this.getSupabaseClient();
       
+      // Validate and clean IP address
+      let cleanIpAddress = null;
+      if (ipAddress && ipAddress !== 'unknown') {
+        // Take only the first IP if multiple IPs are present
+        const cleanIp = ipAddress.split(',')[0].trim();
+        // Basic IP validation (IPv4 or IPv6)
+        if (this.isValidIP(cleanIp)) {
+          cleanIpAddress = cleanIp;
+        }
+      }
+      
       const downloadLogs = trackIds.map(trackId => ({
         track_id: trackId,
         user_id: userId || null,
-        ip_address: ipAddress || null,
+        ip_address: cleanIpAddress,
         user_agent: userAgent || null,
         download_type: downloadType,
         success,

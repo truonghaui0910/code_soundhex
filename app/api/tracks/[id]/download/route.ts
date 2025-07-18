@@ -22,10 +22,17 @@ export async function POST(
     const supabase = createServerComponentClient<Database>({ cookies });
     const { data: { user } } = await supabase.auth.getUser();
 
-    // Get request info
-    const ipAddress = request.headers.get('x-forwarded-for') || 
-                     request.headers.get('x-real-ip') || 
-                     'unknown';
+    // Get request info - handle multiple IPs in x-forwarded-for
+    const forwardedFor = request.headers.get('x-forwarded-for');
+    const realIp = request.headers.get('x-real-ip');
+    
+    // Extract first IP from x-forwarded-for if it contains multiple IPs
+    let ipAddress = 'unknown';
+    if (forwardedFor) {
+      ipAddress = forwardedFor.split(',')[0].trim();
+    } else if (realIp) {
+      ipAddress = realIp;
+    }
     const userAgent = request.headers.get('user-agent') || 'unknown';
 
     // Parse request body for additional info
