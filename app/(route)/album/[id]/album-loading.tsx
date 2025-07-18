@@ -63,7 +63,7 @@ export default function AlbumLoadingComponent() {
           <div className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-2xl flex items-center justify-center animate-pulse">
             <Music className="h-5 w-5 text-gray-400" />
           </div>
-          <div className="h-8 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+          <div className="h-9 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
         </div>
 
         {/* TrackGridSm Layout Skeleton - Copy from actual TrackGridSm component */}
