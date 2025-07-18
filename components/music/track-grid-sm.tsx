@@ -163,7 +163,7 @@ export function TrackGridSm({
                     {group.map((track) => (
                         <div
                             key={track.id}
-                            className="group flex items-center gap-4 p-6 rounded-xl hover:bg-white/80 dark:hover:bg-gray-800/80 transition-all duration-200"
+                            className="group flex items-center gap-4 p-6 rounded-xl hover:bg-gradient-to-r hover:from-purple-50 hover:to-purple-100 dark:hover:bg-gradient-to-r dark:hover:from-purple-900/40 dark:hover:to-purple-800/40 transition-all duration-200"
                         >
                             {/* Album Cover */}
                             <div className="relative w-32 h-32 flex-shrink-0">
