@@ -10,6 +10,8 @@ export interface RoutePermission {
 // Define route permissions
 export const ROUTE_PERMISSIONS: RoutePermission[] = [
   { path: '/dashboard', requiredRole: 'music_provider' },
+  { path: '/agreements', requiredRole: 'music_provider' },
+  { path: '/upload', requiredRole: 'music_provider' },
   { path: '/admin', requiredRole: 'admin' },
   { path: '/right-management', requiredRole: 'admin' },
 ];

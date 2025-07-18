@@ -291,6 +291,7 @@ export async function middleware(req: NextRequest) {
   const protectedPaths = [
     "/dashboard", 
     "/agreements", 
+    "/upload",
     "/admin", 
     "/right-management", 
     "/library"
@@ -346,10 +347,11 @@ export const config = {
     /*
      * Chỉ match các routes cụ thể cần xử lý middleware:
      * - Auth routes: /login, /register (bao gồm sub-paths cho OAuth)
-     * - Protected routes: /dashboard, /agreements, etc.
+     * - Protected routes: /dashboard, /agreements, /upload, etc.
      */
     "/dashboard/:path*",
     "/agreements/:path*", 
+    "/upload/:path*",
     "/admin/:path*",
     "/right-management/:path*",
     "/library/:path*",
