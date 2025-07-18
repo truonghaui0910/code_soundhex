@@ -223,7 +223,7 @@ export function ArtistDetailUI({ artist, tracks, albums }: ArtistDetailUIProps) 
               </Button>
             </Link>
           </div>
-          <div className="flex flex-col md:flex-row gap-8 items-center md:items-end"></div>
+          <div className="flex flex-col md:flex-row gap-8 items-center md:items-end">
             <div className="w-48 h-48 md:w-64 md:h-64 rounded-full overflow-hidden bg-white/10 backdrop-blur-sm flex items-center justify-center shadow-2xl">
               {artist.profile_image_url ? (
                 <Image
