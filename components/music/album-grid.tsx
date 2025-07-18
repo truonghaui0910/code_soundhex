@@ -119,10 +119,10 @@ export function AlbumGrid({
                         </Link>
 
                         {/* Gradient overlay */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg overflow-hidden" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-lg overflow-hidden group-hover:scale-105" />
 
                         {/* Play Album Button Overlay */}
-                        <div className="absolute inset-0 flex items-center justify-center rounded-lg overflow-hidden">
+                        <div className="absolute inset-0 flex items-center justify-center rounded-lg overflow-hidden group-hover:scale-105 transition-transform duration-300"></div>
                             <Button
                                 size="lg"
                                 onClick={(e) => {
