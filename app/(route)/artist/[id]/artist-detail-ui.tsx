@@ -12,6 +12,7 @@ import { AlbumGrid } from "@/components/music/album-grid";
 import { TrackGridSm } from "@/components/music/track-grid-sm";
 import {
   Play,
+  Pause,
   Clock,
   Music,
   Heart,
@@ -21,6 +22,7 @@ import {
   Pause,
   Download,
   Plus,
+  ArrowLeft
 } from "lucide-react";
 import Link from "next/link";
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
@@ -316,6 +318,15 @@ export function ArtistDetailUI({ artist, tracks, albums }: ArtistDetailUIProps) 
                   <Share className="mr-2 h-5 w-5" />
                   Share
                 </Button>
+                 <Link href="/music">
+                   <Button
+                      size="lg"
+                      className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all duration-200 border-0"
+                    >
+                      <ArrowLeft className="mr-2 h-5 w-5" />
+                      Back to Music
+                    </Button>
+                 </Link>
               </div>
             </div>
           </div>
@@ -360,7 +371,7 @@ export function ArtistDetailUI({ artist, tracks, albums }: ArtistDetailUIProps) 
           </section>
         )}
 
-        
+
       </div>
 
       {/* Music Player */}
