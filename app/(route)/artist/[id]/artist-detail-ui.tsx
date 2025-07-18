@@ -335,9 +335,10 @@ export function ArtistDetailUI({ artist, tracks, albums }: ArtistDetailUIProps) 
                   size="lg"
                   className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all duration-200 border-0"
                   onClick={() => toggleArtistFollow(artist.id)}
+                  disabled={artistFollowStatus.isLoading}
                 >
-                  <Heart className="mr-2 h-5 w-5" />
-                  {artistFollowStatus ? "Unfollow" : "Follow"}
+                  <Heart className={`mr-2 h-5 w-5 ${artistFollowStatus.isFollowing ? 'fill-current' : ''}`} />
+                  {artistFollowStatus.isLoading ? "Loading..." : (artistFollowStatus.isFollowing ? "Unfollow" : "Follow")}
                 </Button>
                 <Button
                   size="lg"
