@@ -5,6 +5,7 @@ import {
   isClient,
 } from "@/lib/services/audio-service";
 import { Track } from "@/lib/definitions/Track";
+import { TrackViewService } from "@/lib/services/track-view-service";
 
 /**
  * Hook để sử dụng AudioService trong các component React
@@ -18,6 +19,12 @@ export function useAudioPlayer() {
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [duration, setDuration] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
+
+  // View tracking state
+  const [viewStartTime, setViewStartTime] = useState<number>(0);
+  const [hasRecordedView, setHasRecordedView] = useState<boolean>(false);
+  const [sessionId] = useState<string>(() => `session-${Date.now()}-${Math.random().toString(36)}`);
+  const viewCheckIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Đảm bảo chỉ sử dụng AudioService ở phía client
   const getAudioService = useCallback(() => {
@@ -118,11 +125,13 @@ export function useAudioPlayer() {
       setCurrentTrack(track);
       setIsPlaying(true);
       setError(null);
+      setHasRecordedView(false);
+      setViewStartTime(Date.now());
 
       // Gọi service để phát bài hát
       audioService.playTrack(track);
     },
-    [getAudioService, trackList],
+    [getAudioService, trackList, sessionId],
   );
 
   // Chuyển đổi giữa phát/tạm dừng
@@ -197,6 +206,52 @@ export function useAudioPlayer() {
     const seconds = Math.floor(timeInSeconds % 60);
     return `${minutes}:${seconds.toString().padStart(2, "0")}`;
   }, []);
+
+  // Function to record track view
+  const recordTrackView = useCallback(async (trackId: number, playDuration: number) => {
+    if (hasRecordedView) return;
+
+    try {
+      const response = await fetch(`/api/tracks/${trackId}/view`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          viewDuration: playDuration,
+          sessionId: sessionId,
+        }),
+      });
+
+      if (response.ok) {
+        setHasRecordedView(true);
+        console.log(`View recorded for track ${trackId} after ${playDuration} seconds`);
+      }
+    } catch (error) {
+      console.error('Error recording view:', error);
+    }
+  }, [hasRecordedView, sessionId]);
+
+
+  useEffect(() => {
+    const audioService = getAudioService();
+    if (!audioService) return;
+
+    audioService.addEventListener("timeupdate", () => {
+      setCurrentTime(audioService.getCurrentTime());
+    });
+  }, [getAudioService]);
+
+  useEffect(() => {
+    const audioService = getAudioService();
+    if (!audioService) return;
+
+    // Check if we should record a view (after 30 seconds of listening)
+    if (!hasRecordedView && currentTrack && currentTime >= 30) {
+      const playDuration = Math.floor((Date.now() - viewStartTime) / 1000);
+      recordTrackView(currentTrack.id, playDuration);
+    }
+  }, [currentTime, hasRecordedView, currentTrack, viewStartTime, recordTrackView, getAudioService]);
 
   // Trả về các trạng thái và phương thức điều khiển
   return {

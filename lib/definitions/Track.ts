@@ -5,6 +5,7 @@ export interface Track {
   duration: number | null;
   file_url?: string;
   audio_file_url?: string;
+  view_count?: number;
   artist?: {
     id: string | number;
     name: string;
