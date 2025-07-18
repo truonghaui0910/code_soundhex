@@ -139,7 +139,7 @@ export function AlbumDetailUI({ album, tracks, isLoading = false }: AlbumDetailU
           <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center">
             <Music className="h-5 w-5 text-white" />
           </div>
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Track List</h2>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Track List</h2>
         </div>
         
         <TrackGridSm
