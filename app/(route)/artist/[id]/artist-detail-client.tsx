@@ -17,6 +17,9 @@ export function ArtistDetailClient({ artistId, artist: initialArtist }: ArtistDe
   const [albums, setAlbums] = useState([]);
   const [error, setError] = useState(null);
 
+  // Move useMemo here, before any conditional returns
+  const memoizedTracks = useMemo(() => tracks, [tracks]);
+
   useEffect(() => {
     let isMounted = true;
     
@@ -211,8 +214,6 @@ export function ArtistDetailClient({ artistId, artist: initialArtist }: ArtistDe
       </div>
     );
   }
-
-  const memoizedTracks = useMemo(() => tracks, [tracks]);
 
   return (
     <ArtistDetailUI artist={artist} tracks={memoizedTracks} albums={albums} />
