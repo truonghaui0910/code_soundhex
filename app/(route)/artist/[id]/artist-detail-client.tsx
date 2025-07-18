@@ -1,7 +1,7 @@
 // app/(route)/artist/[id]/artist-detail-client.tsx - Copy album logic
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from "react";
 import ArtistDetailLoading from './artist-loading';
 import { ArtistDetailUI } from './artist-detail-ui';
 
@@ -194,5 +194,8 @@ export function ArtistDetailClient({ artistId, artist: initialArtist }: ArtistDe
     );
   }
 
-  return <ArtistDetailUI artist={artist} tracks={tracks} albums={albums} />;
+  const memoizedTracks = useMemo(() => tracks, [tracks]);
+
+  return (
+    <ArtistDetailUI artist={artist} tracks={memoizedTracks} albums={albums} />;
 }

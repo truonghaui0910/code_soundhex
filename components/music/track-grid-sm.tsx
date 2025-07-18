@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { 
@@ -70,14 +70,13 @@ const formatViewCount = (count: number) => {
     return count.toString();
 };
 
-export function TrackGridSm({ 
+export const TrackGridSm = React.memo(function TrackGridSm({ 
     tracks, 
     isLoading = false, 
     loadingCount = 10,
     onTrackPlay,
     className = "space-y-2"
 }: TrackGridSmProps) {
-    console.log('TrackGridSm - Received tracks:', tracks.length, tracks);
     const [openMenuId, setOpenMenuId] = useState<number | null>(null);
     const menuRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
 
@@ -353,4 +352,4 @@ export function TrackGridSm({
             ))}
         </div>
     );
-}
+});
