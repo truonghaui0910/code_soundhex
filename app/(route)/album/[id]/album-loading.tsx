@@ -63,13 +63,7 @@ export default function AlbumLoadingComponent() {
           <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center">
             <Music className="h-5 w-5 text-white" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Track List</h2>
-          {/* Loading dots for title */}
-          <div className="flex space-x-1 ml-2">
-            <div className="w-1 h-1 bg-gray-400 rounded-full animate-pulse" style={{animationDelay: '0ms'}}></div>
-            <div className="w-1 h-1 bg-gray-400 rounded-full animate-pulse" style={{animationDelay: '300ms'}}></div>
-            <div className="w-1 h-1 bg-gray-400 rounded-full animate-pulse" style={{animationDelay: '600ms'}}></div>
-          </div>
+          <div className="h-8 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
         </div>
 
         {/* TrackGridSm Layout Skeleton - Copy from actual TrackGridSm component */}
@@ -80,8 +74,8 @@ export default function AlbumLoadingComponent() {
                 <div key={colIndex} className="group flex items-center gap-4 p-6 rounded-xl hover:bg-white/80 dark:hover:bg-gray-800/80 transition-all duration-200">
                   {/* Album Cover */}
                   <div className="relative w-32 h-32 flex-shrink-0">
-                    <div className="w-full h-full bg-gradient-to-br from-purple-400 via-pink-400 to-rose-400 rounded-lg flex items-center justify-center animate-pulse">
-                      <Music className="h-6 w-6 text-white/80" />
+                    <div className="w-full h-full bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center animate-pulse">
+                      <Music className="h-6 w-6 text-gray-400" />
                     </div>
                   </div>
 
