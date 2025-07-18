@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -48,7 +47,7 @@ export function AlbumGrid({
             try {
                 const response = await fetch(`/api/albums/${album.id}/tracks`);
                 console.log('AlbumGrid - API response status:', response.status);
-                
+
                 if (response.ok) {
                     const data = await response.json();
                     console.log('AlbumGrid - API response data:', data);
@@ -58,10 +57,10 @@ export function AlbumGrid({
                         tracksLength: data.tracks?.length || 0,
                         directArrayLength: Array.isArray(data) ? data.length : 'not an array'
                     });
-                    
+
                     // Handle both formats: { tracks: [...] } and direct array [...]
                     const tracksArray = data.tracks || (Array.isArray(data) ? data : []);
-                    
+
                     if (Array.isArray(tracksArray) && tracksArray.length > 0) {
                         console.log('AlbumGrid - Setting trackList with tracks:', tracksArray);
                         setTrackList(tracksArray);
@@ -120,10 +119,10 @@ export function AlbumGrid({
                         </Link>
 
                         {/* Gradient overlay */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg overflow-hidden" />
 
                         {/* Play Album Button Overlay */}
-                        <div className="absolute inset-0 flex items-center justify-center rounded-lg">
+                        <div className="absolute inset-0 flex items-center justify-center rounded-lg overflow-hidden">
                             <Button
                                 size="lg"
                                 onClick={(e) => {
