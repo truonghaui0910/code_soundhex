@@ -197,5 +197,6 @@ export function ArtistDetailClient({ artistId, artist: initialArtist }: ArtistDe
   const memoizedTracks = useMemo(() => tracks, [tracks]);
 
   return (
-    <ArtistDetailUI artist={artist} tracks={memoizedTracks} albums={albums} />;
+    <ArtistDetailUI artist={artist} tracks={memoizedTracks} albums={albums} />
+  );
 }
