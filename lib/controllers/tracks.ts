@@ -15,7 +15,7 @@ export class TracksController {
     const { data, error } = await supabase
       .from("tracks")
       .select(`
-        id, title, description, duration, file_url, source_type, created_at,
+        id, title, description, duration, file_url, source_type, created_at, view_count,
         artist:artist_id (id, name, profile_image_url),
         album:album_id (id, title, cover_image_url),
         genre:genre_id (id, name)
@@ -37,7 +37,7 @@ export class TracksController {
     const { data, error } = await supabase
       .from("tracks")
       .select(`
-        *,
+        *, view_count,
         artist:artist_id(id, name, profile_image_url, custom_url),
         album:album_id(id, title, cover_image_url),
         genre:genre_id(id, name)
@@ -61,7 +61,7 @@ export class TracksController {
     const { data, error } = await supabase
       .from("tracks")
       .select(`
-        *,
+        *, view_count,
         artist:artist_id(id, name, profile_image_url, custom_url),
         album:album_id(id, title, cover_image_url),
         genre:genre_id(id, name)
@@ -90,7 +90,7 @@ export class TracksController {
     const { data, error } = await supabase
       .from("tracks")
       .select(`
-        *,
+        *, view_count,
         artist:artist_id(id, name, profile_image_url, custom_url),
         album:album_id(id, title, cover_image_url),
         genre:genre_id(id, name)
@@ -115,7 +115,7 @@ export class TracksController {
 
     const { data, error } = await supabase
       .from("tracks")
-      .select(`id, title, description, duration, file_url, created_at, album_id, artist_id, genre_id`)
+      .select(`id, title, description, duration, file_url, created_at, album_id, artist_id, genre_id, view_count`)
       .eq("album_id", albumId)
       .order("created_at", { ascending: false });
 
@@ -179,7 +179,7 @@ export class TracksController {
     const { data, error } = await supabase
       .from("tracks")
       .select(`
-        *,
+        *, view_count,
         artist:artist_id(id, name),
         album:album_id(id, name, cover_url),
         genre:genre_id(id, name)
@@ -222,7 +222,7 @@ export class TracksController {
     let query_builder = supabase
       .from("tracks")
       .select(`
-        *,
+        *, view_count,
         artist:artist_id(id, name, profile_image_url, custom_url),
         album:album_id(id, title, cover_image_url, custom_url),
         genre:genre_id(id, name)
@@ -267,7 +267,7 @@ export class TracksController {
     const { data, error } = await supabase
       .from("tracks")
       .select(`
-        id, title, description, duration, file_url, source_type, created_at,
+        id, title, description, duration, file_url, source_type, created_at, view_count,
         artist:artist_id(id, name, profile_image_url),
         album:album_id(id, title, cover_image_url),
         genre:genre_id(id, name)
@@ -306,7 +306,7 @@ export class TracksController {
     let query = supabase
       .from("tracks")
       .select(`
-        *,
+        *, view_count,
         artist:artist_id(id, name, profile_image_url, custom_url),
         album:album_id(id, title, cover_image_url, custom_url),
         genre:genre_id(id, name)
