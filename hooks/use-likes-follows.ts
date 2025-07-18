@@ -125,8 +125,8 @@ export function useLikesFollows() {
   const toggleTrackLike = useCallback(async (trackId: number) => {
     if (!user) {
       showWarning({
-        title: "Đăng nhập để tiếp tục",
-        message: "Bạn cần đăng nhập để thích bài hát này"
+        title: "Login Required",
+        message: "You need to login to like this track"
       });
       return;
     }
@@ -172,8 +172,8 @@ export function useLikesFollows() {
   const toggleAlbumLike = useCallback(async (albumId: number) => {
     if (!user) {
       showWarning({
-        title: "Đăng nhập để tiếp tục",
-        message: "Bạn cần đăng nhập để thích album này"
+        title: "Login Required",
+        message: "You need to login to like this album"
       });
       return;
     }
@@ -219,8 +219,8 @@ export function useLikesFollows() {
   const toggleArtistFollow = useCallback(async (artistId: number) => {
     if (!user) {
        showWarning({
-        title: "Đăng nhập để tiếp tục",
-        message: "Bạn cần đăng nhập để theo dõi nghệ sĩ này"
+        title: "Login Required",
+        message: "You need to login to follow this artist"
       });
       return;
     }
