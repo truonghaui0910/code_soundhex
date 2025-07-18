@@ -214,10 +214,10 @@ export function ArtistDetailUI({ artist, tracks, albums }: ArtistDetailUIProps) 
 
     // Fetch artist follow status when component mounts
     useEffect(() => {
-      if (artist.id && !isLoading) {
+      if (artist.id) {
         fetchArtistFollowStatus(artist.id);
       }
-    }, [artist.id, isLoading, fetchArtistFollowStatus]);
+    }, [artist.id, fetchArtistFollowStatus]);
   
     const artistFollowStatus = getArtistFollowStatus(artist.id);
 
