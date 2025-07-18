@@ -211,20 +211,19 @@ export function ArtistDetailUI({ artist, tracks, albums }: ArtistDetailUIProps) 
       <div className="relative overflow-hidden bg-gradient-to-r from-slate-800 via-purple-900 to-slate-900 text-white">
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="relative container mx-auto px-6 py-16">
-          {/* Back to Music Button */}
-          <div className="mb-6">
-            <Link href="/music">
-              <Button
-                size="sm"
-                className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all duration-200 border-0"
-              >
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Music
-              </Button>
-            </Link>
-          </div>
           <div className="flex flex-col md:flex-row gap-8 items-center md:items-end">
-            <div className="w-48 h-48 md:w-64 md:h-64 rounded-full overflow-hidden bg-white/10 backdrop-blur-sm flex items-center justify-center shadow-2xl">
+            <div className="flex flex-col items-center gap-4">
+              {/* Back to Music Button - moved closer to image and centered */}
+              <Link href="/music">
+                <Button
+                  size="sm"
+                  className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all duration-200 border-0"
+                >
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Back to Music
+                </Button>
+              </Link>
+              <div className="w-48 h-48 md:w-64 md:h-64 rounded-full overflow-hidden bg-white/10 backdrop-blur-sm flex items-center justify-center shadow-2xl">
               {artist.profile_image_url ? (
                 <Image
                   src={artist.profile_image_url}
@@ -236,6 +235,7 @@ export function ArtistDetailUI({ artist, tracks, albums }: ArtistDetailUIProps) 
               ) : (
                 <Users className="h-20 w-20 text-white/60" />
               )}
+              </div>
             </div>
             <div className="flex-1 flex flex-col gap-4 text-center md:text-left">
               <Badge className="bg-white/20 text-white border-white/30 w-fit mx-auto md:mx-0">
@@ -329,15 +329,6 @@ export function ArtistDetailUI({ artist, tracks, albums }: ArtistDetailUIProps) 
                   <Share className="mr-2 h-5 w-5" />
                   Share
                 </Button>
-                 <Link href="/music">
-                   <Button
-                      size="lg"
-                      className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all duration-200 border-0"
-                    >
-                      <ArrowLeft className="mr-2 h-5 w-5" />
-                      Back to Music
-                    </Button>
-                 </Link>
               </div>
             </div>
           </div>
