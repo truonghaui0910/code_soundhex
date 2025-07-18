@@ -84,7 +84,7 @@ export function TrackGrid({
         togglePlayPause,
     } = useAudioPlayer();
     const { downloadTrack } = useDownload();
-    const { getTrackLikeStatus, fetchTrackLikeStatus, toggleTrackLike } = useLikesFollows();
+    const { getTrackLikeStatus, fetchTrackLikeStatus, toggleTrackLike, fetchBatchTrackLikesStatus } = useLikesFollows();
 
     const handleTrackPlay = (track: Track) => {
         if (onTrackPlay) {
@@ -124,13 +124,13 @@ export function TrackGrid({
         );
     }
 
+    // Batch fetch like status for all tracks
     useEffect(() => {
         if (!isLoading && tracks.length > 0) {
-            tracks.forEach(track => {
-                fetchTrackLikeStatus(track.id);
-            });
+            const trackIds = tracks.map(track => track.id);
+            fetchBatchTrackLikesStatus(trackIds);
         }
-    }, [tracks, isLoading, fetchTrackLikeStatus]);
+    }, [tracks, isLoading, fetchBatchTrackLikesStatus]);
 
     return (
         <div className={className}>
