@@ -208,12 +208,9 @@ export function TrackGrid({
                                 </div>
 
                                 <div className="flex items-center justify-between">
-                                    <Badge
-                                        variant="secondary"
-                                        className="text-xs bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 dark:from-purple-900/30 dark:to-pink-900/30 dark:text-purple-300 border-0"
-                                    >
-                                        {track.genre?.name || "Unknown"}
-                                    </Badge>
+                                    <div className="flex items-center gap-1 text-xs text-purple-700 dark:text-purple-300 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 px-2 py-1 rounded-full border-0">
+                                        <span>{track.genre?.name || "Unknown"}</span>
+                                    </div>
                                     <div className="flex items-center gap-1 text-xs text-gray-500 bg-gray-100 dark:bg-gray-700/50 px-2 py-1 rounded-full">
                                         <Clock className="h-3 w-3" />
                                         <span className="font-mono">{formatDuration(track.duration)}</span>

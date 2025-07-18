@@ -22,10 +22,12 @@ export async function GET(
       );
     }
 
-    console.log(`API: Starting tracks fetch for artist ${artistId}`);
+    console.log("API: Starting tracks fetch for artist", artistId);
     const startTime = Date.now();
 
     const tracks = await TracksController.getTracksByArtist(artistId);
+    console.log(`API: Artist tracks fetch completed - Count:`, tracks.length);
+    console.log("API: Sample track view_count:", tracks[0]?.view_count);
 
     const fetchTime = Date.now() - startTime;
     console.log(

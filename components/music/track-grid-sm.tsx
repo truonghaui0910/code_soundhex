@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { 
@@ -13,7 +13,7 @@ import {
     Heart, 
     Share,
     MoreHorizontal,
-    Eye
+    Headphones
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -59,14 +59,24 @@ const formatDuration = (seconds: number | null) => {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
 };
 
-export function TrackGridSm({ 
+// Helper function to format view count
+const formatViewCount = (count: number) => {
+    if (count >= 1000000) {
+        return (count / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+    }
+    if (count >= 1000) {
+        return (count / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+    }
+    return count.toString();
+};
+
+export const TrackGridSm = React.memo(function TrackGridSm({ 
     tracks, 
     isLoading = false, 
     loadingCount = 10,
     onTrackPlay,
     className = "space-y-2"
 }: TrackGridSmProps) {
-    console.log('TrackGridSm - Received tracks:', tracks.length, tracks);
     const [openMenuId, setOpenMenuId] = useState<number | null>(null);
     const menuRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
 
@@ -259,8 +269,8 @@ export function TrackGridSm({
                                         {track.view_count !== undefined && (
                                             <>
                                                 <span>•</span>
-                                                <Eye className="h-3 w-3" />
-                                                <span>{track.view_count.toLocaleString()} views</span>
+                                                <Headphones className="h-3 w-3" />
+                                                <span>{formatViewCount(track.view_count)}</span>
                                             </>
                                         )}
                                     </div>
@@ -342,4 +352,4 @@ export function TrackGridSm({
             ))}
         </div>
     );
-}
+});

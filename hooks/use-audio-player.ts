@@ -121,17 +121,19 @@ export function useAudioPlayer() {
         setCurrentIndex(trackIndex);
       }
 
+      // Reset view tracking cho bài hát mới
+      setHasRecordedView(false);
+      setViewStartTime(Date.now());
+
       // Cập nhật state ngay lập tức - điều này đảm bảo UI được cập nhật ngay
       setCurrentTrack(track);
       setIsPlaying(true);
       setError(null);
-      setHasRecordedView(false);
-      setViewStartTime(Date.now());
 
       // Gọi service để phát bài hát
       audioService.playTrack(track);
     },
-    [getAudioService, trackList, sessionId],
+    [getAudioService, trackList],
   );
 
   // Chuyển đổi giữa phát/tạm dừng
@@ -211,6 +213,9 @@ export function useAudioPlayer() {
   const recordTrackView = useCallback(async (trackId: number, playDuration: number) => {
     if (hasRecordedView) return;
 
+    // Set flag immediately to prevent multiple calls
+    setHasRecordedView(true);
+
     try {
       const response = await fetch(`/api/tracks/${trackId}/view`, {
         method: 'POST',
@@ -224,11 +229,23 @@ export function useAudioPlayer() {
       });
 
       if (response.ok) {
-        setHasRecordedView(true);
         console.log(`View recorded for track ${trackId} after ${playDuration} seconds`);
+      } else {
+        // Reset flag if API call failed
+        const errorData = await response.json().catch(() => ({}));
+        console.error(`Failed to record view for track ${trackId}:`, errorData);
+        if (response.status === 400) {
+          // Don't retry for validation errors
+          console.log('View recording failed due to validation - will not retry');
+        } else {
+          // Reset flag for other errors to allow retry
+          setHasRecordedView(false);
+        }
       }
     } catch (error) {
       console.error('Error recording view:', error);
+      // Reset flag on network errors to allow retry
+      setHasRecordedView(false);
     }
   }, [hasRecordedView, sessionId]);
 
@@ -246,10 +263,14 @@ export function useAudioPlayer() {
     const audioService = getAudioService();
     if (!audioService) return;
 
-    // Check if we should record a view (after 30 seconds of listening)
-    if (!hasRecordedView && currentTrack && currentTime >= 30) {
-      const playDuration = Math.floor((Date.now() - viewStartTime) / 1000);
-      recordTrackView(currentTrack.id, playDuration);
+    // Check if we should record a view (after 30 seconds of actual listening time)
+    if (!hasRecordedView && currentTrack && viewStartTime > 0) {
+      const actualPlayDuration = Math.floor((Date.now() - viewStartTime) / 1000);
+      
+      // Only record view if user has actually listened for 30+ seconds
+      if (actualPlayDuration >= 30) {
+        recordTrackView(currentTrack.id, actualPlayDuration);
+      }
     }
   }, [currentTime, hasRecordedView, currentTrack, viewStartTime, recordTrackView, getAudioService]);
 

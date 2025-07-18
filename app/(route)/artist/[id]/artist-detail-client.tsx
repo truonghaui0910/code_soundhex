@@ -1,7 +1,7 @@
 // app/(route)/artist/[id]/artist-detail-client.tsx - Copy album logic
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from "react";
 import ArtistDetailLoading from './artist-loading';
 import { ArtistDetailUI } from './artist-detail-ui';
 
@@ -17,7 +17,12 @@ export function ArtistDetailClient({ artistId, artist: initialArtist }: ArtistDe
   const [albums, setAlbums] = useState([]);
   const [error, setError] = useState(null);
 
+  // Move useMemo here, before any conditional returns
+  const memoizedTracks = useMemo(() => tracks, [tracks]);
+
   useEffect(() => {
+    let isMounted = true;
+    
     async function fetchData() {
       // If we already have artist data, just fetch tracks and albums
       if (initialArtist) {
@@ -59,13 +64,19 @@ export function ArtistDetailClient({ artistId, artist: initialArtist }: ArtistDe
           const validatedTracks = Array.isArray(tracksData) ? tracksData : [];
           const validatedAlbums = Array.isArray(artistAlbums) ? artistAlbums : [];
 
-          setTracks(validatedTracks);
-          setAlbums(validatedAlbums);
+          if (isMounted) {
+            setTracks(validatedTracks);
+            setAlbums(validatedAlbums);
+          }
         } catch (err) {
           console.error("Error loading tracks and albums:", err);
-          setError(err.message);
+          if (isMounted) {
+            setError(err.message);
+          }
         } finally {
-          setLoading(false);
+          if (isMounted) {
+            setLoading(false);
+          }
         }
         return;
       }
@@ -149,18 +160,28 @@ export function ArtistDetailClient({ artistId, artist: initialArtist }: ArtistDe
         console.log(`Successfully loaded artist: ${validatedArtist.name} with ${validatedTracks.length} tracks and ${validatedAlbums.length} albums`);
 
         // Set data regardless - giống album
-        setArtist(validatedArtist);
-        setTracks(validatedTracks);
-        setAlbums(validatedAlbums);
+        if (isMounted) {
+          setArtist(validatedArtist);
+          setTracks(validatedTracks);
+          setAlbums(validatedAlbums);
+        }
       } catch (err) {
         console.error("Error loading artist:", err);
-        setError(err.message);
+        if (isMounted) {
+          setError(err.message);
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     }
 
     fetchData();
+    
+    return () => {
+      isMounted = false;
+    };
   }, [artistId, initialArtist]);
 
   // Loading state - hiển thị ngay khi component mount
@@ -194,5 +215,7 @@ export function ArtistDetailClient({ artistId, artist: initialArtist }: ArtistDe
     );
   }
 
-  return <ArtistDetailUI artist={artist} tracks={tracks} albums={albums} />;
+  return (
+    <ArtistDetailUI artist={artist} tracks={memoizedTracks} albums={albums} />
+  );
 }

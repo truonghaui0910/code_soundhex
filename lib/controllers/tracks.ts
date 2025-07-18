@@ -15,7 +15,7 @@ export class TracksController {
     const { data, error } = await supabase
       .from("tracks")
       .select(`
-        id, title, description, duration, file_url, source_type, created_at,
+        id, title, description, duration, file_url, source_type, created_at, view_count,
         artist:artist_id (id, name, profile_image_url),
         album:album_id (id, title, cover_image_url),
         genre:genre_id (id, name)
@@ -37,7 +37,7 @@ export class TracksController {
     const { data, error } = await supabase
       .from("tracks")
       .select(`
-        *,
+        *, view_count,
         artist:artist_id(id, name, profile_image_url, custom_url),
         album:album_id(id, title, cover_image_url),
         genre:genre_id(id, name)
@@ -61,7 +61,7 @@ export class TracksController {
     const { data, error } = await supabase
       .from("tracks")
       .select(`
-        *,
+        *, view_count,
         artist:artist_id(id, name, profile_image_url, custom_url),
         album:album_id(id, title, cover_image_url),
         genre:genre_id(id, name)
@@ -85,12 +85,12 @@ export class TracksController {
    * Lấy danh sách bài hát theo nghệ sĩ
    */
   static async getTracksByArtist(artistId: number): Promise<Track[]> {
-    const supabase = createClientComponentClient<Database>();
+    const supabase = createServerComponentClient<Database>({ cookies });
 
     const { data, error } = await supabase
       .from("tracks")
       .select(`
-        *,
+        *, view_count,
         artist:artist_id(id, name, profile_image_url, custom_url),
         album:album_id(id, title, cover_image_url),
         genre:genre_id(id, name)
@@ -102,6 +102,9 @@ export class TracksController {
       console.error(`Error fetching tracks for artist ${artistId}:`, error);
       throw new Error(`Failed to fetch tracks: ${error.message}`);
     }
+
+    console.log(`TracksController.getTracksByArtist - Found ${data?.length || 0} tracks`);
+    console.log(`TracksController.getTracksByArtist - Sample view_count:`, data?.[0]?.view_count);
 
     return data as unknown as Track[];
   }
@@ -115,7 +118,7 @@ export class TracksController {
 
     const { data, error } = await supabase
       .from("tracks")
-      .select(`id, title, description, duration, file_url, created_at, album_id, artist_id, genre_id`)
+      .select(`id, title, description, duration, file_url, created_at, album_id, artist_id, genre_id, view_count`)
       .eq("album_id", albumId)
       .order("created_at", { ascending: false });
 
@@ -179,7 +182,7 @@ export class TracksController {
     const { data, error } = await supabase
       .from("tracks")
       .select(`
-        *,
+        *, view_count,
         artist:artist_id(id, name),
         album:album_id(id, name, cover_url),
         genre:genre_id(id, name)
@@ -222,7 +225,7 @@ export class TracksController {
     let query_builder = supabase
       .from("tracks")
       .select(`
-        *,
+        *, view_count,
         artist:artist_id(id, name, profile_image_url, custom_url),
         album:album_id(id, title, cover_image_url, custom_url),
         genre:genre_id(id, name)
@@ -267,7 +270,7 @@ export class TracksController {
     const { data, error } = await supabase
       .from("tracks")
       .select(`
-        id, title, description, duration, file_url, source_type, created_at,
+        id, title, description, duration, file_url, source_type, created_at, view_count,
         artist:artist_id(id, name, profile_image_url),
         album:album_id(id, title, cover_image_url),
         genre:genre_id(id, name)
@@ -306,7 +309,7 @@ export class TracksController {
     let query = supabase
       .from("tracks")
       .select(`
-        *,
+        *, view_count,
         artist:artist_id(id, name, profile_image_url, custom_url),
         album:album_id(id, title, cover_image_url, custom_url),
         genre:genre_id(id, name)

@@ -4,33 +4,28 @@ import { TracksController } from "@/lib/controllers/tracks";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: { id: string } }
 ) {
   try {
-    const albumId = Number(params.id);
-
-    if (!albumId || isNaN(albumId)) {
-      return NextResponse.json({ error: "Invalid album ID" }, { status: 400 });
+    const albumId = parseInt(params.id);
+    if (isNaN(albumId)) {
+      return NextResponse.json(
+        { error: "Invalid album ID" },
+        { status: 400 }
+      );
     }
 
-    console.log(`API: Starting tracks fetch for album ${albumId}`);
-    const startTime = Date.now();
-
+    console.log(`🎵 API: Starting tracks fetch for album ${albumId}`);
     const tracks = await TracksController.getTracksByAlbum(albumId);
+    console.log(`🎵 API: Album tracks fetch completed - Count:`, tracks.length);
+    console.log(`🎵 API: Sample track view_count:`, tracks[0]?.view_count);
 
-    const fetchTime = Date.now() - startTime;
-    console.log(`API: Tracks fetch completed in ${fetchTime}ms - Count: ${tracks.length}`);
-
-    return NextResponse.json(tracks, {
-      headers: {
-        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
-      },
-    });
+    return NextResponse.json(tracks);
   } catch (error) {
-    console.error(`API: Error fetching album ${params.id} tracks:`, error);
+    console.error("Error fetching album tracks:", error);
     return NextResponse.json(
       { error: "Failed to fetch tracks" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
