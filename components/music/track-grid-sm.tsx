@@ -254,25 +254,21 @@ export const TrackGridSm = React.memo(function TrackGridSm({
                                         </Link>
                                     </p>
                                 )}
-                                <div className="flex items-center gap-3 mt-2">
+                                <div className="flex items-center justify-between gap-2 mt-2">
                                     {track.genre && (
-                                        <Badge
-                                            variant="secondary"
-                                            className="text-sm px-3 py-1 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 dark:from-purple-900/30 dark:to-pink-900/30 dark:text-purple-300 border-0"
-                                        >
-                                            {track.genre.name}
-                                        </Badge>
+                                        <div className="flex items-center gap-1 text-xs text-purple-700 dark:text-purple-300 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 px-2 py-1 rounded-full border-0">
+                                            <span>{track.genre.name}</span>
+                                        </div>
                                     )}
-                                    <div className="flex items-center gap-1 text-sm text-gray-500">
-                                        <Clock className="h-4 w-4" />
+                                    {track.view_count !== undefined && (
+                                        <div className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30 px-2 py-1 rounded-full">
+                                            <Headphones className="h-3 w-3" />
+                                            <span className="font-mono">{formatViewCount(track.view_count)}</span>
+                                        </div>
+                                    )}
+                                    <div className="flex items-center gap-1 text-xs text-gray-500 bg-gray-100 dark:bg-gray-700/50 px-2 py-1 rounded-full">
+                                        <Clock className="h-3 w-3" />
                                         <span className="font-mono">{formatDuration(track.duration)}</span>
-                                        {track.view_count !== undefined && (
-                                            <>
-                                                <span>•</span>
-                                                <Headphones className="h-3 w-3" />
-                                                <span>{formatViewCount(track.view_count)}</span>
-                                            </>
-                                        )}
                                     </div>
                                 </div>
                             </div>

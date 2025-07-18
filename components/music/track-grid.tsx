@@ -1,4 +1,3 @@
-
 "use client";
 
 import Image from "next/image";
@@ -11,18 +10,22 @@ import {
     Plus, 
     Download, 
     Heart, 
-    Share 
+    Share,
+    Headphones 
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 import { useDownload } from "@/hooks/use-download";
 import AddToPlaylist from "@/components/playlist/add-to-playlist";
+import { useEffect } from "react";
+import { useLikesFollows } from "@/hooks/use-likes-follows";
 
 interface Track {
     id: number;
     title: string;
     duration: number | null;
+    view_count?: number;
     artist?: {
         id: number;
         name: string;
@@ -57,6 +60,14 @@ const formatDuration = (seconds: number | null) => {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
 };
 
+// Helper function to format view count
+const formatViewCount = (views: number | undefined) => {
+    if (!views || views === 0) return "0";
+    if (views < 1000) return views.toString();
+    if (views < 1000000) return `${(views / 1000).toFixed(1)}K`;
+    return `${(views / 1000000).toFixed(1)}M`;
+};
+
 export function TrackGrid({ 
     tracks, 
     isLoading = false, 
@@ -73,6 +84,7 @@ export function TrackGrid({
         togglePlayPause,
     } = useAudioPlayer();
     const { downloadTrack } = useDownload();
+    const { getTrackLikeStatus, fetchTrackLikeStatus, toggleTrackLike } = useLikesFollows();
 
     const handleTrackPlay = (track: Track) => {
         if (onTrackPlay) {
@@ -111,6 +123,14 @@ export function TrackGrid({
             </div>
         );
     }
+
+    useEffect(() => {
+        if (!isLoading && tracks.length > 0) {
+            tracks.forEach(track => {
+                fetchTrackLikeStatus(track.id);
+            });
+        }
+    }, [tracks, isLoading, fetchTrackLikeStatus]);
 
     return (
         <div className={className}>
@@ -207,9 +227,13 @@ export function TrackGrid({
                                     </p>
                                 </div>
 
-                                <div className="flex items-center justify-between">
+                                <div className="flex items-center justify-between gap-2">
                                     <div className="flex items-center gap-1 text-xs text-purple-700 dark:text-purple-300 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 px-2 py-1 rounded-full border-0">
                                         <span>{track.genre?.name || "Unknown"}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30 px-2 py-1 rounded-full">
+                                        <Headphones className="h-3 w-3" />
+                                        <span className="font-mono">{formatViewCount(track.view_count)}</span>
                                     </div>
                                     <div className="flex items-center gap-1 text-xs text-gray-500 bg-gray-100 dark:bg-gray-700/50 px-2 py-1 rounded-full">
                                         <Clock className="h-3 w-3" />
@@ -219,9 +243,9 @@ export function TrackGrid({
                             </div>
 
                             {/* Action buttons */}
-                            <div className="mt-4 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+                            <div className="mt-4 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
                                 <AddToPlaylist trackId={track.id} trackTitle={track.title}>
-                                    <Button size="sm" variant="ghost" className="hover:bg-purple-100 dark:hover:bg-purple-900/30">
+                                    <Button size="sm" variant="ghost" className="hover:bg-purple-100 dark:hover:bg-purple-900/30 flex-1">
                                         <Plus className="h-4 w-4" />
                                     </Button>
                                 </AddToPlaylist>
@@ -229,14 +253,23 @@ export function TrackGrid({
                                     size="sm"
                                     variant="ghost"
                                     onClick={() => downloadTrack(track)}
-                                    className="hover:bg-purple-100 dark:hover:bg-purple-900/30"
+                                    className="hover:bg-purple-100 dark:hover:bg-purple-900/30 flex-1"
                                 >
                                     <Download className="h-4 w-4" />
                                 </Button>
-                                <Button size="sm" variant="ghost" className="hover:bg-purple-100 dark:hover:bg-purple-900/30">
-                                    <Heart className="h-4 w-4" />
+                                <Button
+                                    size="sm"
+                                    className={`backdrop-blur-sm transition-all duration-200 border-0 p-2 h-8 w-8 ${
+                                        getTrackLikeStatus(track.id).isLiked 
+                                            ? 'bg-red-500 text-white hover:bg-red-600' 
+                                            : 'bg-white/10 text-white hover:bg-white/20'
+                                    }`}
+                                    onClick={() => toggleTrackLike(track.id)}
+                                    disabled={getTrackLikeStatus(track.id).isLoading}
+                                >
+                                    <Heart className={`h-4 w-4 ${getTrackLikeStatus(track.id).isLiked ? 'fill-current' : ''}`} />
                                 </Button>
-                                <Button size="sm" variant="ghost" className="hover:bg-purple-100 dark:hover:bg-purple-900/30">
+                                <Button size="sm" variant="ghost" className="hover:bg-purple-100 dark:hover:bg-purple-900/30 flex-1">
                                     <Share className="h-4 w-4" />
                                 </Button>
                             </div>

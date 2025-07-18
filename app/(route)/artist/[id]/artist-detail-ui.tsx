@@ -10,6 +10,7 @@ import { MusicPlayer } from "@/components/music/MusicPlayer";
 import { TrackList } from "@/components/music/track-list";
 import { AlbumGrid } from "@/components/music/album-grid";
 import { TrackGridSm } from "@/components/music/track-grid-sm";
+import { useLikesFollows } from "@/hooks/use-likes-follows";
 import {
   Play,
   Pause,
@@ -78,7 +79,13 @@ export function ArtistDetailUI({ artist, tracks, albums }: ArtistDetailUIProps) 
     setTrackList,
     togglePlayPause,
   } = useAudioPlayer();
-  const { downloadTrack, downloadMultipleTracks, isDownloading, isTrackDownloading } = useDownload();
+  const {
+    downloadTrack,
+    downloadMultipleTracks,
+    isDownloading,
+    isTrackDownloading,
+  } = useDownload();
+  const { getArtistFollowStatus, fetchArtistFollowStatus, toggleArtistFollow } = useLikesFollows();
 
   useEffect(() => {
     const supabase = createClientComponentClient();
@@ -205,6 +212,15 @@ export function ArtistDetailUI({ artist, tracks, albums }: ArtistDetailUIProps) 
     }
   };
 
+    // Fetch artist follow status when component mounts
+    useEffect(() => {
+      if (artist.id && !isLoading) {
+        fetchArtistFollowStatus(artist.id);
+      }
+    }, [artist.id, isLoading, fetchArtistFollowStatus]);
+  
+    const artistFollowStatus = getArtistFollowStatus(artist.id);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20">
       {/* Header Section */}
@@ -318,9 +334,10 @@ export function ArtistDetailUI({ artist, tracks, albums }: ArtistDetailUIProps) 
                 <Button
                   size="lg"
                   className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all duration-200 border-0"
+                  onClick={() => toggleArtistFollow(artist.id)}
                 >
                   <Heart className="mr-2 h-5 w-5" />
-                  Follow
+                  {artistFollowStatus ? "Unfollow" : "Follow"}
                 </Button>
                 <Button
                   size="lg"
