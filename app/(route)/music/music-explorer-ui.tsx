@@ -99,7 +99,9 @@ interface MusicExplorerUIProps {
     selectedGenre: string;
     setSelectedGenre: (genre: string) => void;
     currentView: "featured" | "library" | "upload" | "albums" | "artists";
-    setCurrentView: (view: "featured" | "library" | "upload" | "albums" | "artists") => void;
+    setCurrentView: (
+        view: "featured" | "library" | "upload" | "albums" | "artists",
+    ) => void;
     isLoadingFeatured: boolean;
     onSearchKeyPress?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
     isSearching?: boolean;
@@ -198,7 +200,7 @@ export function MusicExplorerUI({
                                     setShowSuggestions(true);
                                 }}
                                 onKeyPress={(e) => {
-                                    if (e.key === 'Enter') {
+                                    if (e.key === "Enter") {
                                         setShowSuggestions(false);
                                     }
                                     onSearchKeyPress?.(e);
@@ -216,8 +218,18 @@ export function MusicExplorerUI({
                                     className="absolute right-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 hover:text-white transition-colors z-10"
                                     title="Clear search"
                                 >
-                                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    <svg
+                                        className="h-5 w-5"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M6 18L18 6M6 6l12 12"
+                                        />
                                     </svg>
                                 </button>
                             )}
@@ -313,12 +325,12 @@ export function MusicExplorerUI({
                             {currentView === "featured"
                                 ? `${featuredTracks.length} featured tracks`
                                 : currentView === "library"
-                                    ? `Showing ${Math.min((currentPage - 1) * itemsPerPage + 1, totalTracks)}-${Math.min(currentPage * itemsPerPage, totalTracks)} of ${totalTracks} tracks${searchQuery ? ` for "${searchQuery}"` : ""}`
-                                    : currentView === "albums"
-                                        ? `Showing ${Math.min((albumsCurrentPage - 1) * itemsPerPage + 1, totalAlbums)}-${Math.min(albumsCurrentPage * itemsPerPage, totalAlbums)} of ${totalAlbums} albums`
-                                        : currentView === "artists"
-                                            ? `Showing ${Math.min((artistsCurrentPage - 1) * itemsPerPage + 1, totalArtists)}-${Math.min(artistsCurrentPage * itemsPerPage, totalArtists)} of ${totalArtists} artists`
-                                            : `${libraryTracks.length} tracks found${searchQuery ? ` for "${searchQuery}"` : ""}`}
+                                  ? `Showing ${Math.min((currentPage - 1) * itemsPerPage + 1, totalTracks)}-${Math.min(currentPage * itemsPerPage, totalTracks)} of ${totalTracks} tracks${searchQuery ? ` for "${searchQuery}"` : ""}`
+                                  : currentView === "albums"
+                                    ? `Showing ${Math.min((albumsCurrentPage - 1) * itemsPerPage + 1, totalAlbums)}-${Math.min(albumsCurrentPage * itemsPerPage, totalAlbums)} of ${totalAlbums} albums`
+                                    : currentView === "artists"
+                                      ? `Showing ${Math.min((artistsCurrentPage - 1) * itemsPerPage + 1, totalArtists)}-${Math.min(artistsCurrentPage * itemsPerPage, totalArtists)} of ${totalArtists} artists`
+                                      : `${libraryTracks.length} tracks found${searchQuery ? ` for "${searchQuery}"` : ""}`}
                         </div>
                     </div>
                 </div>
@@ -343,7 +355,9 @@ export function MusicExplorerUI({
                                     onClick={() => {
                                         if (featuredTracks.length > 0) {
                                             // Shuffle the featured tracks array
-                                            const shuffledTracks = [...featuredTracks].sort(() => Math.random() - 0.5);
+                                            const shuffledTracks = [
+                                                ...featuredTracks,
+                                            ].sort(() => Math.random() - 0.5);
                                             setTrackList(shuffledTracks);
                                             playTrack(shuffledTracks[0]);
                                         }
@@ -355,13 +369,17 @@ export function MusicExplorerUI({
                                 </Button>
                             </div>
 
-                            <TrackGrid 
+                            <TrackGrid
                                 tracks={featuredTracks}
                                 onTrackPlay={(track, tracks) => {
-                                    if (currentTrack?.id === track.id && isPlaying) {
+                                    if (
+                                        currentTrack?.id === track.id &&
+                                        isPlaying
+                                    ) {
                                         togglePlayPause();
                                     } else {
-                                        playTrack(track, featuredTracks);
+                                        setTrackList(featuredTracks);
+                                        playTrack(track);
                                     }
                                 }}
                             />
@@ -398,10 +416,12 @@ export function MusicExplorerUI({
                                 </Button>
                             </div>
 
-                            <AlbumGrid 
+                            <AlbumGrid
                                 albums={featuredAlbums}
                                 onAlbumPlay={(album) => {
-                                    const albumTracks = featuredTracks.filter(t => t.album?.id === album.id);
+                                    const albumTracks = featuredTracks.filter(
+                                        (t) => t.album?.id === album.id,
+                                    );
                                     if (albumTracks.length > 0) {
                                         setTrackList(albumTracks);
                                         playTrack(albumTracks[0]);
@@ -451,7 +471,9 @@ export function MusicExplorerUI({
                                     onClick={() => {
                                         if (libraryTracks.length > 0) {
                                             // Shuffle the library tracks array
-                                            const shuffledTracks = [...libraryTracks].sort(() => Math.random() - 0.5);
+                                            const shuffledTracks = [
+                                                ...libraryTracks,
+                                            ].sort(() => Math.random() - 0.5);
                                             setTrackList(shuffledTracks);
                                             playTrack(shuffledTracks[0]);
                                         }
@@ -483,15 +505,16 @@ export function MusicExplorerUI({
                                     <Music className="h-12 w-12 text-white" />
                                 </div>
                                 <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-                                    {searchQuery ? 'No tracks found' : 'No tracks available'}
+                                    {searchQuery
+                                        ? "No tracks found"
+                                        : "No tracks available"}
                                 </h3>
                                 <p className="text-gray-600 dark:text-gray-400 text-lg mb-8 max-w-md mx-auto">
                                     {searchQuery
-                                        ? `We couldn't find any tracks matching "${searchQuery}"${selectedGenre !== 'all' ? ` in ${selectedGenre} genre` : ''}.`
-                                        : selectedGenre !== 'all'
-                                            ? `No tracks available in ${selectedGenre} genre.`
-                                            : 'No tracks are available in the library at the moment.'
-                                    }
+                                        ? `We couldn't find any tracks matching "${searchQuery}"${selectedGenre !== "all" ? ` in ${selectedGenre} genre` : ""}.`
+                                        : selectedGenre !== "all"
+                                          ? `No tracks available in ${selectedGenre} genre.`
+                                          : "No tracks are available in the library at the moment."}
                                 </p>
                                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                                     {searchQuery && (
@@ -506,17 +529,22 @@ export function MusicExplorerUI({
                                             Clear Search & Filters
                                         </Button>
                                     )}
-                                    {selectedGenre !== 'all' && !searchQuery && (
-                                        <Button
-                                            onClick={() => setSelectedGenre("all")}
-                                            variant="outline"
-                                            className="px-6 py-3 rounded-2xl"
-                                        >
-                                            Show All Genres
-                                        </Button>
-                                    )}
+                                    {selectedGenre !== "all" &&
+                                        !searchQuery && (
+                                            <Button
+                                                onClick={() =>
+                                                    setSelectedGenre("all")
+                                                }
+                                                variant="outline"
+                                                className="px-6 py-3 rounded-2xl"
+                                            >
+                                                Show All Genres
+                                            </Button>
+                                        )}
                                     <Button
-                                        onClick={() => setCurrentView("featured")}
+                                        onClick={() =>
+                                            setCurrentView("featured")
+                                        }
                                         className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-2xl"
                                     >
                                         Explore Featured
@@ -524,14 +552,18 @@ export function MusicExplorerUI({
                                 </div>
                             </div>
                         ) : (
-                            <TrackGrid 
+                            <TrackGrid
                                 key={`library-${libraryTracks.length}-${searchQuery}-${currentPage}`}
                                 tracks={libraryTracks}
                                 onTrackPlay={(track, tracks) => {
-                                    if (currentTrack?.id === track.id && isPlaying) {
+                                    if (
+                                        currentTrack?.id === track.id &&
+                                        isPlaying
+                                    ) {
                                         togglePlayPause();
                                     } else {
-                                        playTrack(track, libraryTracks);
+                                        setTrackList(libraryTracks);
+                                        playTrack(track);
                                     }
                                 }}
                             />
@@ -543,7 +575,11 @@ export function MusicExplorerUI({
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                                    onClick={() =>
+                                        setCurrentPage(
+                                            Math.max(1, currentPage - 1),
+                                        )
+                                    }
                                     disabled={currentPage === 1}
                                     className="flex items-center gap-2"
                                 >
@@ -556,43 +592,83 @@ export function MusicExplorerUI({
                                     {currentPage > 3 && (
                                         <>
                                             <Button
-                                                variant={1 === currentPage ? "default" : "outline"}
+                                                variant={
+                                                    1 === currentPage
+                                                        ? "default"
+                                                        : "outline"
+                                                }
                                                 size="sm"
-                                                onClick={() => setCurrentPage(1)}
+                                                onClick={() =>
+                                                    setCurrentPage(1)
+                                                }
                                                 className="w-10 h-10"
                                             >
                                                 1
                                             </Button>
-                                            {currentPage > 4 && <span className="text-gray-500">...</span>}
+                                            {currentPage > 4 && (
+                                                <span className="text-gray-500">
+                                                    ...
+                                                </span>
+                                            )}
                                         </>
                                     )}
 
                                     {/* Page numbers around current page */}
-                                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                                        const pageNumber = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
-                                        if (pageNumber > totalPages) return null;
+                                    {Array.from(
+                                        { length: Math.min(5, totalPages) },
+                                        (_, i) => {
+                                            const pageNumber =
+                                                Math.max(
+                                                    1,
+                                                    Math.min(
+                                                        totalPages - 4,
+                                                        currentPage - 2,
+                                                    ),
+                                                ) + i;
+                                            if (pageNumber > totalPages)
+                                                return null;
 
-                                        return (
-                                            <Button
-                                                key={pageNumber}
-                                                variant={pageNumber === currentPage ? "default" : "outline"}
-                                                size="sm"
-                                                onClick={() => setCurrentPage(pageNumber)}
-                                                className="w-10 h-10"
-                                            >
-                                                {pageNumber}
-                                            </Button>
-                                        );
-                                    })}
+                                            return (
+                                                <Button
+                                                    key={pageNumber}
+                                                    variant={
+                                                        pageNumber ===
+                                                        currentPage
+                                                            ? "default"
+                                                            : "outline"
+                                                    }
+                                                    size="sm"
+                                                    onClick={() =>
+                                                        setCurrentPage(
+                                                            pageNumber,
+                                                        )
+                                                    }
+                                                    className="w-10 h-10"
+                                                >
+                                                    {pageNumber}
+                                                </Button>
+                                            );
+                                        },
+                                    )}
 
                                     {/* Last page */}
                                     {currentPage < totalPages - 2 && (
                                         <>
-                                            {currentPage < totalPages - 3 && <span className="text-gray-500">...</span>}
+                                            {currentPage < totalPages - 3 && (
+                                                <span className="text-gray-500">
+                                                    ...
+                                                </span>
+                                            )}
                                             <Button
-                                                variant={totalPages === currentPage ? "default" : "outline"}
+                                                variant={
+                                                    totalPages === currentPage
+                                                        ? "default"
+                                                        : "outline"
+                                                }
                                                 size="sm"
-                                                onClick={() => setCurrentPage(totalPages)}
+                                                onClick={() =>
+                                                    setCurrentPage(totalPages)
+                                                }
                                                 className="w-10 h-10"
                                             >
                                                 {totalPages}
@@ -604,7 +680,14 @@ export function MusicExplorerUI({
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                                    onClick={() =>
+                                        setCurrentPage(
+                                            Math.min(
+                                                totalPages,
+                                                currentPage + 1,
+                                            ),
+                                        )
+                                    }
                                     disabled={currentPage === totalPages}
                                     className="flex items-center gap-2"
                                 >
@@ -615,7 +698,7 @@ export function MusicExplorerUI({
                         )}
                     </div>
                 )}
-                 {currentView === "albums" && (
+                {currentView === "albums" && (
                     <div className="space-y-6">
                         <div className="flex items-center justify-between">
                             <h2 className="text-xl font-bold flex items-center gap-3">
@@ -630,7 +713,7 @@ export function MusicExplorerUI({
 
                         {/* Grid view for albums */}
                         {isLoadingAlbums ? (
-                            <AlbumGrid 
+                            <AlbumGrid
                                 albums={[]}
                                 isLoading={true}
                                 loadingCount={5}
@@ -642,15 +725,16 @@ export function MusicExplorerUI({
                                     <Album className="h-12 w-12 text-white" />
                                 </div>
                                 <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-                                    {searchQuery ? 'No albums found' : 'No albums available'}
+                                    {searchQuery
+                                        ? "No albums found"
+                                        : "No albums available"}
                                 </h3>
                                 <p className="text-gray-600 dark:text-gray-400 text-lg mb-8 max-w-md mx-auto">
                                     {searchQuery
-                                        ? `We couldn't find any albums matching "${searchQuery}"${selectedGenre !== 'all' ? ` in ${selectedGenre} genre` : ''}.`
-                                        : selectedGenre !== 'all'
-                                            ? `No albums available in ${selectedGenre} genre.`
-                                            : 'No albums are available in the library at the moment.'
-                                    }
+                                        ? `We couldn't find any albums matching "${searchQuery}"${selectedGenre !== "all" ? ` in ${selectedGenre} genre` : ""}.`
+                                        : selectedGenre !== "all"
+                                          ? `No albums available in ${selectedGenre} genre.`
+                                          : "No albums are available in the library at the moment."}
                                 </p>
                                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                                     {searchQuery && (
@@ -665,17 +749,22 @@ export function MusicExplorerUI({
                                             Clear Search & Filters
                                         </Button>
                                     )}
-                                    {selectedGenre !== 'all' && !searchQuery && (
-                                        <Button
-                                            onClick={() => setSelectedGenre("all")}
-                                            variant="outline"
-                                            className="px-6 py-3 rounded-2xl"
-                                        >
-                                            Show All Genres
-                                        </Button>
-                                    )}
+                                    {selectedGenre !== "all" &&
+                                        !searchQuery && (
+                                            <Button
+                                                onClick={() =>
+                                                    setSelectedGenre("all")
+                                                }
+                                                variant="outline"
+                                                className="px-6 py-3 rounded-2xl"
+                                            >
+                                                Show All Genres
+                                            </Button>
+                                        )}
                                     <Button
-                                        onClick={() => setCurrentView("featured")}
+                                        onClick={() =>
+                                            setCurrentView("featured")
+                                        }
                                         className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-2xl"
                                     >
                                         Explore Featured
@@ -683,7 +772,7 @@ export function MusicExplorerUI({
                                 </div>
                             </div>
                         ) : (
-                            <AlbumGrid 
+                            <AlbumGrid
                                 key={`albums-${allAlbums.length}-${searchQuery}-${albumsCurrentPage}`}
                                 albums={allAlbums}
                             />
@@ -695,7 +784,11 @@ export function MusicExplorerUI({
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    onClick={() => setAlbumsCurrentPage(Math.max(1, albumsCurrentPage - 1))}
+                                    onClick={() =>
+                                        setAlbumsCurrentPage(
+                                            Math.max(1, albumsCurrentPage - 1),
+                                        )
+                                    }
                                     disabled={albumsCurrentPage === 1}
                                     className="flex items-center gap-2"
                                 >
@@ -708,43 +801,93 @@ export function MusicExplorerUI({
                                     {albumsCurrentPage > 3 && (
                                         <>
                                             <Button
-                                                variant={1 === albumsCurrentPage ? "default" : "outline"}
+                                                variant={
+                                                    1 === albumsCurrentPage
+                                                        ? "default"
+                                                        : "outline"
+                                                }
                                                 size="sm"
-                                                onClick={() => setAlbumsCurrentPage(1)}
+                                                onClick={() =>
+                                                    setAlbumsCurrentPage(1)
+                                                }
                                                 className="w-10 h-10"
                                             >
                                                 1
                                             </Button>
-                                            {albumsCurrentPage > 4 && <span className="text-gray-500">...</span>}
+                                            {albumsCurrentPage > 4 && (
+                                                <span className="text-gray-500">
+                                                    ...
+                                                </span>
+                                            )}
                                         </>
                                     )}
 
                                     {/* Page numbers around current page */}
-                                    {Array.from({ length: Math.min(5, albumsTotalPages) }, (_, i) => {
-                                        const pageNumber = Math.max(1, Math.min(albumsTotalPages - 4, albumsCurrentPage - 2)) + i;
-                                        if (pageNumber > albumsTotalPages) return null;
+                                    {Array.from(
+                                        {
+                                            length: Math.min(
+                                                5,
+                                                albumsTotalPages,
+                                            ),
+                                        },
+                                        (_, i) => {
+                                            const pageNumber =
+                                                Math.max(
+                                                    1,
+                                                    Math.min(
+                                                        albumsTotalPages - 4,
+                                                        albumsCurrentPage - 2,
+                                                    ),
+                                                ) + i;
+                                            if (pageNumber > albumsTotalPages)
+                                                return null;
 
-                                        return (
-                                            <Button
-                                                key={pageNumber}
-                                                variant={pageNumber === albumsCurrentPage ? "default" : "outline"}
-                                                size="sm"
-                                                onClick={() => setAlbumsCurrentPage(pageNumber)}
-                                                className="w-10 h-10"
-                                            >
-                                                {pageNumber}
-                                            </Button>
-                                        );
-                                    })}
+                                            return (
+                                                <Button
+                                                    key={pageNumber}
+                                                    variant={
+                                                        pageNumber ===
+                                                        albumsCurrentPage
+                                                            ? "default"
+                                                            : "outline"
+                                                    }
+                                                    size="sm"
+                                                    onClick={() =>
+                                                        setAlbumsCurrentPage(
+                                                            pageNumber,
+                                                        )
+                                                    }
+                                                    className="w-10 h-10"
+                                                >
+                                                    {pageNumber}
+                                                </Button>
+                                            );
+                                        },
+                                    )}
 
                                     {/* Last page */}
-                                    {albumsCurrentPage < albumsTotalPages - 2 && (
+                                    {albumsCurrentPage <
+                                        albumsTotalPages - 2 && (
                                         <>
-                                            {albumsCurrentPage < albumsTotalPages - 3 && <span className="text-gray-500">...</span>}
+                                            {albumsCurrentPage <
+                                                albumsTotalPages - 3 && (
+                                                <span className="text-gray-500">
+                                                    ...
+                                                </span>
+                                            )}
                                             <Button
-                                                variant={albumsTotalPages === albumsCurrentPage ? "default" : "outline"}
+                                                variant={
+                                                    albumsTotalPages ===
+                                                    albumsCurrentPage
+                                                        ? "default"
+                                                        : "outline"
+                                                }
                                                 size="sm"
-                                                onClick={() => setAlbumsCurrentPage(albumsTotalPages)}
+                                                onClick={() =>
+                                                    setAlbumsCurrentPage(
+                                                        albumsTotalPages,
+                                                    )
+                                                }
                                                 className="w-10 h-10"
                                             >
                                                 {albumsTotalPages}
@@ -756,8 +899,17 @@ export function MusicExplorerUI({
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    onClick={() => setAlbumsCurrentPage(Math.min(albumsTotalPages, albumsCurrentPage + 1))}
-                                    disabled={albumsCurrentPage === albumsTotalPages}
+                                    onClick={() =>
+                                        setAlbumsCurrentPage(
+                                            Math.min(
+                                                albumsTotalPages,
+                                                albumsCurrentPage + 1,
+                                            ),
+                                        )
+                                    }
+                                    disabled={
+                                        albumsCurrentPage === albumsTotalPages
+                                    }
                                     className="flex items-center gap-2"
                                 >
                                     Next
@@ -782,7 +934,7 @@ export function MusicExplorerUI({
 
                         {/* Grid view for artists */}
                         {isLoadingArtists ? (
-<ArtistGrid 
+                            <ArtistGrid
                                 artists={[]}
                                 isLoading={true}
                                 loadingCount={5}
@@ -793,15 +945,16 @@ export function MusicExplorerUI({
                                     <Users className="h-12 w-12 text-white" />
                                 </div>
                                 <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-                                    {searchQuery ? 'No artists found' : 'No artists available'}
+                                    {searchQuery
+                                        ? "No artists found"
+                                        : "No artists available"}
                                 </h3>
                                 <p className="text-gray-600 dark:text-gray-400 text-lg mb-8 max-w-md mx-auto">
                                     {searchQuery
-                                        ? `We couldn't find any artists matching "${searchQuery}"${selectedGenre !== 'all' ? ` in ${selectedGenre} genre` : ''}.`
-                                        : selectedGenre !== 'all'
-                                            ? `No artists available in ${selectedGenre} genre.`
-                                            : 'No artists are available in the library at the moment.'
-                                    }
+                                        ? `We couldn't find any artists matching "${searchQuery}"${selectedGenre !== "all" ? ` in ${selectedGenre} genre` : ""}.`
+                                        : selectedGenre !== "all"
+                                          ? `No artists available in ${selectedGenre} genre.`
+                                          : "No artists are available in the library at the moment."}
                                 </p>
                                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                                     {searchQuery && (
@@ -816,17 +969,22 @@ export function MusicExplorerUI({
                                             Clear Search & Filters
                                         </Button>
                                     )}
-                                    {selectedGenre !== 'all' && !searchQuery && (
-                                        <Button
-                                            onClick={() => setSelectedGenre("all")}
-                                            variant="outline"
-                                            className="px-6 py-3 rounded-2xl"
-                                        >
-                                            Show All Genres
-                                        </Button>
-                                    )}
+                                    {selectedGenre !== "all" &&
+                                        !searchQuery && (
+                                            <Button
+                                                onClick={() =>
+                                                    setSelectedGenre("all")
+                                                }
+                                                variant="outline"
+                                                className="px-6 py-3 rounded-2xl"
+                                            >
+                                                Show All Genres
+                                            </Button>
+                                        )}
                                     <Button
-                                        onClick={() => setCurrentView("featured")}
+                                        onClick={() =>
+                                            setCurrentView("featured")
+                                        }
                                         className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-2xl"
                                     >
                                         Explore Featured
@@ -834,7 +992,7 @@ export function MusicExplorerUI({
                                 </div>
                             </div>
                         ) : (
-                            <ArtistGrid 
+                            <ArtistGrid
                                 key={`artists-${allArtists.length}-${searchQuery}-${artistsCurrentPage}`}
                                 artists={allArtists}
                             />
@@ -846,7 +1004,11 @@ export function MusicExplorerUI({
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    onClick={() => setArtistsCurrentPage(Math.max(1, artistsCurrentPage - 1))}
+                                    onClick={() =>
+                                        setArtistsCurrentPage(
+                                            Math.max(1, artistsCurrentPage - 1),
+                                        )
+                                    }
                                     disabled={artistsCurrentPage === 1}
                                     className="flex items-center gap-2"
                                 >
@@ -859,43 +1021,93 @@ export function MusicExplorerUI({
                                     {artistsCurrentPage > 3 && (
                                         <>
                                             <Button
-                                                variant={1 === artistsCurrentPage ? "default" : "outline"}
+                                                variant={
+                                                    1 === artistsCurrentPage
+                                                        ? "default"
+                                                        : "outline"
+                                                }
                                                 size="sm"
-                                                onClick={() => setArtistsCurrentPage(1)}
+                                                onClick={() =>
+                                                    setArtistsCurrentPage(1)
+                                                }
                                                 className="w-10 h-10"
                                             >
                                                 1
                                             </Button>
-                                            {artistsCurrentPage > 4 && <span className="text-gray-500">...</span>}
+                                            {artistsCurrentPage > 4 && (
+                                                <span className="text-gray-500">
+                                                    ...
+                                                </span>
+                                            )}
                                         </>
                                     )}
 
                                     {/* Page numbers around current page */}
-                                    {Array.from({ length: Math.min(5, artistsTotalPages) }, (_, i) => {
-                                        const pageNumber = Math.max(1, Math.min(artistsTotalPages - 4, artistsCurrentPage - 2)) + i;
-                                        if (pageNumber > artistsTotalPages) return null;
+                                    {Array.from(
+                                        {
+                                            length: Math.min(
+                                                5,
+                                                artistsTotalPages,
+                                            ),
+                                        },
+                                        (_, i) => {
+                                            const pageNumber =
+                                                Math.max(
+                                                    1,
+                                                    Math.min(
+                                                        artistsTotalPages - 4,
+                                                        artistsCurrentPage - 2,
+                                                    ),
+                                                ) + i;
+                                            if (pageNumber > artistsTotalPages)
+                                                return null;
 
-                                        return (
-                                            <Button
-                                                key={pageNumber}
-                                                variant={pageNumber === artistsCurrentPage ? "default" : "outline"}
-                                                size="sm"
-                                                onClick={() => setArtistsCurrentPage(pageNumber)}
-                                                className="w-10 h-10"
-                                            >
-                                                {pageNumber}
-                                            </Button>
-                                        );
-                                    })}
+                                            return (
+                                                <Button
+                                                    key={pageNumber}
+                                                    variant={
+                                                        pageNumber ===
+                                                        artistsCurrentPage
+                                                            ? "default"
+                                                            : "outline"
+                                                    }
+                                                    size="sm"
+                                                    onClick={() =>
+                                                        setArtistsCurrentPage(
+                                                            pageNumber,
+                                                        )
+                                                    }
+                                                    className="w-10 h-10"
+                                                >
+                                                    {pageNumber}
+                                                </Button>
+                                            );
+                                        },
+                                    )}
 
                                     {/* Last page */}
-                                    {artistsCurrentPage < artistsTotalPages - 2 && (
+                                    {artistsCurrentPage <
+                                        artistsTotalPages - 2 && (
                                         <>
-                                            {artistsCurrentPage < artistsTotalPages - 3 && <span className="text-gray-500">...</span>}
+                                            {artistsCurrentPage <
+                                                artistsTotalPages - 3 && (
+                                                <span className="text-gray-500">
+                                                    ...
+                                                </span>
+                                            )}
                                             <Button
-                                                variant={artistsTotalPages === artistsCurrentPage ? "default" : "outline"}
+                                                variant={
+                                                    artistsTotalPages ===
+                                                    artistsCurrentPage
+                                                        ? "default"
+                                                        : "outline"
+                                                }
                                                 size="sm"
-                                                onClick={() => setArtistsCurrentPage(artistsTotalPages)}
+                                                onClick={() =>
+                                                    setArtistsCurrentPage(
+                                                        artistsTotalPages,
+                                                    )
+                                                }
                                                 className="w-10 h-10"
                                             >
                                                 {artistsTotalPages}
@@ -907,8 +1119,17 @@ export function MusicExplorerUI({
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    onClick={() => setArtistsCurrentPage(Math.min(artistsTotalPages, artistsCurrentPage + 1))}
-                                    disabled={artistsCurrentPage === artistsTotalPages}
+                                    onClick={() =>
+                                        setArtistsCurrentPage(
+                                            Math.min(
+                                                artistsTotalPages,
+                                                artistsCurrentPage + 1,
+                                            ),
+                                        )
+                                    }
+                                    disabled={
+                                        artistsCurrentPage === artistsTotalPages
+                                    }
                                     className="flex items-center gap-2"
                                 >
                                     Next
