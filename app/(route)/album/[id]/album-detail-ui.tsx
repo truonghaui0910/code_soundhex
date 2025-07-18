@@ -12,7 +12,7 @@ import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 import { Track } from "@/lib/definitions/Track";
 import { useDownload } from "@/hooks/use-download";
 import AddToPlaylist from "@/components/playlist/add-to-playlist";
-import { TrackList } from "@/components/music/track-list";
+import { TrackGridSm } from "@/components/music/track-grid-sm";
 
 // Helper function to format time
 const formatDuration = (seconds: number | null | undefined) => {
@@ -133,12 +133,9 @@ export function AlbumDetailUI({ album, tracks }: AlbumDetailUIProps) {
 
       {/* Tracks Section */}
       <div className="container mx-auto px-6 py-12">
-        <TrackList
+        <TrackGridSm
           tracks={safeTracks}
           title="Track List"
-          showTrackNumber={true}
-          showAlbumInfo={false}
-          showArtistInfo={true}
           onPlayAll={handlePlayAlbum}
         />
       </div>
