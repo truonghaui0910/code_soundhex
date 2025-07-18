@@ -133,9 +133,16 @@ export function AlbumDetailUI({ album, tracks }: AlbumDetailUIProps) {
 
       {/* Tracks Section */}
       <div className="container mx-auto px-6 py-12">
+        {/* Section Title */}
+        <div className="flex items-center gap-3 mb-8">
+          <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center">
+            <Music className="h-5 w-5 text-white" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Track List</h2>
+        </div>
+        
         <TrackGridSm
           tracks={safeTracks}
-          title="Track List"
           onPlayAll={handlePlayAlbum}
         />
       </div>
