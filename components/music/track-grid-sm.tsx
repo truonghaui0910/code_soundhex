@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 import { useDownload } from "@/hooks/use-download";
+import { useLikesFollows } from "@/hooks/use-likes-follows";
 import AddToPlaylist from "@/components/playlist/add-to-playlist";
 
 interface Track {
@@ -88,6 +89,7 @@ export const TrackGridSm = React.memo(function TrackGridSm({
         togglePlayPause,
     } = useAudioPlayer();
     const { downloadTrack } = useDownload();
+    const { getTrackLikeStatus, fetchTrackLikeStatus, toggleTrackLike } = useLikesFollows();
 
     // Handle click outside to close menu
     useEffect(() => {
@@ -105,6 +107,15 @@ export const TrackGridSm = React.memo(function TrackGridSm({
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, [openMenuId]);
+
+    // Fetch like status for all tracks
+    useEffect(() => {
+        if (!isLoading && tracks.length > 0) {
+            tracks.forEach(track => {
+                fetchTrackLikeStatus(track.id);
+            });
+        }
+    }, [tracks, isLoading, fetchTrackLikeStatus]);
 
     const toggleMenu = (trackId: number) => {
         setOpenMenuId(openMenuId === trackId ? null : trackId);
@@ -172,7 +183,10 @@ export const TrackGridSm = React.memo(function TrackGridSm({
         <div className={className}>
             {trackGroups.map((group, rowIndex) => (
                 <div key={rowIndex} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {group.map((track) => (
+                    {group.map((track) => {
+                        const trackLikeStatus = getTrackLikeStatus(track.id);
+                        
+                        return (
                         <div
                             key={track.id}
                             className="group flex items-center gap-4 p-6 rounded-xl hover:bg-white/10 dark:hover:bg-white/10 transition-all duration-200"
@@ -329,10 +343,18 @@ export const TrackGridSm = React.memo(function TrackGridSm({
                                         Download
                                     </button>
                                     <button
+                                        onClick={() => {
+                                            toggleTrackLike(track.id);
+                                            setOpenMenuId(null);
+                                        }}
                                         className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                                        disabled={trackLikeStatus.isLoading}
                                     >
-                                        <Heart className="h-4 w-4 mr-2 inline-block" />
-                                        Like
+                                        <Heart className={`h-4 w-4 mr-2 inline-block ${trackLikeStatus.isLiked ? 'fill-current text-red-500' : ''}`} />
+                                        {trackLikeStatus.isLiked ? 'Unlike' : 'Like'}
+                                        {trackLikeStatus.totalLikes !== undefined && trackLikeStatus.totalLikes > 0 && (
+                                            <span className="ml-1">({trackLikeStatus.totalLikes})</span>
+                                        )}
                                     </button>
                                     <button
                                         className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
@@ -343,7 +365,8 @@ export const TrackGridSm = React.memo(function TrackGridSm({
                                 </div>
                             </div>
                         </div>
-                    ))}
+                        );
+                    })}
                 </div>
             ))}
         </div>
