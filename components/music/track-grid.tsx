@@ -11,7 +11,8 @@ import {
     Plus, 
     Download, 
     Heart, 
-    Share 
+    Share,
+    Eye 
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +24,7 @@ interface Track {
     id: number;
     title: string;
     duration: number | null;
+    view_count?: number;
     artist?: {
         id: number;
         name: string;
@@ -55,6 +57,14 @@ const formatDuration = (seconds: number | null) => {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, "0")}`;
+};
+
+// Helper function to format view count
+const formatViewCount = (views: number | undefined) => {
+    if (!views || views === 0) return "0";
+    if (views < 1000) return views.toString();
+    if (views < 1000000) return `${(views / 1000).toFixed(1)}K`;
+    return `${(views / 1000000).toFixed(1)}M`;
 };
 
 export function TrackGrid({ 
@@ -207,9 +217,13 @@ export function TrackGrid({
                                     </p>
                                 </div>
 
-                                <div className="flex items-center justify-between">
+                                <div className="flex items-center justify-between gap-2">
                                     <div className="flex items-center gap-1 text-xs text-purple-700 dark:text-purple-300 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 px-2 py-1 rounded-full border-0">
                                         <span>{track.genre?.name || "Unknown"}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30 px-2 py-1 rounded-full">
+                                        <Eye className="h-3 w-3" />
+                                        <span className="font-mono">{formatViewCount(track.view_count)}</span>
                                     </div>
                                     <div className="flex items-center gap-1 text-xs text-gray-500 bg-gray-100 dark:bg-gray-700/50 px-2 py-1 rounded-full">
                                         <Clock className="h-3 w-3" />
