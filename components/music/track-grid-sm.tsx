@@ -270,14 +270,14 @@ export function TrackGridSm({
                                 </Button>
                                 <div
                                     ref={(el) => (menuRefs.current[track.id] = el)}
-                                    className={`absolute right-0 mt-2 w-48 z-[100] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg rounded-md overflow-hidden ${openMenuId === track.id ? '' : 'hidden'}`}
+                                    className={`absolute right-0 mt-2 w-48 z-[100] bg-gradient-to-b from-white to-gray-50 dark:bg-gradient-to-b dark:from-gray-700 dark:to-gray-750 border border-gray-200 dark:border-gray-600 shadow-xl rounded-lg overflow-hidden ${openMenuId === track.id ? '' : 'hidden'}`}
                                 >
                                     <button
                                         onClick={() => {
                                             handleTogglePlay(track);
                                             setOpenMenuId(null);
                                         }}
-                                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-purple-100 dark:hover:bg-purple-800/50 cursor-pointer"
                                     >
                                         {currentTrack?.id === track.id && isPlaying ? (
                                             <>
@@ -297,7 +297,7 @@ export function TrackGridSm({
                                                 e.preventDefault();
                                                 setOpenMenuId(null);
                                             }}
-                                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-purple-100 dark:hover:bg-purple-800/50 cursor-pointer"
                                         >
                                             <Plus className="h-4 w-4 mr-2 inline-block" />
                                             Add to Playlist
@@ -308,19 +308,19 @@ export function TrackGridSm({
                                             downloadTrack(track);
                                             setOpenMenuId(null);
                                         }}
-                                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-purple-100 dark:hover:bg-purple-800/50 cursor-pointer"
                                     >
                                         <Download className="h-4 w-4 mr-2 inline-block" />
                                         Download
                                     </button>
                                     <button
-                                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-purple-100 dark:hover:bg-purple-800/50 cursor-pointer"
                                     >
                                         <Heart className="h-4 w-4 mr-2 inline-block" />
                                         Like
                                     </button>
                                     <button
-                                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-purple-100 dark:hover:bg-purple-800/50 cursor-pointer"
                                     >
                                         <Share className="h-4 w-4 mr-2 inline-block" />
                                         Share
