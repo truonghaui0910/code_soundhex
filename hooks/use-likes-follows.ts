@@ -1,6 +1,6 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { useCurrentUser } from "./use-current-user";
+import { showWarning } from '@/lib/services/notification-service';
 
 interface LikeFollowState {
   isLiked?: boolean;
@@ -124,7 +124,10 @@ export function useLikesFollows() {
   // Toggle track like
   const toggleTrackLike = useCallback(async (trackId: number) => {
     if (!user) {
-      alert("Please login to like tracks");
+      showWarning({
+        title: "Đăng nhập để tiếp tục",
+        message: "Bạn cần đăng nhập để thích bài hát này"
+      });
       return;
     }
 
@@ -168,7 +171,10 @@ export function useLikesFollows() {
   // Toggle album like
   const toggleAlbumLike = useCallback(async (albumId: number) => {
     if (!user) {
-      alert("Please login to like albums");
+      showWarning({
+        title: "Đăng nhập để tiếp tục",
+        message: "Bạn cần đăng nhập để thích album này"
+      });
       return;
     }
 
@@ -212,7 +218,10 @@ export function useLikesFollows() {
   // Toggle artist follow
   const toggleArtistFollow = useCallback(async (artistId: number) => {
     if (!user) {
-      alert("Please login to follow artists");
+       showWarning({
+        title: "Đăng nhập để tiếp tục",
+        message: "Bạn cần đăng nhập để theo dõi nghệ sĩ này"
+      });
       return;
     }
 
