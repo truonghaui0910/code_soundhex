@@ -25,9 +25,10 @@ const formatDuration = (seconds: number | null | undefined) => {
 interface AlbumDetailUIProps {
   album: any;
   tracks: Track[];
+  isLoading?: boolean;
 }
 
-export function AlbumDetailUI({ album, tracks }: AlbumDetailUIProps) {
+export function AlbumDetailUI({ album, tracks, isLoading = false }: AlbumDetailUIProps) {
   const { currentTrack, isPlaying, playTrack, setTrackList, togglePlayPause } = useAudioPlayer();
   const { downloadTrack, downloadMultipleTracks, isDownloading, isTrackDownloading } = useDownload();
 

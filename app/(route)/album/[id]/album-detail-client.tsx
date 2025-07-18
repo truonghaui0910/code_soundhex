@@ -179,5 +179,5 @@ export function AlbumDetailClient({ albumId, initialAlbum }: AlbumDetailClientPr
   }
 
   // Render UI component với data
-  return <AlbumDetailUI album={album} tracks={tracks} />;
+  return <AlbumDetailUI album={album} tracks={tracks} isLoading={loading} />;
 }
