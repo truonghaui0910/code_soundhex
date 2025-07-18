@@ -134,9 +134,12 @@ export function Sidebar() {
   const SidebarContent = () => {
     // Filter items based on user role
     const filteredItems = items.filter((item) => {
-      // Hide Dashboard for user role
-      if (item.href === "/dashboard" && userRole === "user") {
-        return false;
+      // Hide protected routes for user role
+      if (userRole === "user") {
+        const protectedRoutes = ["/dashboard", "/agreements", "/upload"];
+        if (protectedRoutes.some(route => item.href === route)) {
+          return false;
+        }
       }
       return true;
     });

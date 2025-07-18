@@ -8,11 +8,13 @@ import { Button } from "@/components/ui/button";
 import { UserNav } from "./user-nav";
 import { SoundHexLogo } from "@/components/ui/soundhex-logo";
 import { supabase } from "@/lib/supabase/client";
+import { useUserRole } from "@/hooks/use-user-role";
 
 export function Navbar() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const { userRole } = useUserRole();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -51,29 +53,31 @@ export function Navbar() {
         </div>
 
         <div className="ml-auto flex items-center space-x-2 sm:space-x-4">
-          {/* Upload Button */}
-          <Button
-            variant="outline"
-            size="sm"
-            className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0"
-            onClick={() => router.push("/upload")}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="mr-2 h-4 w-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+          {/* Upload Button - Hide for user role */}
+          {userRole !== "user" && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0"
+              onClick={() => router.push("/upload")}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-              />
-            </svg>
-            Upload
-          </Button>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="mr-2 h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                />
+              </svg>
+              Upload
+            </Button>
+          )}
 
           {!loading && <UserNav user={user} />}
         </div>

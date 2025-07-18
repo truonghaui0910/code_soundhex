@@ -53,6 +53,57 @@ export function useLikesFollows() {
     }
   }, []);
 
+  // Batch fetch track likes status
+  const fetchBatchTrackLikesStatus = useCallback(async (trackIds: number[]) => {
+    if (!user || trackIds.length === 0) return;
+
+    // Set loading state for all tracks
+    setTrackLikes(prev => {
+      const updated = { ...prev };
+      trackIds.forEach(id => {
+        updated[id] = { ...updated[id], isLoading: true };
+      });
+      return updated;
+    });
+
+    try {
+      const response = await fetch('/api/tracks/likes/batch', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ trackIds }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setTrackLikes(prev => ({
+          ...prev,
+          ...data
+        }));
+      } else {
+        // Set error state for all tracks
+        setTrackLikes(prev => {
+          const updated = { ...prev };
+          trackIds.forEach(id => {
+            updated[id] = { ...updated[id], isLoading: false, error: data.error };
+          });
+          return updated;
+        });
+      }
+    } catch (error) {
+      // Set error state for all tracks
+      setTrackLikes(prev => {
+        const updated = { ...prev };
+        trackIds.forEach(id => {
+          updated[id] = { ...updated[id], isLoading: false, error: "Failed to fetch like status" };
+        });
+        return updated;
+      });
+    }
+  }, [user]);
+
   // Fetch album like status
   const fetchAlbumLikeStatus = useCallback(async (albumId: number) => {
     try {
@@ -270,6 +321,7 @@ export function useLikesFollows() {
 
     // Fetch functions
     fetchTrackLikeStatus,
+    fetchBatchTrackLikesStatus,
     fetchAlbumLikeStatus,
     fetchArtistFollowStatus,
 
