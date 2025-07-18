@@ -64,6 +64,7 @@ export function TrackGridSm({
     onTrackPlay,
     className = "space-y-2"
 }: TrackGridSmProps) {
+    console.log('TrackGridSm - Received tracks:', tracks.length, tracks);
     const [openMenuId, setOpenMenuId] = useState<number | null>(null);
     const menuRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
 
@@ -134,6 +135,17 @@ export function TrackGridSm({
                         ))}
                     </div>
                 ))}
+            </div>
+        );
+    }
+
+    if (!isLoading && tracks.length === 0) {
+        return (
+            <div className={className}>
+                <div className="flex items-center gap-4 p-6 bg-white/50 dark:bg-gray-800/50 rounded-xl">
+                    <Music className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-500 text-lg">No tracks available</p>
+                </div>
             </div>
         );
     }

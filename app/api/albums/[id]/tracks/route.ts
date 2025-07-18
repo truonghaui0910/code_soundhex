@@ -21,7 +21,7 @@ export async function GET(
     const fetchTime = Date.now() - startTime;
     console.log(`API: Tracks fetch completed in ${fetchTime}ms - Count: ${tracks.length}`);
 
-    return NextResponse.json({ tracks }, {
+    return NextResponse.json(tracks, {
       headers: {
         "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
       },
