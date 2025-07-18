@@ -79,9 +79,12 @@ export function UserNav({ user }: UserNavProps) {
     { label: "Agreements", href: "/agreements" },
     { label: "Sign out", action: handleSignOut, isSignOut: true },
   ].filter(item => {
-    // Hide Dashboard for user role
-    if (item.href === "/dashboard" && userRole === "user") {
-      return false;
+    // Hide protected routes for user role
+    if (userRole === "user") {
+      const protectedRoutes = ["/dashboard", "/agreements"];
+      if (protectedRoutes.includes(item.href || "")) {
+        return false;
+      }
     }
     return true;
   });

@@ -10,6 +10,8 @@ export interface RoutePermission {
 // Define route permissions
 export const ROUTE_PERMISSIONS: RoutePermission[] = [
   { path: '/dashboard', requiredRole: 'music_provider' },
+  { path: '/agreements', requiredRole: 'music_provider' },
+  { path: '/upload', requiredRole: 'music_provider' },
   { path: '/admin', requiredRole: 'admin' },
   { path: '/right-management', requiredRole: 'admin' },
 ];
@@ -30,9 +32,13 @@ export async function checkRoutePermission(
     const hasPermission = UserRoleService.hasPermission(userRole, requiredPermission.requiredRole);
     
     if (!hasPermission) {
-      // Redirect user role to access denied page for protected routes
+      // Redirect based on user role
       let redirectTo = '/access-denied';
-      if (userRole === 'music_provider') {
+      
+      // User role should always go to access-denied for protected routes
+      if (userRole === 'user') {
+        redirectTo = '/access-denied';
+      } else if (userRole === 'music_provider') {
         redirectTo = '/dashboard';
       } else if (userRole === 'admin') {
         redirectTo = '/admin';
