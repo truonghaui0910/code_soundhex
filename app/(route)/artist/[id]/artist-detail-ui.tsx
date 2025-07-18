@@ -19,7 +19,6 @@ import {
   Share,
   Users,
   Album,
-  Pause,
   Download,
   Plus,
   ArrowLeft
