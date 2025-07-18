@@ -15,7 +15,7 @@ interface AudioPlayerContextType {
   currentTime: number;
   duration: number;
   error: string | null;
-  playTrack: (track: Track) => void;
+  playTrack: (track: Track, playlist?: Track[]) => void;
   setTrackList: (tracks: Track[]) => void;
   playNext: () => void;
   playPrevious: () => void;
