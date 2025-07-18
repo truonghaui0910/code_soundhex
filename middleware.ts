@@ -349,11 +349,17 @@ export const config = {
      * - Auth routes: /login, /register (bao gồm sub-paths cho OAuth)
      * - Protected routes: /dashboard, /agreements, /upload, etc.
      */
+    "/dashboard",
     "/dashboard/:path*",
+    "/agreements",
     "/agreements/:path*", 
+    "/upload",
     "/upload/:path*",
+    "/admin",
     "/admin/:path*",
+    "/right-management",
     "/right-management/:path*",
+    "/library",
     "/library/:path*",
     "/login/:path*",        // Xử lý OAuth callbacks
     "/register/:path*",     // Xử lý registration flows
