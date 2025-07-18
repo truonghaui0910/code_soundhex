@@ -109,10 +109,10 @@ export function AlbumGrid({
                                     alt={album.title}
                                     fill
                                     sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
-                                    className="object-cover rounded-lg group-hover:scale-110 transition-transform duration-300"
+                                    className="object-cover rounded-lg group-hover:scale-105 transition-transform duration-300"
                                 />
                             ) : (
-                                <div className="bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center w-full h-full rounded-lg group-hover:scale-110 transition-transform duration-300">
+                                <div className="bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center w-full h-full rounded-lg group-hover:scale-105 transition-transform duration-300">
                                     <Music className="h-12 w-12 text-white" />
                                 </div>
                             )}
