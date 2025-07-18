@@ -65,7 +65,6 @@ export function useAudioPlayer() {
               setTimeout(() => {
                 setCurrentIndex(nextIndex);
                 setCurrentTrack(nextTrack);
-                setIsPlaying(true);
                 audioService.playTrack(nextTrack);
               }, 500);
             }
@@ -99,14 +98,25 @@ export function useAudioPlayer() {
   }, [getAudioService]);
 
   // Phát một bài hát
-  const playTrack = useCallback((track: Track) => {
+  const playTrack = useCallback((track: Track, playlist?: Track[]) => {
     const audioService = getAudioService();
     if (!audioService) return;
 
-    // Tìm index của track trong playlist
-    const trackIndex = trackList.findIndex(t => t.id === track.id);
-    if (trackIndex !== -1) {
-      setCurrentIndex(trackIndex);
+    // Nếu có playlist mới được truyền vào, cập nhật trackList
+    if (playlist && playlist.length > 0) {
+      setTrackListState(playlist);
+      const trackIndex = playlist.findIndex(t => t.id === track.id);
+      setCurrentIndex(trackIndex !== -1 ? trackIndex : 0);
+    } else {
+      // Tìm index của track trong playlist hiện tại
+      const trackIndex = trackList.findIndex(t => t.id === track.id);
+      if (trackIndex !== -1) {
+        setCurrentIndex(trackIndex);
+      } else {
+        // Nếu track không có trong trackList hiện tại, set nó làm track đơn lẻ
+        setTrackListState([track]);
+        setCurrentIndex(0);
+      }
     }
 
     // Cập nhật state ngay lập tức - điều này đảm bảo UI được cập nhật ngay

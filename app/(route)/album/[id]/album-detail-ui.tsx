@@ -154,7 +154,7 @@ export function AlbumDetailUI({ album, tracks, isLoading = false, tracksLoading 
           </div>
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">Track List</h2>
         </div>
-        
+
         <TrackGridSm
           tracks={safeTracks}
           isLoading={tracksLoading}

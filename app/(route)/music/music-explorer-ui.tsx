@@ -361,8 +361,7 @@ export function MusicExplorerUI({
                                     if (currentTrack?.id === track.id && isPlaying) {
                                         togglePlayPause();
                                     } else {
-                                        setTrackList(featuredTracks);
-                                        playTrack(track);
+                                        playTrack(track, featuredTracks);
                                     }
                                 }}
                             />
@@ -532,8 +531,7 @@ export function MusicExplorerUI({
                                     if (currentTrack?.id === track.id && isPlaying) {
                                         togglePlayPause();
                                     } else {
-                                        setTrackList(libraryTracks);
-                                        playTrack(track);
+                                        playTrack(track, libraryTracks);
                                     }
                                 }}
                             />
@@ -784,7 +782,7 @@ export function MusicExplorerUI({
 
                         {/* Grid view for artists */}
                         {isLoadingArtists ? (
-                            <ArtistGrid 
+<ArtistGrid 
                                 artists={[]}
                                 isLoading={true}
                                 loadingCount={5}
