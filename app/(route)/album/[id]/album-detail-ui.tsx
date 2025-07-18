@@ -23,6 +23,8 @@ import { Track } from "@/lib/definitions/Track";
 import { useDownload } from "@/hooks/use-download";
 import AddToPlaylist from "@/components/playlist/add-to-playlist";
 import { TrackGridSm } from "@/components/music/track-grid-sm";
+import { useLikesFollows } from "@/hooks/use-likes-follows";
+import { useEffect } from "react";
 
 // Helper function to format time
 const formatDuration = (seconds: number | null | undefined) => {
@@ -53,6 +55,7 @@ export function AlbumDetailUI({
     isDownloading,
     isTrackDownloading,
   } = useDownload();
+  const { getAlbumLikeStatus, fetchAlbumLikeStatus, toggleAlbumLike } = useLikesFollows();
 
   // Safe album data with fallbacks
   const safeAlbum = {
@@ -77,6 +80,15 @@ export function AlbumDetailUI({
       }, 50);
     }
   };
+
+  // Fetch album like status when component mounts
+  useEffect(() => {
+    if (safeAlbum.id && !isLoading) {
+      fetchAlbumLikeStatus(safeAlbum.id);
+    }
+  }, [safeAlbum.id, isLoading, fetchAlbumLikeStatus]);
+
+  const albumLikeStatus = getAlbumLikeStatus(safeAlbum.id);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20">
@@ -152,10 +164,19 @@ export function AlbumDetailUI({
                 </Button>
                 <Button
                   size="lg"
-                  className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all duration-200 border-0"
+                  className={`backdrop-blur-sm transition-all duration-200 border-0 ${
+                    albumLikeStatus.isLiked 
+                      ? 'bg-red-500 text-white hover:bg-red-600' 
+                      : 'bg-white/10 text-white hover:bg-white/20'
+                  }`}
+                  onClick={() => toggleAlbumLike(safeAlbum.id)}
+                  disabled={albumLikeStatus.isLoading}
                 >
-                  <Heart className="mr-2 h-5 w-5" />
-                  Save
+                  <Heart className={`mr-2 h-5 w-5 ${albumLikeStatus.isLiked ? 'fill-current' : ''}`} />
+                  {albumLikeStatus.isLiked ? 'Liked' : 'Like'}
+                  {albumLikeStatus.totalLikes !== undefined && albumLikeStatus.totalLikes > 0 && (
+                    <span className="ml-1">({albumLikeStatus.totalLikes})</span>
+                  )}
                 </Button>
                 <Button
                   size="lg"

@@ -1,4 +1,3 @@
-
 "use client";
 
 import Image from "next/image";
@@ -19,6 +18,8 @@ import { Badge } from "@/components/ui/badge";
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 import { useDownload } from "@/hooks/use-download";
 import AddToPlaylist from "@/components/playlist/add-to-playlist";
+import { useEffect } from "react";
+import { useLikesFollows } from "@/hooks/use-likes-follows";
 
 interface Track {
     id: number;
@@ -83,6 +84,7 @@ export function TrackGrid({
         togglePlayPause,
     } = useAudioPlayer();
     const { downloadTrack } = useDownload();
+    const { getTrackLikeStatus, fetchTrackLikeStatus, toggleTrackLike } = useLikesFollows();
 
     const handleTrackPlay = (track: Track) => {
         if (onTrackPlay) {
@@ -121,6 +123,14 @@ export function TrackGrid({
             </div>
         );
     }
+
+    useEffect(() => {
+        if (!isLoading && tracks.length > 0) {
+            tracks.forEach(track => {
+                fetchTrackLikeStatus(track.id);
+            });
+        }
+    }, [tracks, isLoading, fetchTrackLikeStatus]);
 
     return (
         <div className={className}>
@@ -247,8 +257,17 @@ export function TrackGrid({
                                 >
                                     <Download className="h-4 w-4" />
                                 </Button>
-                                <Button size="sm" variant="ghost" className="hover:bg-purple-100 dark:hover:bg-purple-900/30 flex-1">
-                                    <Heart className="h-4 w-4" />
+                                <Button
+                                    size="sm"
+                                    className={`backdrop-blur-sm transition-all duration-200 border-0 p-2 h-8 w-8 ${
+                                        getTrackLikeStatus(track.id).isLiked 
+                                            ? 'bg-red-500 text-white hover:bg-red-600' 
+                                            : 'bg-white/10 text-white hover:bg-white/20'
+                                    }`}
+                                    onClick={() => toggleTrackLike(track.id)}
+                                    disabled={getTrackLikeStatus(track.id).isLoading}
+                                >
+                                    <Heart className={`h-4 w-4 ${getTrackLikeStatus(track.id).isLiked ? 'fill-current' : ''}`} />
                                 </Button>
                                 <Button size="sm" variant="ghost" className="hover:bg-purple-100 dark:hover:bg-purple-900/30 flex-1">
                                     <Share className="h-4 w-4" />
