@@ -1,6 +1,6 @@
 
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { cookies } from "next/headers";
 
 export async function POST(
@@ -13,7 +13,7 @@ export async function POST(
       return NextResponse.json({ error: "Invalid track ID" }, { status: 400 });
     }
 
-    const supabase = createClient(cookies());
+    const supabase = createServerSupabaseClient();
     const { data: { user }, error: userError } = await supabase.auth.getUser();
 
     if (userError || !user) {
@@ -74,7 +74,7 @@ export async function GET(
       return NextResponse.json({ error: "Invalid track ID" }, { status: 400 });
     }
 
-    const supabase = createClient(cookies());
+    const supabase = createServerSupabaseClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     // Get total likes count
