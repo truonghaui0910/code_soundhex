@@ -1,6 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
-import { AudioService, AudioEvent, isClient } from '@/lib/services/audio-service';
-import { Track } from '@/lib/definitions/Track';
+import { useState, useEffect, useCallback } from "react";
+import {
+  AudioService,
+  AudioEvent,
+  isClient,
+} from "@/lib/services/audio-service";
+import { Track } from "@/lib/definitions/Track";
 
 /**
  * Hook để sử dụng AudioService trong các component React
@@ -44,17 +48,17 @@ export function useAudioPlayer() {
     // Xử lý các sự kiện audio
     const handleAudioEvent = (event: AudioEvent) => {
       switch (event.type) {
-        case 'play':
+        case "play":
           setIsPlaying(true);
           // Nếu event có chứa thông tin bài hát, cập nhật currentTrack
           if (event.detail?.track) {
             setCurrentTrack(event.detail.track);
           }
           break;
-        case 'pause':
+        case "pause":
           setIsPlaying(false);
           break;
-        case 'ended':
+        case "ended":
           setIsPlaying(false);
           setCurrentTime(0);
           // Tự động chuyển đến bài tiếp theo khi kết thúc
@@ -65,24 +69,25 @@ export function useAudioPlayer() {
               setTimeout(() => {
                 setCurrentIndex(nextIndex);
                 setCurrentTrack(nextTrack);
+                setIsPlaying(true);
                 audioService.playTrack(nextTrack);
               }, 500);
             }
           }
           break;
-        case 'timeupdate':
+        case "timeupdate":
           if (event.detail) {
             setCurrentTime(event.detail.currentTime);
             setDuration(event.detail.duration);
           }
           break;
-        case 'volumechange':
+        case "volumechange":
           if (event.detail) {
             setVolume(event.detail.volume * 100);
           }
           break;
-        case 'error':
-          setError('Error playing track');
+        case "error":
+          setError("Error playing track");
           setIsPlaying(false);
           break;
       }
@@ -98,35 +103,27 @@ export function useAudioPlayer() {
   }, [getAudioService]);
 
   // Phát một bài hát
-  const playTrack = useCallback((track: Track, playlist?: Track[]) => {
-    const audioService = getAudioService();
-    if (!audioService) return;
+  const playTrack = useCallback(
+    (track: Track) => {
+      const audioService = getAudioService();
+      if (!audioService) return;
 
-    // Nếu có playlist mới được truyền vào, cập nhật trackList
-    if (playlist && playlist.length > 0) {
-      setTrackListState(playlist);
-      const trackIndex = playlist.findIndex(t => t.id === track.id);
-      setCurrentIndex(trackIndex !== -1 ? trackIndex : 0);
-    } else {
-      // Tìm index của track trong playlist hiện tại
-      const trackIndex = trackList.findIndex(t => t.id === track.id);
+      // Tìm index của track trong playlist
+      const trackIndex = trackList.findIndex((t) => t.id === track.id);
       if (trackIndex !== -1) {
         setCurrentIndex(trackIndex);
-      } else {
-        // Nếu track không có trong trackList hiện tại, set nó làm track đơn lẻ
-        setTrackListState([track]);
-        setCurrentIndex(0);
       }
-    }
 
-    // Cập nhật state ngay lập tức - điều này đảm bảo UI được cập nhật ngay
-    setCurrentTrack(track);
-    setIsPlaying(true);
-    setError(null);
-    
-    // Gọi service để phát bài hát
-    audioService.playTrack(track);
-  }, [getAudioService, trackList]);
+      // Cập nhật state ngay lập tức - điều này đảm bảo UI được cập nhật ngay
+      setCurrentTrack(track);
+      setIsPlaying(true);
+      setError(null);
+
+      // Gọi service để phát bài hát
+      audioService.playTrack(track);
+    },
+    [getAudioService, trackList],
+  );
 
   // Chuyển đổi giữa phát/tạm dừng
   const togglePlayPause = useCallback(() => {
@@ -137,13 +134,16 @@ export function useAudioPlayer() {
   }, [getAudioService]);
 
   // Thiết lập âm lượng
-  const changeVolume = useCallback((newVolume: number) => {
-    const audioService = getAudioService();
-    if (!audioService) return;
+  const changeVolume = useCallback(
+    (newVolume: number) => {
+      const audioService = getAudioService();
+      if (!audioService) return;
 
-    audioService.setVolume(newVolume);
-    setVolume(newVolume);
-  }, [getAudioService]);
+      audioService.setVolume(newVolume);
+      setVolume(newVolume);
+    },
+    [getAudioService],
+  );
 
   // Thiết lập danh sách track
   const setTrackList = useCallback((tracks: Track[]) => {
@@ -154,10 +154,10 @@ export function useAudioPlayer() {
   // Chuyển đến bài hát tiếp theo
   const playNext = useCallback(() => {
     if (trackList.length === 0) return;
-    
+
     const nextIndex = (currentIndex + 1) % trackList.length;
     const nextTrack = trackList[nextIndex];
-    
+
     if (nextTrack) {
       setCurrentIndex(nextIndex);
       playTrack(nextTrack);
@@ -167,10 +167,11 @@ export function useAudioPlayer() {
   // Chuyển đến bài hát trước đó
   const playPrevious = useCallback(() => {
     if (trackList.length === 0) return;
-    
-    const prevIndex = currentIndex === 0 ? trackList.length - 1 : currentIndex - 1;
+
+    const prevIndex =
+      currentIndex === 0 ? trackList.length - 1 : currentIndex - 1;
     const prevTrack = trackList[prevIndex];
-    
+
     if (prevTrack) {
       setCurrentIndex(prevIndex);
       playTrack(prevTrack);
@@ -178,20 +179,23 @@ export function useAudioPlayer() {
   }, [trackList, currentIndex, playTrack]);
 
   // Di chuyển đến vị trí cụ thể
-  const seekTo = useCallback((time: number) => {
-    const audioService = getAudioService();
-    if (!audioService) return;
+  const seekTo = useCallback(
+    (time: number) => {
+      const audioService = getAudioService();
+      if (!audioService) return;
 
-    audioService.seek(time);
-  }, [getAudioService]);
+      audioService.seek(time);
+    },
+    [getAudioService],
+  );
 
   // Định dạng thời gian dưới dạng mm:ss
   const formatTime = useCallback((timeInSeconds: number) => {
-    if (isNaN(timeInSeconds) || !isFinite(timeInSeconds)) return '0:00';
-    
+    if (isNaN(timeInSeconds) || !isFinite(timeInSeconds)) return "0:00";
+
     const minutes = Math.floor(timeInSeconds / 60);
     const seconds = Math.floor(timeInSeconds % 60);
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
   }, []);
 
   // Trả về các trạng thái và phương thức điều khiển
@@ -211,6 +215,6 @@ export function useAudioPlayer() {
     togglePlayPause,
     changeVolume,
     seekTo,
-    formatTime
+    formatTime,
   };
 }

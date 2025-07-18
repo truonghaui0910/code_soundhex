@@ -6,7 +6,17 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MusicPlayer } from "@/components/music/MusicPlayer";
-import { Play, Pause, Clock, Music, Heart, Share, Download, Plus, ArrowLeft } from "lucide-react";
+import {
+  Play,
+  Pause,
+  Clock,
+  Music,
+  Heart,
+  Share,
+  Download,
+  Plus,
+  ArrowLeft,
+} from "lucide-react";
 import Link from "next/link";
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 import { Track } from "@/lib/definitions/Track";
@@ -16,7 +26,7 @@ import { TrackGridSm } from "@/components/music/track-grid-sm";
 
 // Helper function to format time
 const formatDuration = (seconds: number | null | undefined) => {
-  if (!seconds || typeof seconds !== 'number') return "--:--";
+  if (!seconds || typeof seconds !== "number") return "--:--";
   const mins = Math.floor(seconds / 60);
   const secs = Math.floor(seconds % 60);
   return `${mins}:${secs.toString().padStart(2, "0")}`;
@@ -29,9 +39,20 @@ interface AlbumDetailUIProps {
   tracksLoading?: boolean;
 }
 
-export function AlbumDetailUI({ album, tracks, isLoading = false, tracksLoading = false }: AlbumDetailUIProps) {
-  const { currentTrack, isPlaying, playTrack, setTrackList, togglePlayPause } = useAudioPlayer();
-  const { downloadTrack, downloadMultipleTracks, isDownloading, isTrackDownloading } = useDownload();
+export function AlbumDetailUI({
+  album,
+  tracks,
+  isLoading = false,
+  tracksLoading = false,
+}: AlbumDetailUIProps) {
+  const { currentTrack, isPlaying, playTrack, setTrackList, togglePlayPause } =
+    useAudioPlayer();
+  const {
+    downloadTrack,
+    downloadMultipleTracks,
+    isDownloading,
+    isTrackDownloading,
+  } = useDownload();
 
   // Safe album data with fallbacks
   const safeAlbum = {
@@ -44,7 +65,9 @@ export function AlbumDetailUI({ album, tracks, isLoading = false, tracksLoading 
   };
 
   // Safe tracks data
-  const safeTracks = Array.isArray(tracks) ? tracks.filter(track => track && track.id) : [];
+  const safeTracks = Array.isArray(tracks)
+    ? tracks.filter((track) => track && track.id)
+    : [];
 
   const handlePlayAlbum = () => {
     if (safeTracks && safeTracks.length > 0) {
@@ -105,7 +128,9 @@ export function AlbumDetailUI({ album, tracks, isLoading = false, tracksLoading 
                 {safeAlbum.release_date && (
                   <>
                     <span>•</span>
-                    <span>{new Date(safeAlbum.release_date).getFullYear()}</span>
+                    <span>
+                      {new Date(safeAlbum.release_date).getFullYear()}
+                    </span>
                   </>
                 )}
                 {safeTracks.length > 0 && (
@@ -152,7 +177,9 @@ export function AlbumDetailUI({ album, tracks, isLoading = false, tracksLoading 
           <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center">
             <Music className="h-5 w-5 text-white" />
           </div>
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Track List</h2>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+            Track List
+          </h2>
         </div>
 
         <TrackGridSm

@@ -1,9 +1,9 @@
 // contexts/AudioPlayerContext.tsx
 "use client";
 
-import React, { createContext, useContext, ReactNode, useMemo } from 'react';
-import { useAudioPlayer as useAudioPlayerHook } from '@/hooks/use-audio-player';
-import { Track } from '@/lib/definitions/Track';
+import React, { createContext, useContext, ReactNode, useMemo } from "react";
+import { useAudioPlayer as useAudioPlayerHook } from "@/hooks/use-audio-player";
+import { Track } from "@/lib/definitions/Track";
 
 // Định nghĩa interface cho context
 interface AudioPlayerContextType {
@@ -15,7 +15,7 @@ interface AudioPlayerContextType {
   currentTime: number;
   duration: number;
   error: string | null;
-  playTrack: (track: Track, playlist?: Track[]) => void;
+  playTrack: (track: Track) => void;
   setTrackList: (tracks: Track[]) => void;
   playNext: () => void;
   playPrevious: () => void;
@@ -26,7 +26,9 @@ interface AudioPlayerContextType {
 }
 
 // Tạo context
-const AudioPlayerContext = createContext<AudioPlayerContextType | undefined>(undefined);
+const AudioPlayerContext = createContext<AudioPlayerContextType | undefined>(
+  undefined,
+);
 
 // Provider component
 export function AudioPlayerProvider({ children }: { children: ReactNode }) {
@@ -44,7 +46,9 @@ export function useAudioPlayer() {
   const context = useContext(AudioPlayerContext);
 
   if (context === undefined) {
-    throw new Error('useAudioPlayer must be used within an AudioPlayerProvider');
+    throw new Error(
+      "useAudioPlayer must be used within an AudioPlayerProvider",
+    );
   }
 
   return context;

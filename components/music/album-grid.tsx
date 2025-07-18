@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -48,7 +47,7 @@ export function AlbumGrid({
             try {
                 const response = await fetch(`/api/albums/${album.id}/tracks`);
                 console.log('AlbumGrid - API response status:', response.status);
-                
+
                 if (response.ok) {
                     const data = await response.json();
                     console.log('AlbumGrid - API response data:', data);
@@ -58,10 +57,10 @@ export function AlbumGrid({
                         tracksLength: data.tracks?.length || 0,
                         directArrayLength: Array.isArray(data) ? data.length : 'not an array'
                     });
-                    
+
                     // Handle both formats: { tracks: [...] } and direct array [...]
                     const tracksArray = data.tracks || (Array.isArray(data) ? data : []);
-                    
+
                     if (Array.isArray(tracksArray) && tracksArray.length > 0) {
                         console.log('AlbumGrid - Setting trackList with tracks:', tracksArray);
                         setTrackList(tracksArray);
@@ -110,20 +109,20 @@ export function AlbumGrid({
                                     alt={album.title}
                                     fill
                                     sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
-                                    className="object-cover rounded-lg group-hover:scale-105 transition-transform duration-300"
+                                    className="object-cover rounded-lg group-hover:scale-110 transition-transform duration-300"
                                 />
                             ) : (
-                                <div className="bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center w-full h-full rounded-lg">
+                                <div className="bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center w-full h-full rounded-lg group-hover:scale-110 transition-transform duration-300">
                                     <Music className="h-12 w-12 text-white" />
                                 </div>
                             )}
                         </Link>
 
                         {/* Gradient overlay */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg overflow-hidden" />
 
                         {/* Play Album Button Overlay */}
-                        <div className="absolute inset-0 flex items-center justify-center rounded-lg">
+                        <div className="absolute inset-0 flex items-center justify-center rounded-lg overflow-hidden">
                             <Button
                                 size="lg"
                                 onClick={(e) => {
