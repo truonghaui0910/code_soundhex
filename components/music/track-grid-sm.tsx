@@ -13,7 +13,7 @@ import {
     Heart, 
     Share,
     MoreHorizontal,
-    Eye
+    Headphones
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -57,6 +57,17 @@ const formatDuration = (seconds: number | null) => {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, "0")}`;
+};
+
+// Helper function to format view count
+const formatViewCount = (count: number) => {
+    if (count >= 1000000) {
+        return (count / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+    }
+    if (count >= 1000) {
+        return (count / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+    }
+    return count.toString();
 };
 
 export function TrackGridSm({ 
@@ -259,8 +270,8 @@ export function TrackGridSm({
                                         {track.view_count !== undefined && (
                                             <>
                                                 <span>•</span>
-                                                <Eye className="h-3 w-3" />
-                                                <span>{track.view_count.toLocaleString()} views</span>
+                                                <Headphones className="h-3 w-3" />
+                                                <span>{formatViewCount(track.view_count)}</span>
                                             </>
                                         )}
                                     </div>
