@@ -12,7 +12,7 @@ import {
     Download, 
     Heart, 
     Share,
-    Eye 
+    Headphones 
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -222,7 +222,7 @@ export function TrackGrid({
                                         <span>{track.genre?.name || "Unknown"}</span>
                                     </div>
                                     <div className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30 px-2 py-1 rounded-full">
-                                        <Eye className="h-3 w-3" />
+                                        <Headphones className="h-3 w-3" />
                                         <span className="font-mono">{formatViewCount(track.view_count)}</span>
                                     </div>
                                     <div className="flex items-center gap-1 text-xs text-gray-500 bg-gray-100 dark:bg-gray-700/50 px-2 py-1 rounded-full">
