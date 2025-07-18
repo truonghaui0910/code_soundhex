@@ -30,8 +30,8 @@ export async function checkRoutePermission(
     const hasPermission = UserRoleService.hasPermission(userRole, requiredPermission.requiredRole);
     
     if (!hasPermission) {
-      // Special case: redirect user role to /music when trying to access dashboard
-      let redirectTo = '/music';
+      // Redirect user role to access denied page for protected routes
+      let redirectTo = '/access-denied';
       if (userRole === 'music_provider') {
         redirectTo = '/dashboard';
       } else if (userRole === 'admin') {
