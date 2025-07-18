@@ -15,6 +15,7 @@ export function AlbumDetailClient({ albumId, initialAlbum }: AlbumDetailClientPr
   const [album, setAlbum] = useState<any>(initialAlbum || null);
   const [tracks, setTracks] = useState<any[]>([]);
   const [loading, setLoading] = useState(!initialAlbum);
+  const [tracksLoading, setTracksLoading] = useState(true);
   const [error, setError] = useState(null);
   const [retryCount, setRetryCount] = useState(0);
 
@@ -42,6 +43,7 @@ export function AlbumDetailClient({ albumId, initialAlbum }: AlbumDetailClientPr
         // Nếu đã có initialAlbum, chỉ fetch tracks
         if (initialAlbum) {
           console.log("Using initial album data, only fetching tracks");
+          setTracksLoading(true);
           
           const tracksResponse = await fetchWithTimeout(`/api/albums/${albumId}/tracks`);
           
@@ -60,6 +62,7 @@ export function AlbumDetailClient({ albumId, initialAlbum }: AlbumDetailClientPr
           );
 
           setTracks(validatedTracks);
+          setTracksLoading(false);
         } else {
           // Fetch album và tracks từ API với timeout
           const [albumsResponse, tracksResponse] = await Promise.all([
@@ -117,6 +120,7 @@ export function AlbumDetailClient({ albumId, initialAlbum }: AlbumDetailClientPr
         setError(err.message);
       } finally {
         setLoading(false);
+        setTracksLoading(false);
       }
     }
 
@@ -179,5 +183,5 @@ export function AlbumDetailClient({ albumId, initialAlbum }: AlbumDetailClientPr
   }
 
   // Render UI component với data
-  return <AlbumDetailUI album={album} tracks={tracks} isLoading={loading} />;
+  return <AlbumDetailUI album={album} tracks={tracks} isLoading={loading} tracksLoading={tracksLoading} />;
 }

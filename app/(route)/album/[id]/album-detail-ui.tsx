@@ -26,9 +26,10 @@ interface AlbumDetailUIProps {
   album: any;
   tracks: Track[];
   isLoading?: boolean;
+  tracksLoading?: boolean;
 }
 
-export function AlbumDetailUI({ album, tracks, isLoading = false }: AlbumDetailUIProps) {
+export function AlbumDetailUI({ album, tracks, isLoading = false, tracksLoading = false }: AlbumDetailUIProps) {
   const { currentTrack, isPlaying, playTrack, setTrackList, togglePlayPause } = useAudioPlayer();
   const { downloadTrack, downloadMultipleTracks, isDownloading, isTrackDownloading } = useDownload();
 
@@ -144,7 +145,7 @@ export function AlbumDetailUI({ album, tracks, isLoading = false }: AlbumDetailU
         
         <TrackGridSm
           tracks={safeTracks}
-          isLoading={isLoading}
+          isLoading={tracksLoading}
           loadingCount={15}
           onPlayAll={handlePlayAlbum}
         />
