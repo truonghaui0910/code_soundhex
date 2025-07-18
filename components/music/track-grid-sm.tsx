@@ -270,11 +270,11 @@ export function TrackGridSm({
                                 </Button>
                                 <div
                                     ref={(el) => (menuRefs.current[track.id] = el)}
-                                    className={`absolute right-0 mt-2 w-48 z-[100] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 shadow-xl rounded-lg overflow-hidden ${openMenuId === track.id ? '' : 'hidden'}`}
+                                    className={`absolute right-0 mt-2 w-48 z-[100] border border-gray-200 dark:border-gray-600 shadow-xl rounded-lg overflow-hidden ${openMenuId === track.id ? '' : 'hidden'}`}
                                     style={{ 
-                                        backgroundColor: 'var(--background, rgb(255, 255, 255))', 
+                                        backgroundColor: document.documentElement.classList.contains('dark') ? '#1f2937' : '#ffffff',
                                         backdropFilter: 'none',
-                                        background: 'solid'
+                                        opacity: '1'
                                     }}
                                 >
                                     <button
