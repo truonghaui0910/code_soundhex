@@ -277,7 +277,7 @@ export function TrackGridSm({
                                             handleTogglePlay(track);
                                             setOpenMenuId(null);
                                         }}
-                                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-purple-100 dark:hover:bg-purple-800/50 cursor-pointer"
                                     >
                                         {currentTrack?.id === track.id && isPlaying ? (
                                             <>
@@ -297,7 +297,7 @@ export function TrackGridSm({
                                                 e.preventDefault();
                                                 setOpenMenuId(null);
                                             }}
-                                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-purple-100 dark:hover:bg-purple-800/50 cursor-pointer"
                                         >
                                             <Plus className="h-4 w-4 mr-2 inline-block" />
                                             Add to Playlist
@@ -308,19 +308,19 @@ export function TrackGridSm({
                                             downloadTrack(track);
                                             setOpenMenuId(null);
                                         }}
-                                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-purple-100 dark:hover:bg-purple-800/50 cursor-pointer"
                                     >
                                         <Download className="h-4 w-4 mr-2 inline-block" />
                                         Download
                                     </button>
                                     <button
-                                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-purple-100 dark:hover:bg-purple-800/50 cursor-pointer"
                                     >
                                         <Heart className="h-4 w-4 mr-2 inline-block" />
                                         Like
                                     </button>
                                     <button
-                                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-purple-100 dark:hover:bg-purple-800/50 cursor-pointer"
                                     >
                                         <Share className="h-4 w-4 mr-2 inline-block" />
                                         Share
