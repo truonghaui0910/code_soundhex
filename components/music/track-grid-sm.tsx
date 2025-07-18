@@ -270,7 +270,7 @@ export function TrackGridSm({
                                 </Button>
                                 <div
                                     ref={(el) => (menuRefs.current[track.id] = el)}
-                                    className={`absolute right-0 mt-2 w-48 z-[100] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg rounded-md overflow-hidden ${openMenuId === track.id ? '' : 'hidden'}`}
+                                    className={`absolute right-0 mt-2 w-48 z-[100] bg-gradient-to-b from-white to-gray-50 dark:bg-gradient-to-b dark:from-gray-700 dark:to-gray-750 border border-gray-200 dark:border-gray-600 shadow-xl rounded-lg overflow-hidden ${openMenuId === track.id ? '' : 'hidden'}`}
                                 >
                                     <button
                                         onClick={() => {
