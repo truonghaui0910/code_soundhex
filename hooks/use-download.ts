@@ -33,13 +33,35 @@ export function useDownload() {
     setIsDownloading(true);
     setDownloadProgress(prev => ({ ...prev, [track.id]: true }));
 
+    let downloadSuccess = false;
+    let errorMessage = '';
+
     try {
       await DownloadService.downloadTrack(track);
+      downloadSuccess = true;
       toast.success(`Downloaded: ${track.title}`);
     } catch (error) {
       console.error('Download error:', error);
-      toast.error(error instanceof Error ? error.message : 'Download failed');
+      errorMessage = error instanceof Error ? error.message : 'Download failed';
+      toast.error(errorMessage);
     } finally {
+      // Log the download attempt
+      try {
+        await fetch(`/api/tracks/${track.id}/download`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            downloadType: 'single',
+            success: downloadSuccess,
+            errorMessage: errorMessage || undefined
+          })
+        });
+      } catch (logError) {
+        console.error('Failed to log download:', logError);
+      }
+
       setIsDownloading(false);
       setDownloadProgress(prev => ({ ...prev, [track.id]: false }));
     }
@@ -61,12 +83,36 @@ export function useDownload() {
 
     setIsDownloading(true);
 
+    let downloadSuccess = false;
+    let errorMessage = '';
+
     try {
       await DownloadService.downloadMultipleTracks(tracks);
+      downloadSuccess = true;
     } catch (error) {
       console.error('Batch download error:', error);
-      alert(error instanceof Error ? error.message : 'Download failed');
+      errorMessage = error instanceof Error ? error.message : 'Download failed';
+      alert(errorMessage);
     } finally {
+      // Log the batch download
+      try {
+        for (const track of tracks) {
+          await fetch(`/api/tracks/${track.id}/download`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              downloadType: 'batch',
+              success: downloadSuccess,
+              errorMessage: errorMessage || undefined
+            })
+          });
+        }
+      } catch (logError) {
+        console.error('Failed to log batch download:', logError);
+      }
+
       setIsDownloading(false);
     }
   };
