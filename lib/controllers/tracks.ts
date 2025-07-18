@@ -85,7 +85,7 @@ export class TracksController {
    * Lấy danh sách bài hát theo nghệ sĩ
    */
   static async getTracksByArtist(artistId: number): Promise<Track[]> {
-    const supabase = createClientComponentClient<Database>();
+    const supabase = createServerComponentClient<Database>({ cookies });
 
     const { data, error } = await supabase
       .from("tracks")
@@ -102,6 +102,9 @@ export class TracksController {
       console.error(`Error fetching tracks for artist ${artistId}:`, error);
       throw new Error(`Failed to fetch tracks: ${error.message}`);
     }
+
+    console.log(`TracksController.getTracksByArtist - Found ${data?.length || 0} tracks`);
+    console.log(`TracksController.getTracksByArtist - Sample view_count:`, data?.[0]?.view_count);
 
     return data as unknown as Track[];
   }

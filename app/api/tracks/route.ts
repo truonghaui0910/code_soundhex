@@ -55,12 +55,12 @@ export async function GET(request: NextRequest) {
 
     // Default: get all tracks (for featured tracks and backwards compatibility)
     let tracks = await TracksController.getAllTracks();
-    
+
     // Filter by genre if specified (for featured tracks)
     if (genre) {
       tracks = tracks.filter(track => track.genre?.name === genre);
     }
-    
+
     // Apply limit if specified (for featured tracks)
     if (limit) {
       const limitNum = parseInt(limit);
