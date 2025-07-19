@@ -21,6 +21,20 @@ import { useLikesFollows } from "@/hooks/use-likes-follows";
 import { useAudioPlayer } from "@/hooks/use-audio-player";
 import { Track } from "@/lib/definitions/Track";
 import { ArtistGrid } from "@/components/music/artist-grid";
+import { AlbumGrid } from "@/components/music/album-grid";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
+import Link from "next/link";
 
 interface FollowedArtist {
   id: number;
@@ -51,9 +65,11 @@ interface LikedAlbum {
   id: number;
   title: string;
   cover_image_url?: string;
+  custom_url?: string;
   artist: {
     id: number;
     name: string;
+    custom_url?: string;
   };
   release_date?: string;
 }
@@ -69,13 +85,21 @@ interface Playlist {
 
 export default function YourLibraryPage() {
   const { user } = useCurrentUser();
-  const { playTrack, currentTrack, isPlaying, togglePlayPause } = useAudioPlayer();
+  const { playTrack, currentTrack, isPlaying, togglePlayPause, setTrackList } = useAudioPlayer();
+  const { albumLikes, toggleAlbumLike } = useLikesFollows();
   
   const [followedArtists, setFollowedArtists] = useState<FollowedArtist[]>([]);
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [likedTracks, setLikedTracks] = useState<LikedTrack[]>([]);
   const [likedAlbums, setLikedAlbums] = useState<LikedAlbum[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [createPlaylistOpen, setCreatePlaylistOpen] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [playlistFormData, setPlaylistFormData] = useState({
+    name: "",
+    description: "",
+  });
+  const [loadingPlaylistId, setLoadingPlaylistId] = useState<number | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -138,6 +162,134 @@ export default function YourLibraryPage() {
     }
   };
 
+  const handleCreatePlaylist = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!playlistFormData.name.trim()) {
+      toast.error("Playlist name is required");
+      return;
+    }
+
+    setIsCreating(true);
+    try {
+      const response = await fetch("/api/playlists", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: playlistFormData.name,
+          description: playlistFormData.description,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create playlist");
+      }
+
+      const newPlaylist = await response.json();
+      setPlaylists([newPlaylist, ...playlists]);
+      setCreatePlaylistOpen(false);
+      setPlaylistFormData({ name: "", description: "" });
+      toast.success("Playlist created successfully!");
+    } catch (error) {
+      console.error("Error creating playlist:", error);
+      toast.error("Failed to create playlist");
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  const handlePlayPlaylist = async (playlist: Playlist) => {
+    if (playlist.track_count === 0) {
+      toast.error("This playlist is empty");
+      return;
+    }
+
+    setLoadingPlaylistId(playlist.id);
+    try {
+      const response = await fetch(`/api/playlists/${playlist.id}/tracks`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch playlist tracks");
+      }
+
+      const tracksData = await response.json();
+
+      if (tracksData.length === 0) {
+        toast.error("This playlist is empty");
+        return;
+      }
+
+      let tracks: Track[];
+      if (tracksData[0]?.track) {
+        tracks = tracksData.map((pt: any) => pt.track);
+      } else {
+        tracks = tracksData;
+      }
+
+      const processedTracks = tracks.map((track) => ({
+        ...track,
+        file_url: track.file_url || track.audio_file_url,
+        audio_file_url: track.audio_file_url || track.file_url,
+      }));
+
+      const validTracks = processedTracks.filter(
+        (track) =>
+          track &&
+          track.id &&
+          track.title &&
+          (track.file_url || track.audio_file_url),
+      );
+
+      if (validTracks.length === 0) {
+        toast.error("No valid tracks found in playlist");
+        return;
+      }
+
+      setTrackList(validTracks);
+
+      setTimeout(() => {
+        playTrack(validTracks[0]);
+      }, 50);
+
+      toast.success(
+        `Playing "${playlist.name}" - ${validTracks.length} tracks`,
+      );
+    } catch (error) {
+      console.error("Error playing playlist:", error);
+      toast.error("Failed to play playlist");
+    } finally {
+      setLoadingPlaylistId(null);
+    }
+  };
+
+  const handleAlbumPlay = async (album: LikedAlbum) => {
+    try {
+      const response = await fetch(`/api/albums/${album.id}/tracks`);
+      if (response.ok) {
+        const data = await response.json();
+        const tracksArray = data.tracks || (Array.isArray(data) ? data : []);
+
+        if (Array.isArray(tracksArray) && tracksArray.length > 0) {
+          setTrackList(tracksArray);
+          playTrack(tracksArray[0]);
+        } else {
+          toast.error("No tracks found in this album");
+        }
+      } else {
+        toast.error("Failed to load album tracks");
+      }
+    } catch (error) {
+      console.error("Error loading album tracks:", error);
+      toast.error("Failed to load album tracks");
+    }
+  };
+
+  const handleAlbumLike = async (albumId: number, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    await toggleAlbumLike(albumId);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 flex items-center justify-center">
@@ -149,15 +301,6 @@ export default function YourLibraryPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 text-white">
       <div className="container mx-auto px-4 sm:px-6 py-8 space-y-8">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <div className="w-12 h-12 bg-gradient-to-r from-pink-500 to-orange-400 rounded-full flex items-center justify-center">
-            <Music className="h-6 w-6 text-white" />
-          </div>
-          <h1 className="text-3xl font-bold">Your Library</h1>
-          <Play className="h-6 w-6 ml-2" />
-        </div>
-
         {/* Followed Artists Section */}
         <section className="space-y-4">
           <div className="flex items-center justify-between">
@@ -201,8 +344,14 @@ export default function YourLibraryPage() {
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <h2 className="text-xl font-semibold">PLAYLISTS</h2>
-              <Plus className="h-5 w-5 text-purple-300" />
+              <h2 className="text-xl font-semibold">Playlists</h2>
+              <Button 
+                onClick={() => setCreatePlaylistOpen(true)}
+                size="sm" 
+                className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all duration-300 border-2 border-dashed border-purple-400 p-0"
+              >
+                <Plus className="h-4 w-4 text-purple-300" />
+              </Button>
             </div>
             <Button variant="ghost" size="sm" className="text-purple-300 hover:text-white">
               VIEW ALL
@@ -210,31 +359,74 @@ export default function YourLibraryPage() {
             </Button>
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
             {playlists.slice(0, 5).map((playlist) => (
-              <Card key={playlist.id} className="bg-white/10 backdrop-blur-sm border-0 hover:bg-white/20 transition-all cursor-pointer group">
-                <CardContent className="p-4">
-                  <div className="aspect-square bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg mb-3 relative overflow-hidden">
-                    {playlist.cover_image_url ? (
-                      <img 
-                        src={playlist.cover_image_url} 
-                        alt={playlist.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <List className="h-8 w-8 text-white" />
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <Play className="h-8 w-8 text-white" />
+              <div key={playlist.id} className="group cursor-pointer text-center">
+                <div className="relative aspect-square mb-3">
+                  <Link href={`/playlists/${playlist.id}`}>
+                    <div className="w-full h-full bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg relative overflow-hidden">
+                      {playlist.cover_image_url ? (
+                        <img 
+                          src={playlist.cover_image_url} 
+                          alt={playlist.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <List className="h-8 w-8 text-white" />
+                        </div>
+                      )}
                     </div>
+                  </Link>
+                  
+                  <div className="absolute inset-0 flex items-center justify-center rounded-lg overflow-hidden">
+                    <Button
+                      size="lg"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handlePlayPlaylist(playlist);
+                      }}
+                      disabled={loadingPlaylistId === playlist.id}
+                      className="opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-full bg-white/90 text-purple-600 hover:bg-white hover:scale-110 shadow-lg backdrop-blur-sm"
+                    >
+                      {loadingPlaylistId === playlist.id ? (
+                        <div className="h-6 w-6 border-2 border-purple-600 border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <Play className="h-6 w-6" />
+                      )}
+                    </Button>
                   </div>
-                  <h3 className="font-medium text-sm truncate mb-1">{playlist.name}</h3>
-                  <p className="text-xs text-purple-300">{playlist.track_count || 0} songs</p>
-                </CardContent>
-              </Card>
+                </div>
+                <div className="space-y-1">
+                  <Link href={`/playlists/${playlist.id}`} className="block">
+                    <h3 className="font-semibold text-white group-hover:text-purple-300 transition-colors truncate">
+                      {playlist.name}
+                    </h3>
+                  </Link>
+                  <p className="text-sm text-purple-300 truncate">
+                    {playlist.track_count || 0} songs
+                  </p>
+                </div>
+              </div>
             ))}
+            
+            {playlists.length > 5 && (
+              <div className="group cursor-pointer text-center">
+                <div className="aspect-square mx-auto mb-3 rounded-lg bg-white/10 backdrop-blur-sm flex items-center justify-center relative group-hover:bg-white/20 transition-all duration-300 border-2 border-dashed border-purple-400">
+                  <ChevronRight className="h-8 w-8 text-purple-300" />
+                </div>
+                <div className="space-y-1">
+                  <h3 className="font-semibold text-purple-300 group-hover:text-white transition-colors">
+                    View All
+                  </h3>
+                  <p className="text-sm text-purple-400">
+                    {playlists.length - 5} more
+                  </p>
+                </div>
+              </div>
+            )}
+            
             {playlists.length === 0 && (
               <div className="col-span-full text-center py-8">
                 <List className="h-12 w-12 text-purple-400 mx-auto mb-4" />
@@ -309,34 +501,82 @@ export default function YourLibraryPage() {
             </Button>
           </div>
           
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-            {likedAlbums.slice(0, 6).map((album) => (
-              <Card key={album.id} className="bg-white/10 backdrop-blur-sm border-0 hover:bg-white/20 transition-all cursor-pointer group">
-                <CardContent className="p-4">
-                  <div className="aspect-square bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg mb-3 relative overflow-hidden">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
+            {likedAlbums.slice(0, 5).map((album) => (
+              <div key={album.id} className="group text-center">
+                <div className="relative aspect-square mb-3">
+                  <Link href={`/album/${album.custom_url || album.id}`}>
                     {album.cover_image_url ? (
-                      <img 
-                        src={album.cover_image_url} 
+                      <img
+                        src={album.cover_image_url}
                         alt={album.title}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover rounded-lg group-hover:scale-105 transition-transform duration-300"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <AlbumIcon className="h-8 w-8 text-white" />
+                      <div className="bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center w-full h-full rounded-lg group-hover:scale-105 transition-transform duration-300">
+                        <AlbumIcon className="h-12 w-12 text-white" />
                       </div>
                     )}
-                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <Play className="h-8 w-8 text-white" />
-                    </div>
-                    <div className="absolute top-2 right-2">
-                      <Heart className="h-4 w-4 text-red-400 fill-current" />
+                  </Link>
+
+                  <div className="absolute inset-0 flex items-center justify-center rounded-lg overflow-hidden">
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        onClick={(e) => handleAlbumLike(album.id, e)}
+                        className={`opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-full shadow-lg backdrop-blur-sm ${
+                          albumLikes[album.id] 
+                            ? "bg-red-500/90 text-white hover:bg-red-600" 
+                            : "bg-white/90 text-red-500 hover:bg-white"
+                        }`}
+                      >
+                        <Heart className={`h-4 w-4 ${albumLikes[album.id] ? 'fill-current' : ''}`} />
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleAlbumPlay(album);
+                        }}
+                        className="opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-full bg-white/90 text-purple-600 hover:bg-white hover:scale-110 shadow-lg backdrop-blur-sm"
+                      >
+                        <Play className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
-                  <h3 className="font-medium text-sm truncate mb-1">{album.title}</h3>
-                  <p className="text-xs text-purple-300 truncate">{album.artist.name}</p>
-                </CardContent>
-              </Card>
+                </div>
+                <div className="space-y-1">
+                  <Link href={`/album/${album.custom_url || album.id}`} className="block">
+                    <h3 className="font-semibold text-white group-hover:text-purple-300 transition-colors truncate">
+                      {album.title}
+                    </h3>
+                  </Link>
+                  <Link href={`/artist/${album.artist?.custom_url || album.artist?.id}`} className="block">
+                    <p className="text-sm text-purple-300 hover:text-white transition-colors truncate">
+                      {album.artist?.name}
+                    </p>
+                  </Link>
+                </div>
+              </div>
             ))}
+            
+            {likedAlbums.length > 5 && (
+              <div className="group cursor-pointer text-center">
+                <div className="aspect-square mx-auto mb-3 rounded-lg bg-white/10 backdrop-blur-sm flex items-center justify-center relative group-hover:bg-white/20 transition-all duration-300 border-2 border-dashed border-purple-400">
+                  <ChevronRight className="h-8 w-8 text-purple-300" />
+                </div>
+                <div className="space-y-1">
+                  <h3 className="font-semibold text-purple-300 group-hover:text-white transition-colors">
+                    View All
+                  </h3>
+                  <p className="text-sm text-purple-400">
+                    {likedAlbums.length - 5} more
+                  </p>
+                </div>
+              </div>
+            )}
+            
             {likedAlbums.length === 0 && (
               <div className="col-span-full text-center py-8">
                 <AlbumIcon className="h-12 w-12 text-purple-400 mx-auto mb-4" />
@@ -346,6 +586,65 @@ export default function YourLibraryPage() {
           </div>
         </section>
       </div>
+
+      {/* Create Playlist Dialog */}
+      <Dialog open={createPlaylistOpen} onOpenChange={setCreatePlaylistOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New Playlist</DialogTitle>
+            <DialogDescription>
+              Create a new playlist to organize your favorite tracks
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleCreatePlaylist}>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Playlist Name</Label>
+                <Input
+                  id="name"
+                  value={playlistFormData.name}
+                  onChange={(e) =>
+                    setPlaylistFormData({ ...playlistFormData, name: e.target.value })
+                  }
+                  placeholder="Enter playlist name"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="description">Description (Optional)</Label>
+                <Textarea
+                  id="description"
+                  value={playlistFormData.description}
+                  onChange={(e) =>
+                    setPlaylistFormData({ ...playlistFormData, description: e.target.value })
+                  }
+                  placeholder="Enter playlist description"
+                  rows={3}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setCreatePlaylistOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isCreating}>
+                {isCreating ? (
+                  <>
+                    <div className="mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  "Create Playlist"
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
