@@ -20,7 +20,7 @@ export default async function ProtectedLayout({
 
           {/* Main content area with dynamic margin-top and left margin for desktop */}
           <main
-            className="w-full overflow-y-auto pb-24 ml-0 md:ml-64 md:flex-1 px-0"
+            className="w-full overflow-y-auto ml-0 md:ml-64 md:flex-1 px-0"
             style={{ marginTop: "var(--navbar-height, 64px)" }}
           >
             {children}

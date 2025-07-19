@@ -1,4 +1,3 @@
-
 import { Navbar } from "@/components/layout/navbar";
 import { AudioPlayerProvider } from "@/contexts/AudioPlayerContext";
 import { MusicPlayer } from "@/components/music/MusicPlayer";
@@ -12,7 +11,7 @@ export default async function MusicLayout({
     <AudioPlayerProvider>
       <div className="flex flex-col min-h-screen bg-card">
         <Navbar />
-        
+
         {/* Main content area without sidebar */}
         <main
           className="w-full overflow-y-auto pb-24 px-0"

@@ -680,7 +680,7 @@ export default function YourLibraryPage() {
         </DialogContent>
       </Dialog>
 
-      
+      <div className="pb-32"></div>
     </div>
   );
 }
