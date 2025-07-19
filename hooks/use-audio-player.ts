@@ -254,21 +254,12 @@ export function useAudioPlayer() {
     const audioService = getAudioService();
     if (!audioService) return;
 
-    audioService.addEventListener("timeupdate", () => {
-      setCurrentTime(audioService.getCurrentTime());
-    });
-  }, [getAudioService]);
-
-  useEffect(() => {
-    const audioService = getAudioService();
-    if (!audioService) return;
-
-    // Check if we should record a view (after 30 seconds of actual listening time)
+    // Check if we should record a view (after 15 seconds of actual listening time)
     if (!hasRecordedView && currentTrack && viewStartTime > 0) {
       const actualPlayDuration = Math.floor((Date.now() - viewStartTime) / 1000);
       
-      // Only record view if user has actually listened for 30+ seconds
-      if (actualPlayDuration >= 30) {
+      // Only record view if user has actually listened for 15+ seconds
+      if (actualPlayDuration >= 15) {
         recordTrackView(currentTrack.id, actualPlayDuration);
       }
     }
