@@ -525,12 +525,12 @@ export default function YourLibraryPage() {
                         size="sm"
                         onClick={(e) => handleAlbumLike(album.id, e)}
                         className={`opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-full shadow-lg backdrop-blur-sm ${
-                          albumLikes[album.id] 
+                          albumLikes?.[album.id] 
                             ? "bg-red-500/90 text-white hover:bg-red-600" 
                             : "bg-white/90 text-red-500 hover:bg-white"
                         }`}
                       >
-                        <Heart className={`h-4 w-4 ${albumLikes[album.id] ? 'fill-current' : ''}`} />
+                        <Heart className={`h-4 w-4 ${albumLikes?.[album.id] ? 'fill-current' : ''}`} />
                       </Button>
                       <Button
                         size="sm"
