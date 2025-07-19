@@ -647,18 +647,8 @@ export default function YourLibraryPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Debug Info - remove this after testing */}
-      <div className="fixed top-20 right-4 bg-black/80 text-white p-2 rounded text-xs z-50">
-        <div>Current Track: {currentTrack?.title || 'None'}</div>
-        <div>Is Playing: {isPlaying ? 'Yes' : 'No'}</div>
-        <div>Track List: {trackList.length} tracks</div>
-      </div>
-
       {/* Music Player */}
       <MusicPlayer />
-      
-      {/* Add bottom padding to prevent overlap */}
-      <div className="pb-32"></div>
     </div>
   );
 }
