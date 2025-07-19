@@ -1,5 +1,6 @@
 import { Navbar } from "@/components/layout/navbar";
 import { Sidebar } from "@/components/layout/sidebar";
+import RoleMiddleware from "@/lib/middleware/role-middleware";
 import { AudioPlayerProvider } from "@/contexts/AudioPlayerContext";
 import { MusicPlayer } from "@/components/music/MusicPlayer";
 
@@ -19,14 +20,14 @@ export default async function ProtectedLayout({
 
           {/* Main content area with dynamic margin-top and left margin for desktop */}
           <main
-            className="w-full overflow-y-auto pb-24 ml-0 md:ml-64 md:flex-1 px-0"
+            className="w-full overflow-y-auto ml-0 md:ml-64 md:flex-1 px-0"
             style={{ marginTop: "var(--navbar-height, 64px)" }}
           >
             {children}
           </main>
         </div>
 
-        {/* Music Player - hiển thị trên tất cả trang */}
+        {/* Music Player - hiển thị trên tất cả trang protected */}
         <MusicPlayer />
       </div>
     </AudioPlayerProvider>

@@ -17,11 +17,11 @@ import {
 } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useLikesFollows } from "@/hooks/use-likes-follows";
-import { useAudioPlayer } from "@/hooks/use-audio-player";
+import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 import { Track } from "@/lib/definitions/Track";
 import { ArtistGrid } from "@/components/music/artist-grid";
 import { AlbumGrid } from "@/components/music/album-grid";
-import { MusicPlayer } from "@/components/music/MusicPlayer";
+
 import {
   Dialog,
   DialogContent,
@@ -680,10 +680,7 @@ export default function YourLibraryPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Music Player */}
-      <div className="pb-32">
-        <MusicPlayer />
-      </div>
+      <div className="pb-32"></div>
     </div>
   );
 }
