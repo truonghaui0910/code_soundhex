@@ -22,6 +22,7 @@ import { useAudioPlayer } from "@/hooks/use-audio-player";
 import { Track } from "@/lib/definitions/Track";
 import { ArtistGrid } from "@/components/music/artist-grid";
 import { AlbumGrid } from "@/components/music/album-grid";
+import { MusicPlayer } from "@/components/music/MusicPlayer";
 import {
   Dialog,
   DialogContent,
@@ -645,6 +646,9 @@ export default function YourLibraryPage() {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Music Player */}
+      <MusicPlayer />
     </div>
   );
 }
