@@ -1,20 +1,19 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Music, 
-  Heart, 
-  Play, 
-  Users, 
-  List, 
-  Album as AlbumIcon, 
+import {
+  Music,
+  Heart,
+  Play,
+  Users,
+  List,
+  Album as AlbumIcon,
   ChevronRight,
   Plus,
-  UserPlus
+  UserPlus,
 } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useLikesFollows } from "@/hooks/use-likes-follows";
@@ -86,9 +85,10 @@ interface Playlist {
 
 export default function YourLibraryPage() {
   const { user } = useCurrentUser();
-  const { playTrack, currentTrack, isPlaying, togglePlayPause, setTrackList } = useAudioPlayer();
+  const { playTrack, currentTrack, isPlaying, togglePlayPause, setTrackList } =
+    useAudioPlayer();
   const { albumLikes, toggleAlbumLike } = useLikesFollows();
-  
+
   const [followedArtists, setFollowedArtists] = useState<FollowedArtist[]>([]);
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [likedTracks, setLikedTracks] = useState<LikedTrack[]>([]);
@@ -100,7 +100,9 @@ export default function YourLibraryPage() {
     name: "",
     description: "",
   });
-  const [loadingPlaylistId, setLoadingPlaylistId] = useState<number | null>(null);
+  const [loadingPlaylistId, setLoadingPlaylistId] = useState<number | null>(
+    null,
+  );
 
   useEffect(() => {
     if (user) {
@@ -153,7 +155,7 @@ export default function YourLibraryPage() {
       file_url: track.file_url,
       created_at: new Date().toISOString(),
       source_type: "uploaded",
-      view_count: 0
+      view_count: 0,
     };
 
     if (currentTrack?.id === track.id && isPlaying) {
@@ -310,7 +312,7 @@ export default function YourLibraryPage() {
               <UserPlus className="h-5 w-5 text-purple-300" />
             </div>
           </div>
-          
+
           {followedArtists.length === 0 ? (
             <div className="text-center py-8">
               <UserPlus className="h-12 w-12 text-purple-400 mx-auto mb-4" />
@@ -318,8 +320,8 @@ export default function YourLibraryPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
-              <ArtistGrid 
-                artists={followedArtists.slice(0, 5)} 
+              <ArtistGrid
+                artists={followedArtists.slice(0, 5)}
                 className="contents"
               />
               {followedArtists.length > 5 && (
@@ -346,29 +348,36 @@ export default function YourLibraryPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <h2 className="text-xl font-semibold">Playlists</h2>
-              <Button 
+              <Button
                 onClick={() => setCreatePlaylistOpen(true)}
-                size="sm" 
+                size="sm"
                 className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all duration-300 border-2 border-dashed border-purple-400 p-0"
               >
                 <Plus className="h-4 w-4 text-purple-300" />
               </Button>
             </div>
-            <Button variant="ghost" size="sm" className="text-purple-300 hover:text-white">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-purple-300 hover:text-white"
+            >
               VIEW ALL
               <ChevronRight className="h-4 w-4 ml-1" />
             </Button>
           </div>
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
             {playlists.slice(0, 5).map((playlist) => (
-              <div key={playlist.id} className="group cursor-pointer text-center">
+              <div
+                key={playlist.id}
+                className="group cursor-pointer text-center"
+              >
                 <div className="relative aspect-square mb-3">
                   <Link href={`/playlists/${playlist.id}`}>
                     <div className="w-full h-full bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg relative overflow-hidden">
                       {playlist.cover_image_url ? (
-                        <img 
-                          src={playlist.cover_image_url} 
+                        <img
+                          src={playlist.cover_image_url}
                           alt={playlist.name}
                           className="w-full h-full object-cover"
                         />
@@ -379,7 +388,7 @@ export default function YourLibraryPage() {
                       )}
                     </div>
                   </Link>
-                  
+
                   <div className="absolute inset-0 flex items-center justify-center rounded-lg overflow-hidden">
                     <Button
                       size="lg"
@@ -411,7 +420,7 @@ export default function YourLibraryPage() {
                 </div>
               </div>
             ))}
-            
+
             {playlists.length > 5 && (
               <div className="group cursor-pointer text-center">
                 <div className="aspect-square mx-auto mb-3 rounded-lg bg-white/10 backdrop-blur-sm flex items-center justify-center relative group-hover:bg-white/20 transition-all duration-300 border-2 border-dashed border-purple-400">
@@ -427,7 +436,7 @@ export default function YourLibraryPage() {
                 </div>
               </div>
             )}
-            
+
             {playlists.length === 0 && (
               <div className="col-span-full text-center py-8">
                 <List className="h-12 w-12 text-purple-400 mx-auto mb-4" />
@@ -444,23 +453,27 @@ export default function YourLibraryPage() {
               <h2 className="text-xl font-semibold">Liked Songs</h2>
               <Heart className="h-5 w-5 text-red-400" />
             </div>
-            <Button variant="ghost" size="sm" className="text-purple-300 hover:text-white">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-purple-300 hover:text-white"
+            >
               View All
               <ChevronRight className="h-4 w-4 ml-1" />
             </Button>
           </div>
-          
+
           <div className="space-y-2">
             {likedTracks.slice(0, 5).map((track, index) => (
-              <div 
+              <div
                 key={track.id}
                 className="flex items-center gap-4 p-3 rounded-lg hover:bg-white/10 transition-all cursor-pointer group"
                 onClick={() => handleTrackPlay(track)}
               >
                 <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center relative overflow-hidden">
                   {track.album?.cover_image_url ? (
-                    <img 
-                      src={track.album.cover_image_url} 
+                    <img
+                      src={track.album.cover_image_url}
                       alt={track.title}
                       className="w-full h-full object-cover"
                     />
@@ -473,7 +486,9 @@ export default function YourLibraryPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-medium truncate">{track.title}</p>
-                  <p className="text-sm text-purple-300 truncate">{track.artist.name}</p>
+                  <p className="text-sm text-purple-300 truncate">
+                    {track.artist.name}
+                  </p>
                 </div>
                 <div className="text-right">
                   <Heart className="h-4 w-4 text-red-400 fill-current" />
@@ -496,12 +511,16 @@ export default function YourLibraryPage() {
               <h2 className="text-xl font-semibold">Liked Albums</h2>
               <AlbumIcon className="h-5 w-5 text-purple-300" />
             </div>
-            <Button variant="ghost" size="sm" className="text-purple-300 hover:text-white">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-purple-300 hover:text-white"
+            >
               View All
               <ChevronRight className="h-4 w-4 ml-1" />
             </Button>
           </div>
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
             {likedAlbums.slice(0, 5).map((album) => (
               <div key={album.id} className="group text-center">
@@ -526,12 +545,14 @@ export default function YourLibraryPage() {
                         size="sm"
                         onClick={(e) => handleAlbumLike(album.id, e)}
                         className={`opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-full shadow-lg backdrop-blur-sm ${
-                          albumLikes?.[album.id] 
-                            ? "bg-red-500/90 text-white hover:bg-red-600" 
+                          albumLikes?.[album.id]
+                            ? "bg-red-500/90 text-white hover:bg-red-600"
                             : "bg-white/90 text-red-500 hover:bg-white"
                         }`}
                       >
-                        <Heart className={`h-4 w-4 ${albumLikes?.[album.id] ? 'fill-current' : ''}`} />
+                        <Heart
+                          className={`h-4 w-4 ${albumLikes?.[album.id] ? "fill-current" : ""}`}
+                        />
                       </Button>
                       <Button
                         size="sm"
@@ -548,12 +569,18 @@ export default function YourLibraryPage() {
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <Link href={`/album/${album.custom_url || album.id}`} className="block">
+                  <Link
+                    href={`/album/${album.custom_url || album.id}`}
+                    className="block"
+                  >
                     <h3 className="font-semibold text-white group-hover:text-purple-300 transition-colors truncate">
                       {album.title}
                     </h3>
                   </Link>
-                  <Link href={`/artist/${album.artist?.custom_url || album.artist?.id}`} className="block">
+                  <Link
+                    href={`/artist/${album.artist?.custom_url || album.artist?.id}`}
+                    className="block"
+                  >
                     <p className="text-sm text-purple-300 hover:text-white transition-colors truncate">
                       {album.artist?.name}
                     </p>
@@ -561,7 +588,7 @@ export default function YourLibraryPage() {
                 </div>
               </div>
             ))}
-            
+
             {likedAlbums.length > 5 && (
               <div className="group cursor-pointer text-center">
                 <div className="aspect-square mx-auto mb-3 rounded-lg bg-white/10 backdrop-blur-sm flex items-center justify-center relative group-hover:bg-white/20 transition-all duration-300 border-2 border-dashed border-purple-400">
@@ -577,7 +604,7 @@ export default function YourLibraryPage() {
                 </div>
               </div>
             )}
-            
+
             {likedAlbums.length === 0 && (
               <div className="col-span-full text-center py-8">
                 <AlbumIcon className="h-12 w-12 text-purple-400 mx-auto mb-4" />
@@ -605,7 +632,10 @@ export default function YourLibraryPage() {
                   id="name"
                   value={playlistFormData.name}
                   onChange={(e) =>
-                    setPlaylistFormData({ ...playlistFormData, name: e.target.value })
+                    setPlaylistFormData({
+                      ...playlistFormData,
+                      name: e.target.value,
+                    })
                   }
                   placeholder="Enter playlist name"
                   required
@@ -617,7 +647,10 @@ export default function YourLibraryPage() {
                   id="description"
                   value={playlistFormData.description}
                   onChange={(e) =>
-                    setPlaylistFormData({ ...playlistFormData, description: e.target.value })
+                    setPlaylistFormData({
+                      ...playlistFormData,
+                      description: e.target.value,
+                    })
                   }
                   placeholder="Enter playlist description"
                   rows={3}
@@ -648,7 +681,9 @@ export default function YourLibraryPage() {
       </Dialog>
 
       {/* Music Player */}
-      <MusicPlayer />
+      <div className="pb-32">
+        <MusicPlayer />
+      </div>
     </div>
   );
 }
