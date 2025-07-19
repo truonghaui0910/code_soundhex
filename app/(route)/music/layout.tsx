@@ -14,7 +14,7 @@ export default async function MusicLayout({
 
         {/* Main content area without sidebar */}
         <main
-          className="w-full overflow-y-auto pb-24 px-0"
+          className="w-full overflow-y-auto px-0"
           style={{ marginTop: "var(--navbar-height, 64px)" }}
         >
           {children}
