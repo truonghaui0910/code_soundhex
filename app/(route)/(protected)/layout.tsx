@@ -1,5 +1,6 @@
 import { Navbar } from "@/components/layout/navbar";
 import { Sidebar } from "@/components/layout/sidebar";
+import RoleMiddleware from "@/lib/middleware/role-middleware";
 import { AudioPlayerProvider } from "@/contexts/AudioPlayerContext";
 import { MusicPlayer } from "@/components/music/MusicPlayer";
 
@@ -26,7 +27,7 @@ export default async function ProtectedLayout({
           </main>
         </div>
 
-        {/* Music Player - hiển thị trên tất cả trang */}
+        {/* Music Player - hiển thị trên tất cả trang protected */}
         <MusicPlayer />
       </div>
     </AudioPlayerProvider>
