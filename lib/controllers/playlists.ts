@@ -304,6 +304,14 @@ export class PlaylistsController {
       throw new Error("Track already exists in playlist");
     }
 
+    // Kiểm tra xem playlist có tracks nào chưa
+    const { data: playlistTracks } = await supabase
+      .from("playlist_tracks")
+      .select("id")
+      .eq("playlist_id", playlistId);
+
+    const isFirstTrack = !playlistTracks || playlistTracks.length === 0;
+
     const { data, error } = await supabase
       .from("playlist_tracks")
       .insert({
@@ -325,6 +333,27 @@ export class PlaylistsController {
     if (error) {
       console.error("Error adding track to playlist:", error);
       throw new Error(`Failed to add track to playlist: ${error.message}`);
+    }
+
+    // Nếu đây là bài hát đầu tiên trong playlist, cập nhật cover_image_url của playlist
+    if (isFirstTrack) {
+      const trackData = data as any;
+      const albumCoverUrl = trackData.track?.album?.cover_image_url;
+      
+      if (albumCoverUrl) {
+        const { error: updateError } = await supabase
+          .from("playlists")
+          .update({ cover_image_url: albumCoverUrl })
+          .eq("id", playlistId)
+          .eq("user_id", userId);
+
+        if (updateError) {
+          console.error("Error updating playlist cover image:", updateError);
+          // Không throw error ở đây vì track đã được thêm thành công
+        } else {
+          console.log(`Updated playlist ${playlistId} cover image from first track's album`);
+        }
+      }
     }
 
     return data as PlaylistTrack;
