@@ -4,7 +4,7 @@ import { Database } from "@/types/supabase";
 
 export class TrackViewService {
   private static supabase = createClientComponentClient<Database>();
-  private static viewThreshold = 30; // Minimum seconds to count as a view
+  private static viewThreshold = 15; // Minimum seconds to count as a view
   private static sessionViews = new Set<string>(); // Track views in current session
 
   /**
