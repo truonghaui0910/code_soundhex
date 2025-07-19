@@ -4,7 +4,6 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { 
   Music, 
@@ -21,11 +20,14 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { useLikesFollows } from "@/hooks/use-likes-follows";
 import { useAudioPlayer } from "@/hooks/use-audio-player";
 import { Track } from "@/lib/definitions/Track";
+import { ArtistGrid } from "@/components/music/artist-grid";
 
 interface FollowedArtist {
   id: number;
   name: string;
   profile_image_url?: string;
+  custom_url?: string;
+  tracksCount: number;
 }
 
 interface LikedTrack {
@@ -139,7 +141,7 @@ export default function YourLibraryPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 flex items-center justify-center">
-        <div className="text-white text-xl">Đang tải thư viện...</div>
+        <div className="text-white text-xl">Loading your library...</div>
       </div>
     );
   }
@@ -152,7 +154,7 @@ export default function YourLibraryPage() {
           <div className="w-12 h-12 bg-gradient-to-r from-pink-500 to-orange-400 rounded-full flex items-center justify-center">
             <Music className="h-6 w-6 text-white" />
           </div>
-          <h1 className="text-3xl font-bold">Thư viện</h1>
+          <h1 className="text-3xl font-bold">Your Library</h1>
           <Play className="h-6 w-6 ml-2" />
         </div>
 
@@ -160,45 +162,50 @@ export default function YourLibraryPage() {
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <h2 className="text-xl font-semibold">Nghệ sĩ đã theo dõi</h2>
+              <h2 className="text-xl font-semibold">Followed Artists</h2>
               <UserPlus className="h-5 w-5 text-purple-300" />
             </div>
-            <Button variant="ghost" size="sm" className="text-purple-300 hover:text-white">
-              Xem tất cả
-              <ChevronRight className="h-4 w-4 ml-1" />
-            </Button>
           </div>
           
-          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
-            {followedArtists.slice(0, 8).map((artist) => (
-              <div key={artist.id} className="flex-shrink-0 text-center">
-                <Avatar className="w-20 h-20 mx-auto mb-2 border-2 border-purple-400">
-                  <AvatarImage src={artist.profile_image_url} alt={artist.name} />
-                  <AvatarFallback className="bg-gradient-to-r from-purple-500 to-pink-500">
-                    {artist.name.charAt(0)}
-                  </AvatarFallback>
-                </Avatar>
-                <p className="text-sm font-medium max-w-[80px] truncate">{artist.name}</p>
-              </div>
-            ))}
-            {followedArtists.length === 0 && (
-              <div className="text-center py-8 w-full">
-                <UserPlus className="h-12 w-12 text-purple-400 mx-auto mb-4" />
-                <p className="text-purple-300">Chưa theo dõi nghệ sĩ nào</p>
-              </div>
-            )}
-          </div>
+          {followedArtists.length === 0 ? (
+            <div className="text-center py-8">
+              <UserPlus className="h-12 w-12 text-purple-400 mx-auto mb-4" />
+              <p className="text-purple-300">No followed artists yet</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
+              <ArtistGrid 
+                artists={followedArtists.slice(0, 5)} 
+                className="contents"
+              />
+              {followedArtists.length > 5 && (
+                <div className="group cursor-pointer text-center">
+                  <div className="aspect-square mx-auto mb-3 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center relative group-hover:bg-white/20 transition-all duration-300 border-2 border-dashed border-purple-400">
+                    <ChevronRight className="h-8 w-8 text-purple-300" />
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="font-semibold text-purple-300 group-hover:text-white transition-colors">
+                      View All
+                    </h3>
+                    <p className="text-sm text-purple-400">
+                      {followedArtists.length - 5} more
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </section>
 
         {/* Playlists Section */}
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <h2 className="text-xl font-semibold">PLAYLIST</h2>
+              <h2 className="text-xl font-semibold">PLAYLISTS</h2>
               <Plus className="h-5 w-5 text-purple-300" />
             </div>
             <Button variant="ghost" size="sm" className="text-purple-300 hover:text-white">
-              TẤT CẢ
+              VIEW ALL
               <ChevronRight className="h-4 w-4 ml-1" />
             </Button>
           </div>
@@ -224,14 +231,14 @@ export default function YourLibraryPage() {
                     </div>
                   </div>
                   <h3 className="font-medium text-sm truncate mb-1">{playlist.name}</h3>
-                  <p className="text-xs text-purple-300">{playlist.track_count || 0} bài hát</p>
+                  <p className="text-xs text-purple-300">{playlist.track_count || 0} songs</p>
                 </CardContent>
               </Card>
             ))}
             {playlists.length === 0 && (
               <div className="col-span-full text-center py-8">
                 <List className="h-12 w-12 text-purple-400 mx-auto mb-4" />
-                <p className="text-purple-300">Chưa có playlist nào</p>
+                <p className="text-purple-300">No playlists yet</p>
               </div>
             )}
           </div>
@@ -241,11 +248,11 @@ export default function YourLibraryPage() {
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <h2 className="text-xl font-semibold">Bài hát đã thích</h2>
+              <h2 className="text-xl font-semibold">Liked Songs</h2>
               <Heart className="h-5 w-5 text-red-400" />
             </div>
             <Button variant="ghost" size="sm" className="text-purple-300 hover:text-white">
-              Xem tất cả
+              View All
               <ChevronRight className="h-4 w-4 ml-1" />
             </Button>
           </div>
@@ -283,7 +290,7 @@ export default function YourLibraryPage() {
             {likedTracks.length === 0 && (
               <div className="text-center py-8">
                 <Heart className="h-12 w-12 text-purple-400 mx-auto mb-4" />
-                <p className="text-purple-300">Chưa có bài hát yêu thích nào</p>
+                <p className="text-purple-300">No liked songs yet</p>
               </div>
             )}
           </div>
@@ -293,11 +300,11 @@ export default function YourLibraryPage() {
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <h2 className="text-xl font-semibold">Album đã thích</h2>
+              <h2 className="text-xl font-semibold">Liked Albums</h2>
               <AlbumIcon className="h-5 w-5 text-purple-300" />
             </div>
             <Button variant="ghost" size="sm" className="text-purple-300 hover:text-white">
-              Xem tất cả
+              View All
               <ChevronRight className="h-4 w-4 ml-1" />
             </Button>
           </div>
@@ -333,7 +340,7 @@ export default function YourLibraryPage() {
             {likedAlbums.length === 0 && (
               <div className="col-span-full text-center py-8">
                 <AlbumIcon className="h-12 w-12 text-purple-400 mx-auto mb-4" />
-                <p className="text-purple-300">Chưa có album yêu thích nào</p>
+                <p className="text-purple-300">No liked albums yet</p>
               </div>
             )}
           </div>
