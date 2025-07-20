@@ -35,6 +35,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import Link from "next/link";
+import { CreatePlaylistModal } from "@/components/playlist/create-playlist-modal";
 
 interface FollowedArtist {
   id: number;
@@ -95,11 +96,6 @@ export default function YourLibraryPage() {
   const [likedAlbums, setLikedAlbums] = useState<LikedAlbum[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [createPlaylistOpen, setCreatePlaylistOpen] = useState(false);
-  const [isCreating, setIsCreating] = useState(false);
-  const [playlistFormData, setPlaylistFormData] = useState({
-    name: "",
-    description: "",
-  });
   const [loadingPlaylistId, setLoadingPlaylistId] = useState<number | null>(
     null,
   );
@@ -165,41 +161,8 @@ export default function YourLibraryPage() {
     }
   };
 
-  const handleCreatePlaylist = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!playlistFormData.name.trim()) {
-      toast.error("Playlist name is required");
-      return;
-    }
-
-    setIsCreating(true);
-    try {
-      const response = await fetch("/api/playlists", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: playlistFormData.name,
-          description: playlistFormData.description,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to create playlist");
-      }
-
-      const newPlaylist = await response.json();
-      setPlaylists([newPlaylist, ...playlists]);
-      setCreatePlaylistOpen(false);
-      setPlaylistFormData({ name: "", description: "" });
-      toast.success("Playlist created successfully!");
-    } catch (error) {
-      console.error("Error creating playlist:", error);
-      toast.error("Failed to create playlist");
-    } finally {
-      setIsCreating(false);
-    }
+  const handlePlaylistCreated = (newPlaylist: any) => {
+    setPlaylists([newPlaylist, ...playlists]);
   };
 
   const handlePlayPlaylist = async (playlist: Playlist) => {
@@ -325,19 +288,21 @@ export default function YourLibraryPage() {
                 className="contents"
               />
               {followedArtists.length > 5 && (
-                <div className="group cursor-pointer text-center">
-                  <div className="aspect-square mx-auto mb-3 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center relative group-hover:bg-white/20 transition-all duration-300 border-2 border-dashed border-purple-400">
-                    <ChevronRight className="h-8 w-8 text-purple-300" />
+                <Link href="/library/artists">
+                  <div className="group cursor-pointer text-center">
+                    <div className="aspect-square mx-auto mb-3 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center relative group-hover:bg-white/20 transition-all duration-300 border-2 border-dashed border-purple-400">
+                      <ChevronRight className="h-8 w-8 text-purple-300" />
+                    </div>
+                    <div className="space-y-1">
+                      <h3 className="font-semibold text-purple-300 group-hover:text-white transition-colors">
+                        View All
+                      </h3>
+                      <p className="text-sm text-purple-400">
+                        {followedArtists.length - 5} more
+                      </p>
+                    </div>
                   </div>
-                  <div className="space-y-1">
-                    <h3 className="font-semibold text-purple-300 group-hover:text-white transition-colors">
-                      View All
-                    </h3>
-                    <p className="text-sm text-purple-400">
-                      {followedArtists.length - 5} more
-                    </p>
-                  </div>
-                </div>
+                </Link>
               )}
             </div>
           )}
@@ -414,19 +379,21 @@ export default function YourLibraryPage() {
             ))}
 
             {playlists.length > 5 && (
-              <div className="group cursor-pointer text-center">
-                <div className="aspect-square mx-auto mb-3 rounded-lg bg-white/10 backdrop-blur-sm flex items-center justify-center relative group-hover:bg-white/20 transition-all duration-300 border-2 border-dashed border-purple-400">
-                  <ChevronRight className="h-8 w-8 text-purple-300" />
+              <Link href="/library/playlists">
+                <div className="group cursor-pointer text-center">
+                  <div className="aspect-square mx-auto mb-3 rounded-lg bg-white/10 backdrop-blur-sm flex items-center justify-center relative group-hover:bg-white/20 transition-all duration-300 border-2 border-dashed border-purple-400">
+                    <ChevronRight className="h-8 w-8 text-purple-300" />
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="font-semibold text-purple-300 group-hover:text-white transition-colors">
+                      View All
+                    </h3>
+                    <p className="text-sm text-purple-400">
+                      {playlists.length - 5} more
+                    </p>
+                  </div>
                 </div>
-                <div className="space-y-1">
-                  <h3 className="font-semibold text-purple-300 group-hover:text-white transition-colors">
-                    View All
-                  </h3>
-                  <p className="text-sm text-purple-400">
-                    {playlists.length - 5} more
-                  </p>
-                </div>
-              </div>
+              </Link>
             )}
 
             {playlists.length === 0 && (
@@ -445,14 +412,16 @@ export default function YourLibraryPage() {
               <h2 className="text-xl font-semibold">Liked Songs</h2>
               <Heart className="h-5 w-5 text-red-400" />
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-purple-300 hover:text-white"
-            >
-              View All
-              <ChevronRight className="h-4 w-4 ml-1" />
-            </Button>
+            <Link href="/library/liked-songs">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-purple-300 hover:text-white"
+              >
+                View All
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            </Link>
           </div>
 
           <div className="space-y-2">
@@ -503,14 +472,16 @@ export default function YourLibraryPage() {
               <h2 className="text-xl font-semibold">Liked Albums</h2>
               <AlbumIcon className="h-5 w-5 text-purple-300" />
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-purple-300 hover:text-white"
-            >
-              View All
-              <ChevronRight className="h-4 w-4 ml-1" />
-            </Button>
+            <Link href="/library/liked-albums">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-purple-300 hover:text-white"
+              >
+                View All
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            </Link>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
@@ -582,19 +553,21 @@ export default function YourLibraryPage() {
             ))}
 
             {likedAlbums.length > 5 && (
-              <div className="group cursor-pointer text-center">
-                <div className="aspect-square mx-auto mb-3 rounded-lg bg-white/10 backdrop-blur-sm flex items-center justify-center relative group-hover:bg-white/20 transition-all duration-300 border-2 border-dashed border-purple-400">
-                  <ChevronRight className="h-8 w-8 text-purple-300" />
+              <Link href="/library/liked-albums">
+                <div className="group cursor-pointer text-center">
+                  <div className="aspect-square mx-auto mb-3 rounded-lg bg-white/10 backdrop-blur-sm flex items-center justify-center relative group-hover:bg-white/20 transition-all duration-300 border-2 border-dashed border-purple-400">
+                    <ChevronRight className="h-8 w-8 text-purple-300" />
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="font-semibold text-purple-300 group-hover:text-white transition-colors">
+                      View All
+                    </h3>
+                    <p className="text-sm text-purple-400">
+                      {likedAlbums.length - 5} more
+                    </p>
+                  </div>
                 </div>
-                <div className="space-y-1">
-                  <h3 className="font-semibold text-purple-300 group-hover:text-white transition-colors">
-                    View All
-                  </h3>
-                  <p className="text-sm text-purple-400">
-                    {likedAlbums.length - 5} more
-                  </p>
-                </div>
-              </div>
+              </Link>
             )}
 
             {likedAlbums.length === 0 && (
@@ -607,70 +580,12 @@ export default function YourLibraryPage() {
         </section>
       </div>
 
-      {/* Create Playlist Dialog */}
-      <Dialog open={createPlaylistOpen} onOpenChange={setCreatePlaylistOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Create New Playlist</DialogTitle>
-            <DialogDescription>
-              Create a new playlist to organize your favorite tracks
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleCreatePlaylist}>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Playlist Name</Label>
-                <Input
-                  id="name"
-                  value={playlistFormData.name}
-                  onChange={(e) =>
-                    setPlaylistFormData({
-                      ...playlistFormData,
-                      name: e.target.value,
-                    })
-                  }
-                  placeholder="Enter playlist name"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="description">Description (Optional)</Label>
-                <Textarea
-                  id="description"
-                  value={playlistFormData.description}
-                  onChange={(e) =>
-                    setPlaylistFormData({
-                      ...playlistFormData,
-                      description: e.target.value,
-                    })
-                  }
-                  placeholder="Enter playlist description"
-                  rows={3}
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setCreatePlaylistOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isCreating}>
-                {isCreating ? (
-                  <>
-                    <div className="mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Creating...
-                  </>
-                ) : (
-                  "Create Playlist"
-                )}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+      {/* Create Playlist Modal */}
+      <CreatePlaylistModal
+        open={createPlaylistOpen}
+        onOpenChange={setCreatePlaylistOpen}
+        onPlaylistCreated={handlePlaylistCreated}
+      />
 
       <div className="pb-32"></div>
     </div>

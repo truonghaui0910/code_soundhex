@@ -2895,6 +2895,7 @@ export function MusicUpload() {
                     </Card>
                 )}
             </div>
+            <div className="pb-32"></div>
         </div>
     );
 }

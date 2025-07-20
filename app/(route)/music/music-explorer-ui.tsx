@@ -717,7 +717,7 @@ export function MusicExplorerUI({
                                 albums={[]}
                                 isLoading={true}
                                 loadingCount={5}
-                                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8"
+                                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-8"
                             />
                         ) : allAlbums.length === 0 ? (
                             <div className="text-center py-20">

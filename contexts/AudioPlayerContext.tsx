@@ -15,6 +15,10 @@ interface AudioPlayerContextType {
   currentTime: number;
   duration: number;
   error: string | null;
+  isShuffled: boolean;
+  repeatMode: 'none' | 'one' | 'all';
+  isQueueOpen: boolean;
+  originalTrackList: Track[];
   playTrack: (track: Track) => void;
   setTrackList: (tracks: Track[]) => void;
   playNext: () => void;
@@ -23,6 +27,13 @@ interface AudioPlayerContextType {
   changeVolume: (volume: number) => void;
   seekTo: (time: number) => void;
   formatTime: (time: number) => string;
+  toggleShuffle: () => void;
+  toggleRepeat: () => void;
+  toggleQueue: () => void;
+  toggleMute: () => void;
+  removeFromQueue: (trackId: number) => void;
+  reorderQueue: (fromIndex: number, toIndex: number) => void;
+  jumpToTrack: (index: number) => void;
 }
 
 // Tạo context

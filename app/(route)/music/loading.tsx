@@ -58,7 +58,7 @@ export default function MusicExplorerLoading() {
             <div className="h-10 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
             {Array.from({ length: 10 }).map((_, idx) => (
               <Card key={idx} className="group overflow-hidden border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm animate-pulse">
                 <div className="aspect-square w-full bg-gray-300 dark:bg-gray-600"></div>
@@ -82,7 +82,7 @@ export default function MusicExplorerLoading() {
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
             {Array.from({ length: 10 }).map((_, idx) => (
               <div key={idx} className="group cursor-pointer text-center">
                 <div className="aspect-square mx-auto mb-3 rounded-full bg-gray-300 dark:bg-gray-600 animate-pulse"></div>
@@ -141,7 +141,7 @@ export default function MusicExplorerLoading() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-6">
             {Array.from({ length: 15 }).map((_, idx) => (
               <Card key={idx} className="group overflow-hidden border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm animate-pulse">
                 <div className="aspect-square w-full bg-gray-300 dark:bg-gray-600"></div>

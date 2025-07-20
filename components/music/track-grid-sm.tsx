@@ -112,9 +112,17 @@ export const TrackGridSm = React.memo(function TrackGridSm({
     useEffect(() => {
         if (!isLoading && tracks.length > 0) {
             const trackIds = tracks.map(track => track.id);
-            fetchBatchTrackLikesStatus(trackIds);
+            // Only fetch for tracks that haven't been fetched yet
+            const unfetchedTrackIds = trackIds.filter(id => {
+                const status = getTrackLikeStatus(id);
+                return status.isLiked === undefined && !status.isLoading;
+            });
+            
+            if (unfetchedTrackIds.length > 0) {
+                fetchBatchTrackLikesStatus(unfetchedTrackIds);
+            }
         }
-    }, [tracks, isLoading, fetchBatchTrackLikesStatus]);
+    }, [tracks, isLoading, fetchBatchTrackLikesStatus, getTrackLikeStatus]);
 
     const toggleMenu = (trackId: number) => {
         setOpenMenuId(openMenuId === trackId ? null : trackId);
