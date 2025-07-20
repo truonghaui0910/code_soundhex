@@ -42,6 +42,7 @@ import { toast } from "sonner";
 import Link from "next/link";
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 import { Track } from "@/lib/definitions/Track";
+import { CreatePlaylistModal } from "./create-playlist-modal";
 
 interface Playlist {
   id: number;
@@ -75,7 +76,6 @@ function PlaylistManager() {
     name: "",
     description: "",
   });
-  const [isCreating, setIsCreating] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState<number | null>(null);
   const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
@@ -106,41 +106,8 @@ function PlaylistManager() {
     }
   };
 
-  const handleCreatePlaylist = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.name.trim()) {
-      toast.error("Playlist name is required");
-      return;
-    }
-
-    setIsCreating(true);
-    try {
-      const response = await fetch("/api/playlists", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          description: formData.description,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to create playlist");
-      }
-
-      const newPlaylist = await response.json();
-      setPlaylists([newPlaylist, ...playlists]);
-      setCreateDialogOpen(false);
-      setFormData({ name: "", description: "" });
-      toast.success("Playlist created successfully!");
-    } catch (error) {
-      console.error("Error creating playlist:", error);
-      toast.error("Failed to create playlist");
-    } finally {
-      setIsCreating(false);
-    }
+  const handlePlaylistCreated = (newPlaylist: any) => {
+    setPlaylists([newPlaylist, ...playlists]);
   };
 
   const handleEditPlaylist = async (e: React.FormEvent) => {
@@ -513,64 +480,12 @@ function PlaylistManager() {
         </div>
       )}
 
-      {/* Create Playlist Dialog */}
-      <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Create New Playlist</DialogTitle>
-            <DialogDescription>
-              Create a new playlist to organize your favorite tracks
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleCreatePlaylist}>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Playlist Name</Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                  placeholder="Enter playlist name"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="description">Description (Optional)</Label>
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) =>
-                    setFormData({ ...formData, description: e.target.value })
-                  }
-                  placeholder="Enter playlist description"
-                  rows={3}
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setCreateDialogOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isCreating}>
-                {isCreating ? (
-                  <>
-                    <div className="mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Creating...
-                  </>
-                ) : (
-                  "Create Playlist"
-                )}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+      {/* Create Playlist Modal */}
+      <CreatePlaylistModal
+        open={createDialogOpen}
+        onOpenChange={setCreateDialogOpen}
+        onPlaylistCreated={handlePlaylistCreated}
+      />
 
       {/* Edit Playlist Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>

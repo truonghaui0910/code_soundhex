@@ -13,18 +13,88 @@ import { TrackViewService } from "@/lib/services/track-view-service";
 export function useAudioPlayer() {
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
   const [trackList, setTrackListState] = useState<Track[]>([]);
+  const [originalTrackList, setOriginalTrackList] = useState<Track[]>([]);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [volume, setVolume] = useState<number>(80);
+  const [previousVolume, setPreviousVolume] = useState<number>(80);
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [duration, setDuration] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
+  const [isShuffled, setIsShuffled] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('audioPlayer_isShuffled') === 'true';
+    }
+    return false;
+  });
+  const [repeatMode, setRepeatMode] = useState<'none' | 'one' | 'all'>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('audioPlayer_repeatMode');
+      return (saved as 'none' | 'one' | 'all') || 'none';
+    }
+    return 'none';
+  });
+  const [isQueueOpen, setIsQueueOpen] = useState<boolean>(false);
 
   // View tracking state
   const [viewStartTime, setViewStartTime] = useState<number>(0);
   const [hasRecordedView, setHasRecordedView] = useState<boolean>(false);
   const [sessionId] = useState<string>(() => `session-${Date.now()}-${Math.random().toString(36)}`);
   const viewCheckIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Restore trackList from localStorage on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedTrackList = localStorage.getItem('audioPlayer_trackList');
+      const savedOriginalTrackList = localStorage.getItem('audioPlayer_originalTrackList');
+      const savedCurrentIndex = localStorage.getItem('audioPlayer_currentIndex');
+      
+      if (savedTrackList && savedOriginalTrackList) {
+        try {
+          const trackList = JSON.parse(savedTrackList);
+          const originalTrackList = JSON.parse(savedOriginalTrackList);
+          const currentIndex = parseInt(savedCurrentIndex || '0');
+          
+          setTrackListState(trackList);
+          setOriginalTrackList(originalTrackList);
+          setCurrentIndex(currentIndex);
+          
+          // Restore current track if exists
+          if (trackList[currentIndex]) {
+            setCurrentTrack(trackList[currentIndex]);
+          }
+        } catch (error) {
+          console.error('Error restoring audio player state:', error);
+        }
+      }
+    }
+  }, []);
+
+  // Save state to localStorage when it changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('audioPlayer_isShuffled', isShuffled.toString());
+    }
+  }, [isShuffled]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('audioPlayer_repeatMode', repeatMode);
+    }
+  }, [repeatMode]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && trackList.length > 0) {
+      localStorage.setItem('audioPlayer_trackList', JSON.stringify(trackList));
+      localStorage.setItem('audioPlayer_currentIndex', currentIndex.toString());
+    }
+  }, [trackList, currentIndex]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && originalTrackList.length > 0) {
+      localStorage.setItem('audioPlayer_originalTrackList', JSON.stringify(originalTrackList));
+    }
+  }, [originalTrackList]);
 
   // Đảm bảo chỉ sử dụng AudioService ở phía client
   const getAudioService = useCallback(() => {
@@ -33,6 +103,37 @@ export function useAudioPlayer() {
     }
     return AudioService.getInstance();
   }, []);
+
+  // Helper function để shuffle array
+  const shuffleArray = useCallback((array: Track[]) => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  }, []);
+
+  // Lấy track tiếp theo dựa vào repeat mode
+  const getNextTrack = useCallback(() => {
+    if (trackList.length === 0) return null;
+
+    if (repeatMode === 'one' && currentTrack) {
+      return { track: currentTrack, index: currentIndex };
+    }
+
+    let nextIndex: number;
+    if (repeatMode === 'all') {
+      nextIndex = (currentIndex + 1) % trackList.length;
+    } else {
+      nextIndex = currentIndex + 1;
+      if (nextIndex >= trackList.length) {
+        return null; // Kết thúc playlist
+      }
+    }
+
+    return { track: trackList[nextIndex], index: nextIndex };
+  }, [trackList, currentIndex, repeatMode, currentTrack]);
 
   // Khởi tạo trạng thái từ AudioService
   useEffect(() => {
@@ -66,21 +167,48 @@ export function useAudioPlayer() {
           setIsPlaying(false);
           break;
         case "ended":
+          console.log('Audio ended - starting auto-next logic');
           setIsPlaying(false);
           setCurrentTime(0);
-          // Tự động chuyển đến bài tiếp theo khi kết thúc
-          if (trackList.length > 1) {
-            const nextIndex = (currentIndex + 1) % trackList.length;
-            const nextTrack = trackList[nextIndex];
-            if (nextTrack) {
-              setTimeout(() => {
-                setCurrentIndex(nextIndex);
-                setCurrentTrack(nextTrack);
-                setIsPlaying(true);
-                audioService.playTrack(nextTrack);
-              }, 500);
-            }
-          }
+          // Sử dụng callback để lấy state mới nhất
+          setCurrentIndex(currentIdx => {
+            setTrackListState(currentTrackList => {
+              setRepeatMode(currentRepeatMode => {
+                setCurrentTrack(currentTrackState => {
+                  if (currentTrackList.length === 0) return currentTrackState;
+
+                  let nextIndex: number;
+                  let nextTrack: Track | null = null;
+
+                  if (currentRepeatMode === 'one' && currentTrackState) {
+                    nextTrack = currentTrackState;
+                    nextIndex = currentIdx;
+                  } else if (currentRepeatMode === 'all') {
+                    nextIndex = (currentIdx + 1) % currentTrackList.length;
+                    nextTrack = currentTrackList[nextIndex];
+                  } else {
+                    nextIndex = currentIdx + 1;
+                    if (nextIndex < currentTrackList.length) {
+                      nextTrack = currentTrackList[nextIndex];
+                    }
+                  }
+
+                  if (nextTrack) {
+                    setTimeout(() => {
+                      setCurrentIndex(nextIndex);
+                      setCurrentTrack(nextTrack);
+                      audioService.playTrack(nextTrack);
+                    }, 100);
+                  }
+
+                  return currentTrackState;
+                });
+                return currentRepeatMode;
+              });
+              return currentTrackList;
+            });
+            return currentIdx;
+          });
           break;
         case "timeupdate":
           if (event.detail) {
@@ -115,11 +243,60 @@ export function useAudioPlayer() {
       const audioService = getAudioService();
       if (!audioService) return;
 
-      // Tìm index của track trong playlist
-      const trackIndex = trackList.findIndex((t) => t.id === track.id);
-      if (trackIndex !== -1) {
-        setCurrentIndex(trackIndex);
-      }
+      // Check current trackList state immediately, but with a fallback
+      const checkAndPlay = () => {
+        // Get the most current trackList
+        setTrackListState(currentTrackList => {
+          // Tìm index của track trong playlist hiện tại
+          const trackIndex = currentTrackList.findIndex((t) => t.id === track.id);
+          
+          if (trackIndex !== -1) {
+            setCurrentIndex(trackIndex);
+          } else if (currentTrackList.length === 0) {
+            // If trackList is empty, wait a bit more for setTrackList to complete
+            setTimeout(() => {
+              setTrackListState(retryTrackList => {
+                const retryIndex = retryTrackList.findIndex((t) => t.id === track.id);
+                if (retryIndex !== -1) {
+                  setCurrentIndex(retryIndex);
+                } else {
+                  // Still not found, create single-track queue
+                  if (typeof window !== 'undefined') {
+                    localStorage.removeItem('audioPlayer_trackList');
+                    localStorage.removeItem('audioPlayer_originalTrackList');
+                    localStorage.removeItem('audioPlayer_currentIndex');
+                    localStorage.removeItem('audioPlayer_isShuffled');
+                    localStorage.removeItem('audioPlayer_repeatMode');
+                  }
+                  setOriginalTrackList([track]);
+                  setCurrentIndex(0);
+                  setIsShuffled(false);
+                  setRepeatMode('none');
+                  return [track];
+                }
+                return retryTrackList;
+              });
+            }, 100);
+          } else {
+            // Track not found in existing non-empty list, create single-track queue
+            if (typeof window !== 'undefined') {
+              localStorage.removeItem('audioPlayer_trackList');
+              localStorage.removeItem('audioPlayer_originalTrackList');
+              localStorage.removeItem('audioPlayer_currentIndex');
+              localStorage.removeItem('audioPlayer_isShuffled');
+              localStorage.removeItem('audioPlayer_repeatMode');
+            }
+            setOriginalTrackList([track]);
+            setCurrentIndex(0);
+            setIsShuffled(false);
+            setRepeatMode('none');
+            return [track];
+          }
+          return currentTrackList;
+        });
+      };
+
+      checkAndPlay();
 
       // Reset view tracking cho bài hát mới
       setHasRecordedView(false);
@@ -133,7 +310,7 @@ export function useAudioPlayer() {
       // Gọi service để phát bài hát
       audioService.playTrack(track);
     },
-    [getAudioService, trackList],
+    [getAudioService],
   );
 
   // Chuyển đổi giữa phát/tạm dừng
@@ -150,30 +327,155 @@ export function useAudioPlayer() {
       const audioService = getAudioService();
       if (!audioService) return;
 
+      // Save previous volume if not muting to 0
+      if (newVolume > 0 && volume !== newVolume) {
+        setPreviousVolume(volume);
+      }
+
       audioService.setVolume(newVolume);
       setVolume(newVolume);
     },
-    [getAudioService],
+    [getAudioService, volume],
   );
+
+  // Toggle mute/unmute
+  const toggleMute = useCallback(() => {
+    if (volume === 0) {
+      // Unmute: restore previous volume
+      changeVolume(previousVolume > 0 ? previousVolume : 80);
+    } else {
+      // Mute: set volume to 0
+      setPreviousVolume(volume);
+      changeVolume(0);
+    }
+  }, [volume, previousVolume, changeVolume]);
 
   // Thiết lập danh sách track
   const setTrackList = useCallback((tracks: Track[]) => {
+    // Clear old queue and reset state
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('audioPlayer_trackList');
+      localStorage.removeItem('audioPlayer_originalTrackList');
+      localStorage.removeItem('audioPlayer_currentIndex');
+      localStorage.removeItem('audioPlayer_isShuffled');
+      localStorage.removeItem('audioPlayer_repeatMode');
+    }
+    
+    setOriginalTrackList(tracks);
     setTrackListState(tracks);
     setCurrentIndex(0);
+    setIsShuffled(false);
+    setRepeatMode('none');
   }, []);
+
+  // Toggle shuffle
+  const toggleShuffle = useCallback(() => {
+    if (isShuffled) {
+      // Tắt shuffle: trở về danh sách gốc
+      setTrackListState(originalTrackList);
+      // Tìm vị trí của bài hát hiện tại trong danh sách gốc
+      if (currentTrack) {
+        const originalIndex = originalTrackList.findIndex(t => t.id === currentTrack.id);
+        if (originalIndex !== -1) {
+          setCurrentIndex(originalIndex);
+        }
+      }
+    } else {
+      // Bật shuffle: xáo trộn danh sách
+      const shuffled = shuffleArray(originalTrackList);
+      // Đặt bài hát hiện tại ở đầu danh sách shuffle
+      if (currentTrack) {
+        const currentTrackIndex = shuffled.findIndex(t => t.id === currentTrack.id);
+        if (currentTrackIndex !== -1) {
+          // Hoán đổi bài hát hiện tại lên đầu
+          [shuffled[0], shuffled[currentTrackIndex]] = [shuffled[currentTrackIndex], shuffled[0]];
+        }
+      }
+      setTrackListState(shuffled);
+      setCurrentIndex(0);
+    }
+    setIsShuffled(!isShuffled);
+  }, [isShuffled, originalTrackList, currentTrack, shuffleArray]);
+
+  // Toggle repeat mode
+  const toggleRepeat = useCallback(() => {
+    const modes: ('none' | 'one' | 'all')[] = ['none', 'all', 'one'];
+    const currentModeIndex = modes.indexOf(repeatMode);
+    const nextMode = modes[(currentModeIndex + 1) % modes.length];
+    setRepeatMode(nextMode);
+  }, [repeatMode]);
+
+  // Toggle queue visibility
+  const toggleQueue = useCallback(() => {
+    setIsQueueOpen(!isQueueOpen);
+  }, [isQueueOpen]);
+
+  // Remove track from queue
+  const removeFromQueue = useCallback((trackId: number) => {
+    const newTrackList = trackList.filter(track => track.id !== trackId);
+    setTrackListState(newTrackList);
+    
+    // Cập nhật originalTrackList nếu cần
+    if (!isShuffled) {
+      setOriginalTrackList(newTrackList);
+    }
+    
+    // Điều chỉnh currentIndex nếu cần
+    if (currentTrack && trackId === currentTrack.id) {
+      // Nếu xóa bài đang phát, chuyển sang bài tiếp theo
+      if (newTrackList.length > 0) {
+        const nextIndex = Math.min(currentIndex, newTrackList.length - 1);
+        setCurrentIndex(nextIndex);
+        playTrack(newTrackList[nextIndex]);
+      } else {
+        setCurrentTrack(null);
+        setCurrentIndex(0);
+      }
+    } else if (currentTrack) {
+      // Điều chỉnh index nếu bài bị xóa nằm trước bài đang phát
+      const removedIndex = trackList.findIndex(t => t.id === trackId);
+      const currentTrackIndex = newTrackList.findIndex(t => t.id === currentTrack.id);
+      if (removedIndex < currentIndex && currentTrackIndex !== -1) {
+        setCurrentIndex(currentTrackIndex);
+      }
+    }
+  }, [trackList, currentTrack, currentIndex, isShuffled, playTrack]);
+
+  // Reorder queue
+  const reorderQueue = useCallback((fromIndex: number, toIndex: number) => {
+    const newTrackList = [...trackList];
+    const [movedTrack] = newTrackList.splice(fromIndex, 1);
+    newTrackList.splice(toIndex, 0, movedTrack);
+    
+    setTrackListState(newTrackList);
+    
+    // Cập nhật currentIndex
+    if (currentTrack) {
+      const newCurrentIndex = newTrackList.findIndex(t => t.id === currentTrack.id);
+      if (newCurrentIndex !== -1) {
+        setCurrentIndex(newCurrentIndex);
+      }
+    }
+  }, [trackList, currentTrack]);
+
+  // Jump to specific track in queue
+  const jumpToTrack = useCallback((index: number) => {
+    if (index >= 0 && index < trackList.length) {
+      const track = trackList[index];
+      if (track) {
+        playTrack(track);
+      }
+    }
+  }, [trackList, playTrack]);
 
   // Chuyển đến bài hát tiếp theo
   const playNext = useCallback(() => {
-    if (trackList.length === 0) return;
-
-    const nextIndex = (currentIndex + 1) % trackList.length;
-    const nextTrack = trackList[nextIndex];
-
-    if (nextTrack) {
-      setCurrentIndex(nextIndex);
-      playTrack(nextTrack);
+    const nextTrackInfo = getNextTrack();
+    if (nextTrackInfo) {
+      setCurrentIndex(nextTrackInfo.index);
+      playTrack(nextTrackInfo.track);
     }
-  }, [trackList, currentIndex, playTrack]);
+  }, [getNextTrack, playTrack]);
 
   // Chuyển đến bài hát trước đó
   const playPrevious = useCallback(() => {
@@ -254,21 +556,12 @@ export function useAudioPlayer() {
     const audioService = getAudioService();
     if (!audioService) return;
 
-    audioService.addEventListener("timeupdate", () => {
-      setCurrentTime(audioService.getCurrentTime());
-    });
-  }, [getAudioService]);
-
-  useEffect(() => {
-    const audioService = getAudioService();
-    if (!audioService) return;
-
-    // Check if we should record a view (after 30 seconds of actual listening time)
+    // Check if we should record a view (after 15 seconds of actual listening time)
     if (!hasRecordedView && currentTrack && viewStartTime > 0) {
       const actualPlayDuration = Math.floor((Date.now() - viewStartTime) / 1000);
       
-      // Only record view if user has actually listened for 30+ seconds
-      if (actualPlayDuration >= 30) {
+      // Only record view if user has actually listened for 15+ seconds
+      if (actualPlayDuration >= 15) {
         recordTrackView(currentTrack.id, actualPlayDuration);
       }
     }
@@ -278,12 +571,16 @@ export function useAudioPlayer() {
   return {
     currentTrack,
     trackList,
+    originalTrackList,
     currentIndex,
     isPlaying,
     volume,
     currentTime,
     duration,
     error,
+    isShuffled,
+    repeatMode,
+    isQueueOpen,
     playTrack,
     setTrackList,
     playNext,
@@ -292,5 +589,12 @@ export function useAudioPlayer() {
     changeVolume,
     seekTo,
     formatTime,
+    toggleShuffle,
+    toggleRepeat,
+    toggleQueue,
+    toggleMute,
+    removeFromQueue,
+    reorderQueue,
+    jumpToTrack,
   };
 }

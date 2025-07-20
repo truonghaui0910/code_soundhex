@@ -3,9 +3,10 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Music, Play } from "lucide-react";
+import { Music, Play, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
+import { toast } from "sonner";
 
 interface Album {
     id: number;
@@ -32,49 +33,94 @@ export function AlbumGrid({
     isLoading = false, 
     loadingCount = 5, 
     onAlbumPlay,
-    className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"
+    className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6"
 }: AlbumGridProps) {
     const { setTrackList, playTrack } = useAudioPlayer();
+    const [loadingAlbums, setLoadingAlbums] = useState<Set<number>>(new Set());
 
     const handleAlbumPlay = async (album: Album) => {
-        console.log('AlbumGrid - handleAlbumPlay called with album:', album);
+        console.log(`🎵 AlbumGrid - Playing album: "${album.title}" (ID: ${album.id})`);
+        
         if (onAlbumPlay) {
-            console.log('AlbumGrid - using custom onAlbumPlay callback');
+            console.log('🎵 AlbumGrid - Using custom onAlbumPlay callback');
             onAlbumPlay(album);
-        } else {
-            // Default play behavior - fetch album tracks
-            console.log('AlbumGrid - fetching album tracks from API');
-            try {
-                const response = await fetch(`/api/albums/${album.id}/tracks`);
-                console.log('AlbumGrid - API response status:', response.status);
+            return;
+        }
 
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log('AlbumGrid - API response data:', data);
-                    console.log('AlbumGrid - Response structure:', {
-                        hasTracks: 'tracks' in data,
-                        tracksIsArray: Array.isArray(data.tracks),
-                        tracksLength: data.tracks?.length || 0,
-                        directArrayLength: Array.isArray(data) ? data.length : 'not an array'
-                    });
+        // Set loading state for this album
+        setLoadingAlbums(prev => new Set(prev).add(album.id));
 
-                    // Handle both formats: { tracks: [...] } and direct array [...]
-                    const tracksArray = data.tracks || (Array.isArray(data) ? data : []);
+        try {
+            console.log(`🎵 AlbumGrid - Fetching tracks for album ${album.id}...`);
+            const response = await fetch(`/api/albums/${album.id}/tracks`);
+            console.log(`🎵 AlbumGrid - API response status: ${response.status}`);
 
-                    if (Array.isArray(tracksArray) && tracksArray.length > 0) {
-                        console.log('AlbumGrid - Setting trackList with tracks:', tracksArray);
-                        setTrackList(tracksArray);
-                        console.log('AlbumGrid - Playing first track:', tracksArray[0]);
-                        playTrack(tracksArray[0]);
-                    } else {
-                        console.log('AlbumGrid - No valid tracks found in response');
-                    }
-                } else {
-                    console.log('AlbumGrid - API response not ok, status:', response.status);
-                }
-            } catch (error) {
-                console.error("AlbumGrid - Error loading album tracks:", error);
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error(`🎵 AlbumGrid - API Error ${response.status}:`, errorText);
+                toast.error(`Failed to load album: ${response.status} error`);
+                return;
             }
+
+            const data = await response.json();
+            console.log(`🎵 AlbumGrid - API response data:`, {
+                dataType: typeof data,
+                isArray: Array.isArray(data),
+                length: Array.isArray(data) ? data.length : 'N/A',
+                hasTracksProperty: 'tracks' in data,
+                firstItem: Array.isArray(data) ? data[0] : data.tracks?.[0] || 'No tracks'
+            });
+
+            // Handle both formats: { tracks: [...] } and direct array [...]
+            const tracksArray = Array.isArray(data) ? data : (data.tracks || []);
+
+            if (!Array.isArray(tracksArray)) {
+                console.error('🎵 AlbumGrid - Invalid tracks data format:', tracksArray);
+                toast.error('Invalid album data format');
+                return;
+            }
+
+            if (tracksArray.length === 0) {
+                console.warn(`🎵 AlbumGrid - Album "${album.title}" has no tracks`);
+                toast.error('This album has no tracks to play');
+                return;
+            }
+
+            // Validate first track has required properties
+            const firstTrack = tracksArray[0];
+            if (!firstTrack || !firstTrack.id || !firstTrack.file_url) {
+                console.error('🎵 AlbumGrid - First track is invalid:', firstTrack);
+                toast.error('Album tracks are missing required data');
+                return;
+            }
+
+            console.log(`🎵 AlbumGrid - Setting trackList with ${tracksArray.length} tracks`);
+            console.log(`🎵 AlbumGrid - First track:`, {
+                id: firstTrack.id,
+                title: firstTrack.title,
+                hasFileUrl: !!firstTrack.file_url,
+                hasArtist: !!firstTrack.artist,
+                hasAlbum: !!firstTrack.album
+            });
+
+            setTrackList(tracksArray);
+            
+            // Add small delay to ensure setTrackList completes
+            setTimeout(() => {
+                console.log(`🎵 AlbumGrid - Playing first track: "${firstTrack.title}"`);
+                playTrack(firstTrack);
+            }, 50);
+
+        } catch (error) {
+            console.error('🎵 AlbumGrid - Error loading album tracks:', error);
+            toast.error(`Failed to load album: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        } finally {
+            // Remove loading state
+            setLoadingAlbums(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(album.id);
+                return newSet;
+            });
         }
     };
 
@@ -123,14 +169,19 @@ export function AlbumGrid({
                             <Button
                                 size="lg"
                                 onClick={(e) => {
-                                    console.log('AlbumGrid - Play button clicked for album:', album);
+                                    console.log(`🎵 AlbumGrid - Play button clicked for album: "${album.title}" (ID: ${album.id})`);
                                     e.preventDefault();
                                     e.stopPropagation();
                                     handleAlbumPlay(album);
                                 }}
-                                className="opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-full bg-white/90 text-purple-600 hover:bg-white hover:scale-110 shadow-lg backdrop-blur-sm"
+                                disabled={loadingAlbums.has(album.id)}
+                                className="opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-full bg-white/90 text-purple-600 hover:bg-white hover:scale-110 shadow-lg backdrop-blur-sm disabled:opacity-50 disabled:scale-100"
                             >
-                                <Play className="h-6 w-6" />
+                                {loadingAlbums.has(album.id) ? (
+                                    <Loader2 className="h-6 w-6 animate-spin" />
+                                ) : (
+                                    <Play className="h-6 w-6" />
+                                )}
                             </Button>
                         </div>
                     </div>

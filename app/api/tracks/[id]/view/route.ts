@@ -19,8 +19,8 @@ export async function POST(
 
     const { viewDuration, sessionId } = await request.json();
 
-    // Minimum view duration to count (30 seconds)
-    const minViewDuration = 30;
+    // Minimum view duration to count (15 seconds)
+    const minViewDuration = 15;
     if (!viewDuration || viewDuration < minViewDuration) {
       return NextResponse.json(
         { error: "Insufficient play duration" },

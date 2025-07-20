@@ -1,0 +1,33 @@
+TRACK_INSERT_ERROR: {
+  code: '23502',
+  details: 'Failing row contains (192, 73, 91, Payphone, null, 28, 231, null, 2025-07-20 10:22:35.247112+00, 0ead5b44-3fe2-4692-8967-dc1bf0d944f4, spotify, 1LmN9SSHISbtp9LoaR5ZVJ, null, 0, null, null, payphone, 0, 0).',
+  hint: null,
+  message: 'null value in column "file_url" of relation "tracks" violates not-null constraint'
+}
+TRACK_IMPORT_FAILED: {
+  trackName: 'Payphone',
+  trackId: '1LmN9SSHISbtp9LoaR5ZVJ',
+  error: 'Failed to create track: null value in column "file_url" of relation "tracks" violates not-null constraint',
+  stack: 'Error: Failed to create track: null value in column "file_url" of relation "tracks" violates not-null constraint\n' +
+    '    at importSingleTrack (webpack-internal:///(rsc)/./app/api/import-music/route.ts:187:15)\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n' +
+    '    at async POST (webpack-internal:///(rsc)/./app/api/import-music/route.ts:72:17)\n' +
+    '    at async D:\\WORK\\TEAM\\autowin\\SoundHex\\replit\\code_soundhex\\node_modules\\next\\dist\\compiled\\next-server\\app-route.runtime.dev.js:6:53446\n' +
+    '    at async e_.execute (D:\\WORK\\TEAM\\autowin\\SoundHex\\replit\\code_soundhex\\node_modules\\next\\dist\\compiled\\next-server\\app-route.runtime.dev.js:6:44747)\n' +
+    '    at async e_.handle (D:\\WORK\\TEAM\\autowin\\SoundHex\\replit\\code_soundhex\\node_modules\\next\\dist\\compiled\\next-server\\app-route.runtime.dev.js:6:54700)\n' +
+    '    at async doRender (D:\\WORK\\TEAM\\autowin\\SoundHex\\replit\\code_soundhex\\node_modules\\next\\dist\\server\\base-server.js:1377:42)\n' +
+    '    at async cacheEntry.responseCache.get.routeKind (D:\\WORK\\TEAM\\autowin\\SoundHex\\replit\\code_soundhex\\node_modules\\next\\dist\\server\\base-server.js:1599:28)\n' +
+    '    at async DevServer.renderToResponseWithComponentsImpl (D:\\WORK\\TEAM\\autowin\\SoundHex\\replit\\code_soundhex\\node_modules\\next\\dist\\server\\base-server.js:1507:28)\n' +
+    '    at async DevServer.renderPageComponent (D:\\WORK\\TEAM\\autowin\\SoundHex\\replit\\code_soundhex\\node_modules\\next\\dist\\server\\base-server.js:1924:24)\n' +
+    '    at async DevServer.renderToResponseImpl (D:\\WORK\\TEAM\\autowin\\SoundHex\\replit\\code_soundhex\\node_modules\\next\\dist\\server\\base-server.js:1962:32)\n' +
+    '    at async DevServer.pipeImpl (D:\\WORK\\TEAM\\autowin\\SoundHex\\replit\\code_soundhex\\node_modules\\next\\dist\\server\\base-server.js:920:25)\n' +
+    '    at async NextNodeServer.handleCatchallRenderRequest (D:\\WORK\\TEAM\\autowin\\SoundHex\\replit\\code_soundhex\\node_modules\\next\\dist\\server\\next-server.js:272:17)\n' +
+    '    at async DevServer.handleRequestImpl (D:\\WORK\\TEAM\\autowin\\SoundHex\\replit\\code_soundhex\\node_modules\\next\\dist\\server\\base-server.js:816:17)\n' +
+    '    at async D:\\WORK\\TEAM\\autowin\\SoundHex\\replit\\code_soundhex\\node_modules\\next\\dist\\server\\dev\\next-dev-server.js:339:20\n' +
+    '    at async Span.traceAsyncFn (D:\\WORK\\TEAM\\autowin\\SoundHex\\replit\\code_soundhex\\node_modules\\next\\dist\\trace\\trace.js:154:20)\n' +
+    '    at async DevServer.handleRequest (D:\\WORK\\TEAM\\autowin\\SoundHex\\replit\\code_soundhex\\node_modules\\next\\dist\\server\\dev\\next-dev-server.js:336:24)\n' +
+    '    at async invokeRender (D:\\WORK\\TEAM\\autowin\\SoundHex\\replit\\code_soundhex\\node_modules\\next\\dist\\server\\lib\\router-server.js:174:21)\n' +
+    '    at async handleRequest (D:\\WORK\\TEAM\\autowin\\SoundHex\\replit\\code_soundhex\\node_modules\\next\\dist\\server\\lib\\router-server.js:353:24)\n' +
+    '    at async requestHandlerImpl (D:\\WORK\\TEAM\\autowin\\SoundHex\\replit\\code_soundhex\\node_modules\\next\\dist\\server\\lib\\router-server.js:377:13)\n' +
+    '    at async Server.requestListener (D:\\WORK\\TEAM\\autowin\\SoundHex\\replit\\code_soundhex\\node_modules\\next\\dist\\server\\lib\\start-server.js:141:13)'
+}
