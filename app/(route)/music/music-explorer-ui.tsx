@@ -371,17 +371,6 @@ export function MusicExplorerUI({
 
                             <TrackGrid
                                 tracks={featuredTracks}
-                                onTrackPlay={(track, tracks) => {
-                                    if (
-                                        currentTrack?.id === track.id &&
-                                        isPlaying
-                                    ) {
-                                        togglePlayPause();
-                                    } else {
-                                        setTrackList(featuredTracks);
-                                        playTrack(track);
-                                    }
-                                }}
                             />
 
                             {/* View all button */}
@@ -410,23 +399,15 @@ export function MusicExplorerUI({
                                 <Button
                                     variant="ghost"
                                     onClick={() => setCurrentView("albums")}
-                                    className="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 font-medium"
+                                    className="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 font-medium dark:hover:bg-white/10"
                                 >
                                     View All →
                                 </Button>
                             </div>
 
+                            
                             <AlbumGrid
                                 albums={featuredAlbums}
-                                onAlbumPlay={(album) => {
-                                    const albumTracks = featuredTracks.filter(
-                                        (t) => t.album?.id === album.id,
-                                    );
-                                    if (albumTracks.length > 0) {
-                                        setTrackList(albumTracks);
-                                        playTrack(albumTracks[0]);
-                                    }
-                                }}
                             />
                         </section>
 
@@ -444,7 +425,7 @@ export function MusicExplorerUI({
                                 <Button
                                     variant="ghost"
                                     onClick={() => setCurrentView("artists")}
-                                    className="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 font-medium"
+                                    className="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 font-medium dark:hover:bg-white/10"
                                 >
                                     View All →
                                 </Button>
@@ -486,7 +467,7 @@ export function MusicExplorerUI({
                                 <Button
                                     onClick={() => {
                                         if (libraryTracks.length > 0) {
-                                            setTrackList(libraryTracks);
+                                            setTrackList([libraryTracks[0]]);
                                             playTrack(libraryTracks[0]);
                                         }
                                     }}
@@ -555,17 +536,6 @@ export function MusicExplorerUI({
                             <TrackGrid
                                 key={`library-${libraryTracks.length}-${searchQuery}-${currentPage}`}
                                 tracks={libraryTracks}
-                                onTrackPlay={(track, tracks) => {
-                                    if (
-                                        currentTrack?.id === track.id &&
-                                        isPlaying
-                                    ) {
-                                        togglePlayPause();
-                                    } else {
-                                        setTrackList(libraryTracks);
-                                        playTrack(track);
-                                    }
-                                }}
                             />
                         )}
 

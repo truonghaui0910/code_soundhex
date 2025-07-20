@@ -93,7 +93,7 @@ export function TrackGrid({
             if (currentTrack?.id === track.id && isPlaying) {
                 togglePlayPause();
             } else {
-                setTrackList(tracks);
+                setTrackList([track]);
                 playTrack(track);
             }
         }

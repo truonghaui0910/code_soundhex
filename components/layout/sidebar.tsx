@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, Upload } from "lucide-react";
-import { useUserRole } from "@/hooks/use-user-role";
+import { useUser } from "@/contexts/UserContext";
 
 const items = [
   {
@@ -129,7 +129,7 @@ export function Sidebar() {
     return () => window.removeEventListener("resize", updateNavbarHeight);
   }, []);
 
-  const { userRole } = useUserRole();
+  const { userRole } = useUser();
 
   const SidebarContent = () => {
     // Filter items based on user role

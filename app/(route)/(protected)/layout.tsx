@@ -1,6 +1,5 @@
 import { Navbar } from "@/components/layout/navbar";
 import { Sidebar } from "@/components/layout/sidebar";
-import RoleMiddleware from "@/lib/middleware/role-middleware";
 import { AudioPlayerProvider } from "@/contexts/AudioPlayerContext";
 import { MusicPlayer } from "@/components/music/MusicPlayer";
 

@@ -11,6 +11,7 @@ import { TrackList } from "@/components/music/track-list";
 import { AlbumGrid } from "@/components/music/album-grid";
 import { TrackGridSm } from "@/components/music/track-grid-sm";
 import { useLikesFollows } from "@/hooks/use-likes-follows";
+import { useUser } from "@/contexts/UserContext";
 import {
   Play,
   Pause,
@@ -70,7 +71,6 @@ interface ArtistDetailUIProps {
 }
 
 export function ArtistDetailUI({ artist, tracks, albums }: ArtistDetailUIProps) {
-  const [currentUser, setCurrentUser] = useState(null);
   const [currentArtist, setCurrentArtist] = useState(artist);
   const {
     currentTrack,
@@ -86,15 +86,7 @@ export function ArtistDetailUI({ artist, tracks, albums }: ArtistDetailUIProps) 
     isTrackDownloading,
   } = useDownload();
   const { getArtistFollowStatus, fetchArtistFollowStatus, toggleArtistFollow } = useLikesFollows();
-
-  useEffect(() => {
-    const supabase = createClientComponentClient();
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setCurrentUser(user);
-    };
-    getUser();
-  }, []);
+  const { user: currentUser } = useUser();
 
   const getSocialIcon = (url: string) => {
     if (url.includes('instagram.com')) {
