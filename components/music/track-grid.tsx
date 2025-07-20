@@ -20,7 +20,7 @@ import { Track } from "@/lib/definitions/Track";
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 import { useDownload } from "@/hooks/use-download";
 import AddToPlaylist from "@/components/playlist/add-to-playlist";
-import { useEffect, useCallback, useMemo } from "react";
+import { useEffect, useCallback, useMemo, useRef } from "react";
 import { useLikesFollows } from "@/hooks/use-likes-follows";
 
 interface TrackGridProps {
@@ -66,7 +66,14 @@ const TrackGrid = memo(function TrackGrid({
     const { downloadTrack } = useDownload();
     const { getTrackLikeStatus, fetchTrackLikeStatus, toggleTrackLike, fetchBatchTrackLikesStatus } = useLikesFollows();
 
-    const trackIds = useMemo(() => tracks.map(track => track.id), [tracks]);
+    // OPTIMIZE trackIds to prevent unnecessary API calls - ADD THIS
+    const trackIds = useMemo(() => {
+        if (!tracks || tracks.length === 0) return [];
+        return tracks.map(track => track.id);
+    }, [tracks]);
+
+    // ADD ref to track previous trackIds and prevent duplicate API calls
+    const prevTrackIdsRef = useRef<number[]>([]);
 
     const handleTrackPlay = useCallback((track: Track) => {
         if (onTrackPlay) {
@@ -106,9 +113,19 @@ const TrackGrid = memo(function TrackGrid({
         );
     }
 
+    // OPTIMIZE batch fetch to prevent duplicate API calls - FIX THIS
     useEffect(() => {
         if (!isLoading && trackIds.length > 0) {
-            fetchBatchTrackLikesStatus(trackIds);
+            // PREVENT DUPLICATE API CALLS - ADD THIS CHECK
+            const currentTrackIdsString = trackIds.sort().join(',');
+            const prevTrackIdsString = prevTrackIdsRef.current.sort().join(',');
+            
+            // Only call API if trackIds actually changed
+            if (currentTrackIdsString !== prevTrackIdsString) {
+                console.log('🔄 TrackGrid - Fetching likes for tracks:', trackIds);
+                fetchBatchTrackLikesStatus(trackIds);
+                prevTrackIdsRef.current = [...trackIds];
+            }
         }
     }, [trackIds, isLoading, fetchBatchTrackLikesStatus]);
 
