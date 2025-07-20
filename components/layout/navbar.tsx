@@ -8,40 +8,11 @@ import { Button } from "@/components/ui/button";
 import { UserNav } from "./user-nav";
 import { SoundHexLogo } from "@/components/ui/soundhex-logo";
 import { supabase } from "@/lib/supabase/client";
-import { useUserRole } from "@/hooks/use-user-role";
+import { useUser } from "@/contexts/UserContext";
 
 export function Navbar() {
   const router = useRouter();
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const { userRole } = useUserRole();
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      const { data } = await supabase.auth.getSession();
-      if (data.session?.user) {
-        setUser(data.session.user);
-      }
-      setLoading(false);
-    };
-
-    fetchUser();
-
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      (event: string, session: any) => {
-        if (session?.user) {
-          setUser(session.user);
-        } else {
-          setUser(null);
-        }
-        setLoading(false);
-      },
-    );
-
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
-  }, []);
+  const { user, userRole, loading } = useUser();
 
   return (
     <div className="border-b fixed top-0 left-0 right-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm z-50">
