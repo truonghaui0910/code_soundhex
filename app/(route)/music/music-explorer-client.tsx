@@ -73,8 +73,10 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
     const searchParams = useSearchParams();
 
     // Get unique genres from tracks
-    const genres = Array.from(
-        new Set(tracks.map((track) => track.genre?.name).filter(Boolean)),
+    const genres = useMemo(() => 
+        Array.from(
+            new Set(tracks.map((track) => track.genre?.name).filter(Boolean)),
+        ), [tracks]
     );
 
     // State for library tracks (server-side pagination)
@@ -84,7 +86,7 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
 
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage, setItemsPerPage] = useState(50);
+    const [itemsPerPage] = useState(2); // Remove setter to prevent unnecessary re-renders
     const [totalPages, setTotalPages] = useState(0);
 
     // Albums view state
@@ -101,7 +103,26 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
     const [totalArtists, setTotalArtists] = useState(0);
     const [isLoadingArtists, setIsLoadingArtists] = useState(false);
 
-    
+    // Debounce search - ADD THIS
+    const searchTimeoutRef = useRef<NodeJS.Timeout>();
+    const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
+
+    // Debounce search query - ADD THIS EFFECT
+    useEffect(() => {
+        if (searchTimeoutRef.current) {
+            clearTimeout(searchTimeoutRef.current);
+        }
+        
+        searchTimeoutRef.current = setTimeout(() => {
+            setDebouncedSearchQuery(searchQuery);
+        }, 500);
+
+        return () => {
+            if (searchTimeoutRef.current) {
+                clearTimeout(searchTimeoutRef.current);
+            }
+        };
+    }, [searchQuery]);
 
     // Memoize unique albums and artists to prevent re-renders
     const uniqueAlbums = useMemo(() => {
@@ -160,7 +181,7 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
         return shuffled.slice(0, 12);
     }, [tracks]);
 
-    // Function to fetch albums with pagination
+    // Function to fetch albums with pagination - ADD useCallback
     const fetchAllAlbums = useCallback(async (page: number = 1, resetPage: boolean = false) => {
         if (currentView !== "albums") return;
 
@@ -204,9 +225,9 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
         } finally {
             setIsLoadingAlbums(false);
         }
-    }, [currentView, itemsPerPage]);
+    }, [currentView, itemsPerPage]); // SIMPLIFIED DEPENDENCIES
 
-    // Function to fetch artists with pagination
+    // Function to fetch artists with pagination - ADD useCallback
     const fetchAllArtists = useCallback(async (page: number = 1, resetPage: boolean = false) => {
         if (currentView !== "artists") return;
 
@@ -256,9 +277,9 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
         } finally {
             setIsLoadingArtists(false);
         }
-    }, [currentView, itemsPerPage, tracks]);
+    }, [currentView, itemsPerPage, tracks]); // SIMPLIFIED DEPENDENCIES
 
-    // Function to fetch library tracks with pagination, search and filters
+    // Function to fetch library tracks with pagination, search and filters - ADD useCallback
     const fetchLibraryTracks = useCallback(async (page: number = 1, resetPage: boolean = false) => {
         if (currentView !== "library") return;
 
@@ -273,8 +294,8 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
                 genre: selectedGenre,
             });
 
-            if (searchQuery.trim()) {
-                params.append('search', searchQuery);
+            if (debouncedSearchQuery.trim()) { // USE DEBOUNCED QUERY
+                params.append('search', debouncedSearchQuery);
             }
 
             const response = await fetch(`/api/tracks?${params}`);
@@ -312,81 +333,80 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
         } finally {
             setIsSearching(false);
         }
-    }, [currentView, searchQuery, selectedGenre, itemsPerPage]);
+    }, [currentView, debouncedSearchQuery, selectedGenre, itemsPerPage]); // USE DEBOUNCED QUERY
 
-    // State for search trigger
-    const [shouldSearch, setShouldSearch] = useState(false);
+    // State for search trigger - REMOVE THIS, USE DEBOUNCED EFFECT INSTEAD
+    // const [shouldSearch, setShouldSearch] = useState(false);
 
-    // Search effect when triggered
+    // Search effect when triggered - REPLACE WITH DEBOUNCED EFFECT
     useEffect(() => {
-        if (shouldSearch) {
-            // Auto switch to library view when searching
-            if (searchQuery.trim()) {
-                setCurrentView("library");
-            }
+        if (currentView === "library") {
             fetchLibraryTracks(1, true);
-            setShouldSearch(false);
         }
-    }, [shouldSearch, fetchLibraryTracks, searchQuery]);
+    }, [debouncedSearchQuery, currentView, fetchLibraryTracks]); // USE DEBOUNCED QUERY
 
-    // Handle Enter key press
-    const handleSearchKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Handle Enter key press - SIMPLIFY
+    const handleSearchKeyPress = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
-            setShouldSearch(true);
+            // Clear timeout and immediately set debounced query
+            if (searchTimeoutRef.current) {
+                clearTimeout(searchTimeoutRef.current);
+            }
+            setDebouncedSearchQuery(searchQuery);
         }
-    };
+    }, [searchQuery]);
 
-    // Fetch library tracks when view or genre changes (but not page changes)
+    // Fetch library tracks when view or genre changes (but not page changes) - SIMPLIFIED
     useEffect(() => {
         if (currentView === "library") {
             fetchLibraryTracks(1, true); // Reset to page 1 when view/genre changes
         }
     }, [currentView, selectedGenre, fetchLibraryTracks]);
 
-    // Separate effect for page changes to avoid duplicate calls
+    // Separate effect for page changes to avoid duplicate calls - OPTIMIZED
     useEffect(() => {
-        if (currentView === "library" && totalPages > 0 && currentPage <= totalPages) {
+        if (currentView === "library" && totalPages > 0 && currentPage <= totalPages && currentPage > 1) {
             fetchLibraryTracks(currentPage, false);
         }
-    }, [currentPage, totalPages]);
+    }, [currentPage, totalPages, currentView, fetchLibraryTracks]); // ADDED currentView check
 
-    // Fetch albums when albums view is active
+    // Fetch albums when albums view is active - SIMPLIFIED
     useEffect(() => {
         if (currentView === "albums") {
             fetchAllAlbums(1, true); // Reset to page 1 when view changes
         }
-    }, [currentView]);
+    }, [currentView, fetchAllAlbums]);
 
-    // Separate effect for albums page changes
+    // Separate effect for albums page changes - OPTIMIZED
     useEffect(() => {
-        if (currentView === "albums" && albumsCurrentPage >= 1) {
+        if (currentView === "albums" && albumsCurrentPage > 1) {
             fetchAllAlbums(albumsCurrentPage, false);
         }
-    }, [albumsCurrentPage]);
+    }, [albumsCurrentPage, currentView, fetchAllAlbums]); // ADDED currentView check
 
-    // Fetch artists when artists view is active
+    // Fetch artists when artists view is active - SIMPLIFIED
     useEffect(() => {
         if (currentView === "artists") {
             fetchAllArtists(1, true); // Reset to page 1 when view changes
         }
-    }, [currentView]);
+    }, [currentView, fetchAllArtists]);
 
-    // Separate effect for artists page changes
+    // Separate effect for artists page changes - OPTIMIZED
     useEffect(() => {
-        if (currentView === "artists" && artistsCurrentPage >= 1) {
+        if (currentView === "artists" && artistsCurrentPage > 1) {
             fetchAllArtists(artistsCurrentPage, false);
         }
-    }, [artistsCurrentPage]);
+    }, [artistsCurrentPage, currentView, fetchAllArtists]); // ADDED currentView check
 
-    // Reset search when query is cleared
-    useEffect(() => {
-        if (!searchQuery.trim() && currentView === "library") {
-            fetchLibraryTracks(1, true);
-        }
-    }, [searchQuery, currentView, fetchLibraryTracks]);
+    // REMOVE this effect as it's handled by debounced effect above
+    // useEffect(() => {
+    //     if (!searchQuery.trim() && currentView === "library") {
+    //         fetchLibraryTracks(1, true);
+    //     }
+    // }, [searchQuery, currentView, fetchLibraryTracks]);
 
-    // Function to fetch featured data
-    const fetchFeaturedData = async () => {
+    // Function to fetch featured data - ADD useCallback
+    const fetchFeaturedData = useCallback(async () => {
         setIsLoadingFeatured(true);
         try {
             const genreParam = selectedGenre !== "all" ? `genre=${encodeURIComponent(selectedGenre)}&` : "";
@@ -422,16 +442,16 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
             setIsLoadingFeatured(false);
             setLoading(false);
         }
-    };
+    }, [selectedGenre, tracks]); // SIMPLIFIED DEPENDENCIES
 
-    // Fetch featured data when genre changes or component mounts
+    // Fetch featured data when genre changes or component mounts - SIMPLIFIED
     useEffect(() => {
         if (currentView === "featured") {
             fetchFeaturedData();
         } else {
             setLoading(false);
         }
-    }, [selectedGenre, currentView]);
+    }, [selectedGenre, currentView, fetchFeaturedData]);
 
     useEffect(() => {
         const tab = searchParams.get("tab");
@@ -586,7 +606,17 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
             isLoadingFeatured={isLoadingFeatured}
             onSearchKeyPress={handleSearchKeyPress}
             isSearching={isSearching}
-            onSearchTrigger={() => setShouldSearch(true)}
+            onSearchTrigger={() => {
+                // Clear timeout and immediately set debounced query for immediate search
+                if (searchTimeoutRef.current) {
+                    clearTimeout(searchTimeoutRef.current);
+                }
+                setDebouncedSearchQuery(searchQuery);
+                // Auto switch to library view when searching
+                if (searchQuery.trim()) {
+                    setCurrentView("library");
+                }
+            }}
             currentPage={currentPage}
             setCurrentPage={setCurrentPage}
             itemsPerPage={itemsPerPage}

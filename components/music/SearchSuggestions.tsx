@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { Search, Music, Album, Users, Clock } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -56,6 +56,15 @@ export function SearchSuggestions({
   const [loading, setLoading] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState({ top: 0, left: 0, width: 0 });
+  
+  // ADD throttle tracking - OPTIMIZED
+  const lastScrollTime = useRef(0);
+
+  // MEMOIZE hasResults calculation - ADD THIS
+  const hasResults = useMemo(() => 
+    data.tracks.length > 0 || data.albums.length > 0 || data.artists.length > 0,
+    [data.tracks.length, data.albums.length, data.artists.length]
+  );
 
   useEffect(() => {
     const fetchSuggestions = async () => {
@@ -82,26 +91,49 @@ export function SearchSuggestions({
     return () => clearTimeout(debounceTimer);
   }, [query]);
 
-  // Calculate position based on search input
+  // OPTIMIZE position calculation with throttling - IMPROVED
+  const updatePosition = useCallback(() => {
+    if (isVisible) {
+      const searchInput = document.querySelector('input[placeholder*="Search songs"]') as HTMLInputElement;
+      if (searchInput) {
+        const rect = searchInput.getBoundingClientRect();
+        const newPosition = {
+          top: rect.bottom + window.scrollY + 2,
+          left: rect.left + window.scrollX,
+          width: rect.width
+        };
+        
+        // ONLY UPDATE IF POSITION ACTUALLY CHANGED - ADD THIS CHECK
+        setPosition(prevPosition => {
+          if (
+            Math.abs(prevPosition.top - newPosition.top) > 1 ||
+            Math.abs(prevPosition.left - newPosition.left) > 1 ||
+            Math.abs(prevPosition.width - newPosition.width) > 1
+          ) {
+            return newPosition;
+          }
+          return prevPosition;
+        });
+      }
+    }
+  }, [isVisible]);
+
+  // Calculate position based on search input - OPTIMIZED WITH THROTTLING
   useEffect(() => {
-    const updatePosition = () => {
+    updatePosition();
+
+    // THROTTLED scroll handler to prevent excessive re-renders - IMPROVED
+    const handleScroll = () => {
       if (isVisible) {
-        const searchInput = document.querySelector('input[placeholder*="Search songs"]') as HTMLInputElement;
-        if (searchInput) {
-          const rect = searchInput.getBoundingClientRect();
-          setPosition({
-            top: rect.bottom + window.scrollY + 2, // Reduced from 8 to 2
-            left: rect.left + window.scrollX,
-            width: rect.width
-          });
+        const now = Date.now();
+        if (now - lastScrollTime.current > 16) { // 60fps throttling
+          lastScrollTime.current = now;
+          updatePosition();
         }
       }
     };
 
-    updatePosition();
-
-    // Update position on scroll to prevent floating
-    const handleScroll = () => {
+    const handleResize = () => {
       if (isVisible) {
         updatePosition();
       }
@@ -109,23 +141,23 @@ export function SearchSuggestions({
 
     if (isVisible) {
       window.addEventListener('scroll', handleScroll, { passive: true });
-      window.addEventListener('resize', updatePosition);
+      window.addEventListener('resize', handleResize, { passive: true });
     }
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('resize', updatePosition);
+      window.removeEventListener('resize', handleResize);
     };
-  }, [isVisible]);
+  }, [isVisible, updatePosition]);
 
-  // Handle click outside to close
+  // Handle click outside to close - MEMOIZED
+  const handleClickOutside = useCallback((event: MouseEvent) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      onClose();
+    }
+  }, [onClose]);
+
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        onClose();
-      }
-    };
-
     if (isVisible) {
       document.addEventListener('mousedown', handleClickOutside);
     }
@@ -133,13 +165,11 @@ export function SearchSuggestions({
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isVisible, onClose]);
+  }, [isVisible, handleClickOutside]);
 
   if (!isVisible || !query || query.length < 2) {
     return null;
   }
-
-  const hasResults = data.tracks.length > 0 || data.albums.length > 0 || data.artists.length > 0;
 
   return (
     <div 
