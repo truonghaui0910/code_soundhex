@@ -77,7 +77,7 @@ export function AlbumDetailUI({
       setTrackList(safeTracks);
       setTimeout(() => {
         playTrack(safeTracks[0]);
-      }, 50);
+      }, 10);
     }
   };
 

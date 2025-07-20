@@ -23,7 +23,7 @@ export function ArtistGrid({
     artists,
     isLoading = false,
     loadingCount = 5,
-    className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6",
+    className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6",
 }: ArtistGridProps) {
     if (isLoading) {
         return (
@@ -70,8 +70,7 @@ export function ArtistGrid({
                         <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors truncate">
                             {artist.name}
                         </h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center justify-center gap-1">
-                            <Users className="w-3 h-3" />
+                        <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center justify-center">
                             {artist.tracksCount} tracks
                         </p>
                     </div>
