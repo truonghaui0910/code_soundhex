@@ -45,8 +45,41 @@ const AudioPlayerContext = createContext<AudioPlayerContextType | undefined>(
 export function AudioPlayerProvider({ children }: { children: ReactNode }) {
   const audioPlayerState = useAudioPlayerHook();
 
+  // MEMOIZE context value to prevent unnecessary re-renders - ADD THIS
+  const contextValue = useMemo(() => audioPlayerState, [
+    // ONLY re-create context when these specific values change
+    audioPlayerState.currentTrack?.id, // Only track ID, not the whole object
+    audioPlayerState.isPlaying,
+    audioPlayerState.volume,
+    audioPlayerState.currentTime,
+    audioPlayerState.duration,
+    audioPlayerState.error,
+    audioPlayerState.isShuffled,
+    audioPlayerState.repeatMode,
+    audioPlayerState.isQueueOpen,
+    audioPlayerState.currentIndex,
+    audioPlayerState.trackList.length, // Only length, not the whole array
+    audioPlayerState.originalTrackList.length, // Only length, not the whole array
+    // Functions are stable from useCallback in the hook
+    audioPlayerState.playTrack,
+    audioPlayerState.setTrackList,
+    audioPlayerState.playNext,
+    audioPlayerState.playPrevious,
+    audioPlayerState.togglePlayPause,
+    audioPlayerState.changeVolume,
+    audioPlayerState.seekTo,
+    audioPlayerState.formatTime,
+    audioPlayerState.toggleShuffle,
+    audioPlayerState.toggleRepeat,
+    audioPlayerState.toggleQueue,
+    audioPlayerState.toggleMute,
+    audioPlayerState.removeFromQueue,
+    audioPlayerState.reorderQueue,
+    audioPlayerState.jumpToTrack,
+  ]);
+
   return (
-    <AudioPlayerContext.Provider value={audioPlayerState}>
+    <AudioPlayerContext.Provider value={contextValue}>
       {children}
     </AudioPlayerContext.Provider>
   );

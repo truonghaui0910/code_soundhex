@@ -49,7 +49,7 @@ export function UserNav({ user }: UserNavProps) {
           variant="ghost"
           size="sm"
           onClick={() => router.push("/login")}
-          className="text-foreground hover:text-primary"
+          className="text-foreground hover:text-primary dark:hover:bg-white/10"
         >
           Login
         </Button>

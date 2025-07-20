@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, memo, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Music, Play, Loader2 } from "lucide-react";
@@ -28,7 +28,7 @@ interface AlbumGridProps {
     className?: string;
 }
 
-export function AlbumGrid({ 
+const AlbumGrid = memo(function AlbumGrid({ 
     albums, 
     isLoading = false, 
     loadingCount = 5, 
@@ -38,7 +38,7 @@ export function AlbumGrid({
     const { setTrackList, playTrack } = useAudioPlayer();
     const [loadingAlbums, setLoadingAlbums] = useState<Set<number>>(new Set());
 
-    const handleAlbumPlay = async (album: Album) => {
+    const handleAlbumPlay = useCallback(async (album: Album) => {
         console.log(`🎵 AlbumGrid - Playing album: "${album.title}" (ID: ${album.id})`);
         
         if (onAlbumPlay) {
@@ -122,7 +122,7 @@ export function AlbumGrid({
                 return newSet;
             });
         }
-    };
+    }, [onAlbumPlay, setTrackList, playTrack]);
 
     if (isLoading) {
         return (
@@ -209,4 +209,8 @@ export function AlbumGrid({
             ))}
         </div>
     );
-}
+});
+
+AlbumGrid.displayName = 'AlbumGrid';
+
+export { AlbumGrid };

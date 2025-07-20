@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { 
@@ -15,33 +16,12 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Track } from "@/lib/definitions/Track";
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 import { useDownload } from "@/hooks/use-download";
 import AddToPlaylist from "@/components/playlist/add-to-playlist";
-import { useEffect } from "react";
+import { useEffect, useCallback, useMemo } from "react";
 import { useLikesFollows } from "@/hooks/use-likes-follows";
-
-interface Track {
-    id: number;
-    title: string;
-    duration: number | null;
-    view_count?: number;
-    artist?: {
-        id: number;
-        name: string;
-        custom_url: string | null;
-    } | null;
-    album?: {
-        id: number;
-        title: string;
-        cover_image_url: string | null;
-        custom_url: string | null;
-    } | null;
-    genre?: {
-        id: number;
-        name: string;
-    } | null;
-}
 
 interface TrackGridProps {
     tracks: Track[];
@@ -68,7 +48,7 @@ const formatViewCount = (views: number | undefined) => {
     return `${(views / 1000000).toFixed(1)}M`;
 };
 
-export function TrackGrid({ 
+const TrackGrid = memo(function TrackGrid({ 
     tracks, 
     isLoading = false, 
     loadingCount = 10, 
@@ -86,7 +66,9 @@ export function TrackGrid({
     const { downloadTrack } = useDownload();
     const { getTrackLikeStatus, fetchTrackLikeStatus, toggleTrackLike, fetchBatchTrackLikesStatus } = useLikesFollows();
 
-    const handleTrackPlay = (track: Track) => {
+    const trackIds = useMemo(() => tracks.map(track => track.id), [tracks]);
+
+    const handleTrackPlay = useCallback((track: Track) => {
         if (onTrackPlay) {
             onTrackPlay(track, tracks);
         } else {
@@ -97,7 +79,7 @@ export function TrackGrid({
                 playTrack(track);
             }
         }
-    };
+    }, [onTrackPlay, tracks, currentTrack?.id, isPlaying, togglePlayPause, setTrackList, playTrack]);
 
     if (isLoading) {
         return (
@@ -124,13 +106,11 @@ export function TrackGrid({
         );
     }
 
-    // Batch fetch like status for all tracks
     useEffect(() => {
-        if (!isLoading && tracks.length > 0) {
-            const trackIds = tracks.map(track => track.id);
+        if (!isLoading && trackIds.length > 0) {
             fetchBatchTrackLikesStatus(trackIds);
         }
-    }, [tracks, isLoading, fetchBatchTrackLikesStatus]);
+    }, [trackIds, isLoading, fetchBatchTrackLikesStatus]);
 
     return (
         <div className={className}>
@@ -219,7 +199,7 @@ export function TrackGrid({
                                     </p>
                                     <p className="text-gray-500 dark:text-gray-500 truncate text-xs">
                                         <Link
-                                            href={`/album/${track.album?.custom_url || track.album?.id}`}
+                                            href={`/album/${track.album?.id}`}
                                             className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
                                         >
                                             {track.album?.title || "Unknown Album"}
@@ -282,4 +262,8 @@ export function TrackGrid({
             ))}
         </div>
     );
-}
+});
+
+TrackGrid.displayName = 'TrackGrid';
+
+export { TrackGrid };

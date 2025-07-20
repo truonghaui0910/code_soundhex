@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Users } from "lucide-react";
@@ -19,7 +20,7 @@ interface ArtistGridProps {
     className?: string;
 }
 
-export function ArtistGrid({
+const ArtistGrid = memo(function ArtistGrid({
     artists,
     isLoading = false,
     loadingCount = 5,
@@ -78,4 +79,8 @@ export function ArtistGrid({
             ))}
         </div>
     );
-}
+});
+
+ArtistGrid.displayName = 'ArtistGrid';
+
+export { ArtistGrid };
