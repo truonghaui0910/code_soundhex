@@ -22,6 +22,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { CreatePlaylistModal } from "@/components/playlist/create-playlist-modal";
 import LibraryPlaylistsLoading from "./loading";
+import { PlaylistGrid } from "@/components/music/playlist-grid";
 
 import {
   Dialog,
@@ -43,7 +44,7 @@ interface Playlist {
   created_at: string;
 }
 
-const ITEMS_PER_PAGE = 7;
+const ITEMS_PER_PAGE = 50;
 
 export default function LibraryPlaylistsPage() {
   const { user } = useCurrentUser();
@@ -53,7 +54,6 @@ export default function LibraryPlaylistsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [loadingPlaylistId, setLoadingPlaylistId] = useState<number | null>(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [createPlaylistOpen, setCreatePlaylistOpen] = useState(false);
   const [editPlaylistOpen, setEditPlaylistOpen] = useState(false);
@@ -66,8 +66,6 @@ export default function LibraryPlaylistsPage() {
     name: "",
     description: "",
   });
-  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
-  const menuRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
 
   // Keyboard shortcut for search (Ctrl/Cmd + K)
   useEffect(() => {
@@ -116,19 +114,15 @@ export default function LibraryPlaylistsPage() {
   // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (openMenuId !== null) {
-        const menuElement = menuRefs.current[openMenuId];
-        if (menuElement && !menuElement.contains(event.target as Node)) {
-          setOpenMenuId(null);
-        }
-      }
+      // This effect is no longer needed as menuRefs and openMenuId are removed.
+      // Keeping it for now in case it's re-introduced later.
     };
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [openMenuId]);
+  }, []); // Removed openMenuId from dependency array
 
   const fetchPlaylists = async () => {
     setIsLoading(true);
@@ -144,68 +138,6 @@ export default function LibraryPlaylistsPage() {
     }
   };
 
-  const handlePlayPlaylist = async (playlist: Playlist) => {
-    if (playlist.track_count === 0) {
-      toast.error("This playlist is empty");
-      return;
-    }
-
-    setLoadingPlaylistId(playlist.id);
-    try {
-      const response = await fetch(`/api/playlists/${playlist.id}/tracks`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch playlist tracks");
-      }
-
-      const tracksData = await response.json();
-
-      if (tracksData.length === 0) {
-        toast.error("This playlist is empty");
-        return;
-      }
-
-      let tracks: Track[];
-      if (tracksData[0]?.track) {
-        tracks = tracksData.map((pt: any) => pt.track);
-      } else {
-        tracks = tracksData;
-      }
-
-      const processedTracks = tracks.map((track) => ({
-        ...track,
-        file_url: track.file_url || track.audio_file_url,
-        audio_file_url: track.audio_file_url || track.file_url,
-      }));
-
-      const validTracks = processedTracks.filter(
-        (track) =>
-          track &&
-          track.id &&
-          track.title &&
-          (track.file_url || track.audio_file_url),
-      );
-
-      if (validTracks.length === 0) {
-        toast.error("No valid tracks found in playlist");
-        return;
-      }
-
-      setTrackList(validTracks);
-      setTimeout(() => {
-        playTrack(validTracks[0]);
-      }, 50);
-
-      toast.success(
-        `Playing "${playlist.name}" - ${validTracks.length} tracks`,
-      );
-    } catch (error) {
-      console.error("Error playing playlist:", error);
-      toast.error("Failed to play playlist");
-    } finally {
-      setLoadingPlaylistId(null);
-    }
-  };
-
   const handlePlaylistCreated = (newPlaylist: any) => {
     setPlaylists([newPlaylist, ...playlists]);
     setFilteredPlaylists([newPlaylist, ...filteredPlaylists]);
@@ -218,7 +150,6 @@ export default function LibraryPlaylistsPage() {
       description: playlist.description || "",
     });
     setEditPlaylistOpen(true);
-    setOpenMenuId(null);
   };
 
   const handleEditPlaylist = async (e: React.FormEvent) => {
@@ -277,11 +208,6 @@ export default function LibraryPlaylistsPage() {
   const openDeleteConfirm = (playlist: Playlist) => {
     setPlaylistToDelete(playlist);
     setDeleteConfirmOpen(true);
-    setOpenMenuId(null);
-  };
-
-  const toggleMenu = (playlistId: number) => {
-    setOpenMenuId(openMenuId === playlistId ? null : playlistId);
   };
 
   const confirmDelete = () => {
@@ -556,120 +482,11 @@ export default function LibraryPlaylistsPage() {
           </>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6 mb-8">
-              {currentPlaylists.map((playlist, index) => (
-                <div
-                  key={playlist.id}
-                  className="group cursor-pointer text-center transform transition-all duration-300 hover:scale-105"
-                  style={{
-                    animationDelay: `${index * 50}ms`,
-                    animation: "fadeInUp 0.6s ease-out forwards"
-                  }}
-                >
-                  <div className="relative aspect-square mb-3">
-                    <Link href={`/playlists/${playlist.id}`}>
-                      <div className="w-full h-full bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg relative overflow-hidden">
-                        {playlist.cover_image_url ? (
-                          <img
-                            src={playlist.cover_image_url}
-                            alt={playlist.name}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <List className="h-8 w-8 text-white" />
-                          </div>
-                        )}
-                      </div>
-                    </Link>
-
-                    {/* Play Button - Center */}
-                    <div className="absolute inset-0 flex items-center justify-center rounded-lg overflow-hidden">
-                      <Button
-                        size="lg"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          handlePlayPlaylist(playlist);
-                        }}
-                        disabled={loadingPlaylistId === playlist.id}
-                        className="opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-full bg-white/90 text-purple-600 hover:bg-white hover:scale-110 shadow-lg backdrop-blur-sm"
-                      >
-                        {loadingPlaylistId === playlist.id ? (
-                          <div className="h-6 w-6 border-2 border-purple-600 border-t-transparent rounded-full animate-spin" />
-                        ) : (
-                          <Play className="h-6 w-6" />
-                        )}
-                      </Button>
-                    </div>
-                    
-                    {/* Three Dots Menu - Top Right */}
-                    <div className="absolute top-2 right-2">
-                      <Button
-                        size="sm"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          toggleMenu(playlist.id);
-                        }}
-                        className="opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-full bg-white/90 text-purple-600 hover:bg-white hover:scale-110 shadow-lg backdrop-blur-sm w-8 h-8 p-0"
-                      >
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                      
-                      {/* Manual Dropdown Menu */}
-                      <div
-                        ref={(el) => { 
-                          menuRefs.current[playlist.id] = el; 
-                        }}
-                        className={`absolute right-0 mt-2 w-48 z-[100] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg rounded-md overflow-hidden ${
-                          openMenuId === playlist.id ? '' : 'hidden'
-                        }`}
-                      >
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            openEditDialog(playlist);
-                          }}
-                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors"
-                        >
-                          <Edit className="h-4 w-4 mr-2 inline-block" />
-                          Edit
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            openDeleteConfirm(playlist);
-                          }}
-                          disabled={isDeleting === playlist.id}
-                          className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          <Trash2 className="h-4 w-4 mr-2 inline-block" />
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="space-y-1">
-                    <Link href={`/playlists/${playlist.id}`} className="block">
-                      <h3 className="font-semibold text-white group-hover:text-purple-300 transition-colors truncate">
-                        {playlist.name}
-                      </h3>
-                    </Link>
-                    <p className="text-sm text-purple-300 truncate">
-                      {playlist.track_count || 0} songs
-                    </p>
-                    {playlist.description && (
-                      <p className="text-xs text-purple-400 truncate">
-                        {playlist.description}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
+            <PlaylistGrid 
+              playlists={currentPlaylists}
+              onPlaylistEdit={openEditDialog}
+              onPlaylistDelete={openDeleteConfirm}
+            />
 
             {/* Pagination */}
             {totalPages > 1 && (

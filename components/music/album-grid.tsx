@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, memo, useCallback } from "react";
+import { useState, memo, useCallback, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Music, Play, Loader2 } from "lucide-react";
+import { Music, Play, Loader2, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
+import { useLikesFollows } from "@/hooks/use-likes-follows";
 import { toast } from "sonner";
 
 interface Album {
@@ -36,7 +37,21 @@ const AlbumGrid = memo(function AlbumGrid({
     className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6"
 }: AlbumGridProps) {
     const { setTrackList, playTrack } = useAudioPlayer();
+    const { getAlbumLikeStatus, fetchAlbumLikeStatus, toggleAlbumLike } = useLikesFollows();
     const [loadingAlbums, setLoadingAlbums] = useState<Set<number>>(new Set());
+
+    // Fetch album like status for all albums when component mounts
+    useEffect(() => {
+        if (!isLoading && albums.length > 0) {
+            albums.forEach(album => {
+                const status = getAlbumLikeStatus(album.id);
+                // Only fetch if we haven't fetched yet and it's not currently loading
+                if (status.isLiked === undefined && !status.isLoading) {
+                    fetchAlbumLikeStatus(album.id);
+                }
+            });
+        }
+    }, [albums, isLoading, fetchAlbumLikeStatus, getAlbumLikeStatus]);
 
     const handleAlbumPlay = useCallback(async (album: Album) => {
         console.log(`🎵 AlbumGrid - Playing album: "${album.title}" (ID: ${album.id})`);
@@ -166,6 +181,25 @@ const AlbumGrid = memo(function AlbumGrid({
 
                         {/* Play Album Button Overlay */}
                         <div className="absolute inset-0 flex items-center justify-center rounded-lg overflow-hidden">
+                            {/* Heart Icon - Left */}
+                            <Button
+                                size="sm"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    toggleAlbumLike(album.id);
+                                }}
+                                disabled={getAlbumLikeStatus(album.id).isLoading}
+                                className={`opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-full shadow-lg backdrop-blur-sm w-10 h-10 p-0 absolute left-3 ${
+                                    getAlbumLikeStatus(album.id).isLiked 
+                                        ? 'bg-red-500 text-white hover:bg-red-600' 
+                                        : 'bg-white/90 text-red-500 hover:bg-white hover:text-red-600'
+                                }`}
+                            >
+                                <Heart className={`h-5 w-5 ${getAlbumLikeStatus(album.id).isLiked ? 'fill-current' : ''}`} />
+                            </Button>
+
+                            {/* Play Button - Center */}
                             <Button
                                 size="lg"
                                 onClick={(e) => {

@@ -55,7 +55,7 @@ export default function TracksListLight({ tracks, className = "" }: TracksListLi
   const { playTrack, currentTrack, isPlaying, togglePlayPause, setTrackList } = useAudioPlayer();
   const { getTrackLikeStatus, fetchBatchTrackLikesStatus, toggleTrackLike } = useLikesFollows();
   const { downloadTrack } = useDownload();
-  
+
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
   const [openPlaylistMenuId, setOpenPlaylistMenuId] = useState<number | null>(null);
   const [playlists, setPlaylists] = useState<any[]>([]);
@@ -96,7 +96,7 @@ export default function TracksListLight({ tracks, className = "" }: TracksListLi
         const status = getTrackLikeStatus(id);
         return status.isLiked === undefined && !status.isLoading;
       });
-      
+
       if (unfetchedTrackIds.length > 0) {
         fetchBatchTrackLikesStatus(unfetchedTrackIds);
       }
@@ -215,44 +215,50 @@ export default function TracksListLight({ tracks, className = "" }: TracksListLi
         return (
           <div
             key={track.id}
-            className="group flex items-center gap-4 p-3 rounded-lg hover:bg-white/10 transition-all cursor-pointer"
+            className={`group flex items-center gap-4 p-3 rounded-lg transition-all cursor-pointer
+              hover:bg-white/10
+              ${isCurrentTrack && isPlaying ? 'bg-white/10' : ''}
+            `}
             onClick={() => handleTrackPlay(track)}
           >
-                         {/* Track Cover */}
-             <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center relative overflow-hidden">
-               {track.album?.cover_image_url ? (
-                 <img
-                   src={track.album.cover_image_url}
-                   alt={track.title}
-                   className="w-full h-full object-cover"
-                 />
-               ) : (
-                 <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
-                   <div className="text-white text-lg font-bold">
-                     {track.title.charAt(0).toUpperCase()}
-                   </div>
-                 </div>
-               )}
-               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                 {isCurrentlyPlaying ? (
-                   <div className="flex items-center gap-1">
-                     <div className="flex items-end gap-[2px] h-5">
-                       <div className="w-[2px] bg-white rounded-full animate-pulse" style={{ height: '4px', animationDelay: '0ms', animationDuration: '1000ms' }}></div>
-                       <div className="w-[2px] bg-white rounded-full animate-pulse" style={{ height: '8px', animationDelay: '150ms', animationDuration: '1000ms' }}></div>
-                       <div className="w-[2px] bg-white rounded-full animate-pulse" style={{ height: '6px', animationDelay: '300ms', animationDuration: '1000ms' }}></div>
-                       <div className="w-[2px] bg-white rounded-full animate-pulse" style={{ height: '10px', animationDelay: '450ms', animationDuration: '1000ms' }}></div>
-                     </div>
-                   </div>
-                 ) : (
-                   <Play className="h-6 w-6 text-white fill-white" />
-                 )}
-               </div>
-             </div>
+            {/* Track Cover */}
+            <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center relative overflow-hidden">
+              {track.album?.cover_image_url ? (
+                <img
+                  src={track.album.cover_image_url}
+                  alt={track.title}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
+                  <div className="text-white text-lg font-bold">
+                    {track.title.charAt(0).toUpperCase()}
+                  </div>
+                </div>
+              )}
+              <div
+                className={
+                  "absolute inset-0 bg-black/40 transition-opacity flex items-center justify-center " +
+                  (isCurrentlyPlaying ? "opacity-100" : "opacity-0 group-hover:opacity-100")
+                }
+              >
+                {isCurrentlyPlaying ? (
+                  <div className="flex items-end space-x-0.5 h-5">
+                    <div className="w-1 bg-white animate-equalize-1" style={{ height: "30%" }}></div>
+                    <div className="w-1 bg-white animate-equalize-2" style={{ height: "100%" }}></div>
+                    <div className="w-1 bg-white animate-equalize-3" style={{ height: "60%" }}></div>
+                    <div className="w-1 bg-white animate-equalize-4" style={{ height: "80%" }}></div>
+                  </div>
+                ) : (
+                  <Play className="h-6 w-6 text-white fill-white" />
+                )}
+              </div>
+            </div>
 
             {/* Track Info */}
             <div className="flex-1 min-w-0">
               <p className="font-medium truncate">{track.title}</p>
-              <Link 
+              <Link
                 href={`/artist/${track.artist.custom_url || track.artist.id}`}
                 onClick={(e) => e.stopPropagation()}
                 className="block"
@@ -263,296 +269,294 @@ export default function TracksListLight({ tracks, className = "" }: TracksListLi
               </Link>
             </div>
 
-                         {/* Stats and Actions */}
-             <div className="flex items-center gap-3">
-               {/* View Count */}
-               {track.view_count !== undefined && track.view_count > 0 && (
-                 <div className="flex items-center gap-1 text-xs text-purple-300">
-                   <Headphones className="h-3 w-3" />
-                   <span className="font-mono">{formatViewCount(track.view_count)}</span>
-                 </div>
-               )}
+            {/* Stats and Actions */}
+            <div className="flex items-center gap-3">
+              {/* View Count */}
+              {track.view_count !== undefined && track.view_count > 0 && (
+                <div className="flex items-center gap-1 text-xs text-purple-300">
+                  <Headphones className="h-3 w-3" />
+                  <span className="font-mono">{formatViewCount(track.view_count)}</span>
+                </div>
+              )}
 
-               {/* Like Button - Fixed Position */}
-               <div className="w-8 h-8 flex items-center justify-center">
-                 <Button
-                   size="sm"
-                   variant="ghost"
-                   onClick={(e) => {
-                     e.preventDefault();
-                     e.stopPropagation();
-                     toggleTrackLike(track.id);
-                   }}
-                   disabled={likeStatus.isLoading}
-                   title={likeStatus.isLiked ? "Remove from liked songs" : "Add to liked songs"}
-                   className={`p-1 h-8 w-8 transition-all duration-200 dark:hover:bg-white/10 ${
-                     likeStatus.isLiked 
-                       ? 'text-red-400 hover:text-red-300' 
-                       : 'text-purple-300 hover:text-white'
-                   }`}
-                 >
-                   <Heart 
-                     className={`h-4 w-4 ${likeStatus.isLiked ? 'fill-current' : ''}`} 
-                   />
-                 </Button>
-               </div>
+              {/* Like Button - Fixed Position */}
+              <div className="w-8 h-8 flex items-center justify-center">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleTrackLike(track.id);
+                  }}
+                  disabled={likeStatus.isLoading}
+                  title={likeStatus.isLiked ? "Remove from liked songs" : "Add to liked songs"}
+                  className={`p-1 h-8 w-8 transition-all duration-200 dark:hover:bg-white/10 ${likeStatus.isLiked
+                      ? 'text-red-400 hover:text-red-300'
+                      : 'text-purple-300 hover:text-white'
+                    }`}
+                >
+                  <Heart
+                    className={`h-4 w-4 ${likeStatus.isLiked ? 'fill-current' : ''}`}
+                  />
+                </Button>
+              </div>
 
-               {/* Duration and Menu Container - Fixed Width */}
-               <div className="w-20 flex items-center justify-center gap-2">
-                 {/* Duration (hidden when menu is open) */}
-                 <div className={`${openMenuId === track.id ? 'hidden' : 'flex'} items-center gap-1 text-xs text-purple-300`}>
-                   <Clock className="h-3 w-3" />
-                   <span className="font-mono">{formatDuration(track.duration || null)}</span>
-                 </div>
+              {/* Duration and Menu Container - Fixed Width */}
+              <div className="w-20 flex items-center justify-center gap-2">
+                {/* Duration (hidden when menu is open) */}
+                <div className={`${openMenuId === track.id ? 'hidden' : 'flex'} items-center gap-1 text-xs text-purple-300`}>
+                  <Clock className="h-3 w-3" />
+                  <span className="font-mono">{formatDuration(track.duration || null)}</span>
+                </div>
 
-                 {/* Three Dots Menu (always visible) */}
-                 <div className="relative">
-                   <Button
-                     size="sm"
-                     variant="ghost"
-                     onClick={(e) => {
-                       e.preventDefault();
-                       e.stopPropagation();
-                       toggleMenu(track.id);
-                     }}
-                     className="p-1 h-8 w-8 text-purple-300 hover:text-white dark:hover:bg-white/10"
-                   >
-                     <MoreHorizontal className="h-4 w-4" />
-                   </Button>
-                   
-                   {/* Dropdown Menu */}
-                   <div
-                     ref={(el) => { 
-                       menuRefs.current[track.id] = el; 
-                     }}
-                     className={`absolute right-0 mt-2 w-80 z-[100] bg-purple-900 border border-purple-700 shadow-2xl rounded-xl overflow-hidden ${
-                       openMenuId === track.id ? '' : 'hidden'
-                     }`}
-                   >
-                     {/* Header Section */}
-                     <div className="p-4 border-b border-purple-700">
-                       <div className="flex items-start gap-3">
-                         {/* Artist Profile Picture */}
-                         <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0">
-                           {track.artist.profile_image_url ? (
-                             <img
-                               src={track.artist.profile_image_url}
-                               alt={track.artist.name}
-                               className="w-full h-full object-cover rounded-full"
-                             />
-                           ) : (
-                             <span className="text-white font-bold text-lg">
-                               {track.artist.name.charAt(0).toUpperCase()}
-                             </span>
-                           )}
-                         </div>
-                         
-                         {/* Song Info */}
-                         <div className="flex-1 min-w-0">
-                           <h3 className="text-white font-bold text-lg truncate">
-                             {track.title}
-                           </h3>
-                           <div className="flex items-center gap-4 mt-1 text-purple-300 text-sm">
-                             <div className="flex items-center gap-1">
-                               <Heart className="h-3 w-3" />
-                               <span>{formatViewCount(likeStatus.totalLikes || 0)}</span>
-                             </div>
-                             <div className="flex items-center gap-1">
-                               <Headphones className="h-3 w-3" />
-                               <span>{formatViewCount(track.view_count || 0)}</span>
-                             </div>
-                           </div>
-                         </div>
-                       </div>
-                     </div>
+                {/* Three Dots Menu (always visible) */}
+                <div className="relative">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      toggleMenu(track.id);
+                    }}
+                    className="p-1 h-8 w-8 text-purple-300 hover:text-white dark:hover:bg-white/10"
+                  >
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+
+                  {/* Dropdown Menu */}
+                  <div
+                    ref={(el) => {
+                      menuRefs.current[track.id] = el;
+                    }}
+                    className={`absolute right-0 mt-2 w-80 z-[100] bg-purple-900 border border-purple-700 shadow-2xl rounded-xl overflow-hidden ${openMenuId === track.id ? '' : 'hidden'
+                      }`}
+                  >
+                    {/* Header Section */}
+                    <div className="p-4 border-b border-purple-700">
+                      <div className="flex items-start gap-3">
+                        {/* Artist Profile Picture */}
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0">
+                          {track.artist.profile_image_url ? (
+                            <img
+                              src={track.artist.profile_image_url}
+                              alt={track.artist.name}
+                              className="w-full h-full object-cover rounded-full"
+                            />
+                          ) : (
+                            <span className="text-white font-bold text-lg">
+                              {track.artist.name.charAt(0).toUpperCase()}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Song Info */}
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-white font-bold text-lg truncate">
+                            {track.title}
+                          </h3>
+                          <div className="flex items-center gap-4 mt-1 text-purple-300 text-sm">
+                            <div className="flex items-center gap-1">
+                              <Heart className="h-3 w-3" />
+                              <span>{formatViewCount(likeStatus.totalLikes || 0)}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Headphones className="h-3 w-3" />
+                              <span>{formatViewCount(track.view_count || 0)}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
 
 
 
-                     {/* Action List */}
-                     <div className="py-2">
-                       <AddToPlaylist trackId={track.id} trackTitle={track.title}>
-                         <button
-                           onClick={(e) => {
-                             e.preventDefault();
-                             e.stopPropagation();
-                             setOpenMenuId(null);
-                           }}
-                           className="flex items-center w-full px-4 py-3 text-white hover:bg-purple-700/50 transition-colors"
-                         >
-                           <Plus className="h-4 w-4 mr-3" />
-                           <span className="text-sm">Add to Queue</span>
-                         </button>
-                       </AddToPlaylist>
+                    {/* Action List */}
+                    <div className="py-2">
+                      {/* <AddToPlaylist trackId={track.id} trackTitle={track.title}>
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setOpenMenuId(null);
+                          }}
+                          className="flex items-center w-full px-4 py-3 text-white hover:bg-purple-700/50 transition-colors"
+                        >
+                          <Plus className="h-4 w-4 mr-3" />
+                          <span className="text-sm">Add to Queue</span>
+                        </button>
+                      </AddToPlaylist> */}
+{/* 
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          // Add to queue next
+                          setOpenMenuId(null);
+                        }}
+                        className="flex items-center w-full px-4 py-3 text-white hover:bg-purple-700/50 transition-colors"
+                      >
+                        <SkipForward className="h-4 w-4 mr-3" />
+                        <span className="text-sm">Play Next</span>
+                      </button> */}
 
-                       <button
-                         onClick={(e) => {
-                           e.preventDefault();
-                           e.stopPropagation();
-                           // Add to queue next
-                           setOpenMenuId(null);
-                         }}
-                         className="flex items-center w-full px-4 py-3 text-white hover:bg-purple-700/50 transition-colors"
-                       >
-                         <SkipForward className="h-4 w-4 mr-3" />
-                         <span className="text-sm">Play Next</span>
-                       </button>
-
-                       <button
-                         onClick={(e) => {
-                           e.preventDefault();
-                           e.stopPropagation();
-                           // Play similar content
-                           setOpenMenuId(null);
-                         }}
-                         className="flex items-center w-full px-4 py-3 text-white hover:bg-purple-700/50 transition-colors"
-                       >
-                         <Radio className="h-4 w-4 mr-3" />
-                         <span className="text-sm">Play Similar</span>
-                       </button>
-
-
-
-                                              <div className="relative group">
-                         <button
-                           onMouseEnter={() => togglePlaylistMenu(track.id)}
-                           className="flex items-center justify-between w-full px-4 py-3 text-white hover:bg-purple-700/50 transition-colors"
-                         >
-                           <div className="flex items-center">
-                             <ListMusic className="h-4 w-4 mr-3" />
-                             <span className="text-sm">Add to Playlist</span>
-                           </div>
-                           <ChevronRight className="h-4 w-4" />
-                         </button>
-                         
-                         {/* Playlist Sub-menu */}
-                         {openPlaylistMenuId === track.id && (
-                           <div
-                             ref={(el) => { 
-                               playlistMenuRefs.current[track.id] = el; 
-                             }}
-                             className="absolute left-full top-0 ml-2 w-64 z-[9999] bg-purple-800 border border-purple-600 shadow-2xl rounded-xl overflow-hidden"
-                             onMouseEnter={() => setOpenPlaylistMenuId(track.id)}
-                             onMouseLeave={() => setOpenPlaylistMenuId(null)}
-                           >
-                             {/* Search Header */}
-                             <div className="p-3 border-b border-purple-600">
-                               <div className="flex items-center gap-2 bg-purple-700 rounded-lg px-3 py-2">
-                                 <Search className="h-4 w-4 text-purple-300" />
-                                 <input
-                                   type="text"
-                                   placeholder="Search playlist..."
-                                   value={searchQuery}
-                                   onChange={(e) => setSearchQuery(e.target.value)}
-                                   className="bg-transparent text-white placeholder-purple-300 text-sm outline-none flex-1"
-                                 />
-                               </div>
-                             </div>
-
-                             {/* Create New Playlist */}
-                             <div className="p-2 border-b border-purple-600">
-                               <button className="flex items-center gap-2 w-full p-2 text-white hover:bg-purple-700/50 transition-colors rounded">
-                                 <Plus className="h-4 w-4 text-red-400" />
-                                 <span className="text-sm">Create new playlist</span>
-                               </button>
-                             </div>
-
-                             {/* Playlists List */}
-                             <div className="max-h-48 overflow-y-auto">
-                               {isLoadingPlaylists ? (
-                                 <div className="p-4 text-center text-purple-300 text-sm">
-                                   Loading playlists...
-                                 </div>
-                               ) : playlists.filter(playlist =>
-                                   playlist.name.toLowerCase().includes(searchQuery.toLowerCase())
-                                 ).length === 0 ? (
-                                 <div className="p-4 text-center text-purple-300 text-sm">
-                                   {searchQuery ? "No playlists found" : "No playlists yet"}
-                                 </div>
-                               ) : (
-                                 playlists
-                                   .filter(playlist =>
-                                     playlist.name.toLowerCase().includes(searchQuery.toLowerCase())
-                                   )
-                                   .map((playlist) => (
-                                     <div
-                                       key={playlist.id}
-                                       className="flex items-center p-2 hover:bg-purple-700/50 transition-colors"
-                                     >
-                                       <ListMusic className="mr-2 h-4 w-4 text-white flex-shrink-0" />
-                                       <div
-                                         className="flex-1 cursor-pointer"
-                                         onClick={() => handleAddToPlaylist(playlist.id, track.id, track.title)}
-                                       >
-                                         <div className="font-medium text-sm text-white">{playlist.name}</div>
-                                         <div className="text-xs text-purple-300">
-                                           {playlist.track_count} tracks
-                                         </div>
-                                       </div>
-                                     </div>
-                                   ))
-                               )}
-                             </div>
-                           </div>
-                         )}
-                       </div>
-
-                       <button
-                         onClick={(e) => {
-                           e.preventDefault();
-                           e.stopPropagation();
-                           const trackToDownload: Track = {
-                             id: track.id,
-                             title: track.title,
-                             artist: {
-                               id: track.artist.id,
-                               name: track.artist.name,
-                               custom_url: track.artist.custom_url || track.artist.id.toString(),
-                               profile_image_url: track.artist.profile_image_url,
-                             },
-                             album: track.album ? {
-                               id: track.album.id,
-                               title: track.album.title,
-                               cover_image_url: track.album.cover_image_url,
-                             } : undefined,
-                             duration: track.duration || null,
-                             file_url: track.file_url,
-                             view_count: track.view_count,
-                           };
-                           downloadTrack(trackToDownload);
-                           setOpenMenuId(null);
-                         }}
-                         className="flex items-center w-full px-4 py-3 text-white hover:bg-purple-700/50 transition-colors"
-                       >
-                         <Download className="h-4 w-4 mr-3" />
-                         <span className="text-sm">Download</span>
-                       </button>
-
-                       <button
-                         onClick={(e) => {
-                           e.preventDefault();
-                           e.stopPropagation();
-                           const url = `${window.location.origin}/track/${track.id}`;
-                           navigator.clipboard.writeText(url);
-                           toast.success('Link copied to clipboard!');
-                           setOpenMenuId(null);
-                         }}
-                         className="flex items-center w-full px-4 py-3 text-white hover:bg-purple-700/50 transition-colors"
-                       >
-                         <LinkIcon className="h-4 w-4 mr-3" />
-                         <span className="text-sm">Copy Link</span>
-                       </button>
+                      {/* <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          // Play similar content
+                          setOpenMenuId(null);
+                        }}
+                        className="flex items-center w-full px-4 py-3 text-white hover:bg-purple-700/50 transition-colors"
+                      >
+                        <Radio className="h-4 w-4 mr-3" />
+                        <span className="text-sm">Play Similar</span>
+                      </button> */}
 
 
-                     </div>
+
+                      <div className="relative group">
+                        <button
+                          onMouseEnter={() => togglePlaylistMenu(track.id)}
+                          className="flex items-center justify-between w-full px-4 py-3 text-white hover:bg-purple-700/50 transition-colors"
+                        >
+                          <div className="flex items-center">
+                            <ListMusic className="h-4 w-4 mr-3" />
+                            <span className="text-sm">Add to Playlist</span>
+                          </div>
+                          <ChevronRight className="h-4 w-4" />
+                        </button>
+
+                        {/* Playlist Sub-menu */}
+                        {openPlaylistMenuId === track.id && (
+                          <div
+                            ref={(el) => {
+                              playlistMenuRefs.current[track.id] = el;
+                            }}
+                            className="absolute left-full top-0 ml-2 w-64 z-[9999] bg-purple-800 border border-purple-600 shadow-2xl rounded-xl overflow-hidden"
+                            onMouseEnter={() => setOpenPlaylistMenuId(track.id)}
+                            onMouseLeave={() => setOpenPlaylistMenuId(null)}
+                          >
+                            {/* Search Header */}
+                            <div className="p-3 border-b border-purple-600">
+                              <div className="flex items-center gap-2 bg-purple-700 rounded-lg px-3 py-2">
+                                <Search className="h-4 w-4 text-purple-300" />
+                                <input
+                                  type="text"
+                                  placeholder="Search playlist..."
+                                  value={searchQuery}
+                                  onChange={(e) => setSearchQuery(e.target.value)}
+                                  className="bg-transparent text-white placeholder-purple-300 text-sm outline-none flex-1"
+                                />
+                              </div>
+                            </div>
+
+                            {/* Create New Playlist */}
+                            <div className="p-2 border-b border-purple-600">
+                              <button className="flex items-center gap-2 w-full p-2 text-white hover:bg-purple-700/50 transition-colors rounded">
+                                <Plus className="h-4 w-4 text-red-400" />
+                                <span className="text-sm">Create new playlist</span>
+                              </button>
+                            </div>
+
+                            {/* Playlists List */}
+                            <div className="max-h-48 overflow-y-auto">
+                              {isLoadingPlaylists ? (
+                                <div className="p-4 text-center text-purple-300 text-sm">
+                                  Loading playlists...
+                                </div>
+                              ) : playlists.filter(playlist =>
+                                playlist.name.toLowerCase().includes(searchQuery.toLowerCase())
+                              ).length === 0 ? (
+                                <div className="p-4 text-center text-purple-300 text-sm">
+                                  {searchQuery ? "No playlists found" : "No playlists yet"}
+                                </div>
+                              ) : (
+                                playlists
+                                  .filter(playlist =>
+                                    playlist.name.toLowerCase().includes(searchQuery.toLowerCase())
+                                  )
+                                  .map((playlist) => (
+                                    <div
+                                      key={playlist.id}
+                                      className="flex items-center p-2 hover:bg-purple-700/50 transition-colors"
+                                    >
+                                      <ListMusic className="mr-2 h-4 w-4 text-white flex-shrink-0" />
+                                      <div
+                                        className="flex-1 cursor-pointer"
+                                        onClick={() => handleAddToPlaylist(playlist.id, track.id, track.title)}
+                                      >
+                                        <div className="font-medium text-sm text-white">{playlist.name}</div>
+                                        <div className="text-xs text-purple-300">
+                                          {playlist.track_count} tracks
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          const trackToDownload: Track = {
+                            id: track.id,
+                            title: track.title,
+                            artist: {
+                              id: track.artist.id,
+                              name: track.artist.name,
+                              custom_url: track.artist.custom_url || track.artist.id.toString(),
+                              profile_image_url: track.artist.profile_image_url,
+                            },
+                            album: track.album ? {
+                              id: track.album.id,
+                              title: track.album.title,
+                              cover_image_url: track.album.cover_image_url,
+                            } : undefined,
+                            duration: track.duration || null,
+                            file_url: track.file_url,
+                            view_count: track.view_count,
+                          };
+                          downloadTrack(trackToDownload);
+                          setOpenMenuId(null);
+                        }}
+                        className="flex items-center w-full px-4 py-3 text-white hover:bg-purple-700/50 transition-colors"
+                      >
+                        <Download className="h-4 w-4 mr-3" />
+                        <span className="text-sm">Download</span>
+                      </button>
+
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          const url = `${window.location.origin}/track/${track.id}`;
+                          navigator.clipboard.writeText(url);
+                          toast.success('Link copied to clipboard!');
+                          setOpenMenuId(null);
+                        }}
+                        className="flex items-center w-full px-4 py-3 text-white hover:bg-purple-700/50 transition-colors"
+                      >
+                        <LinkIcon className="h-4 w-4 mr-3" />
+                        <span className="text-sm">Copy Link</span>
+                      </button>
 
 
-                   </div>
-                 </div>
-               </div>
-             </div>
-           </div>
-         );
-       })}
-     </div>
-   );
- } 
+                    </div>
+
+
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+} 
