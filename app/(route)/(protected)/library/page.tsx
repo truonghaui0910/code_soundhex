@@ -14,6 +14,7 @@ import {
   ChevronRight,
   Plus,
   UserPlus,
+  Trash2,
 } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useLikesFollows } from "@/hooks/use-likes-follows";
@@ -21,6 +22,7 @@ import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 import { Track } from "@/lib/definitions/Track";
 import { ArtistGrid } from "@/components/music/artist-grid";
 import { AlbumGrid } from "@/components/music/album-grid";
+import { PlaylistGrid } from "@/components/music/playlist-grid";
 import TracksListLight from "@/components/music/tracks-list-light";
 
 import {
@@ -98,9 +100,16 @@ export default function YourLibraryPage() {
   const [likedAlbums, setLikedAlbums] = useState<LikedAlbum[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [createPlaylistOpen, setCreatePlaylistOpen] = useState(false);
-  const [loadingPlaylistId, setLoadingPlaylistId] = useState<number | null>(
-    null,
-  );
+  const [editPlaylistOpen, setEditPlaylistOpen] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist | null>(null);
+  const [playlistToDelete, setPlaylistToDelete] = useState<Playlist | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isDeleting, setIsDeleting] = useState<number | null>(null);
+  const [editFormData, setEditFormData] = useState({
+    name: "",
+    description: "",
+  });
 
   useEffect(() => {
     if (user) {
@@ -149,95 +158,106 @@ export default function YourLibraryPage() {
     setPlaylists([newPlaylist, ...playlists]);
   };
 
-  const handlePlayPlaylist = async (playlist: Playlist) => {
-    if (playlist.track_count === 0) {
-      toast.error("This playlist is empty");
+  const openEditDialog = (playlist: Playlist) => {
+    setSelectedPlaylist(playlist);
+    setEditFormData({
+      name: playlist.name,
+      description: playlist.description || "",
+    });
+    setEditPlaylistOpen(true);
+  };
+
+  const handleEditPlaylist = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedPlaylist || !editFormData.name.trim()) {
+      toast.error("Playlist name is required");
       return;
     }
 
-    setLoadingPlaylistId(playlist.id);
+    setIsEditing(true);
     try {
-      const response = await fetch(`/api/playlists/${playlist.id}/tracks`);
+      const response = await fetch(`/api/playlists/${selectedPlaylist.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: editFormData.name.trim(),
+          description: editFormData.description.trim(),
+        }),
+      });
+
       if (!response.ok) {
-        throw new Error("Failed to fetch playlist tracks");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to update playlist");
       }
 
-      const tracksData = await response.json();
+      const updatedPlaylist = await response.json();
 
-      if (tracksData.length === 0) {
-        toast.error("This playlist is empty");
-        return;
-      }
-
-      let tracks: Track[];
-      if (tracksData[0]?.track) {
-        tracks = tracksData.map((pt: any) => pt.track);
-      } else {
-        tracks = tracksData;
-      }
-
-      const processedTracks = tracks.map((track) => ({
-        ...track,
-        file_url: track.file_url || track.audio_file_url,
-        audio_file_url: track.audio_file_url || track.file_url,
-      }));
-
-      const validTracks = processedTracks.filter(
-        (track) =>
-          track &&
-          track.id &&
-          track.title &&
-          (track.file_url || track.audio_file_url),
+      // Update local state
+      setPlaylists(
+        playlists.map((p) =>
+          p.id === selectedPlaylist.id ? { ...p, ...updatedPlaylist } : p,
+        ),
       );
 
-      if (validTracks.length === 0) {
-        toast.error("No valid tracks found in playlist");
-        return;
-      }
+      // Reset form and close dialog
+      setEditPlaylistOpen(false);
+      setSelectedPlaylist(null);
+      setEditFormData({ name: "", description: "" });
 
-      setTrackList(validTracks);
-
-      setTimeout(() => {
-        playTrack(validTracks[0]);
-      }, 50);
-
-      toast.success(
-        `Playing "${playlist.name}" - ${validTracks.length} tracks`,
-      );
+      toast.success(`"${updatedPlaylist.name}" updated successfully!`);
     } catch (error) {
-      console.error("Error playing playlist:", error);
-      toast.error("Failed to play playlist");
+      console.error("Error updating playlist:", error);
+      toast.error("Failed to update playlist. Please try again.");
     } finally {
-      setLoadingPlaylistId(null);
+      setIsEditing(false);
     }
   };
 
-  const handleAlbumPlay = async (album: LikedAlbum) => {
-    try {
-      const response = await fetch(`/api/albums/${album.id}/tracks`);
-      if (response.ok) {
-        const data = await response.json();
-        const tracksArray = data.tracks || (Array.isArray(data) ? data : []);
+  const openDeleteConfirm = (playlist: Playlist) => {
+    setPlaylistToDelete(playlist);
+    setDeleteConfirmOpen(true);
+  };
 
-        if (Array.isArray(tracksArray) && tracksArray.length > 0) {
-          setTrackList(tracksArray);
-          playTrack(tracksArray[0]);
-        } else {
-          toast.error("No tracks found in this album");
+  const confirmDelete = () => {
+    if (playlistToDelete) {
+      handleDeletePlaylist(playlistToDelete);
+      setDeleteConfirmOpen(false);
+      setPlaylistToDelete(null);
+    }
+  };
+
+  const handleDeletePlaylist = async (playlist: Playlist) => {
+    setIsDeleting(playlist.id);
+
+    const deletePromise = new Promise(async (resolve, reject) => {
+      try {
+        const response = await fetch(`/api/playlists/${playlist.id}`, {
+          method: "DELETE",
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Failed to delete playlist");
         }
-      } else {
-        toast.error("Failed to load album tracks");
-      }
-    } catch (error) {
-      console.error("Error loading album tracks:", error);
-      toast.error("Failed to load album tracks");
-    }
-  };
 
-  const handleAlbumLike = async (albumId: number, e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    await toggleAlbumLike(albumId);
+        // Remove from local state
+        setPlaylists(playlists.filter((p) => p.id !== playlist.id));
+        resolve(`"${playlist.name}" has been deleted successfully!`);
+      } catch (error) {
+        console.error("Error deleting playlist:", error);
+        reject(new Error("Failed to delete playlist. Please try again."));
+      } finally {
+        setIsDeleting(null);
+      }
+    });
+
+    toast.promise(deletePromise, {
+      loading: `Deleting "${playlist.name}"...`,
+      success: (message) => message as string,
+      error: (err) => err.message,
+    });
   };
 
   if (isLoading) {
@@ -303,86 +323,39 @@ export default function YourLibraryPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
-            {playlists.slice(0, 5).map((playlist) => (
-              <div
-                key={playlist.id}
-                className="group cursor-pointer text-center"
-              >
-                <div className="relative aspect-square mb-3">
-                  <Link href={`/playlists/${playlist.id}`}>
-                    <div className="w-full h-full bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg relative overflow-hidden">
-                      {playlist.cover_image_url ? (
-                        <img
-                          src={playlist.cover_image_url}
-                          alt={playlist.name}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <List className="h-8 w-8 text-white" />
-                        </div>
-                      )}
+          {playlists.length === 0 ? (
+            <div className="text-center py-8">
+              <List className="h-12 w-12 text-purple-400 mx-auto mb-4" />
+              <p className="text-purple-300">No playlists yet</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
+              <PlaylistGrid 
+                playlists={playlists.slice(0, 5)} 
+                onPlaylistEdit={openEditDialog}
+                onPlaylistDelete={openDeleteConfirm}
+                className="contents"
+              />
+              
+              {playlists.length > 5 && (
+                <Link href="/library/playlists">
+                  <div className="group cursor-pointer text-center">
+                    <div className="aspect-square mx-auto mb-3 rounded-lg bg-white/10 backdrop-blur-sm flex items-center justify-center relative group-hover:bg-white/20 transition-all duration-300 border-2 border-dashed border-purple-400">
+                      <ChevronRight className="h-8 w-8 text-purple-300" />
                     </div>
-                  </Link>
-
-                  <div className="absolute inset-0 flex items-center justify-center rounded-lg overflow-hidden">
-                    <Button
-                      size="lg"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        handlePlayPlaylist(playlist);
-                      }}
-                      disabled={loadingPlaylistId === playlist.id}
-                      className="opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-full bg-white/90 text-purple-600 hover:bg-white hover:scale-110 shadow-lg backdrop-blur-sm"
-                    >
-                      {loadingPlaylistId === playlist.id ? (
-                        <div className="h-6 w-6 border-2 border-purple-600 border-t-transparent rounded-full animate-spin" />
-                      ) : (
-                        <Play className="h-6 w-6" />
-                      )}
-                    </Button>
+                    <div className="space-y-1">
+                      <h3 className="font-semibold text-purple-300 group-hover:text-white transition-colors">
+                        View All
+                      </h3>
+                      <p className="text-sm text-purple-400">
+                        {playlists.length - 5} more
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <div className="space-y-1">
-                  <Link href={`/playlists/${playlist.id}`} className="block">
-                    <h3 className="font-semibold text-white group-hover:text-purple-300 transition-colors truncate">
-                      {playlist.name}
-                    </h3>
-                  </Link>
-                  <p className="text-sm text-purple-300 truncate">
-                    {playlist.track_count || 0} songs
-                  </p>
-                </div>
-              </div>
-            ))}
-
-            {playlists.length > 5 && (
-              <Link href="/library/playlists">
-                <div className="group cursor-pointer text-center">
-                  <div className="aspect-square mx-auto mb-3 rounded-lg bg-white/10 backdrop-blur-sm flex items-center justify-center relative group-hover:bg-white/20 transition-all duration-300 border-2 border-dashed border-purple-400">
-                    <ChevronRight className="h-8 w-8 text-purple-300" />
-                  </div>
-                  <div className="space-y-1">
-                    <h3 className="font-semibold text-purple-300 group-hover:text-white transition-colors">
-                      View All
-                    </h3>
-                    <p className="text-sm text-purple-400">
-                      {playlists.length - 5} more
-                    </p>
-                  </div>
-                </div>
-              </Link>
-            )}
-
-            {playlists.length === 0 && (
-              <div className="col-span-full text-center py-8">
-                <List className="h-12 w-12 text-purple-400 mx-auto mb-4" />
-                <p className="text-purple-300">No playlists yet</p>
-              </div>
-            )}
-          </div>
+                </Link>
+              )}
+            </div>
+          )}
         </section>
 
         {/* Liked Tracks Section */}
@@ -426,99 +399,47 @@ export default function YourLibraryPage() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
-            {likedAlbums.slice(0, 5).map((album) => (
-              <div key={album.id} className="group text-center">
-                <div className="relative aspect-square mb-3">
-                  <Link href={`/album/${album.custom_url || album.id}`}>
-                    {album.cover_image_url ? (
-                      <img
-                        src={album.cover_image_url}
-                        alt={album.title}
-                        className="w-full h-full object-cover rounded-lg group-hover:scale-105 transition-transform duration-300"
-                      />
-                    ) : (
-                      <div className="bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center w-full h-full rounded-lg group-hover:scale-105 transition-transform duration-300">
-                        <AlbumIcon className="h-12 w-12 text-white" />
-                      </div>
-                    )}
-                  </Link>
+          {likedAlbums.length === 0 ? (
+            <div className="text-center py-8">
+              <AlbumIcon className="h-12 w-12 text-purple-400 mx-auto mb-4" />
+              <p className="text-purple-300">No liked albums yet</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
+              <AlbumGrid 
+                albums={likedAlbums.slice(0, 5).map(album => ({
+                  id: album.id,
+                  title: album.title,
+                  cover_image_url: album.cover_image_url || null,
+                  custom_url: album.custom_url || null,
+                  artist: {
+                    id: album.artist.id,
+                    name: album.artist.name,
+                    custom_url: album.artist.custom_url || null,
+                  }
+                }))}
+                className="contents"
+              />
 
-                  <div className="absolute inset-0 flex items-center justify-center rounded-lg overflow-hidden">
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        onClick={(e) => handleAlbumLike(album.id, e)}
-                        className={`opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-full shadow-lg backdrop-blur-sm ${
-                          getAlbumLikeStatus(album.id).isLiked
-                            ? "bg-red-500/90 text-white hover:bg-red-600"
-                            : "bg-white/90 text-red-500 hover:bg-white"
-                        }`}
-                      >
-                        <Heart
-                          className={`h-4 w-4 ${getAlbumLikeStatus(album.id).isLiked ? "fill-current" : ""}`}
-                        />
-                      </Button>
-                      <Button
-                        size="sm"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          handleAlbumPlay(album);
-                        }}
-                        className="opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-full bg-white/90 text-purple-600 hover:bg-white hover:scale-110 shadow-lg backdrop-blur-sm"
-                      >
-                        <Play className="h-4 w-4" />
-                      </Button>
+              {likedAlbums.length > 5 && (
+                <Link href="/library/liked-albums">
+                  <div className="group cursor-pointer text-center">
+                    <div className="aspect-square mx-auto mb-3 rounded-lg bg-white/10 backdrop-blur-sm flex items-center justify-center relative group-hover:bg-white/20 transition-all duration-300 border-2 border-dashed border-purple-400">
+                      <ChevronRight className="h-8 w-8 text-purple-300" />
+                    </div>
+                    <div className="space-y-1">
+                      <h3 className="font-semibold text-purple-300 group-hover:text-white transition-colors">
+                        View All
+                      </h3>
+                      <p className="text-sm text-purple-400">
+                        {likedAlbums.length - 5} more
+                      </p>
                     </div>
                   </div>
-                </div>
-                <div className="space-y-1">
-                  <Link
-                    href={`/album/${album.custom_url || album.id}`}
-                    className="block"
-                  >
-                    <h3 className="font-semibold text-white group-hover:text-purple-300 transition-colors truncate">
-                      {album.title}
-                    </h3>
-                  </Link>
-                  <Link
-                    href={`/artist/${album.artist?.custom_url || album.artist?.id}`}
-                    className="block"
-                  >
-                    <p className="text-sm text-purple-300 hover:text-white transition-colors truncate">
-                      {album.artist?.name}
-                    </p>
-                  </Link>
-                </div>
-              </div>
-            ))}
-
-            {likedAlbums.length > 5 && (
-              <Link href="/library/liked-albums">
-                <div className="group cursor-pointer text-center">
-                  <div className="aspect-square mx-auto mb-3 rounded-lg bg-white/10 backdrop-blur-sm flex items-center justify-center relative group-hover:bg-white/20 transition-all duration-300 border-2 border-dashed border-purple-400">
-                    <ChevronRight className="h-8 w-8 text-purple-300" />
-                  </div>
-                  <div className="space-y-1">
-                    <h3 className="font-semibold text-purple-300 group-hover:text-white transition-colors">
-                      View All
-                    </h3>
-                    <p className="text-sm text-purple-400">
-                      {likedAlbums.length - 5} more
-                    </p>
-                  </div>
-                </div>
-              </Link>
-            )}
-
-            {likedAlbums.length === 0 && (
-              <div className="col-span-full text-center py-8">
-                <AlbumIcon className="h-12 w-12 text-purple-400 mx-auto mb-4" />
-                <p className="text-purple-300">No liked albums yet</p>
-              </div>
-            )}
-          </div>
+                </Link>
+              )}
+            </div>
+          )}
         </section>
       </div>
 
@@ -528,6 +449,106 @@ export default function YourLibraryPage() {
         onOpenChange={setCreatePlaylistOpen}
         onPlaylistCreated={handlePlaylistCreated}
       />
+
+      {/* Edit Playlist Dialog */}
+      <Dialog open={editPlaylistOpen} onOpenChange={setEditPlaylistOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Playlist</DialogTitle>
+            <DialogDescription>
+              Update your playlist information
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleEditPlaylist}>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-name">Playlist Name</Label>
+                <Input
+                  id="edit-name"
+                  value={editFormData.name}
+                  onChange={(e) =>
+                    setEditFormData({ ...editFormData, name: e.target.value })
+                  }
+                  placeholder="Enter playlist name"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-description">Description (Optional)</Label>
+                <Textarea
+                  id="edit-description"
+                  value={editFormData.description}
+                  onChange={(e) =>
+                    setEditFormData({ ...editFormData, description: e.target.value })
+                  }
+                  placeholder="Enter playlist description"
+                  rows={3}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setEditPlaylistOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isEditing}>
+                {isEditing ? (
+                  <>
+                    <div className="mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save Changes"
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Playlist</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete &quot;{playlistToDelete?.name}
+              &quot;? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setDeleteConfirmOpen(false)}
+              disabled={isDeleting === playlistToDelete?.id}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={confirmDelete}
+              disabled={isDeleting === playlistToDelete?.id}
+            >
+              {isDeleting === playlistToDelete?.id ? (
+                <>
+                  <div className="mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <div className="pb-32"></div>
     </div>
