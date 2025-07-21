@@ -21,6 +21,7 @@ import { Track } from "@/lib/definitions/Track";
 import Link from "next/link";
 import { toast } from "sonner";
 import { CreatePlaylistModal } from "@/components/playlist/create-playlist-modal";
+import LibraryPlaylistsLoading from "./loading";
 
 import {
   Dialog,
@@ -433,15 +434,11 @@ export default function LibraryPlaylistsPage() {
   };
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 flex items-center justify-center">
-        <div className="text-white text-xl">Loading playlists...</div>
-      </div>
-    );
+    return <LibraryPlaylistsLoading />;
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 text-white">
+    <div className="min-h-screen bg-gradient-to-r from-slate-800 via-purple-900 to-slate-900 text-white">
       <style jsx>{`
         @keyframes fadeInUp {
           from {

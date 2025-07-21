@@ -86,7 +86,7 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
 
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage] = useState(2); // Remove setter to prevent unnecessary re-renders
+    const [itemsPerPage] = useState(50); 
     const [totalPages, setTotalPages] = useState(0);
 
     // Albums view state
@@ -106,6 +106,7 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
     // Debounce search - ADD THIS
     const searchTimeoutRef = useRef<NodeJS.Timeout>();
     const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
+    const [forceSearch, setForceSearch] = useState(false); // ADD THIS FOR ENTER KEY
 
     // Debounce search query - ADD THIS EFFECT
     useEffect(() => {
@@ -115,6 +116,7 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
         
         searchTimeoutRef.current = setTimeout(() => {
             setDebouncedSearchQuery(searchQuery);
+            setForceSearch(false); // RESET FORCE SEARCH WHEN DEBOUNCED
         }, 500);
 
         return () => {
@@ -283,6 +285,8 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
     const fetchLibraryTracks = useCallback(async (page: number = 1, resetPage: boolean = false) => {
         if (currentView !== "library") return;
 
+        console.log(`🔄 MusicExplorerClient - Fetching library tracks: page=${page}, resetPage=${resetPage}`);
+
         // Only show loading if it's a fresh search or view change, not pagination
         if (resetPage || page === 1) {
             setIsSearching(true);
@@ -303,6 +307,7 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
             if (response.ok) {
                 const data = await response.json();
                 if (data.tracks && Array.isArray(data.tracks)) {
+                    console.log(`✅ MusicExplorerClient - Received ${data.tracks.length} tracks for page ${page}`);
                     setLibraryTracks(data.tracks);
                     setTotalTracks(data.total || 0);
                     setTotalPages(data.totalPages || 0);
@@ -338,14 +343,15 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
     // State for search trigger - REMOVE THIS, USE DEBOUNCED EFFECT INSTEAD
     // const [shouldSearch, setShouldSearch] = useState(false);
 
-    // Search effect when triggered - REPLACE WITH DEBOUNCED EFFECT
+    // Search effect when triggered - FIX RACE CONDITION
     useEffect(() => {
-        if (currentView === "library") {
+        if (currentView === "library" && (debouncedSearchQuery !== undefined || forceSearch)) {
             fetchLibraryTracks(1, true);
+            setForceSearch(false); // RESET FORCE SEARCH
         }
-    }, [debouncedSearchQuery, currentView, fetchLibraryTracks]); // USE DEBOUNCED QUERY
+    }, [debouncedSearchQuery, currentView, forceSearch, fetchLibraryTracks]); // USE DEBOUNCED QUERY
 
-    // Handle Enter key press - SIMPLIFY
+    // Handle Enter key press - FIX AUTO SWITCH TO LIBRARY
     const handleSearchKeyPress = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
             // Clear timeout and immediately set debounced query
@@ -353,20 +359,31 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
                 clearTimeout(searchTimeoutRef.current);
             }
             setDebouncedSearchQuery(searchQuery);
+            setForceSearch(true); // ADD THIS TO FORCE SEARCH
+            
+            // AUTO SWITCH TO LIBRARY VIEW WHEN ENTER IS PRESSED - ADD THIS
+            if (searchQuery.trim()) {
+                setCurrentView("library");
+            }
         }
     }, [searchQuery]);
 
-    // Fetch library tracks when view or genre changes (but not page changes) - SIMPLIFIED
+    // Fetch library tracks when view or genre changes (but not page changes) - OPTIMIZED
     useEffect(() => {
         if (currentView === "library") {
             fetchLibraryTracks(1, true); // Reset to page 1 when view/genre changes
         }
     }, [currentView, selectedGenre, fetchLibraryTracks]);
 
-    // Separate effect for page changes to avoid duplicate calls - OPTIMIZED
+    // Separate effect for page changes to avoid duplicate calls - FIX DUPLICATE CALLS
     useEffect(() => {
         if (currentView === "library" && totalPages > 0 && currentPage <= totalPages && currentPage > 1) {
-            fetchLibraryTracks(currentPage, false);
+            // ADD DELAY TO PREVENT RACE CONDITION WITH VIEW/GENRE EFFECT
+            const timeoutId = setTimeout(() => {
+                fetchLibraryTracks(currentPage, false);
+            }, 100);
+            
+            return () => clearTimeout(timeoutId);
         }
     }, [currentPage, totalPages, currentView, fetchLibraryTracks]); // ADDED currentView check
 
@@ -612,6 +629,7 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
                     clearTimeout(searchTimeoutRef.current);
                 }
                 setDebouncedSearchQuery(searchQuery);
+                setForceSearch(true); // ADD THIS TO FORCE SEARCH
                 // Auto switch to library view when searching
                 if (searchQuery.trim()) {
                     setCurrentView("library");

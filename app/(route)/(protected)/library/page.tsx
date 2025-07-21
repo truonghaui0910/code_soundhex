@@ -21,6 +21,7 @@ import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 import { Track } from "@/lib/definitions/Track";
 import { ArtistGrid } from "@/components/music/artist-grid";
 import { AlbumGrid } from "@/components/music/album-grid";
+import TracksListLight from "@/components/music/tracks-list-light";
 
 import {
   Dialog,
@@ -36,12 +37,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import Link from "next/link";
 import { CreatePlaylistModal } from "@/components/playlist/create-playlist-modal";
+import LibraryLoadingSkeleton from "./loading";
 
 interface FollowedArtist {
   id: number;
   name: string;
-  profile_image_url?: string;
-  custom_url?: string;
+  profile_image_url: string | null;
+  custom_url: string | null;
   tracksCount: number;
 }
 
@@ -88,7 +90,7 @@ export default function YourLibraryPage() {
   const { user } = useCurrentUser();
   const { playTrack, currentTrack, isPlaying, togglePlayPause, setTrackList } =
     useAudioPlayer();
-  const { albumLikes, toggleAlbumLike } = useLikesFollows();
+  const { toggleAlbumLike, getAlbumLikeStatus } = useLikesFollows();
 
   const [followedArtists, setFollowedArtists] = useState<FollowedArtist[]>([]);
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
@@ -141,25 +143,7 @@ export default function YourLibraryPage() {
     }
   };
 
-  const handleTrackPlay = (track: LikedTrack) => {
-    const trackToPlay: Track = {
-      id: track.id,
-      title: track.title,
-      artist: track.artist,
-      album: track.album,
-      duration: track.duration,
-      file_url: track.file_url,
-      created_at: new Date().toISOString(),
-      source_type: "uploaded",
-      view_count: 0,
-    };
 
-    if (currentTrack?.id === track.id && isPlaying) {
-      togglePlayPause();
-    } else {
-      playTrack(trackToPlay);
-    }
-  };
 
   const handlePlaylistCreated = (newPlaylist: any) => {
     setPlaylists([newPlaylist, ...playlists]);
@@ -257,15 +241,11 @@ export default function YourLibraryPage() {
   };
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 flex items-center justify-center">
-        <div className="text-white text-xl">Loading your library...</div>
-      </div>
-    );
+    return <LibraryLoadingSkeleton />;
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 text-white">
+    <div className="min-h-screen bg-gradient-to-r from-slate-800 via-purple-900 to-slate-900 text-white">
       <div className="container mx-auto px-4 sm:px-6 py-8 space-y-8">
         {/* Followed Artists Section */}
         <section className="space-y-4">
@@ -424,45 +404,7 @@ export default function YourLibraryPage() {
             </Link>
           </div>
 
-          <div className="space-y-2">
-            {likedTracks.slice(0, 5).map((track, index) => (
-              <div
-                key={track.id}
-                className="flex items-center gap-4 p-3 rounded-lg hover:bg-white/10 transition-all cursor-pointer group"
-                onClick={() => handleTrackPlay(track)}
-              >
-                <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center relative overflow-hidden">
-                  {track.album?.cover_image_url ? (
-                    <img
-                      src={track.album.cover_image_url}
-                      alt={track.title}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <Music className="h-6 w-6 text-white" />
-                  )}
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <Play className="h-4 w-4 text-white" />
-                  </div>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate">{track.title}</p>
-                  <p className="text-sm text-purple-300 truncate">
-                    {track.artist.name}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <Heart className="h-4 w-4 text-red-400 fill-current" />
-                </div>
-              </div>
-            ))}
-            {likedTracks.length === 0 && (
-              <div className="text-center py-8">
-                <Heart className="h-12 w-12 text-purple-400 mx-auto mb-4" />
-                <p className="text-purple-300">No liked songs yet</p>
-              </div>
-            )}
-          </div>
+          <TracksListLight tracks={likedTracks.slice(0, 5)} />
         </section>
 
         {/* Liked Albums Section */}
@@ -508,13 +450,13 @@ export default function YourLibraryPage() {
                         size="sm"
                         onClick={(e) => handleAlbumLike(album.id, e)}
                         className={`opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-full shadow-lg backdrop-blur-sm ${
-                          albumLikes?.[album.id]
+                          getAlbumLikeStatus(album.id).isLiked
                             ? "bg-red-500/90 text-white hover:bg-red-600"
                             : "bg-white/90 text-red-500 hover:bg-white"
                         }`}
                       >
                         <Heart
-                          className={`h-4 w-4 ${albumLikes?.[album.id] ? "fill-current" : ""}`}
+                          className={`h-4 w-4 ${getAlbumLikeStatus(album.id).isLiked ? "fill-current" : ""}`}
                         />
                       </Button>
                       <Button

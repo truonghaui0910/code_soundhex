@@ -20,7 +20,7 @@ import { Track } from "@/lib/definitions/Track";
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 import { useDownload } from "@/hooks/use-download";
 import AddToPlaylist from "@/components/playlist/add-to-playlist";
-import { useEffect, useCallback, useMemo } from "react";
+import { useEffect, useCallback, useMemo, useRef } from "react";
 import { useLikesFollows } from "@/hooks/use-likes-follows";
 
 interface TrackGridProps {
@@ -66,7 +66,14 @@ const TrackGrid = memo(function TrackGrid({
     const { downloadTrack } = useDownload();
     const { getTrackLikeStatus, fetchTrackLikeStatus, toggleTrackLike, fetchBatchTrackLikesStatus } = useLikesFollows();
 
-    const trackIds = useMemo(() => tracks.map(track => track.id), [tracks]);
+    // OPTIMIZE trackIds to prevent unnecessary API calls - ADD THIS
+    const trackIds = useMemo(() => {
+        if (!tracks || tracks.length === 0) return [];
+        return tracks.map(track => track.id);
+    }, [tracks]);
+
+    // ADD ref to track previous trackIds and prevent duplicate API calls
+    const prevTrackIdsRef = useRef<number[]>([]);
 
     const handleTrackPlay = useCallback((track: Track) => {
         if (onTrackPlay) {
@@ -106,9 +113,19 @@ const TrackGrid = memo(function TrackGrid({
         );
     }
 
+    // OPTIMIZE batch fetch to prevent duplicate API calls - FIX THIS
     useEffect(() => {
         if (!isLoading && trackIds.length > 0) {
-            fetchBatchTrackLikesStatus(trackIds);
+            // PREVENT DUPLICATE API CALLS - ADD THIS CHECK
+            const currentTrackIdsString = trackIds.sort().join(',');
+            const prevTrackIdsString = prevTrackIdsRef.current.sort().join(',');
+            
+            // Only call API if trackIds actually changed
+            if (currentTrackIdsString !== prevTrackIdsString) {
+                console.log('🔄 TrackGrid - Fetching likes for tracks:', trackIds);
+                fetchBatchTrackLikesStatus(trackIds);
+                prevTrackIdsRef.current = [...trackIds];
+            }
         }
     }, [trackIds, isLoading, fetchBatchTrackLikesStatus]);
 
@@ -191,27 +208,27 @@ const TrackGrid = memo(function TrackGrid({
                         <div className="p-6">
                             <div className="space-y-3">
                                 <div>
-                                    <h3 className="font-bold text-lg text-gray-900 dark:text-white truncate group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                                    <h3 className="font-semibold text-gray-900 dark:text-white truncate group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
                                         {track.title}
                                     </h3>
                                     <p className="text-gray-600 dark:text-gray-400 truncate text-sm font-medium">
                                         {track.artist?.name || "Unknown Artist"}
                                     </p>
-                                    <p className="text-gray-500 dark:text-gray-500 truncate text-xs">
+                                    {/* <p className="text-gray-500 dark:text-gray-500 truncate text-xs">
                                         <Link
                                             href={`/album/${track.album?.id}`}
                                             className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
                                         >
                                             {track.album?.title || "Unknown Album"}
                                         </Link>
-                                    </p>
+                                    </p> */}
                                 </div>
 
                                 <div className="flex items-center justify-between gap-2">
-                                    <div className="flex items-center gap-1 text-xs text-purple-700 dark:text-purple-300 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 px-2 py-1 rounded-full border-0">
+                                    <div className="flex items-center gap-1 text-xs text-purple-700 dark:text-purple-300 bg-gray-100 dark:bg-gray-700/50 px-2 py-1 rounded-full border-0">
                                         <span>{track.genre?.name || "Unknown"}</span>
                                     </div>
-                                    <div className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30 px-2 py-1 rounded-full">
+                                    <div className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 bg-gray-100 dark:bg-gray-700/50 px-2 py-1 rounded-full">
                                         <Headphones className="h-3 w-3" />
                                         <span className="font-mono">{formatViewCount(track.view_count)}</span>
                                     </div>
@@ -225,7 +242,7 @@ const TrackGrid = memo(function TrackGrid({
                             {/* Action buttons */}
                             <div className="mt-4 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
                                 <AddToPlaylist trackId={track.id} trackTitle={track.title}>
-                                    <Button size="sm" variant="ghost" className="hover:bg-purple-100 dark:hover:bg-purple-900/30 flex-1">
+                                    <Button size="sm" variant="ghost" className="lex-1">
                                         <Plus className="h-4 w-4" />
                                     </Button>
                                 </AddToPlaylist>
@@ -233,7 +250,7 @@ const TrackGrid = memo(function TrackGrid({
                                     size="sm"
                                     variant="ghost"
                                     onClick={() => downloadTrack(track)}
-                                    className="hover:bg-purple-100 dark:hover:bg-purple-900/30 flex-1"
+                                    className="flex-1"
                                 >
                                     <Download className="h-4 w-4" />
                                 </Button>
@@ -249,7 +266,7 @@ const TrackGrid = memo(function TrackGrid({
                                 >
                                     <Heart className={`h-4 w-4 ${getTrackLikeStatus(track.id).isLiked ? 'fill-current' : ''}`} />
                                 </Button>
-                                <Button size="sm" variant="ghost" className="hover:bg-purple-100 dark:hover:bg-purple-900/30 flex-1">
+                                <Button size="sm" variant="ghost" className="flex-1">
                                     <Share className="h-4 w-4" />
                                 </Button>
                             </div>

@@ -534,7 +534,7 @@ export function MusicExplorerUI({
                             </div>
                         ) : (
                             <TrackGrid
-                                key={`library-${libraryTracks.length}-${searchQuery}-${currentPage}`}
+                                key={`library-${currentPage}`}
                                 tracks={libraryTracks}
                             />
                         )}
