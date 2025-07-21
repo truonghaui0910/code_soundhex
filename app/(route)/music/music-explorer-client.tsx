@@ -86,7 +86,7 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
 
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage] = useState(2); // Remove setter to prevent unnecessary re-renders
+    const [itemsPerPage] = useState(50); 
     const [totalPages, setTotalPages] = useState(0);
 
     // Albums view state

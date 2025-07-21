@@ -102,8 +102,8 @@ export function MusicPlayer() {
 
   // Use effect for debugging
   useEffect(() => {
-    console.log('MusicPlayer: currentTrack =', currentTrack);
-    console.log('MusicPlayer: isPlaying =', isPlaying);
+    // console.log('MusicPlayer: currentTrack =', currentTrack);
+    // console.log('MusicPlayer: isPlaying =', isPlaying);
   }, [currentTrack, isPlaying]);
 
   // Don't render if no track is selected
@@ -249,7 +249,7 @@ export function MusicPlayer() {
                   variant="ghost"
                   className={`h-8 w-8 transition-colors ${
                     likeStatus.isLiked
-                      ? 'text-red-500 hover:text-red-600'
+                      ? 'text-red-500 hover:text-red-600 dark:hover:bg-white/10 hover:bg-white/10'
                       : 'text-gray-400 dark:hover:bg-white/10 hover:bg-white/10'
                   }`}
                   onClick={() => toggleTrackLike(currentTrack.id)}
