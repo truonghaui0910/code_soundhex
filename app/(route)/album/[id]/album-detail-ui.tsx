@@ -86,9 +86,13 @@ export function AlbumDetailUI({
   // Fetch album like status when component mounts
   useEffect(() => {
     if (safeAlbum.id && !isLoading) {
-      fetchAlbumLikeStatus(safeAlbum.id);
+      const albumLikeStatus = getAlbumLikeStatus(safeAlbum.id);
+      // Only fetch if we haven't fetched yet and it's not currently loading
+      if (albumLikeStatus.isLiked === undefined && !albumLikeStatus.isLoading) {
+        fetchAlbumLikeStatus(safeAlbum.id);
+      }
     }
-  }, [safeAlbum.id, isLoading, fetchAlbumLikeStatus]);
+  }, [safeAlbum.id, isLoading]); // Remove fetchAlbumLikeStatus from deps to prevent re-fetching
 
   const albumLikeStatus = getAlbumLikeStatus(safeAlbum.id);
 

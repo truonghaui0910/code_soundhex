@@ -37,21 +37,24 @@ const AlbumGrid = memo(function AlbumGrid({
     className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6"
 }: AlbumGridProps) {
     const { setTrackList, playTrack } = useAudioPlayer();
-    const { getAlbumLikeStatus, fetchAlbumLikeStatus, toggleAlbumLike } = useLikesFollows();
+    const { getAlbumLikeStatus, fetchBatchAlbumLikesStatus, toggleAlbumLike } = useLikesFollows();
     const [loadingAlbums, setLoadingAlbums] = useState<Set<number>>(new Set());
 
-    // Fetch album like status for all albums when component mounts
+    // Batch fetch album like status for all albums when component mounts
     useEffect(() => {
         if (!isLoading && albums.length > 0) {
-            albums.forEach(album => {
-                const status = getAlbumLikeStatus(album.id);
-                // Only fetch if we haven't fetched yet and it's not currently loading
-                if (status.isLiked === undefined && !status.isLoading) {
-                    fetchAlbumLikeStatus(album.id);
-                }
+            const albumIds = albums.map(album => album.id);
+            // Only fetch for albums that haven't been fetched yet
+            const unfetchedAlbumIds = albumIds.filter(id => {
+                const status = getAlbumLikeStatus(id);
+                return status.isLiked === undefined && !status.isLoading;
             });
+            
+            if (unfetchedAlbumIds.length > 0) {
+                fetchBatchAlbumLikesStatus(unfetchedAlbumIds);
+            }
         }
-    }, [albums, isLoading, fetchAlbumLikeStatus, getAlbumLikeStatus]);
+    }, [albums, isLoading, fetchBatchAlbumLikesStatus, getAlbumLikeStatus]);
 
     const handleAlbumPlay = useCallback(async (album: Album) => {
         console.log(`🎵 AlbumGrid - Playing album: "${album.title}" (ID: ${album.id})`);
@@ -144,10 +147,10 @@ const AlbumGrid = memo(function AlbumGrid({
             <div className={className}>
                 {Array.from({ length: loadingCount }).map((_, index) => (
                     <div key={index} className="group text-center animate-pulse">
-                        <div className="aspect-square mb-3 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+                        <div className="aspect-square mb-3 bg-white/20 dark:bg-white/20 rounded-lg"></div>
                         <div className="space-y-1">
-                            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mx-auto"></div>
-                            <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-2/3 mx-auto"></div>
+                            <div className="h-4 bg-white/20 dark:bg-white/20 rounded mx-auto"></div>
+                            <div className="h-3 bg-white/20 dark:bg-white/20 rounded w-2/3 mx-auto"></div>
                         </div>
                     </div>
                 ))}

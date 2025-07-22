@@ -34,10 +34,10 @@ const ArtistGrid = memo(function ArtistGrid({
                         key={index}
                         className="group cursor-pointer text-center animate-pulse"
                     >
-                        <div className="aspect-square mx-auto mb-3 rounded-full bg-gray-200 dark:bg-gray-700"></div>
+                        <div className="aspect-square mx-auto mb-3 rounded-full bg-white/20 dark:bg-white/20"></div>
                         <div className="space-y-1">
-                            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mx-auto"></div>
-                            <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-2/3 mx-auto"></div>
+                            <div className="h-4 bg-white/20 dark:bg-white/20 rounded mx-auto"></div>
+                            <div className="h-3 bg-white/20 dark:bg-white/20 rounded w-2/3 mx-auto"></div>
                         </div>
                     </div>
                 ))}
@@ -54,7 +54,7 @@ const ArtistGrid = memo(function ArtistGrid({
                     prefetch={false}
                     className="group cursor-pointer text-center block"
                 >
-                    <div className="aspect-square mx-auto mb-3 rounded-full overflow-hidden bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center relative group-hover:scale-105 transition-transform duration-300">
+                    <div className="aspect-square mx-auto mb-3 rounded-full overflow-hidden bg-white/20 flex items-center justify-center relative group-hover:scale-105 transition-transform duration-300">
                         {artist.profile_image_url ? (
                             <Image
                                 src={artist.profile_image_url}

@@ -31,7 +31,11 @@ export class TracksController {
     return data as Track[];
   }
 
-  static async getAllTracks(): Promise<Track[]> {
+  /**
+   * Lấy danh sách bài hát được xem nhiều nhất
+   */
+  static async getMostViewedTracks(limit: number = 12): Promise<Track[]> {
+    console.log(`🎵 TracksController.getMostViewedTracks - Starting fetch with limit: ${limit}`);
     const supabase = createServerComponentClient<Database>({ cookies });
 
     const { data, error } = await supabase
@@ -39,16 +43,19 @@ export class TracksController {
       .select(`
         *, view_count,
         artist:artist_id(id, name, profile_image_url, custom_url),
-        album:album_id(id, title, cover_image_url),
+        album:album_id(id, title, cover_image_url, custom_url),
         genre:genre_id(id, name)
       `)
-      .order("created_at", { ascending: false });
+      .order("view_count", { ascending: false })
+      .order("created_at", { ascending: false })
+      .limit(limit);
 
     if (error) {
-      console.error("Error fetching tracks:", error);
-      throw new Error(`Failed to fetch tracks: ${error.message}`);
+      console.error("Error fetching most viewed tracks:", error);
+      throw new Error(`Failed to fetch most viewed tracks: ${error.message}`);
     }
 
+    console.log(`✅ TracksController.getMostViewedTracks - Found ${data?.length || 0} tracks`);
     return data as unknown as Track[];
   }
 
@@ -381,5 +388,33 @@ export class TracksController {
       total,
       totalPages
     };
+  }
+
+  /**
+   * Lấy danh sách bài hát được xem nhiều nhất
+   */
+  static async getMostViewedTracks(limit: number = 12): Promise<Track[]> {
+    console.log(`🎵 TracksController.getMostViewedTracks - Starting fetch with limit: ${limit}`);
+    const supabase = createServerComponentClient<Database>({ cookies });
+
+    const { data, error } = await supabase
+      .from("tracks")
+      .select(`
+        *, view_count,
+        artist:artist_id(id, name, profile_image_url, custom_url),
+        album:album_id(id, title, cover_image_url, custom_url),
+        genre:genre_id(id, name)
+      `)
+      .order("view_count", { ascending: false })
+      .order("created_at", { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      console.error("Error fetching most viewed tracks:", error);
+      throw new Error(`Failed to fetch most viewed tracks: ${error.message}`);
+    }
+
+    console.log(`✅ TracksController.getMostViewedTracks - Found ${data?.length || 0} tracks`);
+    return data as unknown as Track[];
   }
 }

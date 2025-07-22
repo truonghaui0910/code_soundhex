@@ -307,9 +307,13 @@ export function MusicExplorerUI({
                             {/* Genre Filter */}
                             <select
                                 value={selectedGenre}
-                                onChange={(e) =>
-                                    setSelectedGenre(e.target.value)
-                                }
+                                onChange={(e) => {
+                                    setSelectedGenre(e.target.value);
+                                    // Tự động chuyển sang view library khi chọn genre
+                                    if (e.target.value !== "all") {
+                                        setCurrentView("library");
+                                    }
+                                }}
                                 className="px-4 py-2 rounded-full border bg-white dark:bg-gray-800 text-sm font-medium"
                             >
                                 <option value="all">All Genres</option>
@@ -686,7 +690,7 @@ export function MusicExplorerUI({
                             <AlbumGrid
                                 albums={[]}
                                 isLoading={true}
-                                loadingCount={5}
+                                loadingCount={6}
                                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-8"
                             />
                         ) : allAlbums.length === 0 ? (
@@ -907,7 +911,7 @@ export function MusicExplorerUI({
                             <ArtistGrid
                                 artists={[]}
                                 isLoading={true}
-                                loadingCount={5}
+                                loadingCount={6}
                             />
                         ) : allArtists.length === 0 ? (
                             <div className="text-center py-20">
