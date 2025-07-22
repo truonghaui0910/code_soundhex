@@ -49,10 +49,10 @@ const formatViewCount = (views: number | undefined) => {
 // Helper function to format date
 const formatDate = (dateString: string | null) => {
   if (!dateString) return "Unknown";
-  return new Date(dateString).toLocaleDateString('vi-VN', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
+  return new Date(dateString).toLocaleDateString("vi-VN", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
   });
 };
 
@@ -67,12 +67,9 @@ export function TrackDetailUI({
 }: TrackDetailUIProps) {
   const { currentTrack, isPlaying, playTrack, setTrackList, togglePlayPause } =
     useAudioPlayer();
-  const {
-    downloadTrack,
-    isDownloading,
-    isTrackDownloading,
-  } = useDownload();
-  const { getTrackLikeStatus, fetchTrackLikeStatus, toggleTrackLike } = useLikesFollows();
+  const { downloadTrack, isDownloading, isTrackDownloading } = useDownload();
+  const { getTrackLikeStatus, fetchTrackLikeStatus, toggleTrackLike } =
+    useLikesFollows();
 
   // Safe track data with fallbacks
   const safeTrack = {
@@ -192,6 +189,7 @@ export function TrackDetailUI({
                 {trackLikeStatus.totalLikes !== undefined ? (
                   <>
                     <span>•</span>
+                    <Heart className="h-4 w-4 text-white fill-white drop-shadow-lg" />
                     <span>{trackLikeStatus.totalLikes}</span>
                   </>
                 ) : trackLikeStatus.isLoading ? (
@@ -213,24 +211,37 @@ export function TrackDetailUI({
                   ) : (
                     <Play className="mr-2 h-5 w-5" />
                   )}
-                  {currentTrack?.id === safeTrack.id && isPlaying ? 'Pause' : 'Play'}
+                  {currentTrack?.id === safeTrack.id && isPlaying
+                    ? "Pause"
+                    : "Play"}
                 </Button>
                 <Button
                   size="lg"
                   className={`backdrop-blur-sm transition-all duration-200 border-0 ${
-                    trackLikeStatus.isLiked 
-                      ? 'bg-red-500 text-white hover:bg-red-600' 
-                      : 'bg-white/10 text-white hover:bg-white/20'
+                    trackLikeStatus.isLiked
+                      ? "bg-red-500 text-white hover:bg-red-600"
+                      : "bg-white/10 text-white hover:bg-white/20"
                   }`}
                   onClick={() => toggleTrackLike(safeTrack.id)}
                   disabled={trackLikeStatus.isLoading}
                 >
-                  <Heart className={`mr-2 h-5 w-5 ${trackLikeStatus.isLiked ? 'fill-current' : ''}`} />
+                  <Heart
+                    className={`mr-2 h-5 w-5 ${trackLikeStatus.isLiked ? "fill-current" : ""}`}
+                  />
                   <div className="min-w-[60px] flex justify-center items-center">
-                    {trackLikeStatus.isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : (trackLikeStatus.isLiked ? 'Liked' : 'Like')}
+                    {trackLikeStatus.isLoading ? (
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                    ) : trackLikeStatus.isLiked ? (
+                      "Liked"
+                    ) : (
+                      "Like"
+                    )}
                   </div>
                 </Button>
-                <AddToPlaylist trackId={safeTrack.id} trackTitle={safeTrack.title}>
+                <AddToPlaylist
+                  trackId={safeTrack.id}
+                  trackTitle={safeTrack.title}
+                >
                   <Button
                     size="lg"
                     className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all duration-200 border-0"
@@ -258,7 +269,10 @@ export function TrackDetailUI({
                   onClick={() => {
                     const currentUrl = window.location.href;
                     navigator.clipboard.writeText(currentUrl);
-                    showSuccess({ title: "Copied!", message: "Link copied to clipboard!" });
+                    showSuccess({
+                      title: "Copied!",
+                      message: "Link copied to clipboard!",
+                    });
                   }}
                 >
                   <Share className="mr-2 h-5 w-5" />
@@ -286,15 +300,6 @@ export function TrackDetailUI({
           {/* Track Information */}
           <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl border border-white/30 dark:border-gray-700/30 shadow-xl">
             <CardContent className="p-8">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 via-pink-500 to-rose-500 rounded-2xl flex items-center justify-center shadow-lg">
-                  <Music className="h-6 w-6 text-white" />
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
-                  Track Information
-                </h3>
-              </div>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Title */}
                 <div className="bg-white/20 dark:bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/30 dark:border-white/20">
@@ -302,9 +307,13 @@ export function TrackDetailUI({
                     <div className="w-8 h-8 bg-white/30 dark:bg-white/20 rounded-lg flex items-center justify-center">
                       <Music className="h-4 w-4 text-gray-700 dark:text-white" />
                     </div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wide">Title</p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wide">
+                      Title
+                    </p>
                   </div>
-                  <p className="font-bold text-lg text-gray-900 dark:text-white truncate">{safeTrack.title}</p>
+                  <p className="font-bold text-lg text-gray-900 dark:text-white truncate">
+                    {safeTrack.title}
+                  </p>
                 </div>
 
                 {/* Artist */}
@@ -313,7 +322,9 @@ export function TrackDetailUI({
                     <div className="w-8 h-8 bg-white/30 dark:bg-white/20 rounded-lg flex items-center justify-center">
                       <User className="h-4 w-4 text-gray-700 dark:text-white" />
                     </div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wide">Artist</p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wide">
+                      Artist
+                    </p>
                   </div>
                   <Link
                     href={`/artist/${safeTrack.artist.custom_url || safeTrack.artist.id}`}
@@ -330,7 +341,9 @@ export function TrackDetailUI({
                       <div className="w-8 h-8 bg-white/30 dark:bg-white/20 rounded-lg flex items-center justify-center">
                         <Disc className="h-4 w-4 text-gray-700 dark:text-white" />
                       </div>
-                      <p className="text-sm font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wide">Album</p>
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wide">
+                        Album
+                      </p>
                     </div>
                     <Link
                       href={`/album/${safeTrack.album.custom_url || safeTrack.album.id}`}
@@ -348,9 +361,13 @@ export function TrackDetailUI({
                       <div className="w-8 h-8 bg-white/30 dark:bg-white/20 rounded-lg flex items-center justify-center">
                         <div className="w-4 h-4 bg-gray-700 dark:bg-white rounded-full"></div>
                       </div>
-                      <p className="text-sm font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wide">Genre</p>
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wide">
+                        Genre
+                      </p>
                     </div>
-                    <p className="font-bold text-lg text-gray-900 dark:text-white truncate">{safeTrack.genre.name}</p>
+                    <p className="font-bold text-lg text-gray-900 dark:text-white truncate">
+                      {safeTrack.genre.name}
+                    </p>
                   </div>
                 )}
 
@@ -360,9 +377,13 @@ export function TrackDetailUI({
                     <div className="w-8 h-8 bg-white/30 dark:bg-white/20 rounded-lg flex items-center justify-center">
                       <Clock className="h-4 w-4 text-gray-700 dark:text-white" />
                     </div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wide">Duration</p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wide">
+                      Duration
+                    </p>
                   </div>
-                  <p className="font-bold text-lg text-gray-900 dark:text-white font-mono">{formatDuration(safeTrack.duration)}</p>
+                  <p className="font-bold text-lg text-gray-900 dark:text-white font-mono">
+                    {formatDuration(safeTrack.duration)}
+                  </p>
                 </div>
 
                 {/* Views */}
@@ -371,9 +392,13 @@ export function TrackDetailUI({
                     <div className="w-8 h-8 bg-white/30 dark:bg-white/20 rounded-lg flex items-center justify-center">
                       <Headphones className="h-4 w-4 text-gray-700 dark:text-white" />
                     </div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wide">Plays</p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wide">
+                      Plays
+                    </p>
                   </div>
-                  <p className="font-bold text-lg text-gray-900 dark:text-white">{formatViewCount(safeTrack.view_count)}</p>
+                  <p className="font-bold text-lg text-gray-900 dark:text-white">
+                    {formatViewCount(safeTrack.view_count)}
+                  </p>
                 </div>
 
                 {/* Likes */}
@@ -383,10 +408,14 @@ export function TrackDetailUI({
                       <div className="w-8 h-8 bg-white/30 dark:bg-white/20 rounded-lg flex items-center justify-center">
                         <Heart className="h-4 w-4 text-red-500 fill-current" />
                       </div>
-                      <p className="text-sm font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wide">Likes</p>
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wide">
+                        Likes
+                      </p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <p className="font-bold text-lg text-gray-900 dark:text-white">{trackLikeStatus.totalLikes}</p>
+                      <p className="font-bold text-lg text-gray-900 dark:text-white">
+                        {trackLikeStatus.totalLikes}
+                      </p>
                       <Heart className="h-5 w-5 text-white fill-white drop-shadow-lg" />
                     </div>
                   </div>
@@ -398,9 +427,13 @@ export function TrackDetailUI({
                     <div className="w-8 h-8 bg-white/30 dark:bg-white/20 rounded-lg flex items-center justify-center">
                       <Calendar className="h-4 w-4 text-gray-700 dark:text-white" />
                     </div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wide">Release Date</p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wide">
+                      Release Date
+                    </p>
                   </div>
-                  <p className="font-bold text-lg text-gray-900 dark:text-white">{formatDate(safeTrack.created_at)}</p>
+                  <p className="font-bold text-lg text-gray-900 dark:text-white">
+                    {formatDate(safeTrack.created_at)}
+                  </p>
                 </div>
               </div>
             </CardContent>
