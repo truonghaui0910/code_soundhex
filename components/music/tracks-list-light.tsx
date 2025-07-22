@@ -15,6 +15,7 @@ import AddToPlaylist from "@/components/playlist/add-to-playlist";
 interface LikedTrack {
   id: number;
   title: string;
+  custom_url?: string;
   artist: {
     id: number;
     name: string;
@@ -25,6 +26,7 @@ interface LikedTrack {
     id: number;
     title: string;
     cover_image_url?: string;
+    custom_url?: string;
   };
   duration?: number;
   file_url?: string;
@@ -541,7 +543,7 @@ export default function TracksListLight({ tracks, className = "" }: TracksListLi
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          const url = `${window.location.origin}/track/${track.id}`;
+                          const url = `${window.location.origin}/track/${track.custom_url || track.id}`;
                           navigator.clipboard.writeText(url);
                           toast.success('Link copied to clipboard!');
                           setOpenMenuId(null);

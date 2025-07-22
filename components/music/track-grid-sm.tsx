@@ -248,7 +248,7 @@ export const TrackGridSm = React.memo(function TrackGridSm({
                             <div className="flex-1 min-w-0">
                                 <h4 className="font-semibold text-gray-900 dark:text-white truncate hover:text-purple-600 dark:hover:text-purple-400 transition-colors mb-1">
                                     <Link
-                                        href={`/track/${track.id}`}
+                                        href={`/track/${track.custom_url || track.id}`}
                                         className="hover:underline"
                                     >
                                         {track.title}
