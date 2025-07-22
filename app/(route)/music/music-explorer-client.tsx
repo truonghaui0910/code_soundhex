@@ -152,26 +152,23 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
     }, [tracks]);
 
     const uniqueArtists = useMemo(() => {
-        return Array.from(
-            new Map(
-                tracks
-                    .filter((track) => track.artist)
-                    .map((track) => [
-                        track.artist!.id,
-                        {
-                            id: track.artist!.id,
-                            name: track.artist!.name,
-                            profile_image_url: track.artist!.profile_image_url,
-                            custom_url: track.artist!.custom_url,
-                            tracksCount: tracks.filter(
-                                (t) =>
-                                    t.artist &&
-                                    t.artist.id === track.artist!.id,
-                            ).length,
-                        },
-                    ]),
-            ).values(),
-        );
+        const artistMap = new Map();
+        tracks.forEach((track) => {
+            if (track.artist) {
+                const artistId = track.artist.id;
+                if (!artistMap.has(artistId)) {
+                    artistMap.set(artistId, {
+                        id: track.artist.id,
+                        name: track.artist.name,
+                        profile_image_url: track.artist.profile_image_url,
+                        custom_url: track.artist.custom_url,
+                        tracksCount: 0,
+                    });
+                }
+                artistMap.get(artistId).tracksCount++;
+            }
+        });
+        return Array.from(artistMap.values());
     }, [tracks]);
 
     // Get trending tracks from most viewed tracks (shuffle for variety)
@@ -245,10 +242,10 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
             if (response.ok) {
                 const data = await response.json();
                 if (data.artists && Array.isArray(data.artists)) {
-                    // Add tracks count for each artist
+                    // Use tracks count from API response
                     const artistsWithCount = data.artists.map(artist => ({
                         ...artist,
-                        tracksCount: tracks.filter(t => t.artist?.id === artist.id).length
+                        tracksCount: artist.tracksCount || 0
                     }));
                     
                     setAllArtists(artistsWithCount);
@@ -443,7 +440,7 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
                 const artistsData = await artistsResponse.json();
                 const artistsWithCount = artistsData.artists?.map((artist: any) => ({
                     ...artist,
-                    tracksCount: tracks.filter(t => t.artist?.id === artist.id).length
+                    tracksCount: artist.tracksCount || 0
                 })) || [];
                 setFeaturedArtists(artistsWithCount.slice(0, 12));
             }

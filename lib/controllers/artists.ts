@@ -101,7 +101,7 @@ export class ArtistsController {
   static async getArtistsWithPagination(page: number = 1, limit: number = 10): Promise<{ artists: Artist[], total: number, totalPages: number }> {
     console.log(`🎵 ArtistsController.getArtistsWithPagination - Starting fetch with page: ${page}, limit: ${limit}`);
     const supabase = createServerComponentClient<Database>({ cookies });
-    
+
     const offset = (page - 1) * limit;
 
     // Get total count first
@@ -187,7 +187,7 @@ export class ArtistsController {
       .single();
 
     if (error) throw error;
-    
+
     // Parse social from JSON string if needed
     if (artist.social && typeof artist.social === 'string') {
       try {
@@ -198,7 +198,7 @@ export class ArtistsController {
     } else if (!artist.social) {
       artist.social = [];
     }
-    
+
     return artist;
   }
 

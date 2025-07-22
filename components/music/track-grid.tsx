@@ -228,7 +228,7 @@ const TrackGrid = memo(function TrackGrid({
                         <div className="p-3">
                             <div className="space-y-3">
                                 <div>
-                                    <Link href={`/track/${track.id}`}>
+                                    <Link href={`/track/${track.custom_url || track.id}`}>
                                         <h3 className="font-semibold text-gray-900 dark:text-white truncate group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors cursor-pointer">
                                             {track.title}
                                         </h3>
@@ -270,10 +270,6 @@ const TrackGrid = memo(function TrackGrid({
                                         size="sm" 
                                         variant="ghost" 
                                         className="flex-1"
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                        }}
                                     >
                                         <Plus className="h-4 w-4" />
                                     </Button>

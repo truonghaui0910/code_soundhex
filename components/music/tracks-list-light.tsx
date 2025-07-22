@@ -257,7 +257,13 @@ export default function TracksListLight({ tracks, className = "" }: TracksListLi
 
             {/* Track Info */}
             <div className="flex-1 min-w-0">
-              <p className="font-medium truncate">{track.title}</p>
+              <Link
+                href={`/track/${track.custom_url || track.id}`}
+                onClick={(e) => e.stopPropagation()}
+                className="block"
+              >
+                <p className="font-medium truncate hover:text-purple-300 transition-colors">{track.title}</p>
+              </Link>
               <Link
                 href={`/artist/${track.artist.custom_url || track.artist.id}`}
                 onClick={(e) => e.stopPropagation()}

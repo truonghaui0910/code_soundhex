@@ -187,12 +187,12 @@ export function TrackDetailUI({
                 <span>•</span>
                 <span className="flex items-center gap-1">
                   <Headphones className="h-4 w-4" />
-                  {formatViewCount(safeTrack.view_count)} views
+                  {formatViewCount(safeTrack.view_count)}
                 </span>
                 {trackLikeStatus.totalLikes !== undefined ? (
                   <>
                     <span>•</span>
-                    <span>{trackLikeStatus.totalLikes} {trackLikeStatus.totalLikes === 1 ? 'like' : 'likes'}</span>
+                    <span>{trackLikeStatus.totalLikes}</span>
                   </>
                 ) : trackLikeStatus.isLoading ? (
                   <>
@@ -297,7 +297,7 @@ export function TrackDetailUI({
                     <p className="font-medium text-gray-900 dark:text-white">{safeTrack.title}</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center gap-3">
                   <User className="h-5 w-5 text-purple-500" />
                   <div>
@@ -387,4 +387,4 @@ export function TrackDetailUI({
       <div className="pb-32"></div>
     </div>
   );
-} 
+}
