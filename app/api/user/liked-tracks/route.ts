@@ -28,15 +28,19 @@ export async function GET(request: NextRequest) {
           title,
           duration,
           file_url,
+          custom_url,
+          view_count,
           artist:artist_id(
             id,
             name,
-            profile_image_url
+            profile_image_url,
+            custom_url
           ),
           album:album_id(
             id,
             title,
-            cover_image_url
+            cover_image_url,
+            custom_url
           )
         )
       `)
@@ -54,6 +58,8 @@ export async function GET(request: NextRequest) {
       title: item.tracks.title,
       duration: item.tracks.duration,
       file_url: item.tracks.file_url,
+      custom_url: item.tracks.custom_url,
+      view_count: item.tracks.view_count,
       artist: item.tracks.artist,
       album: item.tracks.album
     }));

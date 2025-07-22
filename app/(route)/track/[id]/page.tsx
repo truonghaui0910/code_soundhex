@@ -18,17 +18,18 @@ export default async function TrackDetailPage({
   let track;
   let trackId: number;
 
-  // Check if ID is numeric (old format) or custom URL
-  if (/^\d+$/.test(id)) {
-    // Numeric ID
+  // Try custom_url first since most tracks now have custom_url
+  track = await TracksController.getTrackByCustomUrl(id);
+  
+  // If not found and ID is numeric, try by ID
+  if (!track && /^\d+$/.test(id)) {
     trackId = parseInt(id);
     track = await TracksController.getTrackById(trackId);
-  } else {
-    // Custom URL
-    track = await TracksController.getTrackByCustomUrl(id);
-    if (track) {
-      trackId = track.id;
-    }
+  }
+  
+  // Set trackId if we found track by custom_url
+  if (track && !trackId) {
+    trackId = track.id;
   }
 
   if (!track) {
