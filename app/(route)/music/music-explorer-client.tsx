@@ -245,36 +245,13 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
             if (response.ok) {
                 const data = await response.json();
                 if (data.artists && Array.isArray(data.artists)) {
-                    // Fetch tracks count for all artists
-                    try {
-                        const tracksCountResponse = await fetch('/api/artists/tracks-count');
-                        if (tracksCountResponse.ok) {
-                            const tracksCountMap = await tracksCountResponse.json();
-                            
-                            // Add tracks count for each artist
-                            const artistsWithCount = data.artists.map((artist: any) => ({
-                                ...artist,
-                                tracksCount: tracksCountMap[artist.id] || 0
-                            }));
-                            
-                            setAllArtists(artistsWithCount);
-                        } else {
-                            // Fallback to 0 if API fails
-                            const artistsWithCount = data.artists.map((artist: any) => ({
-                                ...artist,
-                                tracksCount: 0
-                            }));
-                            setAllArtists(artistsWithCount);
-                        }
-                    } catch (error) {
-                        console.error("Error fetching tracks count:", error);
-                        // Fallback to 0 if API fails
-                        const artistsWithCount = data.artists.map((artist: any) => ({
-                            ...artist,
-                            tracksCount: 0
-                        }));
-                        setAllArtists(artistsWithCount);
-                    }
+                    // Add tracks count for each artist
+                    const artistsWithCount = data.artists.map(artist => ({
+                        ...artist,
+                        tracksCount: tracks.filter(t => t.artist?.id === artist.id).length
+                    }));
+                    
+                    setAllArtists(artistsWithCount);
                     setTotalArtists(data.total || 0);
                     setArtistsTotalPages(data.totalPages || 0);
                     if (resetPage) {

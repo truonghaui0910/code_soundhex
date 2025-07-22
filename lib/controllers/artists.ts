@@ -26,17 +26,9 @@ export class ArtistsController {
 
     const { data, error } = await supabase
       .from("artists")
-      .select(`
-        id, 
-        name, 
-        profile_image_url, 
-        bio, 
-        created_at, 
-        custom_url, 
-        social, 
-        user_id
-      `)
+      .select(`id, name, profile_image_url,bio, created_at`)
       .eq("user_id", userId)
+      // .eq('import_source', 'direct') // Chỉ lấy artists được tạo direct, không phải import từ Spotify
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -44,19 +36,7 @@ export class ArtistsController {
       throw new Error(`Failed to fetch user artists: ${error.message}`);
     }
 
-    // Convert social from database format to array if needed
-    const artists = (data ?? []).map(artist => {
-      if (artist.social && typeof artist.social === 'string') {
-        try {
-          artist.social = JSON.parse(artist.social);
-        } catch (e) {
-          artist.social = [];
-        }
-      }
-      return artist;
-    }) as Artist[];
-
-    return artists;
+    return data ?? [];
   }
 
   static async getAllArtists(): Promise<Artist[]> {
@@ -65,16 +45,7 @@ export class ArtistsController {
 
     const { data, error } = await supabase
       .from("artists")
-      .select(`
-        id, 
-        name, 
-        profile_image_url, 
-        bio, 
-        created_at, 
-        custom_url, 
-        social, 
-        user_id
-      `)
+      .select(`id, name, profile_image_url, bio, created_at, custom_url, social, user_id`)
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -92,7 +63,7 @@ export class ArtistsController {
         }
       }
       return artist;
-    }) as Artist[];
+    });
 
     return artists;
   }
@@ -103,16 +74,7 @@ export class ArtistsController {
 
     const { data, error } = await supabase
       .from("artists")
-      .select(`
-        id, 
-        name, 
-        profile_image_url, 
-        bio, 
-        created_at, 
-        custom_url, 
-        social, 
-        user_id
-      `)
+      .select(`id, name, profile_image_url, bio, created_at, custom_url, social, user_id`)
       .order("created_at", { ascending: false })
       .limit(limit);
 
@@ -131,7 +93,7 @@ export class ArtistsController {
         }
       }
       return artist;
-    }) as Artist[];
+    });
 
     return artists;
   }
@@ -155,16 +117,7 @@ export class ArtistsController {
     // Get paginated data
     const { data, error } = await supabase
       .from("artists")
-      .select(`
-        id, 
-        name, 
-        profile_image_url, 
-        bio, 
-        created_at, 
-        custom_url, 
-        social, 
-        user_id
-      `)
+      .select(`id, name, profile_image_url, bio, created_at, custom_url, social, user_id`)
       .order("created_at", { ascending: false })
       .range(offset, offset + limit - 1);
 
@@ -183,7 +136,7 @@ export class ArtistsController {
         }
       }
       return artist;
-    }) as Artist[];
+    });
 
     const total = count || 0;
     const totalPages = Math.ceil(total / limit);
@@ -292,16 +245,7 @@ export class ArtistsController {
 
     const { data, error } = await supabase
       .from("artists")
-      .select(`
-        id, 
-        name, 
-        profile_image_url, 
-        bio, 
-        created_at, 
-        custom_url, 
-        social, 
-        user_id
-      `)
+      .select(`id, name, profile_image_url, bio, created_at, custom_url, social, user_id`)
       .ilike("name", `%${searchTerm}%`)
       .order("created_at", { ascending: false })
       .limit(limit);
@@ -321,8 +265,8 @@ export class ArtistsController {
         }
       }
       return artist;
-    }) as Artist[];
+    });
 
     return artists;
   }
-} 
+}
