@@ -24,8 +24,11 @@ export default async function TrackDetailPage({
     trackId = parseInt(id);
     track = await TracksController.getTrackById(trackId);
   } else {
-    // Custom URL - có thể implement sau
-    notFound();
+    // Custom URL
+    track = await TracksController.getTrackByCustomUrl(id);
+    if (track) {
+      trackId = track.id;
+    }
   }
 
   if (!track) {
