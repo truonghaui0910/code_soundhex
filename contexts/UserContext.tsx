@@ -32,14 +32,14 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   const [userRole, setUserRole] = useState<UserRole>('user');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  
+
   const initialized = useRef(false);
   const fetchingRole = useRef(false);
 
   // Fetch user role function
   const fetchUserRole = async (userEmail: string) => {
     if (fetchingRole.current) return;
-    
+
     try {
       fetchingRole.current = true;
 
@@ -58,7 +58,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
       const data = await response.json();
       const role = data.role || 'user';
-      
+
       // Update global cache
       globalRoleCache = { role, timestamp: Date.now(), email: userEmail };
       setUserRole(role);
@@ -78,10 +78,10 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     const initializeAuth = async () => {
       try {
         setLoading(true);
-        
+
         // Get initial session only once
         const { data: { session }, error: authError } = await supabase.auth.getSession();
-        
+
         if (authError) {
           console.error("Auth error:", authError);
           setError(authError);
@@ -90,7 +90,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         } else {
           const currentUser = session?.user as User || null;
           setUser(currentUser);
-          
+
           // Fetch role if user exists
           if (currentUser?.email) {
             await fetchUserRole(currentUser.email);
@@ -113,14 +113,14 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('Auth state changed:', event, session?.user?.email);
-      
+
       // Only update state for important events, not token refresh
       if (event === 'SIGNED_IN') {
         const currentUser = session?.user as User || null;
         setUser(currentUser);
         setLoading(false);
         setError(null);
-        
+
         // Clear cache and fetch new role
         globalRoleCache = null;
         if (currentUser?.email) {
@@ -139,7 +139,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         const currentUser = session?.user as User || null;
         setUser(currentUser);
         setLoading(false);
-        
+
         if (currentUser?.email) {
           await fetchUserRole(currentUser.email);
         } else {
@@ -150,6 +150,46 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     });
 
     return () => {
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const getSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (mounted) {
+          setUser(session?.user ?? null);
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error("Error getting session:", error);
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    getSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        // Only log meaningful auth events, skip INITIAL_SESSION
+        if (event !== 'INITIAL_SESSION' && event !== 'TOKEN_REFRESHED') {
+          console.log("Auth state changed:", event);
+        }
+
+        if (mounted) {
+          setUser(session?.user ?? null);
+          setLoading(false);
+        }
+      }
+    );
+
+    return () => {
+      mounted = false;
       subscription.unsubscribe();
     };
   }, [supabase]);
@@ -178,4 +218,4 @@ export function useCurrentUser() {
 export function useUserRole() {
   const { userRole, loading, error } = useUser();
   return { userRole, loading, error: error?.message || null };
-} 
+}

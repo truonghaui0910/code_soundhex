@@ -8,15 +8,25 @@ export async function GET(
   try {
     const { id } = params;
     
-    if (!id || isNaN(Number(id))) {
+    if (!id) {
       return NextResponse.json(
-        { error: "Invalid track ID" },
+        { error: "Track ID is required" },
         { status: 400 }
       );
     }
 
-    const trackId = parseInt(id);
-    const track = await TracksController.getTrackById(trackId);
+    let track = null;
+
+    // First try to get by numeric ID
+    if (!isNaN(Number(id))) {
+      const trackId = parseInt(id);
+      track = await TracksController.getTrackById(trackId);
+    }
+
+    // If not found by ID, try by custom_url
+    if (!track) {
+      track = await TracksController.getTrackByCustomUrl(id);
+    }
 
     if (!track) {
       return NextResponse.json(

@@ -1,79 +1,56 @@
-
-"use client";
-
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import type { User } from "@supabase/auth-helpers-nextjs";
 
-export type User = {
-  id: string;
-  email: string;
-  user_metadata?: {
-    name?: string;
-    avatar_url?: string;
-  };
-};
-
-export function useCurrentUser() {
-  const supabase = createClientComponentClient();
+export const useCurrentUser = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-  const initialized = useRef(false);
+  const supabase = createClientComponentClient();
 
   useEffect(() => {
-    // Prevent multiple initializations
-    if (initialized.current) return;
-    initialized.current = true;
+    let mounted = true;
 
-    const initializeAuth = async () => {
+    // Get initial session
+    const getInitialSession = async () => {
       try {
-        setLoading(true);
-        
-        // Get initial session only once
-        const { data: { session }, error: authError } = await supabase.auth.getSession();
-        
-        if (authError) {
-          console.error("Auth error:", authError);
-          setError(authError);
-          setUser(null);
-        } else {
-          setUser(session?.user as User || null);
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+
+        if (mounted) {
+          setUser(session?.user ?? null);
+          setLoading(false);
         }
-      } catch (err) {
-        console.error("Error fetching user:", err);
-        setError(err as Error);
-        setUser(null);
-      } finally {
-        setLoading(false);
+      } catch (error) {
+        console.error("Error getting initial session:", error);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     };
 
-    initializeAuth();
+    getInitialSession();
 
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Auth state changed:', event, session?.user?.email);
-      
-      // Only update state for important events, not token refresh
-      if (event === 'SIGNED_IN') {
-        setUser(session?.user as User || null);
-        setLoading(false);
-        setError(null);
-      } else if (event === 'SIGNED_OUT') {
-        setUser(null);
-        setLoading(false);
-        setError(null);
-      } else if (event === 'INITIAL_SESSION') {
-        setUser(session?.user as User || null);
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      // Only log meaningful auth state changes, not INITIAL_SESSION
+      if (event !== 'INITIAL_SESSION') {
+        console.log("Auth state changed:", event);
+      }
+
+      if (mounted) {
+        setUser(session?.user ?? null);
         setLoading(false);
       }
-      // Ignore TOKEN_REFRESHED events to prevent unnecessary updates
     });
 
     return () => {
+      mounted = false;
       subscription.unsubscribe();
     };
-  }, [supabase]);
+  }, []); // Remove supabase from dependencies to prevent recreation
 
-  return { user, loading, error };
-}
+  return { user, loading };
+};

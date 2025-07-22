@@ -1,6 +1,9 @@
 // app/api/artists/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { ArtistsController } from "@/lib/controllers/artists";
+import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
+import { cookies } from "next/headers";
+import { Database } from "@/lib/database.types";
 
 export const dynamic = "force-dynamic";
 
@@ -9,7 +12,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const limit = searchParams.get("limit");
     const page = searchParams.get("page");
-    
+
     console.log("API: Starting artists fetch", { limit, page });
     const startTime = Date.now();
 
@@ -18,8 +21,54 @@ export async function GET(request: NextRequest) {
       // Server-side pagination
       const pageNum = parseInt(page) || 1;
       const limitNum = parseInt(limit || "10");
-      
-      result = await ArtistsController.getArtistsWithPagination(pageNum, limitNum);
+
+      const { artists, total, totalPages } = await ArtistsController.getArtistsWithPagination(
+        Number(page),
+        Number(limit)
+      );
+
+      // Get track counts for each artist
+      const artistIds = artists.map(artist => artist.id);
+      let trackCountMap = new Map<number, number>();
+
+      if (artistIds.length > 0) {
+        const supabase = createServerComponentClient<Database>({ cookies });
+        const { data: trackCounts, error: trackCountError } = await supabase
+          .from("tracks")
+          .select("artist_id")
+          .in("artist_id", artistIds);
+
+        if (!trackCountError && trackCounts) {
+          // Count tracks per artist
+          trackCounts.forEach((track: any) => {
+            const count = trackCountMap.get(track.artist_id) || 0;
+            trackCountMap.set(track.artist_id, count + 1);
+          });
+        }
+      }
+
+      // Add track counts to artists
+      const artistsWithTrackCount = artists.map(artist => ({
+        ...artist,
+        tracksCount: trackCountMap.get(artist.id) || 0
+      }));
+
+      const fetchTime = Date.now() - startTime;
+      console.log(`API: Artists fetch completed in ${fetchTime}ms - Count: ${artists.length}`);
+
+      return NextResponse.json(
+        {
+          artists: artistsWithTrackCount,
+          total,
+          totalPages,
+          currentPage: Number(page)
+        },
+        {
+          headers: {
+            "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600"
+          }
+        }
+      );
     } else if (limit) {
       // Legacy limit-based fetch
       const limitNum = parseInt(limit);
