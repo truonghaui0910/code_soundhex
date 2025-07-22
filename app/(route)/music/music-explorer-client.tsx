@@ -60,7 +60,8 @@ interface MusicExplorerClientProps {
 
 export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps) {
     const [tracks] = useState<Track[]>(initialTracks);
-    const [featuredTracks, setFeaturedTracks] = useState<Track[]>([]);
+    // Use initialTracks as featured tracks (already sorted by view_count)
+    const [featuredTracks] = useState<Track[]>(initialTracks);
     const [featuredAlbums, setFeaturedAlbums] = useState<FeaturedAlbum[]>([]);
     const [featuredArtists, setFeaturedArtists] = useState<FeaturedArtist[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
@@ -173,15 +174,15 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
         );
     }, [tracks]);
 
-    // Get trending tracks (memoized stable random selection)
+    // Get trending tracks from most viewed tracks (shuffle for variety)
     const trendingTracks = useMemo(() => {
-        const shuffled = [...tracks].sort((a, b) => {
+        const shuffled = [...initialTracks].sort((a, b) => {
             const seedA = a.id * 9301 + 49297;
             const seedB = b.id * 9301 + 49297;
             return (seedA % 233280) - (seedB % 233280);
         });
         return shuffled.slice(0, 12);
-    }, [tracks]);
+    }, [initialTracks]);
 
     // Function to fetch albums with pagination - ADD useCallback
     const fetchAllAlbums = useCallback(async (page: number = 1, resetPage: boolean = false) => {
@@ -422,36 +423,29 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
     //     }
     // }, [searchQuery, currentView, fetchLibraryTracks]);
 
-    // Function to fetch featured data - ADD useCallback
+    // Function to fetch featured data (albums and artists only)
     const fetchFeaturedData = useCallback(async () => {
         setIsLoadingFeatured(true);
         try {
-            const genreParam = selectedGenre !== "all" ? `genre=${encodeURIComponent(selectedGenre)}&` : "";
+            // Featured tracks are already loaded from initialTracks (most viewed)
+            // Only fetch albums and artists
 
-            // Fetch featured tracks
-            const tracksResponse = await fetch(`/api/tracks?${genreParam}limit=10`);
-            if (tracksResponse.ok) {
-                const tracksData = await tracksResponse.json();
-                const tracksArray = Array.isArray(tracksData) ? tracksData : tracksData.tracks || [];
-                setFeaturedTracks(tracksArray.slice(0, 10));
-            }
-
-            // Fetch featured albums using pagination API
-            const albumsResponse = await fetch(`/api/albums?page=1&limit=10`);
+            // Fetch featured albums
+            const albumsResponse = await fetch(`/api/albums?page=1&limit=12`);
             if (albumsResponse.ok) {
                 const albumsData = await albumsResponse.json();
-                setFeaturedAlbums(albumsData.albums || []);
+                setFeaturedAlbums(albumsData.albums?.slice(0, 12) || []);
             }
 
-            // Fetch featured artists using pagination API
-            const artistsResponse = await fetch(`/api/artists?page=1&limit=10`);
+            // Fetch featured artists
+            const artistsResponse = await fetch(`/api/artists?page=1&limit=12`);
             if (artistsResponse.ok) {
                 const artistsData = await artistsResponse.json();
-                const artistsWithCount = (artistsData.artists || []).map((artist: any) => ({
+                const artistsWithCount = artistsData.artists?.map((artist: any) => ({
                     ...artist,
                     tracksCount: tracks.filter(t => t.artist?.id === artist.id).length
-                }));
-                setFeaturedArtists(artistsWithCount);
+                })) || [];
+                setFeaturedArtists(artistsWithCount.slice(0, 12));
             }
         } catch (error) {
             console.error("Error fetching featured data:", error);
@@ -459,7 +453,7 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
             setIsLoadingFeatured(false);
             setLoading(false);
         }
-    }, [selectedGenre, tracks]); // SIMPLIFIED DEPENDENCIES
+    }, [tracks]); // Remove selectedGenre dependency since we don't fetch tracks by genre anymore
 
     // Fetch featured data when genre changes or component mounts - SIMPLIFIED
     useEffect(() => {

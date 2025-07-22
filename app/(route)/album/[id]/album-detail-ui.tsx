@@ -16,6 +16,7 @@ import {
   Download,
   Plus,
   ArrowLeft,
+  Loader2,
 } from "lucide-react";
 import Link from "next/link";
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
@@ -25,6 +26,7 @@ import AddToPlaylist from "@/components/playlist/add-to-playlist";
 import { TrackGridSm } from "@/components/music/track-grid-sm";
 import { useLikesFollows } from "@/hooks/use-likes-follows";
 import { useEffect } from "react";
+import { showSuccess } from "@/lib/services/notification-service";
 
 // Helper function to format time
 const formatDuration = (seconds: number | null | undefined) => {
@@ -84,9 +86,13 @@ export function AlbumDetailUI({
   // Fetch album like status when component mounts
   useEffect(() => {
     if (safeAlbum.id && !isLoading) {
-      fetchAlbumLikeStatus(safeAlbum.id);
+      const albumLikeStatus = getAlbumLikeStatus(safeAlbum.id);
+      // Only fetch if we haven't fetched yet and it's not currently loading
+      if (albumLikeStatus.isLiked === undefined && !albumLikeStatus.isLoading) {
+        fetchAlbumLikeStatus(safeAlbum.id);
+      }
     }
-  }, [safeAlbum.id, isLoading, fetchAlbumLikeStatus]);
+  }, [safeAlbum.id, isLoading]); // Remove fetchAlbumLikeStatus from deps to prevent re-fetching
 
   const albumLikeStatus = getAlbumLikeStatus(safeAlbum.id);
 
@@ -137,18 +143,29 @@ export function AlbumDetailUI({
                 >
                   {safeAlbum.artist.name}
                 </Link>
+                {(safeAlbum.release_date || safeTracks.length > 0) && <span>•</span>}
                 {safeAlbum.release_date && (
                   <>
-                    <span>•</span>
                     <span>
                       {new Date(safeAlbum.release_date).getFullYear()}
                     </span>
+                    {safeTracks.length > 0 && <span>•</span>}
                   </>
                 )}
                 {safeTracks.length > 0 && (
                   <>
-                    <span>•</span>
                     <span>{safeTracks.length} songs</span>
+                    {albumLikeStatus.totalLikes !== undefined ? (
+                      <>
+                        <span>•</span>
+                        <span>{albumLikeStatus.totalLikes} {albumLikeStatus.totalLikes === 1 ? 'like' : 'likes'}</span>
+                      </>
+                    ) : albumLikeStatus.isLoading ? (
+                      <>
+                        <span>•</span>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      </>
+                    ) : null}
                   </>
                 )}
               </div>
@@ -173,14 +190,18 @@ export function AlbumDetailUI({
                   disabled={albumLikeStatus.isLoading}
                 >
                   <Heart className={`mr-2 h-5 w-5 ${albumLikeStatus.isLiked ? 'fill-current' : ''}`} />
-                  {albumLikeStatus.isLiked ? 'Liked' : 'Like'}
-                  {albumLikeStatus.totalLikes !== undefined && albumLikeStatus.totalLikes > 0 && (
-                    <span className="ml-1">({albumLikeStatus.totalLikes})</span>
-                  )}
+                  <div className="min-w-[60px] flex justify-center items-center">
+                    {albumLikeStatus.isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : (albumLikeStatus.isLiked ? 'Liked' : 'Like')}
+                  </div>
                 </Button>
                 <Button
                   size="lg"
                   className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all duration-200 border-0"
+                  onClick={() => {
+                    const currentUrl = window.location.href;
+                    navigator.clipboard.writeText(currentUrl);
+                    showSuccess({ title: "Copied!", message: "Link copied to clipboard!" });
+                  }}
                 >
                   <Share className="mr-2 h-5 w-5" />
                   Share

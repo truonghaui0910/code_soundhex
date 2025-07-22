@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { 
@@ -22,6 +22,8 @@ import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 import { useDownload } from "@/hooks/use-download";
 import AddToPlaylist from "@/components/playlist/add-to-playlist";
 import { Track } from "@/lib/definitions/Track";
+import { showSuccess } from "@/lib/services/notification-service";
+import { useLikesFollows } from "@/hooks/use-likes-follows";
 
 interface TrackListProps {
   tracks: Track[];
@@ -59,6 +61,7 @@ export function TrackList({
   } = useAudioPlayer();
   
   const { downloadTrack, isTrackDownloading } = useDownload();
+  const { getTrackLikeStatus, fetchTrackLikeStatus, toggleTrackLike } = useLikesFollows();
 
   const handlePlayTrack = (track: Track, index: number) => {
     setTrackList(tracks);
@@ -84,6 +87,19 @@ export function TrackList({
   };
 
   const safeTracks = Array.isArray(tracks) ? tracks.filter(track => track && track.id) : [];
+
+  // Fetch track like status when component mounts
+  useEffect(() => {
+    if (safeTracks.length > 0) {
+      const trackIds = safeTracks.map(track => track.id);
+      trackIds.forEach(trackId => {
+        const trackLikeStatus = getTrackLikeStatus(trackId);
+        if (trackLikeStatus.isLiked === undefined && !trackLikeStatus.isLoading) {
+          fetchTrackLikeStatus(trackId);
+        }
+      });
+    }
+  }, [safeTracks, getTrackLikeStatus, fetchTrackLikeStatus]);
 
   if (safeTracks.length === 0) {
     return (
@@ -186,39 +202,34 @@ export function TrackList({
                 )}
 
                 {/* Track Cover */}
-                <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
-                  {track.cover_image_url ? (
-                    <Image
-                      src={track.cover_image_url}
-                      alt={track.title}
-                      width={48}
-                      height={48}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : track.album?.cover_image_url ? (
-                    <Image
-                      src={track.album.cover_image_url}
-                      alt={track.title}
-                      width={48}
-                      height={48}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <Music className="h-5 w-5 text-white/80" />
-                  )}
-                </div>
+                <Link href={`/track/${track.id}`}>
+                  <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center cursor-pointer">
+                    {track.album?.cover_image_url ? (
+                      <Image
+                        src={track.album.cover_image_url}
+                        alt={track.title}
+                        width={48}
+                        height={48}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <Music className="h-5 w-5 text-white/80" />
+                    )}
+                  </div>
+                </Link>
 
                 {/* Track Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <h3 
-                      className={`font-semibold text-lg truncate cursor-pointer hover:text-purple-600 dark:hover:text-purple-400 transition-colors ${
-                        isCurrentTrack ? 'text-purple-600 dark:text-purple-400' : 'text-gray-900 dark:text-gray-100'
-                      }`}
-                      onClick={() => handleTogglePlay(track, idx)}
-                    >
-                      {track.title}
-                    </h3>
+                    <Link href={`/track/${track.id}`}>
+                      <h3 
+                        className={`font-semibold text-lg truncate cursor-pointer hover:text-purple-600 dark:hover:text-purple-400 transition-colors ${
+                          isCurrentTrack ? 'text-purple-600 dark:text-purple-400' : 'text-gray-900 dark:text-gray-100'
+                        }`}
+                      >
+                        {track.title}
+                      </h3>
+                    </Link>
                     {/* Playing indicator with wave animation */}
                     {isCurrentlyPlaying && (
                       <div className="flex items-center gap-1">
@@ -257,19 +268,23 @@ export function TrackList({
                 {/* Duration and Genre */}
                 <div className="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
                   {track.genre && (
-                    <Badge 
-                      variant="secondary" 
-                      className="text-xs bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 dark:from-purple-900/30 dark:to-pink-900/30 dark:text-purple-300 border-0"
-                    >
-                      {track.genre.name}
-                    </Badge>
+                    <Link href={`/music?genre=${track.genre.name}`}>
+                      <Badge 
+                        variant="secondary" 
+                        className="text-xs bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 dark:from-purple-900/30 dark:to-pink-900/30 dark:text-purple-300 border-0 hover:from-purple-200 hover:to-pink-200 cursor-pointer transition-colors"
+                      >
+                        {track.genre.name}
+                      </Badge>
+                    </Link>
                   )}
-                  <div className="flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
-                    <span className="font-mono">
-                      {formatDuration(track.duration)}
-                    </span>
-                  </div>
+                  <Link href={`/track/${track.id}`}>
+                    <div className="flex items-center gap-1 hover:text-purple-600 dark:hover:text-purple-400 transition-colors cursor-pointer">
+                      <Clock className="h-4 w-4" />
+                      <span className="font-mono">
+                        {formatDuration(track.duration)}
+                      </span>
+                    </div>
+                  </Link>
                 </div>
 
                 {/* Actions */}
@@ -279,6 +294,10 @@ export function TrackList({
                       variant="ghost"
                       size="sm"
                       className="h-8 w-8 p-0 hover:bg-purple-100 dark:hover:bg-purple-900/50"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }}
                     >
                       <Plus className="h-4 w-4 text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400" />
                     </Button>
@@ -288,7 +307,11 @@ export function TrackList({
                     variant="ghost"
                     size="sm"
                     className="h-8 w-8 p-0 hover:bg-purple-100 dark:hover:bg-purple-900/50"
-                    onClick={() => handleDownload(track)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleDownload(track);
+                    }}
                     disabled={isTrackDownloading(track.id)}
                   >
                     <Download className="h-4 w-4 text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400" />
@@ -297,10 +320,18 @@ export function TrackList({
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-8 w-8 p-0 hover:bg-purple-100 dark:hover:bg-purple-900/50"
+                    className={`h-8 w-8 p-0 hover:bg-purple-100 dark:hover:bg-purple-900/50 ${
+                      getTrackLikeStatus(track.id).isLiked ? 'text-red-500' : ''
+                    }`}
                     title="Like"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      toggleTrackLike(track.id);
+                    }}
+                    disabled={getTrackLikeStatus(track.id).isLoading}
                   >
-                    <Heart className="h-4 w-4 text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400" />
+                    <Heart className={`h-4 w-4 ${getTrackLikeStatus(track.id).isLiked ? 'fill-current' : ''} hover:text-purple-600 dark:hover:text-purple-400`} />
                   </Button>
 
                   <Button
@@ -308,6 +339,13 @@ export function TrackList({
                     size="sm"
                     className="h-8 w-8 p-0 hover:bg-purple-100 dark:hover:bg-purple-900/50"
                     title="Share"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      const currentUrl = window.location.href;
+                      navigator.clipboard.writeText(currentUrl);
+                      showSuccess({ title: "Copied!", message: "Link copied to clipboard!" });
+                    }}
                   >
                     <Share className="h-4 w-4 text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400" />
                   </Button>

@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { NotificationProvider } from "@/components/ui/notification";
 import { UserProvider } from "@/contexts/UserContext";
+import { AudioPlayerProvider } from "@/contexts/AudioPlayerContext";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -43,8 +44,10 @@ export default function RootLayout({
         style={{ backgroundColor: "hsl(220 15% 12%)", color: "hsl(0 0% 85%)" }}
       >
         <UserProvider>
-          {children}
-          <NotificationProvider />
+          <AudioPlayerProvider>
+            {children}
+            <NotificationProvider />
+          </AudioPlayerProvider>
         </UserProvider>
       </body>
     </html>
