@@ -11,12 +11,12 @@ import {
   Menu,
   X,
 } from "lucide-react";
-import { useCurrentUser } from "@/hooks/use-current-user";
+import { useCurrentUser } from "@/contexts/UserContext";
 import { UserNav } from "@/components/layout/user-nav";
 import { SoundHexLogo } from "@/components/ui/soundhex-logo";
 import { supabase } from "@/lib/supabase/client";
 
-export default function Home() {
+function HomePage() {
   const [visible, setVisible] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, loading } = useCurrentUser();
@@ -423,4 +423,8 @@ export default function Home() {
       </footer>
     </main>
   );
+}
+
+export default function Home() {
+  return <HomePage />;
 }

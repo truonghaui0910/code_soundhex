@@ -82,7 +82,7 @@ export function QueuePanel({ isOpen, onClose }: QueuePanelProps) {
                   key={`${track.id}-${index}`}
                   className={`group flex items-center gap-3 p-2 rounded-lg transition-colors cursor-pointer ${
                     currentIndex === index
-                      ? 'bg-rose-500/20 border border-rose-500/30'
+                      ? 'bg-gray-500/50'
                       : 'hover:bg-gray-800/50'
                   }`}
                   onClick={() => jumpToTrack(index)}
@@ -128,7 +128,7 @@ export function QueuePanel({ isOpen, onClose }: QueuePanelProps) {
                   {/* Track Info */}
                   <div className="flex-1 min-w-0">
                     <div className={`font-medium text-sm truncate ${
-                      currentIndex === index ? 'text-rose-500' : 'text-white'
+                      currentIndex === index ? 'text-white' : 'text-white'
                     }`}>
                       {track.title || "Unknown Title"}
                     </div>

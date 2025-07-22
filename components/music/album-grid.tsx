@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, memo, useCallback, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Music, Play, Loader2 } from "lucide-react";
+import { Music, Play, Loader2, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
+import { useLikesFollows } from "@/hooks/use-likes-follows";
 import { toast } from "sonner";
 
 interface Album {
@@ -28,7 +29,7 @@ interface AlbumGridProps {
     className?: string;
 }
 
-export function AlbumGrid({ 
+const AlbumGrid = memo(function AlbumGrid({ 
     albums, 
     isLoading = false, 
     loadingCount = 5, 
@@ -36,9 +37,26 @@ export function AlbumGrid({
     className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6"
 }: AlbumGridProps) {
     const { setTrackList, playTrack } = useAudioPlayer();
+    const { getAlbumLikeStatus, fetchBatchAlbumLikesStatus, toggleAlbumLike } = useLikesFollows();
     const [loadingAlbums, setLoadingAlbums] = useState<Set<number>>(new Set());
 
-    const handleAlbumPlay = async (album: Album) => {
+    // Batch fetch album like status for all albums when component mounts
+    useEffect(() => {
+        if (!isLoading && albums.length > 0) {
+            const albumIds = albums.map(album => album.id);
+            // Only fetch for albums that haven't been fetched yet
+            const unfetchedAlbumIds = albumIds.filter(id => {
+                const status = getAlbumLikeStatus(id);
+                return status.isLiked === undefined && !status.isLoading;
+            });
+            
+            if (unfetchedAlbumIds.length > 0) {
+                fetchBatchAlbumLikesStatus(unfetchedAlbumIds);
+            }
+        }
+    }, [albums, isLoading, fetchBatchAlbumLikesStatus, getAlbumLikeStatus]);
+
+    const handleAlbumPlay = useCallback(async (album: Album) => {
         console.log(`🎵 AlbumGrid - Playing album: "${album.title}" (ID: ${album.id})`);
         
         if (onAlbumPlay) {
@@ -122,17 +140,17 @@ export function AlbumGrid({
                 return newSet;
             });
         }
-    };
+    }, [onAlbumPlay, setTrackList, playTrack]);
 
     if (isLoading) {
         return (
             <div className={className}>
                 {Array.from({ length: loadingCount }).map((_, index) => (
                     <div key={index} className="group text-center animate-pulse">
-                        <div className="aspect-square mb-3 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+                        <div className="aspect-square mb-3 bg-white/20 dark:bg-white/20 rounded-lg"></div>
                         <div className="space-y-1">
-                            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mx-auto"></div>
-                            <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-2/3 mx-auto"></div>
+                            <div className="h-4 bg-white/20 dark:bg-white/20 rounded mx-auto"></div>
+                            <div className="h-3 bg-white/20 dark:bg-white/20 rounded w-2/3 mx-auto"></div>
                         </div>
                     </div>
                 ))}
@@ -166,6 +184,25 @@ export function AlbumGrid({
 
                         {/* Play Album Button Overlay */}
                         <div className="absolute inset-0 flex items-center justify-center rounded-lg overflow-hidden">
+                            {/* Heart Icon - Left */}
+                            <Button
+                                size="sm"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    toggleAlbumLike(album.id);
+                                }}
+                                disabled={getAlbumLikeStatus(album.id).isLoading}
+                                className={`opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-full shadow-lg backdrop-blur-sm w-10 h-10 p-0 absolute left-3 ${
+                                    getAlbumLikeStatus(album.id).isLiked 
+                                        ? 'bg-red-500 text-white hover:bg-red-600' 
+                                        : 'bg-white/90 text-red-500 hover:bg-white hover:text-red-600'
+                                }`}
+                            >
+                                <Heart className={`h-5 w-5 ${getAlbumLikeStatus(album.id).isLiked ? 'fill-current' : ''}`} />
+                            </Button>
+
+                            {/* Play Button - Center */}
                             <Button
                                 size="lg"
                                 onClick={(e) => {
@@ -209,4 +246,8 @@ export function AlbumGrid({
             ))}
         </div>
     );
-}
+});
+
+AlbumGrid.displayName = 'AlbumGrid';
+
+export { AlbumGrid };

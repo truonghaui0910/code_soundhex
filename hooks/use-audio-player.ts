@@ -42,7 +42,7 @@ export function useAudioPlayer() {
   const [sessionId] = useState<string>(() => `session-${Date.now()}-${Math.random().toString(36)}`);
   const viewCheckIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Restore trackList from localStorage on mount
+  // Restore trackList from localStorage on mount - IMPROVE VALIDATION
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const savedTrackList = localStorage.getItem('audioPlayer_trackList');
@@ -55,16 +55,43 @@ export function useAudioPlayer() {
           const originalTrackList = JSON.parse(savedOriginalTrackList);
           const currentIndex = parseInt(savedCurrentIndex || '0');
           
-          setTrackListState(trackList);
-          setOriginalTrackList(originalTrackList);
-          setCurrentIndex(currentIndex);
-          
-          // Restore current track if exists
-          if (trackList[currentIndex]) {
-            setCurrentTrack(trackList[currentIndex]);
+          // VALIDATE RESTORED DATA - ADD THIS
+          if (Array.isArray(trackList) && Array.isArray(originalTrackList) && 
+              trackList.length > 0 && originalTrackList.length > 0 &&
+              currentIndex >= 0 && currentIndex < trackList.length) {
+            
+            console.log('✅ Restoring audio player state:', {
+              trackListLength: trackList.length,
+              originalTrackListLength: originalTrackList.length,
+              currentIndex,
+              currentTrack: trackList[currentIndex]?.title
+            });
+            
+            setTrackListState(trackList);
+            setOriginalTrackList(originalTrackList);
+            setCurrentIndex(currentIndex);
+            
+            // Restore current track if exists
+            if (trackList[currentIndex]) {
+              setCurrentTrack(trackList[currentIndex]);
+            }
+          } else {
+            console.log('❌ Invalid audio player state, clearing localStorage');
+            // Clear invalid data
+            localStorage.removeItem('audioPlayer_trackList');
+            localStorage.removeItem('audioPlayer_originalTrackList');
+            localStorage.removeItem('audioPlayer_currentIndex');
+            localStorage.removeItem('audioPlayer_isShuffled');
+            localStorage.removeItem('audioPlayer_repeatMode');
           }
         } catch (error) {
           console.error('Error restoring audio player state:', error);
+          // Clear corrupted data
+          localStorage.removeItem('audioPlayer_trackList');
+          localStorage.removeItem('audioPlayer_originalTrackList');
+          localStorage.removeItem('audioPlayer_currentIndex');
+          localStorage.removeItem('audioPlayer_isShuffled');
+          localStorage.removeItem('audioPlayer_repeatMode');
         }
       }
     }
@@ -313,13 +340,45 @@ export function useAudioPlayer() {
     [getAudioService],
   );
 
-  // Chuyển đổi giữa phát/tạm dừng
+  // Clear invalid audio player state - ADD THIS HELPER FUNCTION
+  const clearInvalidState = useCallback(() => {
+    console.log('🧹 Clearing invalid audio player state');
+    setCurrentTrack(null);
+    setTrackListState([]);
+    setOriginalTrackList([]);
+    setCurrentIndex(0);
+    setIsPlaying(false);
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('audioPlayer_trackList');
+      localStorage.removeItem('audioPlayer_originalTrackList');
+      localStorage.removeItem('audioPlayer_currentIndex');
+      localStorage.removeItem('audioPlayer_isShuffled');
+      localStorage.removeItem('audioPlayer_repeatMode');
+    }
+  }, []);
+
+  // Chuyển đổi giữa phát/tạm dừng - FIX INVALID TRACK ISSUE
   const togglePlayPause = useCallback(() => {
     const audioService = getAudioService();
     if (!audioService) return;
 
+    // CHECK IF CURRENT TRACK IS VALID - ADD THIS
+    if (!currentTrack) {
+      console.log('❌ togglePlayPause - No current track available');
+      return;
+    }
+
+    // CHECK IF CURRENT TRACK EXISTS IN TRACKLIST - ADD THIS
+    const trackExists = trackList.some(track => track.id === currentTrack.id);
+    if (!trackExists) {
+      console.log('❌ togglePlayPause - Current track not found in trackList, clearing invalid state');
+      clearInvalidState();
+      return;
+    }
+
+    console.log('✅ togglePlayPause - Playing track:', currentTrack.title);
     audioService.togglePlayPause();
-  }, [getAudioService]);
+  }, [getAudioService, currentTrack, trackList, clearInvalidState]);
 
   // Thiết lập âm lượng
   const changeVolume = useCallback(

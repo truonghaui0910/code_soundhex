@@ -307,9 +307,13 @@ export function MusicExplorerUI({
                             {/* Genre Filter */}
                             <select
                                 value={selectedGenre}
-                                onChange={(e) =>
-                                    setSelectedGenre(e.target.value)
-                                }
+                                onChange={(e) => {
+                                    setSelectedGenre(e.target.value);
+                                    // Tự động chuyển sang view library khi chọn genre
+                                    if (e.target.value !== "all") {
+                                        setCurrentView("library");
+                                    }
+                                }}
                                 className="px-4 py-2 rounded-full border bg-white dark:bg-gray-800 text-sm font-medium"
                             >
                                 <option value="all">All Genres</option>
@@ -371,17 +375,6 @@ export function MusicExplorerUI({
 
                             <TrackGrid
                                 tracks={featuredTracks}
-                                onTrackPlay={(track, tracks) => {
-                                    if (
-                                        currentTrack?.id === track.id &&
-                                        isPlaying
-                                    ) {
-                                        togglePlayPause();
-                                    } else {
-                                        setTrackList(featuredTracks);
-                                        playTrack(track);
-                                    }
-                                }}
                             />
 
                             {/* View all button */}
@@ -410,23 +403,15 @@ export function MusicExplorerUI({
                                 <Button
                                     variant="ghost"
                                     onClick={() => setCurrentView("albums")}
-                                    className="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 font-medium"
+                                    className="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 font-medium dark:hover:bg-white/10"
                                 >
                                     View All →
                                 </Button>
                             </div>
 
+                            
                             <AlbumGrid
                                 albums={featuredAlbums}
-                                onAlbumPlay={(album) => {
-                                    const albumTracks = featuredTracks.filter(
-                                        (t) => t.album?.id === album.id,
-                                    );
-                                    if (albumTracks.length > 0) {
-                                        setTrackList(albumTracks);
-                                        playTrack(albumTracks[0]);
-                                    }
-                                }}
                             />
                         </section>
 
@@ -444,7 +429,7 @@ export function MusicExplorerUI({
                                 <Button
                                     variant="ghost"
                                     onClick={() => setCurrentView("artists")}
-                                    className="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 font-medium"
+                                    className="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 font-medium dark:hover:bg-white/10"
                                 >
                                     View All →
                                 </Button>
@@ -486,7 +471,7 @@ export function MusicExplorerUI({
                                 <Button
                                     onClick={() => {
                                         if (libraryTracks.length > 0) {
-                                            setTrackList(libraryTracks);
+                                            setTrackList([libraryTracks[0]]);
                                             playTrack(libraryTracks[0]);
                                         }
                                     }}
@@ -553,19 +538,8 @@ export function MusicExplorerUI({
                             </div>
                         ) : (
                             <TrackGrid
-                                key={`library-${libraryTracks.length}-${searchQuery}-${currentPage}`}
+                                key={`library-${currentPage}`}
                                 tracks={libraryTracks}
-                                onTrackPlay={(track, tracks) => {
-                                    if (
-                                        currentTrack?.id === track.id &&
-                                        isPlaying
-                                    ) {
-                                        togglePlayPause();
-                                    } else {
-                                        setTrackList(libraryTracks);
-                                        playTrack(track);
-                                    }
-                                }}
                             />
                         )}
 
@@ -716,7 +690,7 @@ export function MusicExplorerUI({
                             <AlbumGrid
                                 albums={[]}
                                 isLoading={true}
-                                loadingCount={5}
+                                loadingCount={6}
                                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-8"
                             />
                         ) : allAlbums.length === 0 ? (
@@ -937,7 +911,7 @@ export function MusicExplorerUI({
                             <ArtistGrid
                                 artists={[]}
                                 isLoading={true}
-                                loadingCount={5}
+                                loadingCount={6}
                             />
                         ) : allArtists.length === 0 ? (
                             <div className="text-center py-20">

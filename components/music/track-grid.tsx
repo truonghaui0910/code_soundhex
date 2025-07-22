@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { 
@@ -15,33 +16,13 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Track } from "@/lib/definitions/Track";
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 import { useDownload } from "@/hooks/use-download";
 import AddToPlaylist from "@/components/playlist/add-to-playlist";
-import { useEffect } from "react";
+import { useEffect, useCallback, useMemo, useRef } from "react";
 import { useLikesFollows } from "@/hooks/use-likes-follows";
-
-interface Track {
-    id: number;
-    title: string;
-    duration: number | null;
-    view_count?: number;
-    artist?: {
-        id: number;
-        name: string;
-        custom_url: string | null;
-    } | null;
-    album?: {
-        id: number;
-        title: string;
-        cover_image_url: string | null;
-        custom_url: string | null;
-    } | null;
-    genre?: {
-        id: number;
-        name: string;
-    } | null;
-}
+import { showSuccess } from "@/lib/services/notification-service";
 
 interface TrackGridProps {
     tracks: Track[];
@@ -68,7 +49,7 @@ const formatViewCount = (views: number | undefined) => {
     return `${(views / 1000000).toFixed(1)}M`;
 };
 
-export function TrackGrid({ 
+const TrackGrid = memo(function TrackGrid({ 
     tracks, 
     isLoading = false, 
     loadingCount = 10, 
@@ -86,18 +67,27 @@ export function TrackGrid({
     const { downloadTrack } = useDownload();
     const { getTrackLikeStatus, fetchTrackLikeStatus, toggleTrackLike, fetchBatchTrackLikesStatus } = useLikesFollows();
 
-    const handleTrackPlay = (track: Track) => {
+    // OPTIMIZE trackIds to prevent unnecessary API calls - ADD THIS
+    const trackIds = useMemo(() => {
+        if (!tracks || tracks.length === 0) return [];
+        return tracks.map(track => track.id);
+    }, [tracks]);
+
+    // ADD ref to track previous trackIds and prevent duplicate API calls
+    const prevTrackIdsRef = useRef<number[]>([]);
+
+    const handleTrackPlay = useCallback((track: Track) => {
         if (onTrackPlay) {
             onTrackPlay(track, tracks);
         } else {
             if (currentTrack?.id === track.id && isPlaying) {
                 togglePlayPause();
             } else {
-                setTrackList(tracks);
+                setTrackList([track]);
                 playTrack(track);
             }
         }
-    };
+    }, [onTrackPlay, tracks, currentTrack?.id, isPlaying, togglePlayPause, setTrackList, playTrack]);
 
     if (isLoading) {
         return (
@@ -124,13 +114,21 @@ export function TrackGrid({
         );
     }
 
-    // Batch fetch like status for all tracks
+    // OPTIMIZE batch fetch to prevent duplicate API calls - FIX THIS
     useEffect(() => {
-        if (!isLoading && tracks.length > 0) {
-            const trackIds = tracks.map(track => track.id);
-            fetchBatchTrackLikesStatus(trackIds);
+        if (!isLoading && trackIds.length > 0) {
+            // PREVENT DUPLICATE API CALLS - ADD THIS CHECK
+            const currentTrackIdsString = trackIds.sort().join(',');
+            const prevTrackIdsString = prevTrackIdsRef.current.sort().join(',');
+            
+            // Only call API if trackIds actually changed
+            if (currentTrackIdsString !== prevTrackIdsString) {
+                console.log('🔄 TrackGrid - Fetching likes for tracks:', trackIds);
+                fetchBatchTrackLikesStatus(trackIds);
+                prevTrackIdsRef.current = [...trackIds];
+            }
         }
-    }, [tracks, isLoading, fetchBatchTrackLikesStatus]);
+    }, [trackIds, isLoading, fetchBatchTrackLikesStatus]);
 
     return (
         <div className={className}>
@@ -148,21 +146,25 @@ export function TrackGrid({
                         {/* Album Cover */}
                         <div className="relative aspect-square overflow-hidden">
                             {track.album?.cover_image_url ? (
-                                <Image
-                                    src={track.album.cover_image_url}
-                                    alt={track.album?.title || track.title}
-                                    fill
-                                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-                                    className="object-cover group-hover:scale-110 transition-transform duration-700"
-                                    style={{
-                                        transform: 'translateZ(0)',
-                                        willChange: 'transform'
-                                    }}
-                                />
+                                <Link href={`/track/${track.id}`}>
+                                    <Image
+                                        src={track.album.cover_image_url}
+                                        alt={track.album?.title || track.title}
+                                        fill
+                                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                                        className="object-cover group-hover:scale-110 transition-transform duration-700 cursor-pointer"
+                                        style={{
+                                            transform: 'translateZ(0)',
+                                            willChange: 'transform'
+                                        }}
+                                    />
+                                </Link>
                             ) : (
-                                <div className="w-full h-full bg-gradient-to-br from-purple-400 via-pink-400 to-rose-400 flex items-center justify-center">
-                                    <Music className="h-20 w-20 text-white/80" />
-                                </div>
+                                <Link href={`/track/${track.id}`}>
+                                    <div className="w-full h-full bg-gradient-to-br from-purple-400 via-pink-400 to-rose-400 flex items-center justify-center cursor-pointer">
+                                        <Music className="h-20 w-20 text-white/80" />
+                                    </div>
+                                </Link>
                             )}
 
                             {/* Gradient overlay */}
@@ -172,8 +174,12 @@ export function TrackGrid({
                             <div className="absolute inset-0 flex items-center justify-center">
                                 <Button
                                     size="lg"
-                                    onClick={() => handleTrackPlay(track)}
-                                    className="opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-full bg-white/90 text-purple-600 hover:bg-white hover:scale-110 shadow-lg backdrop-blur-sm"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        handleTrackPlay(track);
+                                    }}
+                                    className="opacity-0 group-hover:opacity-100 rounded-full bg-white/90 text-purple-600 hover:bg-white shadow-lg backdrop-blur-sm z-10"
                                 >
                                     {currentTrack?.id === track.id && isPlaying ? (
                                         <Pause className="h-6 w-6" />
@@ -186,12 +192,12 @@ export function TrackGrid({
                             {/* Now playing indicator */}
                             {currentTrack?.id === track.id && isPlaying && (
                                 <div className="absolute top-4 right-4">
-                                    <div className="w-10 h-10 bg-gradient-to-r from-rose-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg backdrop-blur-sm">
-                                        <div className="flex items-end space-x-0.5 h-5">
-                                            <div className="w-1 bg-white animate-equalize-1" style={{ height: "30%" }}></div>
-                                            <div className="w-1 bg-white animate-equalize-2" style={{ height: "100%" }}></div>
-                                            <div className="w-1 bg-white animate-equalize-3" style={{ height: "60%" }}></div>
-                                            <div className="w-1 bg-white animate-equalize-4" style={{ height: "80%" }}></div>
+                                    <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center shadow-lg backdrop-blur-sm">
+                                        <div className="flex items-end space-x-0.5 h-4">
+                                            <div className="w-0.5 bg-white animate-equalize-1" style={{ height: "30%" }}></div>
+                                            <div className="w-0.5 bg-white animate-equalize-2" style={{ height: "100%" }}></div>
+                                            <div className="w-0.5 bg-white animate-equalize-3" style={{ height: "60%" }}></div>
+                                            <div className="w-0.5 bg-white animate-equalize-4" style={{ height: "80%" }}></div>
                                         </div>
                                     </div>
                                 </div>
@@ -200,60 +206,83 @@ export function TrackGrid({
                             {/* Track number badge */}
                             {showTrackNumbers && (
                                 <div className="absolute top-4 left-4">
-                                    <div className="w-8 h-8 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center text-white text-sm font-bold">
-                                        {index + 1}
-                                    </div>
+                                    <Link href={`/track/${track.id}`}>
+                                        <div className="w-8 h-8 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center text-white text-sm font-bold hover:bg-black/70 transition-colors cursor-pointer">
+                                            {index + 1}
+                                        </div>
+                                    </Link>
                                 </div>
                             )}
+
+                            {/* Genre badge - bottom left */}
+                            <div className="absolute bottom-4 left-4">
+                                <Link href={`/music?genre=${track.genre?.name || "all"}`}>
+                                    <div className="text-xs text-white bg-black/50 backdrop-blur-sm px-2 py-1 rounded-full border-0 hover:bg-black/70 transition-colors cursor-pointer">
+                                        {track.genre?.name || "Unknown"}
+                                    </div>
+                                </Link>
+                            </div>
                         </div>
 
                         {/* Track Info */}
-                        <div className="p-6">
+                        <div className="p-3">
                             <div className="space-y-3">
                                 <div>
-                                    <h3 className="font-bold text-lg text-gray-900 dark:text-white truncate group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
-                                        {track.title}
-                                    </h3>
-                                    <p className="text-gray-600 dark:text-gray-400 truncate text-sm font-medium">
-                                        {track.artist?.name || "Unknown Artist"}
-                                    </p>
-                                    <p className="text-gray-500 dark:text-gray-500 truncate text-xs">
-                                        <Link
-                                            href={`/album/${track.album?.custom_url || track.album?.id}`}
-                                            className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
-                                        >
-                                            {track.album?.title || "Unknown Album"}
+                                    <Link href={`/track/${track.custom_url || track.id}`}>
+                                        <h3 className="font-semibold text-gray-900 dark:text-white truncate group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors cursor-pointer">
+                                            {track.title}
+                                        </h3>
+                                    </Link>
+                                    <Link href={`/artist/${track.artist?.custom_url || track.artist?.id}`}>
+                                        <p className="text-gray-600 dark:text-gray-400 truncate text-sm font-medium hover:text-purple-600 dark:hover:text-purple-400 transition-colors cursor-pointer">
+                                            {track.artist?.name || "Unknown Artist"}
+                                        </p>
+                                    </Link>
+                                    {track.album && (
+                                        <Link href={`/album/${track.album?.custom_url || track.album?.id}`}>
+                                            <p className="text-gray-500 dark:text-gray-500 truncate text-xs hover:text-purple-600 dark:hover:text-purple-400 transition-colors cursor-pointer">
+                                                {track.album?.title || "Unknown Album"}
+                                            </p>
                                         </Link>
-                                    </p>
+                                    )}
                                 </div>
 
                                 <div className="flex items-center justify-between gap-2">
-                                    <div className="flex items-center gap-1 text-xs text-purple-700 dark:text-purple-300 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 px-2 py-1 rounded-full border-0">
-                                        <span>{track.genre?.name || "Unknown"}</span>
-                                    </div>
-                                    <div className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30 px-2 py-1 rounded-full">
-                                        <Headphones className="h-3 w-3" />
-                                        <span className="font-mono">{formatViewCount(track.view_count)}</span>
-                                    </div>
-                                    <div className="flex items-center gap-1 text-xs text-gray-500 bg-gray-100 dark:bg-gray-700/50 px-2 py-1 rounded-full">
-                                        <Clock className="h-3 w-3" />
-                                        <span className="font-mono">{formatDuration(track.duration)}</span>
-                                    </div>
+                                    <Link href={`/track/${track.id}`}>
+                                        <div className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 bg-gray-100 dark:bg-gray-700/50 px-2 py-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600/50 transition-colors cursor-pointer">
+                                            <Headphones className="h-3 w-3" />
+                                            <span className="font-mono">{formatViewCount(track.view_count)}</span>
+                                        </div>
+                                    </Link>
+                                    <Link href={`/track/${track.id}`}>
+                                        <div className="flex items-center gap-1 text-xs text-gray-500 bg-gray-100 dark:bg-gray-700/50 px-2 py-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600/50 transition-colors cursor-pointer">
+                                            <Clock className="h-3 w-3" />
+                                            <span className="font-mono">{formatDuration(track.duration)}</span>
+                                        </div>
+                                    </Link>
                                 </div>
                             </div>
 
                             {/* Action buttons */}
-                            <div className="mt-4 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+                            <div className="mt-4 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 relative z-20">
                                 <AddToPlaylist trackId={track.id} trackTitle={track.title}>
-                                    <Button size="sm" variant="ghost" className="hover:bg-purple-100 dark:hover:bg-purple-900/30 flex-1">
+                                    <Button 
+                                        size="sm" 
+                                        variant="ghost" 
+                                        className="flex-1"
+                                    >
                                         <Plus className="h-4 w-4" />
                                     </Button>
                                 </AddToPlaylist>
                                 <Button
                                     size="sm"
                                     variant="ghost"
-                                    onClick={() => downloadTrack(track)}
-                                    className="hover:bg-purple-100 dark:hover:bg-purple-900/30 flex-1"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        downloadTrack(track);
+                                    }}
+                                    className="flex-1"
                                 >
                                     <Download className="h-4 w-4" />
                                 </Button>
@@ -264,12 +293,27 @@ export function TrackGrid({
                                             ? 'bg-red-500 text-white hover:bg-red-600' 
                                             : 'bg-white/10 text-white hover:bg-white/20'
                                     }`}
-                                    onClick={() => toggleTrackLike(track.id)}
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        toggleTrackLike(track.id);
+                                    }}
                                     disabled={getTrackLikeStatus(track.id).isLoading}
                                 >
                                     <Heart className={`h-4 w-4 ${getTrackLikeStatus(track.id).isLiked ? 'fill-current' : ''}`} />
                                 </Button>
-                                <Button size="sm" variant="ghost" className="hover:bg-purple-100 dark:hover:bg-purple-900/30 flex-1">
+                                <Button 
+                                    size="sm" 
+                                    variant="ghost" 
+                                    className="flex-1"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        const currentUrl = window.location.href;
+                                        navigator.clipboard.writeText(currentUrl);
+                                        showSuccess({ title: "Copied!", message: "Link copied to clipboard!" });
+                                    }}
+                                >
                                     <Share className="h-4 w-4" />
                                 </Button>
                             </div>
@@ -282,4 +326,8 @@ export function TrackGrid({
             ))}
         </div>
     );
-}
+});
+
+TrackGrid.displayName = 'TrackGrid';
+
+export { TrackGrid };

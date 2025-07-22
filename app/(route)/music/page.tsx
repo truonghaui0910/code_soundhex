@@ -1,17 +1,17 @@
 
 import { Metadata } from "next";
-import { TracksController } from "@/lib/controllers/tracks";
+import { TracksOptimizedController } from "@/lib/controllers/tracks-optimized";
 import { MusicExplorerClient } from "./music-explorer-client";
 
 export const metadata: Metadata = {
-  title: "SoundHex Music Platform",
-  description: "Discover, stream, and upload music for free",
+  title: "Music Explorer - SoundHex",
+  description: "Discover and explore music on SoundHex platform",
 };
 
 export default async function MusicPage() {
   try {
-    // Get data from controller
-    const tracks = await TracksController.getAllTracks();
+    // Get only most viewed tracks instead of all tracks
+    const tracks = await TracksOptimizedController.getMostViewedTracks(12);
 
     return (
       <div className="min-h-screen">

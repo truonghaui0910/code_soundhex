@@ -27,12 +27,13 @@ interface Track {
     title: string;
     duration: number | null;
     artist?: {
-        id: number;
+        id: string | number;
         name: string;
         custom_url: string | null;
+        profile_image_url?: string | null;
     } | null;
     album?: {
-        id: number;
+        id: string | number;
         title: string;
         cover_image_url: string | null;
         custom_url: string | null;
@@ -196,7 +197,7 @@ export const TrackGridSm = React.memo(function TrackGridSm({
                         return (
                         <div
                             key={track.id}
-                            className="group flex items-center gap-4 p-6 rounded-xl hover:bg-white/10 dark:hover:bg-white/10 transition-all duration-200"
+                            className="group flex items-center gap-2 p-3 rounded-xl hover:bg-white/10 dark:hover:bg-white/10 transition-all duration-200"
                         >
                             {/* Album Cover */}
                             <div className="relative w-32 h-32 flex-shrink-0">
@@ -244,10 +245,10 @@ export const TrackGridSm = React.memo(function TrackGridSm({
                             </div>
 
                             {/* Track Info */}
-                            <div className="flex-1 min-w-0 px-2">
+                            <div className="flex-1 min-w-0">
                                 <h4 className="font-semibold text-gray-900 dark:text-white truncate hover:text-purple-600 dark:hover:text-purple-400 transition-colors mb-1">
                                     <Link
-                                        href={`/track/${track.id}`}
+                                        href={`/track/${track.custom_url || track.id}`}
                                         className="hover:underline"
                                     >
                                         {track.title}
@@ -277,7 +278,7 @@ export const TrackGridSm = React.memo(function TrackGridSm({
                                 )}
                                 <div className="flex items-center justify-between gap-2 mt-2">
                                     {track.genre && (
-                                        <div className="flex items-center gap-1 text-xs text-purple-700 dark:text-purple-300 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 px-2 py-1 rounded-full border-0">
+                                        <div className="flex items-center gap-1 text-xs text-purple-700 dark:text-purple-300 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 px-2 py-1 rounded-full border-0 truncate">
                                             <span>{track.genre.name}</span>
                                         </div>
                                     )}
@@ -299,13 +300,13 @@ export const TrackGridSm = React.memo(function TrackGridSm({
                                 <Button
                                     size="sm"
                                     variant="ghost"
-                                    className="w-8 h-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-purple-200 dark:hover:bg-purple-800/50 focus:opacity-100"
+                                    className="w-8 h-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity focus:opacity-100"
                                     onClick={() => toggleMenu(track.id)}
                                 >
                                     <MoreHorizontal className="h-4 w-4" />
                                 </Button>
                                 <div
-                                    ref={(el) => (menuRefs.current[track.id] = el)}
+                                    ref={(el) => { menuRefs.current[track.id] = el; }}
                                     className={`absolute right-0 mt-2 w-48 z-[100] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg rounded-md overflow-hidden ${openMenuId === track.id ? '' : 'hidden'}`}
                                 >
                                     <button

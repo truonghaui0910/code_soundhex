@@ -15,9 +15,9 @@ export class TracksController {
     const { data, error } = await supabase
       .from("tracks")
       .select(`
-        id, title, description, duration, file_url, source_type, created_at, view_count,
-        artist:artist_id (id, name, profile_image_url),
-        album:album_id (id, title, cover_image_url),
+        id, title, description, duration, file_url, source_type, created_at, view_count, custom_url,
+        artist:artist_id (id, name, profile_image_url, custom_url),
+        album:album_id (id, title, cover_image_url, custom_url),
         genre:genre_id (id, name)
       `)
       .in('id', ids)
@@ -31,24 +31,31 @@ export class TracksController {
     return data as Track[];
   }
 
-  static async getAllTracks(): Promise<Track[]> {
+  /**
+   * Lấy danh sách bài hát được xem nhiều nhất
+   */
+  static async getMostViewedTracks(limit: number = 12): Promise<Track[]> {
+    console.log(`🎵 TracksController.getMostViewedTracks - Starting fetch with limit: ${limit}`);
     const supabase = createServerComponentClient<Database>({ cookies });
 
     const { data, error } = await supabase
       .from("tracks")
       .select(`
-        *, view_count,
+        *, view_count, custom_url,
         artist:artist_id(id, name, profile_image_url, custom_url),
-        album:album_id(id, title, cover_image_url),
+        album:album_id(id, title, cover_image_url, custom_url),
         genre:genre_id(id, name)
       `)
-      .order("created_at", { ascending: false });
+      .order("view_count", { ascending: false })
+      .order("created_at", { ascending: false })
+      .limit(limit);
 
     if (error) {
-      console.error("Error fetching tracks:", error);
-      throw new Error(`Failed to fetch tracks: ${error.message}`);
+      console.error("Error fetching most viewed tracks:", error);
+      throw new Error(`Failed to fetch most viewed tracks: ${error.message}`);
     }
 
+    console.log(`✅ TracksController.getMostViewedTracks - Found ${data?.length || 0} tracks`);
     return data as unknown as Track[];
   }
 
@@ -61,7 +68,7 @@ export class TracksController {
     const { data, error } = await supabase
       .from("tracks")
       .select(`
-        *, view_count,
+        *, view_count, custom_url,
         artist:artist_id(id, name, profile_image_url, custom_url),
         album:album_id(id, title, cover_image_url),
         genre:genre_id(id, name)
@@ -90,7 +97,7 @@ export class TracksController {
     const { data, error } = await supabase
       .from("tracks")
       .select(`
-        *, view_count,
+        *, view_count, custom_url,
         artist:artist_id(id, name, profile_image_url, custom_url),
         album:album_id(id, title, cover_image_url),
         genre:genre_id(id, name)
@@ -225,7 +232,7 @@ export class TracksController {
     let query_builder = supabase
       .from("tracks")
       .select(`
-        *, view_count,
+        *, view_count, custom_url,
         artist:artist_id(id, name, profile_image_url, custom_url),
         album:album_id(id, title, cover_image_url, custom_url),
         genre:genre_id(id, name)
@@ -235,11 +242,11 @@ export class TracksController {
     const conditions = [];
     conditions.push(`title.ilike.%${searchTerm}%`);
     conditions.push(`description.ilike.%${searchTerm}%`);
-    
+
     if (artistIds.length > 0) {
       conditions.push(`artist_id.in.(${artistIds.join(',')})`);
     }
-    
+
     if (albumIds.length > 0) {
       conditions.push(`album_id.in.(${albumIds.join(',')})`);
     }
@@ -270,9 +277,9 @@ export class TracksController {
     const { data, error } = await supabase
       .from("tracks")
       .select(`
-        id, title, description, duration, file_url, source_type, created_at, view_count,
-        artist:artist_id(id, name, profile_image_url),
-        album:album_id(id, title, cover_image_url),
+        id, title, description, duration, file_url, source_type, created_at, view_count, custom_url,
+        artist:artist_id(id, name, profile_image_url, custom_url),
+        album:album_id(id, title, cover_image_url, custom_url),
         genre:genre_id(id, name)
       `)
       .in("id", trackIds)
@@ -309,7 +316,7 @@ export class TracksController {
     let query = supabase
       .from("tracks")
       .select(`
-        *, view_count,
+        *, view_count, custom_url,
         artist:artist_id(id, name, profile_image_url, custom_url),
         album:album_id(id, title, cover_image_url, custom_url),
         genre:genre_id(id, name)
@@ -337,11 +344,11 @@ export class TracksController {
       const conditions = [];
       conditions.push(`title.ilike.%${searchTerm}%`);
       conditions.push(`description.ilike.%${searchTerm}%`);
-      
+
       if (artistIds.length > 0) {
         conditions.push(`artist_id.in.(${artistIds.join(',')})`);
       }
-      
+
       if (albumIds.length > 0) {
         conditions.push(`album_id.in.(${albumIds.join(',')})`);
       }
@@ -381,5 +388,79 @@ export class TracksController {
       total,
       totalPages
     };
+  }
+
+  static async getArtistByCustomUrl(customUrl: string): Promise<Artist | null> {
+    const supabase = createServerComponentClient<Database>({ cookies });
+    const { data: artist, error } = await supabase
+      .from('artists')
+      .select('*')
+      .eq('custom_url', customUrl)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return null; // No rows found
+      }
+      throw error;
+    }
+
+    return artist;
+  }
+
+  /**
+   * Lấy thông tin một bài hát theo custom_url
+   */
+  static async getTrackByCustomUrl(customUrl: string): Promise<Track | null> {
+    const supabase = createServerComponentClient<Database>({ cookies });
+
+    const { data, error } = await supabase
+      .from("tracks")
+      .select(`
+        *, view_count, custom_url,
+        artist:artist_id(id, name, profile_image_url, custom_url),
+        album:album_id(id, title, cover_image_url, custom_url),
+        genre:genre_id(id, name)
+      `)
+      .eq("custom_url", customUrl)
+      .single();
+
+    if (error) {
+      if (error.code === "PGRST116") {
+        return null; // No rows found
+      }
+      console.error(`Error fetching track by custom_url ${customUrl}:`, error);
+      throw new Error(`Failed to fetch track: ${error.message}`);
+    }
+
+    return data as unknown as Track;
+  }
+
+  /**
+   * Lấy danh sách bài hát được xem nhiều nhất
+   */
+  static async getMostViewedTracks(limit: number = 12): Promise<Track[]> {
+    console.log(`🎵 TracksController.getMostViewedTracks - Starting fetch with limit: ${limit}`);
+    const supabase = createServerComponentClient<Database>({ cookies });
+
+    const { data, error } = await supabase
+      .from("tracks")
+      .select(`
+        *, view_count, custom_url,
+        artist:artist_id(id, name, profile_image_url, custom_url),
+        album:album_id(id, title, cover_image_url, custom_url),
+        genre:genre_id(id, name)
+      `)
+      .order("view_count", { ascending: false })
+      .order("created_at", { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      console.error("Error fetching most viewed tracks:", error);
+      throw new Error(`Failed to fetch most viewed tracks: ${error.message}`);
+    }
+
+    console.log(`✅ TracksController.getMostViewedTracks - Found ${data?.length || 0} tracks`);
+    return data as unknown as Track[];
   }
 }

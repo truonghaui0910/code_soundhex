@@ -60,7 +60,8 @@ interface MusicExplorerClientProps {
 
 export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps) {
     const [tracks] = useState<Track[]>(initialTracks);
-    const [featuredTracks, setFeaturedTracks] = useState<Track[]>([]);
+    // Use initialTracks as featured tracks (already sorted by view_count)
+    const [featuredTracks] = useState<Track[]>(initialTracks);
     const [featuredAlbums, setFeaturedAlbums] = useState<FeaturedAlbum[]>([]);
     const [featuredArtists, setFeaturedArtists] = useState<FeaturedArtist[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
@@ -73,8 +74,10 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
     const searchParams = useSearchParams();
 
     // Get unique genres from tracks
-    const genres = Array.from(
-        new Set(tracks.map((track) => track.genre?.name).filter(Boolean)),
+    const genres = useMemo(() => 
+        Array.from(
+            new Set(tracks.map((track) => track.genre?.name).filter(Boolean)),
+        ), [tracks]
     );
 
     // State for library tracks (server-side pagination)
@@ -84,7 +87,7 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
 
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage, setItemsPerPage] = useState(50);
+    const [itemsPerPage] = useState(50); 
     const [totalPages, setTotalPages] = useState(0);
 
     // Albums view state
@@ -101,7 +104,28 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
     const [totalArtists, setTotalArtists] = useState(0);
     const [isLoadingArtists, setIsLoadingArtists] = useState(false);
 
-    
+    // Debounce search - ADD THIS
+    const searchTimeoutRef = useRef<NodeJS.Timeout>();
+    const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
+    const [forceSearch, setForceSearch] = useState(false); // ADD THIS FOR ENTER KEY
+
+    // Debounce search query - ADD THIS EFFECT
+    useEffect(() => {
+        if (searchTimeoutRef.current) {
+            clearTimeout(searchTimeoutRef.current);
+        }
+        
+        searchTimeoutRef.current = setTimeout(() => {
+            setDebouncedSearchQuery(searchQuery);
+            setForceSearch(false); // RESET FORCE SEARCH WHEN DEBOUNCED
+        }, 500);
+
+        return () => {
+            if (searchTimeoutRef.current) {
+                clearTimeout(searchTimeoutRef.current);
+            }
+        };
+    }, [searchQuery]);
 
     // Memoize unique albums and artists to prevent re-renders
     const uniqueAlbums = useMemo(() => {
@@ -128,39 +152,36 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
     }, [tracks]);
 
     const uniqueArtists = useMemo(() => {
-        return Array.from(
-            new Map(
-                tracks
-                    .filter((track) => track.artist)
-                    .map((track) => [
-                        track.artist!.id,
-                        {
-                            id: track.artist!.id,
-                            name: track.artist!.name,
-                            profile_image_url: track.artist!.profile_image_url,
-                            custom_url: track.artist!.custom_url,
-                            tracksCount: tracks.filter(
-                                (t) =>
-                                    t.artist &&
-                                    t.artist.id === track.artist!.id,
-                            ).length,
-                        },
-                    ]),
-            ).values(),
-        );
+        const artistMap = new Map();
+        tracks.forEach((track) => {
+            if (track.artist) {
+                const artistId = track.artist.id;
+                if (!artistMap.has(artistId)) {
+                    artistMap.set(artistId, {
+                        id: track.artist.id,
+                        name: track.artist.name,
+                        profile_image_url: track.artist.profile_image_url,
+                        custom_url: track.artist.custom_url,
+                        tracksCount: 0,
+                    });
+                }
+                artistMap.get(artistId).tracksCount++;
+            }
+        });
+        return Array.from(artistMap.values());
     }, [tracks]);
 
-    // Get trending tracks (memoized stable random selection)
+    // Get trending tracks from most viewed tracks (shuffle for variety)
     const trendingTracks = useMemo(() => {
-        const shuffled = [...tracks].sort((a, b) => {
+        const shuffled = [...initialTracks].sort((a, b) => {
             const seedA = a.id * 9301 + 49297;
             const seedB = b.id * 9301 + 49297;
             return (seedA % 233280) - (seedB % 233280);
         });
         return shuffled.slice(0, 12);
-    }, [tracks]);
+    }, [initialTracks]);
 
-    // Function to fetch albums with pagination
+    // Function to fetch albums with pagination - ADD useCallback
     const fetchAllAlbums = useCallback(async (page: number = 1, resetPage: boolean = false) => {
         if (currentView !== "albums") return;
 
@@ -204,9 +225,9 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
         } finally {
             setIsLoadingAlbums(false);
         }
-    }, [currentView, itemsPerPage]);
+    }, [currentView, itemsPerPage]); // SIMPLIFIED DEPENDENCIES
 
-    // Function to fetch artists with pagination
+    // Function to fetch artists with pagination - ADD useCallback
     const fetchAllArtists = useCallback(async (page: number = 1, resetPage: boolean = false) => {
         if (currentView !== "artists") return;
 
@@ -221,10 +242,10 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
             if (response.ok) {
                 const data = await response.json();
                 if (data.artists && Array.isArray(data.artists)) {
-                    // Add tracks count for each artist
+                    // Use tracks count from API response
                     const artistsWithCount = data.artists.map(artist => ({
                         ...artist,
-                        tracksCount: tracks.filter(t => t.artist?.id === artist.id).length
+                        tracksCount: artist.tracksCount || 0
                     }));
                     
                     setAllArtists(artistsWithCount);
@@ -256,11 +277,13 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
         } finally {
             setIsLoadingArtists(false);
         }
-    }, [currentView, itemsPerPage, tracks]);
+    }, [currentView, itemsPerPage, tracks]); // SIMPLIFIED DEPENDENCIES
 
-    // Function to fetch library tracks with pagination, search and filters
+    // Function to fetch library tracks with pagination, search and filters - ADD useCallback
     const fetchLibraryTracks = useCallback(async (page: number = 1, resetPage: boolean = false) => {
         if (currentView !== "library") return;
+
+        console.log(`🔄 MusicExplorerClient - Fetching library tracks: page=${page}, resetPage=${resetPage}`);
 
         // Only show loading if it's a fresh search or view change, not pagination
         if (resetPage || page === 1) {
@@ -273,8 +296,8 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
                 genre: selectedGenre,
             });
 
-            if (searchQuery.trim()) {
-                params.append('search', searchQuery);
+            if (debouncedSearchQuery.trim()) { // USE DEBOUNCED QUERY
+                params.append('search', debouncedSearchQuery);
             }
 
             const response = await fetch(`/api/tracks?${params}`);
@@ -282,6 +305,7 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
             if (response.ok) {
                 const data = await response.json();
                 if (data.tracks && Array.isArray(data.tracks)) {
+                    console.log(`✅ MusicExplorerClient - Received ${data.tracks.length} tracks for page ${page}`);
                     setLibraryTracks(data.tracks);
                     setTotalTracks(data.total || 0);
                     setTotalPages(data.totalPages || 0);
@@ -312,109 +336,113 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
         } finally {
             setIsSearching(false);
         }
-    }, [currentView, searchQuery, selectedGenre, itemsPerPage]);
+    }, [currentView, debouncedSearchQuery, selectedGenre, itemsPerPage]); // USE DEBOUNCED QUERY
 
-    // State for search trigger
-    const [shouldSearch, setShouldSearch] = useState(false);
+    // State for search trigger - REMOVE THIS, USE DEBOUNCED EFFECT INSTEAD
+    // const [shouldSearch, setShouldSearch] = useState(false);
 
-    // Search effect when triggered
+    // Search effect when triggered - FIX RACE CONDITION
     useEffect(() => {
-        if (shouldSearch) {
-            // Auto switch to library view when searching
+        if (currentView === "library" && (debouncedSearchQuery !== undefined || forceSearch)) {
+            fetchLibraryTracks(1, true);
+            setForceSearch(false); // RESET FORCE SEARCH
+        }
+    }, [debouncedSearchQuery, currentView, forceSearch, fetchLibraryTracks]); // USE DEBOUNCED QUERY
+
+    // Handle Enter key press - FIX AUTO SWITCH TO LIBRARY
+    const handleSearchKeyPress = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            // Clear timeout and immediately set debounced query
+            if (searchTimeoutRef.current) {
+                clearTimeout(searchTimeoutRef.current);
+            }
+            setDebouncedSearchQuery(searchQuery);
+            setForceSearch(true); // ADD THIS TO FORCE SEARCH
+            
+            // AUTO SWITCH TO LIBRARY VIEW WHEN ENTER IS PRESSED - ADD THIS
             if (searchQuery.trim()) {
                 setCurrentView("library");
             }
-            fetchLibraryTracks(1, true);
-            setShouldSearch(false);
         }
-    }, [shouldSearch, fetchLibraryTracks, searchQuery]);
+    }, [searchQuery]);
 
-    // Handle Enter key press
-    const handleSearchKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') {
-            setShouldSearch(true);
-        }
-    };
-
-    // Fetch library tracks when view or genre changes (but not page changes)
+    // Fetch library tracks when view or genre changes (but not page changes) - OPTIMIZED
     useEffect(() => {
         if (currentView === "library") {
             fetchLibraryTracks(1, true); // Reset to page 1 when view/genre changes
         }
     }, [currentView, selectedGenre, fetchLibraryTracks]);
 
-    // Separate effect for page changes to avoid duplicate calls
+    // Separate effect for page changes to avoid duplicate calls - FIX DUPLICATE CALLS
     useEffect(() => {
-        if (currentView === "library" && totalPages > 0 && currentPage <= totalPages) {
-            fetchLibraryTracks(currentPage, false);
+        if (currentView === "library" && totalPages > 0 && currentPage <= totalPages && currentPage > 1) {
+            // ADD DELAY TO PREVENT RACE CONDITION WITH VIEW/GENRE EFFECT
+            const timeoutId = setTimeout(() => {
+                fetchLibraryTracks(currentPage, false);
+            }, 100);
+            
+            return () => clearTimeout(timeoutId);
         }
-    }, [currentPage, totalPages]);
+    }, [currentPage, totalPages, currentView, fetchLibraryTracks]); // ADDED currentView check
 
-    // Fetch albums when albums view is active
+    // Fetch albums when albums view is active - SIMPLIFIED
     useEffect(() => {
         if (currentView === "albums") {
             fetchAllAlbums(1, true); // Reset to page 1 when view changes
         }
-    }, [currentView]);
+    }, [currentView, fetchAllAlbums]);
 
-    // Separate effect for albums page changes
+    // Separate effect for albums page changes - OPTIMIZED
     useEffect(() => {
-        if (currentView === "albums" && albumsCurrentPage >= 1) {
+        if (currentView === "albums" && albumsCurrentPage > 1) {
             fetchAllAlbums(albumsCurrentPage, false);
         }
-    }, [albumsCurrentPage]);
+    }, [albumsCurrentPage, currentView, fetchAllAlbums]); // ADDED currentView check
 
-    // Fetch artists when artists view is active
+    // Fetch artists when artists view is active - SIMPLIFIED
     useEffect(() => {
         if (currentView === "artists") {
             fetchAllArtists(1, true); // Reset to page 1 when view changes
         }
-    }, [currentView]);
+    }, [currentView, fetchAllArtists]);
 
-    // Separate effect for artists page changes
+    // Separate effect for artists page changes - OPTIMIZED
     useEffect(() => {
-        if (currentView === "artists" && artistsCurrentPage >= 1) {
+        if (currentView === "artists" && artistsCurrentPage > 1) {
             fetchAllArtists(artistsCurrentPage, false);
         }
-    }, [artistsCurrentPage]);
+    }, [artistsCurrentPage, currentView, fetchAllArtists]); // ADDED currentView check
 
-    // Reset search when query is cleared
-    useEffect(() => {
-        if (!searchQuery.trim() && currentView === "library") {
-            fetchLibraryTracks(1, true);
-        }
-    }, [searchQuery, currentView, fetchLibraryTracks]);
+    // REMOVE this effect as it's handled by debounced effect above
+    // useEffect(() => {
+    //     if (!searchQuery.trim() && currentView === "library") {
+    //         fetchLibraryTracks(1, true);
+    //     }
+    // }, [searchQuery, currentView, fetchLibraryTracks]);
 
-    // Function to fetch featured data
-    const fetchFeaturedData = async () => {
+    // Function to fetch featured data (albums and artists only)
+    const fetchFeaturedData = useCallback(async () => {
         setIsLoadingFeatured(true);
         try {
-            const genreParam = selectedGenre !== "all" ? `genre=${encodeURIComponent(selectedGenre)}&` : "";
+            // Featured tracks are already loaded from initialTracks (most viewed)
+            // Only fetch albums and artists
 
-            // Fetch featured tracks
-            const tracksResponse = await fetch(`/api/tracks?${genreParam}limit=10`);
-            if (tracksResponse.ok) {
-                const tracksData = await tracksResponse.json();
-                const tracksArray = Array.isArray(tracksData) ? tracksData : tracksData.tracks || [];
-                setFeaturedTracks(tracksArray.slice(0, 10));
-            }
-
-            // Fetch featured albums using pagination API
-            const albumsResponse = await fetch(`/api/albums?page=1&limit=10`);
+            // Fetch featured albums
+            const albumsResponse = await fetch(`/api/albums?page=1&limit=12`);
             if (albumsResponse.ok) {
                 const albumsData = await albumsResponse.json();
-                setFeaturedAlbums(albumsData.albums || []);
+                setFeaturedAlbums(albumsData.albums?.slice(0, 12) || []);
             }
 
-            // Fetch featured artists using pagination API
-            const artistsResponse = await fetch(`/api/artists?page=1&limit=10`);
+            // Fetch featured artists
+            const artistsResponse = await fetch(`/api/artists?page=1&limit=12`);
             if (artistsResponse.ok) {
                 const artistsData = await artistsResponse.json();
-                const artistsWithCount = (artistsData.artists || []).map((artist: any) => ({
+                const artistsWithCount = artistsData.artists?.map((artist: any) => ({
                     ...artist,
-                    tracksCount: tracks.filter(t => t.artist?.id === artist.id).length
-                }));
-                setFeaturedArtists(artistsWithCount);
+                    tracksCount: artist.tracksCount || 0
+                })) || [];
+                setFeaturedArtists(artistsWithCount.slice(0, 12));
             }
         } catch (error) {
             console.error("Error fetching featured data:", error);
@@ -422,16 +450,16 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
             setIsLoadingFeatured(false);
             setLoading(false);
         }
-    };
+    }, [tracks]); // Remove selectedGenre dependency since we don't fetch tracks by genre anymore
 
-    // Fetch featured data when genre changes or component mounts
+    // Fetch featured data when genre changes or component mounts - SIMPLIFIED
     useEffect(() => {
         if (currentView === "featured") {
             fetchFeaturedData();
         } else {
             setLoading(false);
         }
-    }, [selectedGenre, currentView]);
+    }, [selectedGenre, currentView, fetchFeaturedData]);
 
     useEffect(() => {
         const tab = searchParams.get("tab");
@@ -586,7 +614,18 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
             isLoadingFeatured={isLoadingFeatured}
             onSearchKeyPress={handleSearchKeyPress}
             isSearching={isSearching}
-            onSearchTrigger={() => setShouldSearch(true)}
+            onSearchTrigger={() => {
+                // Clear timeout and immediately set debounced query for immediate search
+                if (searchTimeoutRef.current) {
+                    clearTimeout(searchTimeoutRef.current);
+                }
+                setDebouncedSearchQuery(searchQuery);
+                setForceSearch(true); // ADD THIS TO FORCE SEARCH
+                // Auto switch to library view when searching
+                if (searchQuery.trim()) {
+                    setCurrentView("library");
+                }
+            }}
             currentPage={currentPage}
             setCurrentPage={setCurrentPage}
             itemsPerPage={itemsPerPage}

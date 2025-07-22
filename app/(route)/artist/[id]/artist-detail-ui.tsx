@@ -11,6 +11,7 @@ import { TrackList } from "@/components/music/track-list";
 import { AlbumGrid } from "@/components/music/album-grid";
 import { TrackGridSm } from "@/components/music/track-grid-sm";
 import { useLikesFollows } from "@/hooks/use-likes-follows";
+import { useUser } from "@/contexts/UserContext";
 import {
   Play,
   Pause,
@@ -22,7 +23,8 @@ import {
   Album,
   Download,
   Plus,
-  ArrowLeft
+  ArrowLeft,
+  Check
 } from "lucide-react";
 import Link from "next/link";
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
@@ -32,6 +34,7 @@ import AddToPlaylist from "@/components/playlist/add-to-playlist";
 import { EditArtistModal } from "@/components/artist/edit-artist-modal";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useEffect } from "react";
+import { showSuccess } from "@/lib/services/notification-service";
 
 // Helper function to format time
 const formatDuration = (seconds: number | null) => {
@@ -70,7 +73,6 @@ interface ArtistDetailUIProps {
 }
 
 export function ArtistDetailUI({ artist, tracks, albums }: ArtistDetailUIProps) {
-  const [currentUser, setCurrentUser] = useState(null);
   const [currentArtist, setCurrentArtist] = useState(artist);
   const {
     currentTrack,
@@ -86,15 +88,7 @@ export function ArtistDetailUI({ artist, tracks, albums }: ArtistDetailUIProps) 
     isTrackDownloading,
   } = useDownload();
   const { getArtistFollowStatus, fetchArtistFollowStatus, toggleArtistFollow } = useLikesFollows();
-
-  useEffect(() => {
-    const supabase = createClientComponentClient();
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setCurrentUser(user);
-    };
-    getUser();
-  }, []);
+  const { user: currentUser } = useUser();
 
   const getSocialIcon = (url: string) => {
     if (url.includes('instagram.com')) {
@@ -318,7 +312,15 @@ export function ArtistDetailUI({ artist, tracks, albums }: ArtistDetailUIProps) 
                   </>
                 )}
                 {tracks && tracks.length > 0 && (
-                  <span>{tracks.length} songs</span>
+                  <>
+                    <span>{tracks.length} songs</span>
+                    {artistFollowStatus.totalFollowers !== undefined && (
+                      <>
+                        <span>•</span>
+                        <span>{artistFollowStatus.totalFollowers} followers</span>
+                      </>
+                    )}
+                  </>
                 )}
               </div>
               <div className="flex gap-4 justify-center md:justify-start mt-4">
@@ -333,16 +335,29 @@ export function ArtistDetailUI({ artist, tracks, albums }: ArtistDetailUIProps) 
                 </Button>
                 <Button
                   size="lg"
-                  className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all duration-200 border-0"
+                  className={`backdrop-blur-sm text-white transition-all duration-200 border-0 ${
+                    artistFollowStatus.isFollowing 
+                      ? "bg-red-500 hover:bg-red-600" 
+                      : "bg-white/10 hover:bg-white/20"
+                  }`}
                   onClick={() => toggleArtistFollow(artist.id)}
                   disabled={artistFollowStatus.isLoading}
                 >
-                  <Heart className={`mr-2 h-5 w-5 ${artistFollowStatus.isFollowing ? 'fill-current' : ''}`} />
-                  {artistFollowStatus.isLoading ? "Loading..." : (artistFollowStatus.isFollowing ? "Unfollow" : "Follow")}
+                  {artistFollowStatus.isFollowing ? (
+                    <Check className="mr-2 h-5 w-5" />
+                  ) : (
+                    <Heart className="mr-2 h-5 w-5" />
+                  )}
+                  {artistFollowStatus.isLoading ? "Loading..." : (artistFollowStatus.isFollowing ? "Followed" : "Follow")}
                 </Button>
                 <Button
                   size="lg"
                   className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all duration-200 border-0"
+                  onClick={() => {
+                    const currentUrl = window.location.href;
+                    navigator.clipboard.writeText(currentUrl);
+                    showSuccess({ title: "Copied!", message: "Link copied to clipboard!" });
+                  }}
                 >
                   <Share className="mr-2 h-5 w-5" />
                   Share

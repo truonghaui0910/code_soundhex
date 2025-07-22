@@ -14,6 +14,7 @@ import {
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { ArtistGrid } from "@/components/music/artist-grid";
 import Link from "next/link";
+import LibraryArtistsLoading from "./loading";
 
 interface FollowedArtist {
   id: number;
@@ -80,154 +81,121 @@ export default function LibraryArtistsPage() {
   };
 
   const renderPaginationButtons = () => {
-    const buttons = [];
-    const maxVisiblePages = 5;
-    
-    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-    
-    if (endPage - startPage + 1 < maxVisiblePages) {
-      startPage = Math.max(1, endPage - maxVisiblePages + 1);
-    }
+    return (
+      <div className="flex items-center justify-center gap-4">
+        <Button
+          size="sm"
+          onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+          disabled={currentPage === 1}
+          className="flex items-center gap-2 bg-white/10 backdrop-blur-sm hover:bg-white/20 text-purple-300 hover:text-white transition-all duration-300 border-0"
+        >
+          <ChevronLeft className="h-4 w-4" />
+          Previous
+        </Button>
 
-    // Previous button
-    buttons.push(
-      <Button
-        key="prev"
-        variant="outline"
-        size="sm"
-        onClick={() => handlePageChange(currentPage - 1)}
-        disabled={currentPage === 1}
-        className="bg-white/10 border-purple-400 text-white hover:bg-white/20"
-      >
-        <ChevronLeft className="h-4 w-4" />
-      </Button>
+        <div className="flex items-center gap-2">
+          {/* First page */}
+          {currentPage > 3 && (
+            <>
+              <Button
+                size="sm"
+                onClick={() => handlePageChange(1)}
+                className={`w-10 h-8 transition-all duration-300 border-0 ${
+                  1 === currentPage
+                    ? "bg-purple-600 text-white hover:bg-purple-700"
+                    : "bg-white/10 backdrop-blur-sm hover:bg-white/20 text-purple-300 hover:text-white"
+                }`}
+              >
+                1
+              </Button>
+              {currentPage > 4 && (
+                <span className="text-purple-300">...</span>
+              )}
+            </>
+          )}
+
+          {/* Page numbers around current page */}
+          {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+            const pageNumber = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
+            if (pageNumber > totalPages) return null;
+
+            return (
+              <Button
+                key={pageNumber}
+                size="sm"
+                onClick={() => handlePageChange(pageNumber)}
+                className={`w-10 h-8 transition-all duration-300 border-0 ${
+                  pageNumber === currentPage
+                    ? "bg-purple-600 text-white hover:bg-purple-700"
+                    : "bg-white/10 backdrop-blur-sm hover:bg-white/20 text-purple-300 hover:text-white"
+                }`}
+              >
+                {pageNumber}
+              </Button>
+            );
+          })}
+
+          {/* Last page */}
+          {currentPage < totalPages - 2 && (
+            <>
+              {currentPage < totalPages - 3 && (
+                <span className="text-purple-300">...</span>
+              )}
+              <Button
+                size="sm"
+                onClick={() => handlePageChange(totalPages)}
+                className={`w-10 h-8 transition-all duration-300 border-0 ${
+                  totalPages === currentPage
+                    ? "bg-purple-600 text-white hover:bg-purple-700"
+                    : "bg-white/10 backdrop-blur-sm hover:bg-white/20 text-purple-300 hover:text-white"
+                }`}
+              >
+                {totalPages}
+              </Button>
+            </>
+          )}
+        </div>
+
+        <Button
+          size="sm"
+          onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+          disabled={currentPage === totalPages}
+          className="flex items-center gap-2 bg-white/10 backdrop-blur-sm hover:bg-white/20 text-purple-300 hover:text-white transition-all duration-300 border-0"
+        >
+          Next
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+      </div>
     );
-
-    // First page
-    if (startPage > 1) {
-      buttons.push(
-        <Button
-          key={1}
-          variant="outline"
-          size="sm"
-          onClick={() => handlePageChange(1)}
-          className="bg-white/10 border-purple-400 text-white hover:bg-white/20"
-        >
-          1
-        </Button>
-      );
-      if (startPage > 2) {
-        buttons.push(
-          <span key="dots1" className="text-purple-300">
-            ...
-          </span>
-        );
-      }
-    }
-
-    // Page numbers
-    for (let i = startPage; i <= endPage; i++) {
-      buttons.push(
-        <Button
-          key={i}
-          variant={currentPage === i ? "default" : "outline"}
-          size="sm"
-          onClick={() => handlePageChange(i)}
-          className={
-            currentPage === i
-              ? "bg-purple-600 text-white hover:bg-purple-700"
-              : "bg-white/10 border-purple-400 text-white hover:bg-white/20"
-          }
-        >
-          {i}
-        </Button>
-      );
-    }
-
-    // Last page
-    if (endPage < totalPages) {
-      if (endPage < totalPages - 1) {
-        buttons.push(
-          <span key="dots2" className="text-purple-300">
-            ...
-          </span>
-        );
-      }
-      buttons.push(
-        <Button
-          key={totalPages}
-          variant="outline"
-          size="sm"
-          onClick={() => handlePageChange(totalPages)}
-          className="bg-white/10 border-purple-400 text-white hover:bg-white/20"
-        >
-          {totalPages}
-        </Button>
-      );
-    }
-
-    // Next button
-    buttons.push(
-      <Button
-        key="next"
-        variant="outline"
-        size="sm"
-        onClick={() => handlePageChange(currentPage + 1)}
-        disabled={currentPage === totalPages}
-        className="bg-white/10 border-purple-400 text-white hover:bg-white/20"
-      >
-        <ChevronRight className="h-4 w-4" />
-      </Button>
-    );
-
-    return buttons;
   };
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 flex items-center justify-center">
-        <div className="text-white text-xl">Loading artists...</div>
-      </div>
-    );
+    return <LibraryArtistsLoading />;
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 text-white">
+    <div className="min-h-screen bg-gradient-to-r from-slate-800 via-purple-900 to-slate-900 text-white">
       <div className="container mx-auto px-4 sm:px-6 py-8">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <Link href="/library">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-purple-300 hover:text-white"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Library
-            </Button>
-          </Link>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
           <div className="flex items-center gap-3">
-            <UserPlus className="h-6 w-6 text-purple-300" />
-            <h1 className="text-2xl font-bold">Followed Artists</h1>
+            <Link href="/library" title="Back to library">
+              <div className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all duration-300 flex items-center justify-center group">
+                <ArrowLeft className="h-4 w-4 text-purple-300 group-hover:text-white transition-colors" />
+              </div>
+            </Link>
+            <h1 className="text-xl sm:text-2xl font-normal">Followed Artists</h1>
           </div>
-        </div>
-
-        {/* Search and Stats */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-8">
-          <div className="relative flex-1">
-            <Search className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-purple-400" />
-            <Input
-              placeholder="Search artists..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-white/10 border-purple-400 text-white placeholder:text-purple-300 focus:border-purple-300"
-            />
-          </div>
-          <div className="flex items-center gap-2 text-purple-300">
-            <span className="text-sm">
-              Showing {startIndex + 1}-{Math.min(endIndex, filteredArtists.length)} of {filteredArtists.length} artists
-            </span>
+          <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+            <div className="relative flex items-center">
+              <Search className="h-4 w-4 absolute left-3 text-purple-300" />
+              <Input
+                placeholder="Search artists..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-64 h-8 bg-white/10 border-0 text-white placeholder:text-purple-300 focus:ring-0 focus:outline-none rounded-full pl-10 pr-4"
+              />
+            </div>
           </div>
         </div>
 
@@ -253,10 +221,19 @@ export default function LibraryArtistsPage() {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex justify-center items-center gap-2 mt-8">
+              <div className="mt-12 flex justify-center items-center gap-2">
                 {renderPaginationButtons()}
               </div>
             )}
+
+            {/* Stats Box - Centered at Bottom */}
+            <div className="flex justify-center mt-8">
+              <div className="bg-white/5 backdrop-blur-sm border border-purple-400/30 rounded-lg px-4 py-2">
+                <span className="text-sm text-purple-300">
+                  Showing {startIndex + 1}-{Math.min(endIndex, filteredArtists.length)} of {filteredArtists.length} artists
+                </span>
+              </div>
+            </div>
           </>
         )}
       </div>

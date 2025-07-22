@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase/client";
 import { User } from "@/hooks/use-current-user";
 import { Badge } from "@/components/ui/badge";
-import { useUserRole } from "@/hooks/use-user-role";
+import { useUser } from "@/contexts/UserContext";
 
 interface UserNavProps {
   user: User | null;
@@ -17,7 +17,7 @@ export function UserNav({ user }: UserNavProps) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const { userRole } = useUserRole();
+  const { userRole } = useUser();
 
   const handleSignOut = async () => {
     try {
@@ -49,7 +49,7 @@ export function UserNav({ user }: UserNavProps) {
           variant="ghost"
           size="sm"
           onClick={() => router.push("/login")}
-          className="text-foreground hover:text-primary"
+          className="text-foreground hover:text-primary dark:hover:bg-white/10"
         >
           Login
         </Button>

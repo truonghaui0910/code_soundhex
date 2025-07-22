@@ -27,10 +27,12 @@ export async function GET(request: NextRequest) {
           id,
           title,
           cover_image_url,
+          custom_url,
           release_date,
           artist:artist_id(
             id,
-            name
+            name,
+            custom_url
           )
         )
       `)
@@ -47,6 +49,7 @@ export async function GET(request: NextRequest) {
       id: item.albums.id,
       title: item.albums.title,
       cover_image_url: item.albums.cover_image_url,
+      custom_url: item.albums.custom_url,
       release_date: item.albums.release_date,
       artist: item.albums.artist
     }));
