@@ -54,8 +54,6 @@ async function getOrCreateAlbum(
         
         // Only update if there are changes
         if (Object.keys(updateData).length > 0) {
-            updateData.updated_at = new Date().toISOString();
-            
             const { data: updatedAlbum, error: updateError } = await supabase
                 .from("albums")
                 .update(updateData)

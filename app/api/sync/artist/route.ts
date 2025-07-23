@@ -43,8 +43,6 @@ async function getOrCreateArtist(
         
         // Only update if there are changes
         if (Object.keys(updateData).length > 0) {
-            updateData.updated_at = new Date().toISOString();
-            
             const { data: updatedArtist, error: updateError } = await supabase
                 .from("artists")
                 .update(updateData)
