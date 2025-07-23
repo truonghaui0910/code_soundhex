@@ -1,7 +1,7 @@
 // app/(route)/artist/[id]/artist-detail-ui.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -33,7 +33,6 @@ import { useDownload } from "@/hooks/use-download";
 import AddToPlaylist from "@/components/playlist/add-to-playlist";
 import { EditArtistModal } from "@/components/artist/edit-artist-modal";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { useEffect, useState } from "react";
 import { showSuccess } from "@/lib/services/notification-service";
 import { ArtistGrid } from "@/components/music/artist-grid";
 
