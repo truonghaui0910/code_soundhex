@@ -108,7 +108,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<SyncUserR
       // User exists - update password and metadata
       console.log('Updating existing user:', email);
       
-      // Method 1: Try admin update first
+      // Try to update password first
       const { data: updatedUser, error: updateError } = await supabase.auth.admin.updateUserById(
         existingUser.id,
         {
@@ -121,40 +121,29 @@ export async function POST(request: NextRequest): Promise<NextResponse<SyncUserR
       );
 
       if (updateError) {
-        console.log('Admin update failed, trying alternative method...', updateError.message);
+        console.log('❌ Password update failed:', updateError.message);
         
-        // Method 2: Alternative - just update metadata via direct client update
-        // This might work if admin update is restricted
-        try {
-          // Update user_metadata only (password update might be restricted)
-          const { data: metadataUpdate, error: metadataError } = await supabase.auth.admin.updateUserById(
-            existingUser.id,
-            {
-              user_metadata: {
-                ...existingUser.user_metadata,
-                ...userMetadata
-              }
+        // If password update fails, try to update metadata only
+        const { data: metadataUpdate, error: metadataError } = await supabase.auth.admin.updateUserById(
+          existingUser.id,
+          {
+            user_metadata: {
+              ...existingUser.user_metadata,
+              ...userMetadata
             }
-          );
-
-          if (metadataError) {
-            console.log('Could not update user metadata, but user exists');
-            // User exists but can't update - still return success with existing data
-            userId = existingUser.id;
-            action = 'updated';
-          } else {
-            console.log('User metadata updated successfully');
-            userId = existingUser.id;
-            action = 'updated';
           }
-        } catch (metaError) {
-          // Even metadata update failed, but user exists - return existing data
-          console.log('Metadata update failed, returning existing user data');
-          userId = existingUser.id;
-          action = 'updated';
+        );
+
+        if (metadataError) {
+          console.log('❌ Metadata update also failed:', metadataError.message);
+        } else {
+          console.log('✅ Metadata updated successfully (password update failed)');
         }
+        
+        userId = existingUser.id;
+        action = 'updated';
       } else {
-        console.log('User updated via admin method');
+        console.log('✅ User password and metadata updated successfully');
         userId = existingUser.id;
         action = 'updated';
       }
