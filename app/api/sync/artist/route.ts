@@ -26,6 +26,40 @@ async function getOrCreateArtist(
     }
 
     if (existingArtist) {
+        // Update existing artist with new data
+        const updateData: any = {};
+        
+        if (artistData.name && artistData.name !== existingArtist.name) {
+            updateData.name = artistData.name;
+        }
+        
+        if (artistData.profile_image_url && artistData.profile_image_url !== existingArtist.profile_image_url) {
+            updateData.profile_image_url = artistData.profile_image_url;
+        }
+        
+        if (artistData.user_id && artistData.user_id !== existingArtist.user_id) {
+            updateData.user_id = artistData.user_id;
+        }
+        
+        // Only update if there are changes
+        if (Object.keys(updateData).length > 0) {
+            updateData.updated_at = new Date().toISOString();
+            
+            const { data: updatedArtist, error: updateError } = await supabase
+                .from("artists")
+                .update(updateData)
+                .eq("id", existingArtist.id)
+                .select()
+                .single();
+                
+            if (updateError) {
+                console.error("ARTIST_UPDATE_ERROR:", updateError);
+                throw new Error(`Failed to update artist: ${updateError.message}`);
+            }
+            
+            return updatedArtist;
+        }
+        
         return existingArtist;
     }
 
