@@ -335,6 +335,7 @@ export class AlbumsController {
   static async getRecommendedAlbums(albumId: number, limit: number = 12) {
         try {
             const supabase = createServerComponentClient<Database>({ cookies });
+            console.log('🎵 AlbumsController.getRecommendedAlbums - Starting for album:', albumId);
             
             // Get the album to find its genre
             const { data: album } = await supabase
@@ -343,11 +344,15 @@ export class AlbumsController {
                 .eq('id', albumId)
                 .single();
 
+            console.log('🎵 Album data fetched:', album);
+
             if (!album) {
+                console.log('❌ Album not found for ID:', albumId);
                 return [];
             }
 
             // Get random albums with the same genre including artist info
+            console.log('🔍 Searching for albums with genre_id:', album.genre_id);
             const { data: albums, error } = await supabase
                 .from('albums')
                 .select(`
@@ -363,11 +368,14 @@ export class AlbumsController {
                 .limit(limit);
 
             if (error) {
-                console.error('Error fetching recommended albums:', error);
+                console.error('❌ Error fetching recommended albums:', error);
                 return [];
             }
 
+            console.log('🎵 Found albums with same genre:', albums?.length || 0);
+
             if (!albums || albums.length === 0) {
+                console.log('⚠️ No recommended albums found');
                 return [];
             }
 
@@ -394,6 +402,7 @@ export class AlbumsController {
                 }
             }));
 
+            console.log('✅ Recommended albums transformed, final count:', transformedAlbums.length);
             return transformedAlbums;
         } catch (error) {
             console.error('Error in getRecommendedAlbums:', error);

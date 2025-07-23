@@ -236,7 +236,7 @@ export function ArtistDetailUI({ artist, tracks, albums }: ArtistDetailUIProps) 
 
       fetchRecommendedArtists();
     }, [artist.id]);
-  
+
     const artistFollowStatus = getArtistFollowStatus(artist.id);
 
   return (

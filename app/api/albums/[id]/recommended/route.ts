@@ -9,16 +9,19 @@ export async function GET(
 ) {
   try {
     const albumId = parseInt(params.id);
+    console.log('🎵 API: Fetching recommended albums for album ID:', albumId);
 
     if (isNaN(albumId)) {
+      console.error('❌ Invalid album ID provided:', params.id);
       return NextResponse.json({ error: 'Invalid album ID' }, { status: 400 });
     }
 
     const albums = await AlbumsController.getRecommendedAlbums(albumId, 12);
+    console.log('🎵 API: Recommended albums fetched, count:', albums?.length || 0);
 
     return NextResponse.json({ albums });
   } catch (error) {
-    console.error('Error fetching recommended albums:', error);
+    console.error('❌ Error fetching recommended albums:', error);
     return NextResponse.json(
       { error: 'Failed to fetch recommended albums' },
       { status: 500 }
