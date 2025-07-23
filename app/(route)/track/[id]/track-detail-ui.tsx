@@ -347,33 +347,29 @@ export function TrackDetailUI({
         </div>
 
         {/* Artist Tracks List */}
-        <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl border border-white/30 dark:border-gray-700/30 shadow-xl">
-          <CardContent className="p-6">
-            {loadingArtistTracks ? (
-              <div className="space-y-4">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i} className="flex items-center gap-4 p-3 rounded-lg animate-pulse">
-                    <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
-                    <div className="flex-1 space-y-2">
-                      <div className="w-48 h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                      <div className="w-32 h-3 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                    </div>
-                    <div className="w-12 h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                  </div>
-                ))}
+        {loadingArtistTracks ? (
+          <div className="space-y-4">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-4 p-3 rounded-lg animate-pulse">
+                <div className="w-12 h-12 bg-white/20 dark:bg-gray-700/50 rounded-lg"></div>
+                <div className="flex-1 space-y-2">
+                  <div className="w-48 h-4 bg-white/20 dark:bg-gray-700/50 rounded"></div>
+                  <div className="w-32 h-3 bg-white/20 dark:bg-gray-700/50 rounded"></div>
+                </div>
+                <div className="w-12 h-4 bg-white/20 dark:bg-gray-700/50 rounded"></div>
               </div>
-            ) : artistTracks.length > 0 ? (
-              <TracksListLight tracks={artistTracks} />
-            ) : (
-              <div className="text-center py-8">
-                <Music className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500 dark:text-gray-400">
-                  No other tracks found from this artist
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+            ))}
+          </div>
+        ) : artistTracks.length > 0 ? (
+          <TracksListLight tracks={artistTracks} />
+        ) : (
+          <div className="text-center py-8">
+            <Music className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-500 dark:text-gray-400">
+              No other tracks found from this artist
+            </p>
+          </div>
+        )}
 
         {/* Recommended Tracks Section */}
         {recommendedTracks.length > 0 && (
