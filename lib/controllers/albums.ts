@@ -148,7 +148,7 @@ export class AlbumsController {
   static async getAlbumsWithPagination(page: number = 1, limit: number = 10): Promise<{ albums: Album[], total: number, totalPages: number }> {
     console.log(`🎵 AlbumsController.getAlbumsWithPagination - Starting fetch with page: ${page}, limit: ${limit}`);
     const supabase = createServerComponentClient<Database>({ cookies });
-    
+
     const offset = (page - 1) * limit;
 
     // Get total count first
@@ -332,57 +332,54 @@ export class AlbumsController {
     return data ?? [];
   }
 
-  static async getRecommendedAlbums(albumId: number, limit: number = 12): Promise<Album[]> {
-    try {
-      const supabase = createServerComponentClient<Database>({ cookies });
+  static async getRecommendedAlbums(albumId: number, limit: number = 12) {
+        try {
+            // Get the album to find its genre
+            const { data: album } = await supabase
+                .from('albums')
+                .select('genre_id')
+                .eq('id', albumId)
+                .single();
 
-      // First get the current album's genre
-      const { data: currentAlbum } = await supabase
-        .from("albums")
-        .select("genre_id")
-        .eq('id', albumId)
-        .single();
+            if (!album) {
+                return [];
+            }
 
-      let query = supabase
-        .from("albums")
-        .select(`
-          id, title, cover_image_url, custom_url, release_date, created_at, artist_id, user_id,
-          artist:artist_id(id, name, custom_url)
-        `)
-        .neq('id', albumId);
+            // Get random albums with the same genre including artist info
+            const { data: albums, error } = await supabase
+                .from('albums')
+                .select(`
+                    id,
+                    title,
+                    cover_image_url,
+                    release_date,
+                    custom_url,
+                    artist_id,
+                    artists!inner (
+                        id,
+                        name,
+                        custom_url
+                    )
+                `)
+                .eq('genre_id', album.genre_id)
+                .neq('id', albumId)
+                .limit(limit);
 
-      // If current album has genre, filter by same genre first
-      if (currentAlbum?.genre_id) {
-        query = query.eq('genre_id', currentAlbum.genre_id);
-      }
+            if (error) {
+                console.error('Error fetching recommended albums:', error);
+                return [];
+            }
 
-      // Get total count
-      const { count } = await query.select("*", { count: "exact", head: true });
-      const totalAlbums = count || 0;
-      const offset = totalAlbums > limit ? Math.floor(Math.random() * (totalAlbums - limit)) : 0;
+            // Transform to include artist as nested object
+            const transformedAlbums = albums?.map(album => ({
+                ...album,
+                artist: album.artists
+            })) || [];
 
-      const { data: albums, error } = await query
-        .order('created_at', { ascending: false })
-        .range(offset, offset + limit - 1);
-
-      if (error) {
-        console.error("Error fetching recommended albums:", error);
-        return [];
-      }
-
-      // Map albums with artist info
-      const albumsWithArtist = (albums ?? []).map((album: any) => ({
-        ...album,
-        artist: album.artist || {
-          id: album.artist_id,
-          name: "Unknown Artist",
-        },
-      }));
-
-      return albumsWithArtist;
-    } catch (error) {
-      console.error("AlbumsController.getRecommendedAlbums error:", error);
-      return [];
+            return transformedAlbums;
+        } catch (error) {
+            console.error('Error in getRecommendedAlbums:', error);
+            return [];
+        }
     }
-  }
 }
