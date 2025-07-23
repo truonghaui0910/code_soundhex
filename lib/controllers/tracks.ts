@@ -551,6 +551,48 @@ export class TracksController {
   }
 
   /**
+   * Lấy danh sách bài hát cùng nghệ sĩ dựa trên track ID
+   */
+  static async getTracksByArtistFromTrack(trackId: number, limit: number = 20): Promise<Track[]> {
+    const supabase = createServerComponentClient<Database>({ cookies });
+
+    // First get the track to find its artist
+    const { data: track } = await supabase
+      .from("tracks")
+      .select("artist_id")
+      .eq("id", trackId)
+      .single();
+
+    if (!track) {
+      console.log(`Track not found for ID: ${trackId}`);
+      return [];
+    }
+
+    // Get other tracks from the same artist
+    const { data, error } = await supabase
+      .from("tracks")
+      .select(`
+        *, view_count, custom_url,
+        artist:artist_id(id, name, profile_image_url, custom_url),
+        album:album_id(id, title, cover_image_url, custom_url),
+        genre:genre_id(id, name)
+      `)
+      .eq("artist_id", track.artist_id)
+      .neq("id", trackId) // Exclude current track
+      .order("view_count", { ascending: false })
+      .order("created_at", { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      console.error(`Error fetching tracks for artist from track ${trackId}:`, error);
+      throw new Error(`Failed to fetch tracks: ${error.message}`);
+    }
+
+    console.log(`TracksController.getTracksByArtistFromTrack - Found ${data?.length || 0} tracks`);
+    return data as unknown as Track[];
+  }
+
+  /**
    * Lấy danh sách bài hát được xem nhiều nhất
    */
   static async getMostViewedTracks(limit: number = 12): Promise<Track[]> {

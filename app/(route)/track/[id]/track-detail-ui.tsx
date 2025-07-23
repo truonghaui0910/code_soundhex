@@ -30,6 +30,7 @@ import { useLikesFollows } from "@/hooks/use-likes-follows";
 import { useEffect, useState } from "react";
 import { showSuccess } from "@/lib/services/notification-service";
 import { TrackGridSm } from "@/components/music/track-grid-sm";
+import TracksListLight from "@/components/music/tracks-list-light";
 
 // Helper function to format time
 const formatDuration = (seconds: number | null | undefined) => {
@@ -73,6 +74,8 @@ export function TrackDetailUI({
     useLikesFollows();
   const [recommendedTracks, setRecommendedTracks] = useState<any[]>([]);
   const [loadingRecommended, setLoadingRecommended] = useState(false);
+  const [artistTracks, setArtistTracks] = useState<any[]>([]);
+  const [loadingArtistTracks, setLoadingArtistTracks] = useState(false);
 
   // Safe track data with fallbacks
   const safeTrack = {
@@ -132,6 +135,28 @@ export function TrackDetailUI({
     };
 
     fetchRecommendedTracks();
+  }, [safeTrack.id, isLoading]);
+
+  // Fetch artist tracks
+  useEffect(() => {
+    const fetchArtistTracks = async () => {
+      if (safeTrack.id && !isLoading) {
+        setLoadingArtistTracks(true);
+        try {
+          const response = await fetch(`/api/tracks/${safeTrack.id}/artist-tracks`);
+          if (response.ok) {
+            const data = await response.json();
+            setArtistTracks(data.tracks || []);
+          }
+        } catch (error) {
+          console.error("Error fetching artist tracks:", error);
+        } finally {
+          setLoadingArtistTracks(false);
+        }
+      }
+    };
+
+    fetchArtistTracks();
   }, [safeTrack.id, isLoading]);
 
   const trackLikeStatus = getTrackLikeStatus(safeTrack.id);
@@ -309,179 +334,46 @@ export function TrackDetailUI({
         </div>
       </div>
 
-      {/* Track Details Section */}
+      {/* Artist Tracks Section */}
       <div className="container mx-auto px-6 py-12">
         {/* Section Title */}
         <div className="flex items-center gap-3 mb-8">
           <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center">
-            <Music className="h-5 w-5 text-white" />
+            <User className="h-5 w-5 text-white" />
           </div>
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-            Track Details
+            More from {safeTrack.artist.name}
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Track Information */}
-          <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl border border-white/30 dark:border-gray-700/30 shadow-xl">
-            <CardContent className="p-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Title */}
-                <div className="bg-white/20 dark:bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/30 dark:border-white/20">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-8 h-8 bg-white/30 dark:bg-white/20 rounded-lg flex items-center justify-center">
-                      <Music className="h-4 w-4 text-gray-700 dark:text-white" />
+        {/* Artist Tracks List */}
+        <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl border border-white/30 dark:border-gray-700/30 shadow-xl">
+          <CardContent className="p-6">
+            {loadingArtistTracks ? (
+              <div className="space-y-4">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="flex items-center gap-4 p-3 rounded-lg animate-pulse">
+                    <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+                    <div className="flex-1 space-y-2">
+                      <div className="w-48 h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                      <div className="w-32 h-3 bg-gray-200 dark:bg-gray-700 rounded"></div>
                     </div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wide">
-                      Title
-                    </p>
+                    <div className="w-12 h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
                   </div>
-                  <p className="font-bold text-lg text-gray-900 dark:text-white truncate">
-                    {safeTrack.title}
-                  </p>
-                </div>
-
-                {/* Artist */}
-                <div className="bg-white/20 dark:bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/30 dark:border-white/20">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-8 h-8 bg-white/30 dark:bg-white/20 rounded-lg flex items-center justify-center">
-                      <User className="h-4 w-4 text-gray-700 dark:text-white" />
-                    </div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wide">
-                      Artist
-                    </p>
-                  </div>
-                  <Link
-                    href={`/artist/${safeTrack.artist.custom_url || safeTrack.artist.id}`}
-                    className="font-bold text-lg text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 transition-colors truncate block"
-                  >
-                    {safeTrack.artist.name}
-                  </Link>
-                </div>
-
-                {/* Album */}
-                {safeTrack.album && (
-                  <div className="bg-white/20 dark:bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/30 dark:border-white/20">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="w-8 h-8 bg-white/30 dark:bg-white/20 rounded-lg flex items-center justify-center">
-                        <Disc className="h-4 w-4 text-gray-700 dark:text-white" />
-                      </div>
-                      <p className="text-sm font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wide">
-                        Album
-                      </p>
-                    </div>
-                    <Link
-                      href={`/album/${safeTrack.album.custom_url || safeTrack.album.id}`}
-                      className="font-bold text-lg text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 transition-colors truncate block"
-                    >
-                      {safeTrack.album.title}
-                    </Link>
-                  </div>
-                )}
-
-                {/* Genre */}
-                {safeTrack.genre && (
-                  <div className="bg-white/20 dark:bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/30 dark:border-white/20">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="w-8 h-8 bg-white/30 dark:bg-white/20 rounded-lg flex items-center justify-center">
-                        <div className="w-4 h-4 bg-gray-700 dark:bg-white rounded-full"></div>
-                      </div>
-                      <p className="text-sm font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wide">
-                        Genre
-                      </p>
-                    </div>
-                    <p className="font-bold text-lg text-gray-900 dark:text-white truncate">
-                      {safeTrack.genre.name}
-                    </p>
-                  </div>
-                )}
-
-                {/* Duration */}
-                <div className="bg-white/20 dark:bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/30 dark:border-white/20">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-8 h-8 bg-white/30 dark:bg-white/20 rounded-lg flex items-center justify-center">
-                      <Clock className="h-4 w-4 text-gray-700 dark:text-white" />
-                    </div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wide">
-                      Duration
-                    </p>
-                  </div>
-                  <p className="font-bold text-lg text-gray-900 dark:text-white font-mono">
-                    {formatDuration(safeTrack.duration)}
-                  </p>
-                </div>
-
-                {/* Views */}
-                <div className="bg-white/20 dark:bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/30 dark:border-white/20">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-8 h-8 bg-white/30 dark:bg-white/20 rounded-lg flex items-center justify-center">
-                      <Headphones className="h-4 w-4 text-gray-700 dark:text-white" />
-                    </div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wide">
-                      Plays
-                    </p>
-                  </div>
-                  <p className="font-bold text-lg text-gray-900 dark:text-white">
-                    {formatViewCount(safeTrack.view_count)}
-                  </p>
-                </div>
-
-                {/* Likes */}
-                {trackLikeStatus.totalLikes !== undefined && (
-                  <div className="bg-white/20 dark:bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/30 dark:border-white/20">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="w-8 h-8 bg-white/30 dark:bg-white/20 rounded-lg flex items-center justify-center">
-                        <Heart className="h-4 w-4 text-red-500 fill-current" />
-                      </div>
-                      <p className="text-sm font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wide">
-                        Likes
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <p className="font-bold text-lg text-gray-900 dark:text-white">
-                        {trackLikeStatus.totalLikes}
-                      </p>
-                      <Heart className="h-5 w-5 text-white fill-white drop-shadow-lg" />
-                    </div>
-                  </div>
-                )}
-
-                {/* Release Date */}
-                <div className="bg-white/20 dark:bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/30 dark:border-white/20">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-8 h-8 bg-white/30 dark:bg-white/20 rounded-lg flex items-center justify-center">
-                      <Calendar className="h-4 w-4 text-gray-700 dark:text-white" />
-                    </div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wide">
-                      Release Date
-                    </p>
-                  </div>
-                  <p className="font-bold text-lg text-gray-900 dark:text-white">
-                    {formatDate(safeTrack.created_at)}
-                  </p>
-                </div>
+                ))}
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Track Description */}
-          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-white/20 dark:border-gray-700/30">
-            <CardContent className="p-6">
-              <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
-                Description
-              </h3>
-              {safeTrack.description ? (
-                <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                  {safeTrack.description}
+            ) : artistTracks.length > 0 ? (
+              <TracksListLight tracks={artistTracks} />
+            ) : (
+              <div className="text-center py-8">
+                <Music className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-500 dark:text-gray-400">
+                  No other tracks found from this artist
                 </p>
-              ) : (
-                <p className="text-gray-500 dark:text-gray-400 italic">
-                  No description available for this track.
-                </p>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Recommended Tracks Section */}
         {recommendedTracks.length > 0 && (
