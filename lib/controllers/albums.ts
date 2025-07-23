@@ -337,10 +337,10 @@ export class AlbumsController {
             const supabase = createServerComponentClient<Database>({ cookies });
             console.log('🎵 AlbumsController.getRecommendedAlbums - Starting for album:', albumId);
             
-            // Get the album to find its genre
+            // Get the album to find its artist
             const { data: album } = await supabase
                 .from('albums')
-                .select('genre_id')
+                .select('artist_id, title')
                 .eq('id', albumId)
                 .single();
 
@@ -351,8 +351,8 @@ export class AlbumsController {
                 return [];
             }
 
-            // Get random albums with the same genre including artist info
-            console.log('🔍 Searching for albums with genre_id:', album.genre_id);
+            // Get albums from the same artist first, then other albums
+            console.log('🔍 Searching for albums from same artist:', album.artist_id);
             const { data: albums, error } = await supabase
                 .from('albums')
                 .select(`
@@ -363,8 +363,8 @@ export class AlbumsController {
                     custom_url,
                     artist_id
                 `)
-                .eq('genre_id', album.genre_id)
                 .neq('id', albumId)
+                .order('created_at', { ascending: false })
                 .limit(limit);
 
             if (error) {
@@ -372,15 +372,27 @@ export class AlbumsController {
                 return [];
             }
 
-            console.log('🎵 Found albums with same genre:', albums?.length || 0);
+            console.log('🎵 Found albums:', albums?.length || 0);
 
             if (!albums || albums.length === 0) {
                 console.log('⚠️ No recommended albums found');
                 return [];
             }
 
+            // Prioritize albums from same artist, then random others
+            const sameArtistAlbums = albums.filter(a => a.artist_id === album.artist_id);
+            const otherAlbums = albums.filter(a => a.artist_id !== album.artist_id);
+            
+            // Combine: same artist first, then others, up to limit
+            const prioritizedAlbums = [
+                ...sameArtistAlbums,
+                ...otherAlbums
+            ].slice(0, limit);
+
+            console.log(`🎵 Prioritized albums: ${sameArtistAlbums.length} same artist, ${otherAlbums.length} others`);
+
             // Get artist information separately
-            const artistIds = [...new Set(albums.map(a => a.artist_id))];
+            const artistIds = [...new Set(prioritizedAlbums.map(a => a.artist_id))];
             const { data: artists } = await supabase
                 .from('artists')
                 .select('id, name, custom_url')
@@ -393,7 +405,7 @@ export class AlbumsController {
             }, {} as Record<number, any>);
 
             // Transform to include artist as nested object
-            const transformedAlbums = albums.map(album => ({
+            const transformedAlbums = prioritizedAlbums.map(album => ({
                 ...album,
                 artist: artistMap[album.artist_id] || {
                     id: album.artist_id,
@@ -405,7 +417,7 @@ export class AlbumsController {
             console.log('✅ Recommended albums transformed, final count:', transformedAlbums.length);
             return transformedAlbums;
         } catch (error) {
-            console.error('Error in getRecommendedAlbums:', error);
+            console.error('❌ Error in getRecommendedAlbums:', error);
             return [];
         }
     }
