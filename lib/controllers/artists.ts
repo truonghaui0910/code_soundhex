@@ -272,6 +272,8 @@ export class ArtistsController {
 
   static async getRecommendedArtists(artistId: number, limit: number = 12) {
         try {
+            const supabase = createServerComponentClient<Database>({ cookies });
+            
             // Get all artists with tracks count
             const { data: artists, error } = await supabase
                 .from('artists')

@@ -334,6 +334,8 @@ export class AlbumsController {
 
   static async getRecommendedAlbums(albumId: number, limit: number = 12) {
         try {
+            const supabase = createServerComponentClient<Database>({ cookies });
+            
             // Get the album to find its genre
             const { data: album } = await supabase
                 .from('albums')
