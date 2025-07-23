@@ -464,6 +464,15 @@ export class TracksController {
 
       if (!currentTrack?.genre_id) {
         // If no genre, return random tracks
+        // First get total count
+        const { count } = await supabase
+          .from("tracks")
+          .select("*", { count: "exact", head: true })
+          .neq('id', trackId);
+
+        const totalTracks = count || 0;
+        const offset = totalTracks > limit ? Math.floor(Math.random() * (totalTracks - limit)) : 0;
+
         const { data: tracks, error } = await supabase
           .from("tracks")
           .select(`
@@ -486,13 +495,23 @@ export class TracksController {
             )
           `)
           .neq('id', trackId)
-          .order('RANDOM()', { ascending: true })
-          .limit(limit);
+          .order('created_at', { ascending: false })
+          .range(offset, offset + limit - 1);
 
         return tracks || [];
       }
 
       // Get tracks with same genre
+      // First get total count
+      const { count } = await supabase
+        .from("tracks")
+        .select("*", { count: "exact", head: true })
+        .eq('genre_id', currentTrack.genre_id)
+        .neq('id', trackId);
+
+      const totalTracks = count || 0;
+      const offset = totalTracks > limit ? Math.floor(Math.random() * (totalTracks - limit)) : 0;
+
       const { data: tracks, error } = await supabase
         .from("tracks")
         .select(`
@@ -516,8 +535,8 @@ export class TracksController {
         `)
         .eq('genre_id', currentTrack.genre_id)
         .neq('id', trackId)
-        .order('RANDOM()', { ascending: true })
-        .limit(limit);
+        .order('created_at', { ascending: false })
+        .range(offset, offset + limit - 1);
 
       if (error) {
         console.error("Error fetching recommended tracks:", error);

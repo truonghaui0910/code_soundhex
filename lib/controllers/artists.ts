@@ -269,4 +269,48 @@ export class ArtistsController {
 
     return artists;
   }
+
+  static async getRecommendedArtists(artistId: number, limit: number = 12): Promise<Artist[]> {
+    try {
+      const supabase = createServerComponentClient<Database>({ cookies });
+
+      // Get total count
+      const { count } = await supabase
+        .from("artists")
+        .select("*", { count: "exact", head: true })
+        .neq('id', artistId);
+
+      const totalArtists = count || 0;
+      const offset = totalArtists > limit ? Math.floor(Math.random() * (totalArtists - limit)) : 0;
+
+      const { data: artists, error } = await supabase
+        .from("artists")
+        .select(`id, name, profile_image_url, bio, created_at, custom_url, social, user_id`)
+        .neq('id', artistId)
+        .order('created_at', { ascending: false })
+        .range(offset, offset + limit - 1);
+
+      if (error) {
+        console.error("Error fetching recommended artists:", error);
+        return [];
+      }
+
+      // Convert social from database format to array if needed
+      const processedArtists = (artists ?? []).map(artist => {
+        if (artist.social && typeof artist.social === 'string') {
+          try {
+            artist.social = JSON.parse(artist.social);
+          } catch (e) {
+            artist.social = [];
+          }
+        }
+        return artist;
+      });
+
+      return processedArtists;
+    } catch (error) {
+      console.error("ArtistsController.getRecommendedArtists error:", error);
+      return [];
+    }
+  }
 }

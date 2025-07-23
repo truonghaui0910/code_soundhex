@@ -1,4 +1,3 @@
-
 import { NextRequest, NextResponse } from "next/server";
 import { TracksController } from "@/lib/controllers/tracks";
 
@@ -8,7 +7,7 @@ export async function GET(
 ) {
   try {
     const trackId = parseInt(params.id);
-    
+
     if (isNaN(trackId)) {
       return NextResponse.json(
         { error: "Invalid track ID" },
@@ -17,7 +16,7 @@ export async function GET(
     }
 
     const recommendedTracks = await TracksController.getRecommendedTracks(trackId, 12);
-    
+
     return NextResponse.json({
       success: true,
       tracks: recommendedTracks,
