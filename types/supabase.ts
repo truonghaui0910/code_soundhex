@@ -4,236 +4,556 @@ export type Json =
   | boolean
   | null
   | { [key: string]: Json | undefined }
-  | Json[];
+  | Json[]
 
 export type Database = {
+  // Allows to automatically instanciate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "12.2.3 (519615d)"
+  }
   public: {
     Tables: {
       albums: {
         Row: {
-          artist_id: number;
-          cover_image_url: string | null;
-          created_at: string | null;
-          description: string | null;
-          id: number;
-          release_date: string | null;
-          title: string;
-        };
+          artist_id: number
+          cover_image_url: string | null
+          created_at: string | null
+          custom_url: string | null
+          description: string | null
+          id: number
+          release_date: string | null
+          spotify_id: string | null
+          title: string
+          user_id: string | null
+        }
         Insert: {
-          artist_id?: number;
-          cover_image_url?: string | null;
-          created_at?: string | null;
-          description?: string | null;
-          id?: number;
-          release_date?: string | null;
-          title: string;
-        };
+          artist_id?: number
+          cover_image_url?: string | null
+          created_at?: string | null
+          custom_url?: string | null
+          description?: string | null
+          id?: number
+          release_date?: string | null
+          spotify_id?: string | null
+          title: string
+          user_id?: string | null
+        }
         Update: {
-          artist_id?: number;
-          cover_image_url?: string | null;
-          created_at?: string | null;
-          description?: string | null;
-          id?: number;
-          release_date?: string | null;
-          title?: string;
-        };
+          artist_id?: number
+          cover_image_url?: string | null
+          created_at?: string | null
+          custom_url?: string | null
+          description?: string | null
+          id?: number
+          release_date?: string | null
+          spotify_id?: string | null
+          title?: string
+          user_id?: string | null
+        }
         Relationships: [
           {
-            foreignKeyName: "albums_artist_id_fkey";
-            columns: ["artist_id"];
-            isOneToOne: false;
-            referencedRelation: "artists";
-            referencedColumns: ["id"];
+            foreignKeyName: "albums_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id"]
           },
-        ];
-      };
+        ]
+      }
       artists: {
         Row: {
-          banner_image_url: string | null;
-          bio: string | null;
-          created_at: string | null;
-          id: number;
-          name: string;
-          profile_image_url: string | null;
-        };
+          banner_image_url: string | null
+          bio: string | null
+          created_at: string | null
+          custom_url: string | null
+          id: number
+          name: string
+          profile_image_url: string | null
+          social: string | null
+          spotify_id: string | null
+          user_id: string | null
+        }
         Insert: {
-          banner_image_url?: string | null;
-          bio?: string | null;
-          created_at?: string | null;
-          id?: number;
-          name: string;
-          profile_image_url?: string | null;
-        };
+          banner_image_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          custom_url?: string | null
+          id?: number
+          name: string
+          profile_image_url?: string | null
+          social?: string | null
+          spotify_id?: string | null
+          user_id?: string | null
+        }
         Update: {
-          banner_image_url?: string | null;
-          bio?: string | null;
-          created_at?: string | null;
-          id?: number;
-          name?: string;
-          profile_image_url?: string | null;
-        };
-        Relationships: [];
-      };
+          banner_image_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          custom_url?: string | null
+          id?: number
+          name?: string
+          profile_image_url?: string | null
+          social?: string | null
+          spotify_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       genres: {
         Row: {
-          id: number;
-          name: string;
-        };
+          id: number
+          name: string
+        }
         Insert: {
-          id?: number;
-          name: string;
-        };
+          id?: number
+          name: string
+        }
         Update: {
-          id?: number;
-          name?: string;
-        };
-        Relationships: [];
-      };
-      tracks: {
-        Row: {
-          album_id: number;
-          artist_id: number;
-          created_at: string | null;
-          description: string | null;
-          duration: number | null;
-          file_url: string;
-          genre_id: number | null;
-          id: number;
-          title: string;
-        };
-        Insert: {
-          album_id?: number;
-          artist_id?: number;
-          created_at?: string | null;
-          description?: string | null;
-          duration?: number | null;
-          file_url: string;
-          genre_id?: number | null;
-          id?: number;
-          title: string;
-        };
-        Update: {
-          album_id?: number;
-          artist_id?: number;
-          created_at?: string | null;
-          description?: string | null;
-          duration?: number | null;
-          file_url?: string;
-          genre_id?: number | null;
-          id?: number;
-          title?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "tracks_album_id_fkey";
-            columns: ["album_id"];
-            isOneToOne: false;
-            referencedRelation: "albums";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "tracks_artist_id_fkey";
-            columns: ["artist_id"];
-            isOneToOne: false;
-            referencedRelation: "artists";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "tracks_genre_id_fkey";
-            columns: ["genre_id"];
-            isOneToOne: false;
-            referencedRelation: "genres";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
-      playlists: {
-        Row: {
-          id: number;
-          del_status: number;
-          private: boolean;
-          name: string;
-          description: string | null;
-          cover_image_url: string | null;
-          user_id: string;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: number;
-          del_status?: number;
-          private?: boolean;
-          name: string;
-          description?: string | null;
-          cover_image_url?: string | null;
-          user_id: string;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: number;
-          del_status?: number;
-          private?: boolean;
-          name?: string;
-          description?: string | null;
-          cover_image_url?: string | null;
-          user_id?: string;
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
+          id?: number
+          name?: string
+        }
+        Relationships: []
+      }
       playlist_tracks: {
         Row: {
-          id: number;
-          playlist_id: number;
-          track_id: number;
-          added_at: string;
-        };
+          added_at: string | null
+          id: number
+          playlist_id: number
+          track_id: number
+        }
         Insert: {
-          id?: number;
-          playlist_id: number;
-          track_id: number;
-          added_at?: string;
-        };
+          added_at?: string | null
+          id?: number
+          playlist_id: number
+          track_id: number
+        }
         Update: {
-          id?: number;
-          playlist_id?: number;
-          track_id?: number;
-          added_at?: string;
-        };
-      };
-    };
+          added_at?: string | null
+          id?: number
+          playlist_id?: number
+          track_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "playlist_tracks_playlist_id_fkey"
+            columns: ["playlist_id"]
+            isOneToOne: false
+            referencedRelation: "playlists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "playlist_tracks_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "track_download_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "playlist_tracks_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "tracks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      playlists: {
+        Row: {
+          cover_image_url: string | null
+          created_at: string | null
+          del_status: number
+          description: string | null
+          id: number
+          name: string
+          private: boolean
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          cover_image_url?: string | null
+          created_at?: string | null
+          del_status?: number
+          description?: string | null
+          id?: number
+          name: string
+          private?: boolean
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          cover_image_url?: string | null
+          created_at?: string | null
+          del_status?: number
+          description?: string | null
+          id?: number
+          name?: string
+          private?: boolean
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      track_downloads: {
+        Row: {
+          download_type: string | null
+          downloaded_at: string | null
+          error_message: string | null
+          file_size_bytes: number | null
+          id: number
+          ip_address: unknown | null
+          success: boolean | null
+          track_id: number
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          download_type?: string | null
+          downloaded_at?: string | null
+          error_message?: string | null
+          file_size_bytes?: number | null
+          id?: number
+          ip_address?: unknown | null
+          success?: boolean | null
+          track_id: number
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          download_type?: string | null
+          downloaded_at?: string | null
+          error_message?: string | null
+          file_size_bytes?: number | null
+          id?: number
+          ip_address?: unknown | null
+          success?: boolean | null
+          track_id?: number
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "track_downloads_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "track_download_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "track_downloads_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "tracks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      track_views: {
+        Row: {
+          id: number
+          ip_address: unknown | null
+          session_id: string | null
+          track_id: number
+          user_agent: string | null
+          user_id: string | null
+          view_duration: number | null
+          viewed_at: string | null
+        }
+        Insert: {
+          id?: number
+          ip_address?: unknown | null
+          session_id?: string | null
+          track_id: number
+          user_agent?: string | null
+          user_id?: string | null
+          view_duration?: number | null
+          viewed_at?: string | null
+        }
+        Update: {
+          id?: number
+          ip_address?: unknown | null
+          session_id?: string | null
+          track_id?: number
+          user_agent?: string | null
+          user_id?: string | null
+          view_duration?: number | null
+          viewed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "track_views_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "track_download_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "track_views_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "tracks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tracks: {
+        Row: {
+          album_id: number
+          artist_id: number
+          created_at: string | null
+          custom_url: string | null
+          description: string | null
+          download_count: number | null
+          duration: number | null
+          file_hash: string | null
+          file_url: string | null
+          genre_id: number | null
+          id: number
+          isrc: string | null
+          popularity: number | null
+          preview_url: string | null
+          source_type: string | null
+          spotify_id: string | null
+          title: string
+          user_id: string | null
+          view_count: number | null
+        }
+        Insert: {
+          album_id?: number
+          artist_id?: number
+          created_at?: string | null
+          custom_url?: string | null
+          description?: string | null
+          download_count?: number | null
+          duration?: number | null
+          file_hash?: string | null
+          file_url?: string | null
+          genre_id?: number | null
+          id?: number
+          isrc?: string | null
+          popularity?: number | null
+          preview_url?: string | null
+          source_type?: string | null
+          spotify_id?: string | null
+          title: string
+          user_id?: string | null
+          view_count?: number | null
+        }
+        Update: {
+          album_id?: number
+          artist_id?: number
+          created_at?: string | null
+          custom_url?: string | null
+          description?: string | null
+          download_count?: number | null
+          duration?: number | null
+          file_hash?: string | null
+          file_url?: string | null
+          genre_id?: number | null
+          id?: number
+          isrc?: string | null
+          popularity?: number | null
+          preview_url?: string | null
+          source_type?: string | null
+          spotify_id?: string | null
+          title?: string
+          user_id?: string | null
+          view_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tracks_album_id_fkey"
+            columns: ["album_id"]
+            isOneToOne: false
+            referencedRelation: "albums"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tracks_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tracks_genre_id_fkey"
+            columns: ["genre_id"]
+            isOneToOne: false
+            referencedRelation: "genres"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_album_likes: {
+        Row: {
+          album_id: number
+          created_at: string | null
+          id: number
+          user_id: string
+        }
+        Insert: {
+          album_id: number
+          created_at?: string | null
+          id?: number
+          user_id: string
+        }
+        Update: {
+          album_id?: number
+          created_at?: string | null
+          id?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_album_likes_album_id_fkey"
+            columns: ["album_id"]
+            isOneToOne: false
+            referencedRelation: "albums"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_artist_follows: {
+        Row: {
+          artist_id: number
+          created_at: string | null
+          id: number
+          user_id: string
+        }
+        Insert: {
+          artist_id: number
+          created_at?: string | null
+          id?: number
+          user_id: string
+        }
+        Update: {
+          artist_id?: number
+          created_at?: string | null
+          id?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_artist_follows_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          email: string
+          id: number
+          role: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: number
+          role?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: number
+          role?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      user_track_likes: {
+        Row: {
+          created_at: string | null
+          id: number
+          track_id: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          track_id: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          track_id?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_track_likes_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "track_download_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_track_likes_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "tracks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+    }
     Views: {
-      [_ in never]: never;
-    };
+      track_download_stats: {
+        Row: {
+          download_count: number | null
+          id: number | null
+          last_download: string | null
+          title: string | null
+          total_downloads: number | null
+          unique_downloaders: number | null
+        }
+        Relationships: []
+      }
+    }
     Functions: {
-      [_ in never]: never;
-    };
+      update_user_role_on_agreement: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+    }
     Enums: {
-      [_ in never]: never;
-    };
+      [_ in never]: never
+    }
     CompositeTypes: {
-      [_ in never]: never;
-    };
-  };
-};
+      [_ in never]: never
+    }
+  }
+}
 
-type DefaultSchema = Database[Extract<keyof Database, "public">];
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database;
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
-      Row: infer R;
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
     }
     ? R
     : never
@@ -241,90 +561,98 @@ export type Tables<
         DefaultSchema["Views"])
     ? (DefaultSchema["Tables"] &
         DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-        Row: infer R;
+        Row: infer R
       }
       ? R
       : never
-    : never;
+    : never
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database;
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I;
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
     }
     ? I
     : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
     ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Insert: infer I;
+        Insert: infer I
       }
       ? I
       : never
-    : never;
+    : never
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database;
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U;
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
     }
     ? U
     : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
     ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Update: infer U;
+        Update: infer U
       }
       ? U
       : never
-    : never;
+    : never
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof Database;
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
-> = DefaultSchemaEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
     ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-    : never;
+    : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof Database;
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
     : never = never,
-> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never;
+    : never
 
 export const Constants = {
   public: {
     Enums: {},
   },
-} as const;
+} as const
