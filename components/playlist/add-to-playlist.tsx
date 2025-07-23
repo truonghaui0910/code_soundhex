@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -169,15 +168,18 @@ export default function AddToPlaylist({
     }
   };
 
-  const handleModalOpen = () => {
+  const handleModalOpen = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
     if (!user) {
       showWarning({
-        title: "Login Required",
+        title: "Login Required",  
         message: "You need to login to add tracks to playlists"
       });
       return;
     }
-    
+
     setIsModalOpen(true);
     fetchPlaylists();
   };
@@ -221,7 +223,7 @@ export default function AddToPlaylist({
 
   return (
     <>
-      <div onClick={handleModalOpen} className="w-full">
+      <div onClick={handleModalOpen} className="w-full cursor-pointer">
         {children}
       </div>
 
