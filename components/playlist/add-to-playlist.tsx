@@ -221,7 +221,7 @@ export default function AddToPlaylist({
 
   return (
     <>
-      <div onClick={handleModalOpen}>
+      <div onClick={handleModalOpen} className="w-full">
         {children}
       </div>
 
