@@ -25,7 +25,7 @@ import { useDownload } from "@/hooks/use-download";
 import AddToPlaylist from "@/components/playlist/add-to-playlist";
 import { TrackGridSm } from "@/components/music/track-grid-sm";
 import { useLikesFollows } from "@/hooks/use-likes-follows";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { showSuccess } from "@/lib/services/notification-service";
 
 // Helper function to format time
@@ -58,6 +58,8 @@ export function AlbumDetailUI({
     isTrackDownloading,
   } = useDownload();
   const { getAlbumLikeStatus, fetchAlbumLikeStatus, toggleAlbumLike } = useLikesFollows();
+  const [recommendedAlbums, setRecommendedAlbums] = useState([]);
+  const [loadingRecommended, setLoadingRecommended] = useState(false);
 
   // Safe album data with fallbacks
   const safeAlbum = {
@@ -95,6 +97,28 @@ export function AlbumDetailUI({
   }, [safeAlbum.id, isLoading]); // Remove fetchAlbumLikeStatus from deps to prevent re-fetching
 
   const albumLikeStatus = getAlbumLikeStatus(safeAlbum.id);
+
+  // Fetch recommended albums
+  useEffect(() => {
+    const fetchRecommendedAlbums = async () => {
+      if (safeAlbum.id && !isLoading) {
+        setLoadingRecommended(true);
+        try {
+          const response = await fetch(`/api/albums/${safeAlbum.id}/recommended`);
+          if (response.ok) {
+            const data = await response.json();
+            setRecommendedAlbums(data.albums || []);
+          }
+        } catch (error) {
+          console.error("Error fetching recommended albums:", error);
+        } finally {
+          setLoadingRecommended(false);
+        }
+      }
+    };
+
+    fetchRecommendedAlbums();
+  }, [safeAlbum.id, isLoading]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20">

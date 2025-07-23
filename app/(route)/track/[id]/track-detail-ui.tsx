@@ -27,8 +27,9 @@ import { Track } from "@/lib/definitions/Track";
 import { useDownload } from "@/hooks/use-download";
 import AddToPlaylist from "@/components/playlist/add-to-playlist";
 import { useLikesFollows } from "@/hooks/use-likes-follows";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { showSuccess } from "@/lib/services/notification-service";
+import { TrackGridSm } from "@/components/music/track-grid-sm";
 
 // Helper function to format time
 const formatDuration = (seconds: number | null | undefined) => {
@@ -70,6 +71,8 @@ export function TrackDetailUI({
   const { downloadTrack, isDownloading, isTrackDownloading } = useDownload();
   const { getTrackLikeStatus, fetchTrackLikeStatus, toggleTrackLike } =
     useLikesFollows();
+  const [recommendedTracks, setRecommendedTracks] = useState<any[]>([]);
+  const [loadingRecommended, setLoadingRecommended] = useState(false);
 
   // Safe track data with fallbacks
   const safeTrack = {
@@ -107,6 +110,28 @@ export function TrackDetailUI({
         fetchTrackLikeStatus(safeTrack.id);
       }
     }
+  }, [safeTrack.id, isLoading]);
+
+  // Fetch recommended tracks
+  useEffect(() => {
+    const fetchRecommendedTracks = async () => {
+      if (safeTrack.id && !isLoading) {
+        setLoadingRecommended(true);
+        try {
+          const response = await fetch(`/api/tracks/${safeTrack.id}/recommended`);
+          if (response.ok) {
+            const data = await response.json();
+            setRecommendedTracks(data.tracks || []);
+          }
+        } catch (error) {
+          console.error("Error fetching recommended tracks:", error);
+        } finally {
+          setLoadingRecommended(false);
+        }
+      }
+    };
+
+    fetchRecommendedTracks();
   }, [safeTrack.id, isLoading]);
 
   const trackLikeStatus = getTrackLikeStatus(safeTrack.id);
@@ -457,6 +482,25 @@ export function TrackDetailUI({
             </CardContent>
           </Card>
         </div>
+
+        {/* Recommended Tracks Section */}
+        {recommendedTracks.length > 0 && (
+          <section className="mt-12">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center">
+                <Music className="h-5 w-5 text-white" />
+              </div>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                Recommended Tracks
+              </h2>
+            </div>
+            <TrackGridSm
+              tracks={recommendedTracks}
+              isLoading={loadingRecommended}
+              loadingCount={12}
+            />
+          </section>
+        )}
       </div>
 
       {/* Bottom spacing for music player */}

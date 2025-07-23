@@ -33,8 +33,9 @@ import { useDownload } from "@/hooks/use-download";
 import AddToPlaylist from "@/components/playlist/add-to-playlist";
 import { EditArtistModal } from "@/components/artist/edit-artist-modal";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { showSuccess } from "@/lib/services/notification-service";
+import { ArtistGrid } from "@/components/music/artist-grid";
 
 // Helper function to format time
 const formatDuration = (seconds: number | null) => {
@@ -74,6 +75,8 @@ interface ArtistDetailUIProps {
 
 export function ArtistDetailUI({ artist, tracks, albums }: ArtistDetailUIProps) {
   const [currentArtist, setCurrentArtist] = useState(artist);
+  const [recommendedArtists, setRecommendedArtists] = useState<any[]>([]);
+  const [loadingRecommended, setLoadingRecommended] = useState(false);
   const {
     currentTrack,
     isPlaying,
@@ -212,6 +215,28 @@ export function ArtistDetailUI({ artist, tracks, albums }: ArtistDetailUIProps) 
         fetchArtistFollowStatus(artist.id);
       }
     }, [artist.id, fetchArtistFollowStatus]);
+
+    // Fetch recommended artists
+    useEffect(() => {
+      const fetchRecommendedArtists = async () => {
+        if (artist.id) {
+          setLoadingRecommended(true);
+          try {
+            const response = await fetch(`/api/artists/${artist.id}/recommended`);
+            if (response.ok) {
+              const data = await response.json();
+              setRecommendedArtists(data.artists || []);
+            }
+          } catch (error) {
+            console.error("Error fetching recommended artists:", error);
+          } finally {
+            setLoadingRecommended(false);
+          }
+        }
+      };
+
+      fetchRecommendedArtists();
+    }, [artist.id]);
   
     const artistFollowStatus = getArtistFollowStatus(artist.id);
 
@@ -406,7 +431,22 @@ export function ArtistDetailUI({ artist, tracks, albums }: ArtistDetailUIProps) 
           </section>
         )}
 
-
+        {/* Recommended Artists Section */}
+        {recommendedArtists.length > 0 && (
+          <section>
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-xl font-bold flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
+                  <Users className="h-5 w-5 text-white" />
+                </div>
+                <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  Similar Artists
+                </span>
+              </h2>
+            </div>
+            <ArtistGrid artists={recommendedArtists} />
+          </section>
+        )}
       </div>
 
       {/* Music Player */}
