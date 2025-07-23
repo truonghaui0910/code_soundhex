@@ -25,7 +25,7 @@ import { useDownload } from "@/hooks/use-download";
 import AddToPlaylist from "@/components/playlist/add-to-playlist";
 import { TrackGridSm } from "@/components/music/track-grid-sm";
 import { useLikesFollows } from "@/hooks/use-likes-follows";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { showSuccess } from "@/lib/services/notification-service";
 
 // Helper function to format time
@@ -58,6 +58,8 @@ export function AlbumDetailUI({
     isTrackDownloading,
   } = useDownload();
   const { getAlbumLikeStatus, fetchAlbumLikeStatus, toggleAlbumLike } = useLikesFollows();
+  const [recommendedAlbums, setRecommendedAlbums] = useState([]);
+  const [loadingRecommended, setLoadingRecommended] = useState(false);
 
   // Safe album data with fallbacks
   const safeAlbum = {
@@ -95,6 +97,28 @@ export function AlbumDetailUI({
   }, [safeAlbum.id, isLoading]); // Remove fetchAlbumLikeStatus from deps to prevent re-fetching
 
   const albumLikeStatus = getAlbumLikeStatus(safeAlbum.id);
+
+  // Fetch recommended albums
+  useEffect(() => {
+    const fetchRecommendedAlbums = async () => {
+      if (safeAlbum.id && !isLoading) {
+        setLoadingRecommended(true);
+        try {
+          const response = await fetch(`/api/albums/${safeAlbum.id}/recommended`);
+          if (response.ok) {
+            const data = await response.json();
+            setRecommendedAlbums(data.albums || []);
+          }
+        } catch (error) {
+          console.error("Error fetching recommended albums:", error);
+        } finally {
+          setLoadingRecommended(false);
+        }
+      }
+    };
+
+    fetchRecommendedAlbums();
+  }, [safeAlbum.id, isLoading]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20">
@@ -230,6 +254,54 @@ export function AlbumDetailUI({
           loadingCount={15}
           onPlayAll={handlePlayAlbum}
         />
+
+        {/* Recommended Albums Section */}
+        {recommendedAlbums.length > 0 && (
+          <section className="mt-12">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center">
+                <Music className="h-5 w-5 text-white" />
+              </div>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                Similar Albums
+              </h2>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+              {recommendedAlbums.map((album: any) => (
+                <div
+                  key={album.id}
+                  className="group bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 hover:bg-white/70 dark:hover:bg-gray-800/70 transition-all duration-200 shadow-sm hover:shadow-md"
+                >
+                  <Link href={`/album/${album.custom_url || album.id}`}>
+                    <div className="aspect-square rounded-lg overflow-hidden mb-3 bg-gradient-to-br from-purple-100 to-pink-100 dark:from-gray-700 dark:to-gray-600 flex items-center justify-center">
+                      {album.cover_image_url ? (
+                        <Image
+                          src={album.cover_image_url}
+                          alt={album.title}
+                          width={200}
+                          height={200}
+                          className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-200"
+                        />
+                      ) : (
+                        <Music className="h-8 w-8 text-gray-400" />
+                      )}
+                    </div>
+                    <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors truncate">
+                      {album.title}
+                    </h3>
+                  </Link>
+                  {album.artist && (
+                    <Link href={`/artist/${album.artist.custom_url || album.artist.id}`}>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors truncate">
+                        {album.artist.name}
+                      </p>
+                    </Link>
+                  )}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
       </div>
 
       {/* Music Player */}

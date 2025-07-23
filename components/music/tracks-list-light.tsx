@@ -424,89 +424,16 @@ export default function TracksListLight({ tracks, className = "" }: TracksListLi
 
 
 
-                      <div className="relative group">
-                        <button
-                          onMouseEnter={() => togglePlaylistMenu(track.id)}
-                          className="flex items-center justify-between w-full px-4 py-3 text-white hover:bg-purple-700/50 transition-colors"
-                        >
-                          <div className="flex items-center">
-                            <ListMusic className="h-4 w-4 mr-3" />
-                            <span className="text-sm">Add to Playlist</span>
-                          </div>
-                          <ChevronRight className="h-4 w-4" />
-                        </button>
-
-                        {/* Playlist Sub-menu */}
-                        {openPlaylistMenuId === track.id && (
-                          <div
-                            ref={(el) => {
-                              playlistMenuRefs.current[track.id] = el;
-                            }}
-                            className="absolute left-full top-0 ml-2 w-64 z-[9999] bg-purple-800 border border-purple-600 shadow-2xl rounded-xl overflow-hidden"
-                            onMouseEnter={() => setOpenPlaylistMenuId(track.id)}
-                            onMouseLeave={() => setOpenPlaylistMenuId(null)}
-                          >
-                            {/* Search Header */}
-                            <div className="p-3 border-b border-purple-600">
-                              <div className="flex items-center gap-2 bg-purple-700 rounded-lg px-3 py-2">
-                                <Search className="h-4 w-4 text-purple-300" />
-                                <input
-                                  type="text"
-                                  placeholder="Search playlist..."
-                                  value={searchQuery}
-                                  onChange={(e) => setSearchQuery(e.target.value)}
-                                  className="bg-transparent text-white placeholder-purple-300 text-sm outline-none flex-1"
-                                />
-                              </div>
-                            </div>
-
-                            {/* Create New Playlist */}
-                            <div className="p-2 border-b border-purple-600">
-                              <button className="flex items-center gap-2 w-full p-2 text-white hover:bg-purple-700/50 transition-colors rounded">
-                                <Plus className="h-4 w-4 text-red-400" />
-                                <span className="text-sm">Create new playlist</span>
-                              </button>
-                            </div>
-
-                            {/* Playlists List */}
-                            <div className="max-h-48 overflow-y-auto">
-                              {isLoadingPlaylists ? (
-                                <div className="p-4 text-center text-purple-300 text-sm">
-                                  Loading playlists...
-                                </div>
-                              ) : playlists.filter(playlist =>
-                                playlist.name.toLowerCase().includes(searchQuery.toLowerCase())
-                              ).length === 0 ? (
-                                <div className="p-4 text-center text-purple-300 text-sm">
-                                  {searchQuery ? "No playlists found" : "No playlists yet"}
-                                </div>
-                              ) : (
-                                playlists
-                                  .filter(playlist =>
-                                    playlist.name.toLowerCase().includes(searchQuery.toLowerCase())
-                                  )
-                                  .map((playlist) => (
-                                    <div
-                                      key={playlist.id}
-                                      className="flex items-center p-2 hover:bg-purple-700/50 transition-colors"
-                                    >
-                                      <ListMusic className="mr-2 h-4 w-4 text-white flex-shrink-0" />
-                                      <div
-                                        className="flex-1 cursor-pointer"
-                                        onClick={() => handleAddToPlaylist(playlist.id, track.id, track.title)}
-                                      >
-                                        <div className="font-medium text-sm text-white">{playlist.name}</div>
-                                        <div className="text-xs text-purple-300">
-                                          {playlist.track_count} tracks
-                                        </div>
-                                      </div>
-                                    </div>
-                                  ))
-                              )}
-                            </div>
-                          </div>
-                        )}
-                      </div>
+                      <AddToPlaylist 
+                        trackId={track.id} 
+                        trackTitle={track.title}
+                        onOpen={() => setOpenMenuId(null)}
+                      >
+                        <div className="flex items-center w-full px-4 py-3 text-white hover:bg-purple-700/50 transition-colors cursor-pointer">
+                          <Plus className="h-4 w-4 mr-3" />
+                          <span className="text-sm">Add to Playlist</span>
+                        </div>
+                      </AddToPlaylist>
 
                       <button
                         onClick={(e) => {

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -37,12 +36,14 @@ interface AddToPlaylistProps {
   trackId: number;
   trackTitle: string;
   children: React.ReactNode;
+  onOpen?: () => void;
 }
 
 export default function AddToPlaylist({
   trackId,
   trackTitle,
   children,
+  onOpen,
 }: AddToPlaylistProps) {
   const { user } = useCurrentUser();
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
@@ -169,14 +170,20 @@ export default function AddToPlaylist({
     }
   };
 
-  const handleModalOpen = () => {
+  const handleModalOpen = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
     if (!user) {
       showWarning({
-        title: "Login Required",
+        title: "Login Required",  
         message: "You need to login to add tracks to playlists"
       });
       return;
     }
+
+    // Call onOpen callback to close parent menu
+    onOpen?.();
     
     setIsModalOpen(true);
     fetchPlaylists();
@@ -221,7 +228,7 @@ export default function AddToPlaylist({
 
   return (
     <>
-      <div onClick={handleModalOpen}>
+      <div onClick={handleModalOpen} className="w-full cursor-pointer">
         {children}
       </div>
 

@@ -1,4 +1,12 @@
-import { Users, Music, Clock, Heart, Share, Download, Plus } from "lucide-react";
+import {
+    Users,
+    Music,
+    Clock,
+    Heart,
+    Share,
+    Download,
+    Plus,
+} from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,10 +20,9 @@ export default function ArtistDetailLoading() {
                 <div className="relative container mx-auto px-6 py-16">
                     <div className="flex flex-col md:flex-row gap-8 items-center md:items-end">
                         {/* Artist Profile Image Skeleton */}
-                        <div className="w-48 h-48 md:w-64 md:h-64 rounded-full overflow-hidden bg-white/10 backdrop-blur-sm flex items-center justify-center shadow-2xl">
+                        {/* <div className="w-48 h-48 md:w-64 md:h-64 rounded-full overflow-hidden bg-white/10 backdrop-blur-sm flex items-center justify-center shadow-2xl">
                             <div className="flex items-center space-x-2">
-                                <Users className="h-20 w-20 text-white/40 animate-pulse" />
-                                {/* Loading dots animation */}
+       
                                 <div className="flex space-x-1">
                                     <div
                                         className="w-2 h-2 bg-white/60 rounded-full animate-bounce"
@@ -31,7 +38,7 @@ export default function ArtistDetailLoading() {
                                     ></div>
                                 </div>
                             </div>
-                        </div>
+                        </div> */}
 
                         {/* Artist Info Skeleton */}
                         <div className="flex-1 text-center md:text-left space-y-4">
@@ -44,15 +51,15 @@ export default function ArtistDetailLoading() {
                             {/* Stats Skeleton */}
                             <div className="flex flex-wrap justify-center md:justify-start gap-6 text-white/80">
                                 <div className="flex items-center gap-2">
-                                    <Music className="h-5 w-5 animate-pulse" />
+                                    {/* <Music className="h-5 w-5 animate-pulse" /> */}
                                     <div className="w-16 h-5 bg-white/20 rounded animate-pulse"></div>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <Users className="h-5 w-5 animate-pulse" />
+                                    {/* <Users className="h-5 w-5 animate-pulse" /> */}
                                     <div className="w-20 h-5 bg-white/20 rounded animate-pulse"></div>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <Clock className="h-5 w-5 animate-pulse" />
+                                    {/* <Clock className="h-5 w-5 animate-pulse" /> */}
                                     <div className="w-16 h-5 bg-white/20 rounded animate-pulse"></div>
                                 </div>
                             </div>
@@ -86,7 +93,10 @@ export default function ArtistDetailLoading() {
                     {/* Track Items Skeleton */}
                     <div className="space-y-4">
                         {Array.from({ length: 5 }).map((_, index) => (
-                            <Card key={index} className="border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm animate-pulse">
+                            <Card
+                                key={index}
+                                className="border-0 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm animate-pulse"
+                            >
                                 <CardContent className="p-4">
                                     <div className="flex items-center gap-4">
                                         {/* Play Button Skeleton */}

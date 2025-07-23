@@ -411,9 +411,164 @@ export class TracksController {
   /**
    * Lấy thông tin một bài hát theo custom_url
    */
-  static async getTrackByCustomUrl(customUrl: string): Promise<Track | null> {
+  static async getTrackByCustomUrl(customUrl: string) {
+    try {
+      const supabase = createServerComponentClient({ cookies });
+
+      const { data: track, error } = await supabase
+        .from("tracks")
+        .select(`
+          *,
+          artist:artists!inner (
+            id,
+            name,
+            profile_image_url,
+            custom_url
+          ),
+          album:albums (
+            id,
+            title,
+            cover_image_url,
+            custom_url
+          ),
+          genre:genres (
+            id,
+            name
+          )
+        `)
+        .eq('custom_url', customUrl)
+        .single();
+
+      if (error) {
+        console.error("Error fetching track by custom URL:", error);
+        return null;
+      }
+
+      return track;
+    } catch (error) {
+      console.error("TracksController.getTrackByCustomUrl error:", error);
+      return null;
+    }
+  }
+
+  static async getRecommendedTracks(trackId: number, limit: number = 12) {
+    try {
+      const supabase = createServerComponentClient({ cookies });
+
+      // First get the current track's genre
+      const { data: currentTrack } = await supabase
+        .from("tracks")
+        .select("genre_id")
+        .eq('id', trackId)
+        .single();
+
+      if (!currentTrack?.genre_id) {
+        // If no genre, return random tracks
+        // First get total count
+        const { count } = await supabase
+          .from("tracks")
+          .select("*", { count: "exact", head: true })
+          .neq('id', trackId);
+
+        const totalTracks = count || 0;
+        const offset = totalTracks > limit ? Math.floor(Math.random() * (totalTracks - limit)) : 0;
+
+        const { data: tracks, error } = await supabase
+          .from("tracks")
+          .select(`
+            *,
+            artist:artists!inner (
+              id,
+              name,
+              profile_image_url,
+              custom_url
+            ),
+            album:albums (
+              id,
+              title,
+              cover_image_url,
+              custom_url
+            ),
+            genre:genres (
+              id,
+              name
+            )
+          `)
+          .neq('id', trackId)
+          .order('created_at', { ascending: false })
+          .range(offset, offset + limit - 1);
+
+        return tracks || [];
+      }
+
+      // Get tracks with same genre
+      // First get total count
+      const { count } = await supabase
+        .from("tracks")
+        .select("*", { count: "exact", head: true })
+        .eq('genre_id', currentTrack.genre_id)
+        .neq('id', trackId);
+
+      const totalTracks = count || 0;
+      const offset = totalTracks > limit ? Math.floor(Math.random() * (totalTracks - limit)) : 0;
+
+      const { data: tracks, error } = await supabase
+        .from("tracks")
+        .select(`
+          *,
+          artist:artists!inner (
+            id,
+            name,
+            profile_image_url,
+            custom_url
+          ),
+          album:albums (
+            id,
+            title,
+            cover_image_url,
+            custom_url
+          ),
+          genre:genres (
+            id,
+            name
+          )
+        `)
+        .eq('genre_id', currentTrack.genre_id)
+        .neq('id', trackId)
+        .order('created_at', { ascending: false })
+        .range(offset, offset + limit - 1);
+
+      if (error) {
+        console.error("Error fetching recommended tracks:", error);
+        return [];
+      }
+
+      return tracks || [];
+    } catch (error) {
+      console.error("TracksController.getRecommendedTracks error:", error);
+      return [];
+    }
+  }
+
+  /**
+   * Lấy danh sách bài hát cùng nghệ sĩ dựa trên track ID
+   */
+  static async getTracksByArtistFromTrack(trackId: number, limit: number = 20): Promise<Track[]> {
     const supabase = createServerComponentClient<Database>({ cookies });
 
+    // First get the track to find its artist
+    const { data: track } = await supabase
+      .from("tracks")
+      .select("artist_id")
+      .eq("id", trackId)
+      .single();
+
+    if (!track) {
+      console.log(`Track not found for ID: ${trackId}`);
+      return [];
+    }
+
+    // Get other tracks from the same artist
     const { data, error } = await supabase
       .from("tracks")
       .select(`
@@ -422,18 +577,19 @@ export class TracksController {
         album:album_id(id, title, cover_image_url, custom_url),
         genre:genre_id(id, name)
       `)
-      .eq("custom_url", customUrl)
-      .single();
+      .eq("artist_id", track.artist_id)
+      .neq("id", trackId) // Exclude current track
+      .order("view_count", { ascending: false })
+      .order("created_at", { ascending: false })
+      .limit(limit);
 
     if (error) {
-      if (error.code === "PGRST116") {
-        return null; // No rows found
-      }
-      console.error(`Error fetching track by custom_url ${customUrl}:`, error);
-      throw new Error(`Failed to fetch track: ${error.message}`);
+      console.error(`Error fetching tracks for artist from track ${trackId}:`, error);
+      throw new Error(`Failed to fetch tracks: ${error.message}`);
     }
 
-    return data as unknown as Track;
+    console.log(`TracksController.getTracksByArtistFromTrack - Found ${data?.length || 0} tracks`);
+    return data as unknown as Track[];
   }
 
   /**

@@ -148,7 +148,7 @@ export class AlbumsController {
   static async getAlbumsWithPagination(page: number = 1, limit: number = 10): Promise<{ albums: Album[], total: number, totalPages: number }> {
     console.log(`🎵 AlbumsController.getAlbumsWithPagination - Starting fetch with page: ${page}, limit: ${limit}`);
     const supabase = createServerComponentClient<Database>({ cookies });
-    
+
     const offset = (page - 1) * limit;
 
     // Get total count first
@@ -331,4 +331,139 @@ export class AlbumsController {
 
     return data ?? [];
   }
+
+  static async getRecommendedAlbums(albumId: number, limit: number = 12) {
+        try {
+            const supabase = createServerComponentClient<Database>({ cookies });
+            console.log('🎵 AlbumsController.getRecommendedAlbums - Starting for album:', albumId);
+            
+            // Step 1: Tìm genre_id từ tracks của album hiện tại
+            const { data: albumTracks } = await supabase
+                .from('tracks')
+                .select('genre_id')
+                .eq('album_id', albumId)
+                .not('genre_id', 'is', null)
+                .limit(1);
+
+            console.log('🎵 Album tracks with genre:', albumTracks);
+
+            if (!albumTracks || albumTracks.length === 0) {
+                console.log('⚠️ No tracks with genre found for album:', albumId);
+                // Fallback: return random albums
+                const { data: randomAlbums, error } = await supabase
+                    .from('albums')
+                    .select(`
+                        id,
+                        title,
+                        cover_image_url,
+                        release_date,
+                        custom_url,
+                        artist_id
+                    `)
+                    .neq('id', albumId)
+                    .order('created_at', { ascending: false })
+                    .limit(limit);
+
+                if (error || !randomAlbums) return [];
+
+                // Get artist info
+                const artistIds = [...new Set(randomAlbums.map(a => a.artist_id))];
+                const { data: artists } = await supabase
+                    .from('artists')
+                    .select('id, name, custom_url')
+                    .in('id', artistIds);
+
+                const artistMap = (artists || []).reduce((map, artist) => {
+                    map[artist.id] = artist;
+                    return map;
+                }, {} as Record<number, any>);
+
+                return randomAlbums.map(album => ({
+                    ...album,
+                    artist: artistMap[album.artist_id] || {
+                        id: album.artist_id,
+                        name: 'Unknown Artist',
+                        custom_url: null
+                    }
+                }));
+            }
+
+            const genreId = albumTracks[0].genre_id;
+            console.log('🔍 Found genre_id:', genreId);
+
+            // Step 2: Tìm tracks khác có cùng genre nhưng khác album
+            const { data: similarTracks } = await supabase
+                .from('tracks')
+                .select('album_id')
+                .eq('genre_id', genreId)
+                .neq('album_id', albumId)
+                .not('album_id', 'is', null);
+
+            console.log('🎵 Found similar tracks count:', similarTracks?.length || 0);
+
+            if (!similarTracks || similarTracks.length === 0) {
+                console.log('⚠️ No similar tracks found');
+                return [];
+            }
+
+            // Step 3: Lấy danh sách album_id unique
+            const uniqueAlbumIds = [...new Set(similarTracks.map(track => track.album_id))];
+            console.log('🎵 Unique album IDs:', uniqueAlbumIds.length);
+
+            // Step 4: Query thông tin albums
+            const { data: albums, error } = await supabase
+                .from('albums')
+                .select(`
+                    id,
+                    title,
+                    cover_image_url,
+                    release_date,
+                    custom_url,
+                    artist_id
+                `)
+                .in('id', uniqueAlbumIds)
+                .limit(limit);
+
+            if (error) {
+                console.error('❌ Error fetching recommended albums:', error);
+                return [];
+            }
+
+            console.log('🎵 Found recommended albums:', albums?.length || 0);
+
+            if (!albums || albums.length === 0) {
+                console.log('⚠️ No recommended albums found');
+                return [];
+            }
+
+            // Get artist information
+            const artistIds = [...new Set(albums.map(a => a.artist_id))];
+            const { data: artists } = await supabase
+                .from('artists')
+                .select('id, name, custom_url')
+                .in('id', artistIds);
+
+            // Create artist map
+            const artistMap = (artists || []).reduce((map, artist) => {
+                map[artist.id] = artist;
+                return map;
+            }, {} as Record<number, any>);
+
+            // Transform to include artist as nested object
+            const transformedAlbums = albums.map(album => ({
+                ...album,
+                artist: artistMap[album.artist_id] || {
+                    id: album.artist_id,
+                    name: 'Unknown Artist',
+                    custom_url: null
+                }
+            }));
+
+            console.log('✅ Recommended albums transformed, final count:', transformedAlbums.length);
+            return transformedAlbums;
+        } catch (error) {
+            console.error('❌ Error in getRecommendedAlbums:', error);
+            return [];
+        }
+    }
 }
