@@ -274,7 +274,7 @@ export class ArtistsController {
         try {
             const supabase = createServerComponentClient<Database>({ cookies });
             
-            // Get all artists with tracks count
+            // Get all artists
             const { data: artists, error } = await supabase
                 .from('artists')
                 .select(`
@@ -283,8 +283,7 @@ export class ArtistsController {
                     profile_image_url,
                     bio,
                     created_at,
-                    custom_url,
-                    tracks!inner (count)
+                    custom_url
                 `)
                 .neq('id', artistId)
                 .limit(limit);
@@ -294,11 +293,28 @@ export class ArtistsController {
                 return [];
             }
 
+            if (!artists || artists.length === 0) {
+                return [];
+            }
+
+            // Get tracks count for each artist
+            const artistIds = artists.map(a => a.id);
+            const { data: trackCounts } = await supabase
+                .from('tracks')
+                .select('artist_id')
+                .in('artist_id', artistIds);
+
+            // Count tracks per artist
+            const tracksCountMap = (trackCounts || []).reduce((map, track) => {
+                map[track.artist_id] = (map[track.artist_id] || 0) + 1;
+                return map;
+            }, {} as Record<number, number>);
+
             // Transform to include tracksCount
-            const transformedArtists = artists?.map(artist => ({
+            const transformedArtists = artists.map(artist => ({
                 ...artist,
-                tracksCount: artist.tracks?.length || 0
-            })) || [];
+                tracksCount: tracksCountMap[artist.id] || 0
+            }));
 
             return transformedArtists;
         } catch (error) {

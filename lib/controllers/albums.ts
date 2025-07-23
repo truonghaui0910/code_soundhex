@@ -356,12 +356,7 @@ export class AlbumsController {
                     cover_image_url,
                     release_date,
                     custom_url,
-                    artist_id,
-                    artists!inner (
-                        id,
-                        name,
-                        custom_url
-                    )
+                    artist_id
                 `)
                 .eq('genre_id', album.genre_id)
                 .neq('id', albumId)
@@ -372,11 +367,32 @@ export class AlbumsController {
                 return [];
             }
 
+            if (!albums || albums.length === 0) {
+                return [];
+            }
+
+            // Get artist information separately
+            const artistIds = [...new Set(albums.map(a => a.artist_id))];
+            const { data: artists } = await supabase
+                .from('artists')
+                .select('id, name, custom_url')
+                .in('id', artistIds);
+
+            // Create artist map
+            const artistMap = (artists || []).reduce((map, artist) => {
+                map[artist.id] = artist;
+                return map;
+            }, {} as Record<number, any>);
+
             // Transform to include artist as nested object
-            const transformedAlbums = albums?.map(album => ({
+            const transformedAlbums = albums.map(album => ({
                 ...album,
-                artist: album.artists
-            })) || [];
+                artist: artistMap[album.artist_id] || {
+                    id: album.artist_id,
+                    name: 'Unknown Artist',
+                    custom_url: null
+                }
+            }));
 
             return transformedAlbums;
         } catch (error) {
