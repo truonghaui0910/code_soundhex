@@ -36,12 +36,14 @@ interface AddToPlaylistProps {
   trackId: number;
   trackTitle: string;
   children: React.ReactNode;
+  onOpen?: () => void;
 }
 
 export default function AddToPlaylist({
   trackId,
   trackTitle,
   children,
+  onOpen,
 }: AddToPlaylistProps) {
   const { user } = useCurrentUser();
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
@@ -180,6 +182,9 @@ export default function AddToPlaylist({
       return;
     }
 
+    // Call onOpen callback to close parent menu
+    onOpen?.();
+    
     setIsModalOpen(true);
     fetchPlaylists();
   };

@@ -424,21 +424,16 @@ export default function TracksListLight({ tracks, className = "" }: TracksListLi
 
 
 
-                      <div
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          setOpenMenuId(null);
-                        }}
-                        className="flex items-center w-full px-4 py-3 text-white hover:bg-purple-700/50 transition-colors cursor-pointer"
+                      <AddToPlaylist 
+                        trackId={track.id} 
+                        trackTitle={track.title}
+                        onOpen={() => setOpenMenuId(null)}
                       >
-                        <AddToPlaylist trackId={track.id} trackTitle={track.title}>
-                          <div className="flex items-center w-full">
-                            <Plus className="h-4 w-4 mr-3" />
-                            <span className="text-sm">Add to Playlist</span>
-                          </div>
-                        </AddToPlaylist>
-                      </div>
+                        <div className="flex items-center w-full px-4 py-3 text-white hover:bg-purple-700/50 transition-colors cursor-pointer">
+                          <Plus className="h-4 w-4 mr-3" />
+                          <span className="text-sm">Add to Playlist</span>
+                        </div>
+                      </AddToPlaylist>
 
                       <button
                         onClick={(e) => {
