@@ -107,9 +107,12 @@ const TrackGrid = memo(function TrackGrid({
         ],
     );
 
+    // Determine final className before using it
+    const finalClassName = gridCols || className;
+
     if (isLoading) {
         return (
-            <div className={finalClassName}>
+            <div className={finalClassName}></div>
                 {Array.from({ length: loadingCount }).map((_, index) => (
                     <div key={index} className="group relative">
                         <div className="relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl overflow-hidden shadow-lg border border-white/20 dark:border-gray-700/30 animate-pulse">
@@ -147,8 +150,6 @@ const TrackGrid = memo(function TrackGrid({
             }
         }
     }, [trackIds, isLoading, fetchBatchTrackLikesStatus]);
-
-    const finalClassName = gridCols || className;
 
     return (
         <div className={finalClassName}>
