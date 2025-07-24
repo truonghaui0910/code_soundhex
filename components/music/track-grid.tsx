@@ -112,7 +112,7 @@ const TrackGrid = memo(function TrackGrid({
 
     if (isLoading) {
         return (
-            <div className={finalClassName}></div>
+            <div className={finalClassName}>
                 {Array.from({ length: loadingCount }).map((_, index) => (
                     <div key={index} className="group relative">
                         <div className="relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl overflow-hidden shadow-lg border border-white/20 dark:border-gray-700/30 animate-pulse">
