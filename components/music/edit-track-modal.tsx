@@ -15,6 +15,7 @@ import {
 import { Track } from "@/lib/definitions/Track";
 import { MoodGrid } from "./mood-grid";
 import { showSuccess, showError } from "@/lib/services/notification-service";
+import { X } from "lucide-react";
 
 interface EditTrackModalProps {
     track: Track;
@@ -145,25 +146,41 @@ export function EditTrackModal({
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto bg-purple-900 border border-purple-700">
+            <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 border border-purple-600/50 backdrop-blur-xl">
                 <DialogHeader>
-                    <DialogTitle className="text-2xl font-bold">
-                        Edit Track: {track.title}
-                    </DialogTitle>
-                    <DialogDescription>
-                        Update your track's custom URL and mood tags.
-                    </DialogDescription>
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <DialogTitle className="text-2xl font-bold text-white">
+                                Edit Track: {track.title}
+                            </DialogTitle>
+                            <DialogDescription className="mt-2">
+                                Update your track's custom URL and mood tags.
+                            </DialogDescription>
+                        </div>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={onClose}
+                            className="h-8 w-8 p-0"
+                        >
+                            <X className="h-4 w-4" />
+                        </Button>
+                    </div>
                 </DialogHeader>
-
                 <div className="space-y-6 py-4">
                     {/* Custom URL Section */}
                     <div className="space-y-2">
-                        <Label htmlFor="custom_url">Custom URL</Label>
-                        <div className="text-sm text-muted-foreground mb-2">
+                        <Label
+                            htmlFor="custom_url"
+                            className="text-white font-medium"
+                        >
+                            Custom URL
+                        </Label>
+                        {/* <div className="text-sm text-purple-200 mb-2">
                             Choose a custom URL for your track (optional)
-                        </div>
+                        </div> */}
                         <div className="flex items-center space-x-2">
-                            <span className="text-sm text-white-500">
+                            <span className="text-sm text-purple-300 font-medium">
                                 soundhex.com/track/
                             </span>
                             <Input
@@ -173,21 +190,21 @@ export function EditTrackModal({
                                     handleCustomUrlChange(e.target.value)
                                 }
                                 placeholder="my-awesome-track"
-                                className="flex-1"
+                                className="flex-1 bg-white/10 border-purple-500/30 text-white placeholder:text-purple-300 focus:border-purple-400 focus:ring-purple-400/20"
                             />
                         </div>
                         {urlError && (
-                            <p className="text-sm text-red-500">{urlError}</p>
+                            <p className="text-sm text-red-400">{urlError}</p>
                         )}
                     </div>
 
                     {/* Mood Selection */}
                     <div className="space-y-4">
                         <div>
-                            <Label className="text-lg font-semibold">
+                            <Label className="text-lg font-semibold text-white">
                                 Mood Tags
                             </Label>
-                            <p className="text-sm text-muted-foreground mt-1">
+                            <p className="text-sm text-purple-200 mt-1">
                                 Select moods that best describe your track
                             </p>
                         </div>
@@ -200,21 +217,27 @@ export function EditTrackModal({
                         />
 
                         {selectedMoods.size > 0 && (
-                            <div className="text-sm text-gray-600">
-                                Selected: {Array.from(selectedMoods).join(", ")}
+                            <div className="text-sm text-purple-200 bg-purple-800/30 rounded-lg p-3 border border-purple-600/30">
+                                <span className="font-medium">
+                                    Selected moods:
+                                </span>{" "}
+                                {Array.from(selectedMoods).join(", ")}
                             </div>
                         )}
                     </div>
                 </div>
 
-                <DialogFooter>
-                    <Button variant="outline" onClick={onClose}>
+                <DialogFooter className="bg-purple-800/20 -mx-6 -mb-6 px-6 py-4 border-t border-purple-600/30">
+                    <Button
+                        onClick={onClose}
+                        className="bg-white/20 text-white hover:bg-white/30 transition-colors"
+                    >
                         Cancel
                     </Button>
                     <Button
                         onClick={handleSave}
                         disabled={isLoading || !!urlError}
-                        className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                        className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg"
                     >
                         {isLoading ? "Saving..." : "Save Changes"}
                     </Button>

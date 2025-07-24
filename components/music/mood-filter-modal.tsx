@@ -60,7 +60,7 @@ export function MoodFilterModal({
                 <DialogHeader>
                     <div className="flex items-center justify-between">
                         <div>
-                            <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                            <DialogTitle className="text-2xl font-bold text-white">
                                 Select Moods
                             </DialogTitle>
                             <DialogDescription className="mt-2">

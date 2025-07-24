@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
     Play,
     Pause,
@@ -27,6 +28,7 @@ import { Track } from "@/lib/definitions/Track";
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 import { useDownload } from "@/hooks/use-download";
 import { TrackGrid } from "@/components/music/track-grid";
+import { TrackGridSm } from "@/components/music/track-grid-sm";
 import TracksListLight from "@/components/music/tracks-list-light";
 import AddToPlaylist from "@/components/playlist/add-to-playlist";
 import { useLikesFollows } from "@/hooks/use-likes-follows";
@@ -48,6 +50,7 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
     const [currentTrack, setCurrentTrack] = useState(track);
     const prevTrackIdRef = useRef<number | null>(null);
     const { user } = useCurrentUser();
+    const router = useRouter();
 
     // Update current track when prop changes
     useEffect(() => {
@@ -80,35 +83,69 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
 
     // Fetch other tracks by the same artist
     const fetchArtistTracks = useCallback(async () => {
-        if (!currentTrack?.id) return;
+        if (!currentTrack?.id) {
+            console.log("🔍 fetchArtistTracks - No currentTrack.id, skipping");
+            return;
+        }
+
+        console.log("🔍 fetchArtistTracks - Starting fetch:", {
+            trackId: currentTrack.id,
+            trackTitle: currentTrack.title,
+            artistId: currentTrack.artist?.id,
+            artistName: currentTrack.artist?.name,
+        });
 
         try {
             setIsLoadingArtistTracks(true);
-            const response = await fetch(
-                `/api/tracks/${currentTrack.id}/artist-tracks?limit=20`,
+            const apiUrl = `/api/tracks/${currentTrack.id}/artist-tracks?limit=20`;
+            console.log("🔍 fetchArtistTracks - API URL:", apiUrl);
+
+            const response = await fetch(apiUrl);
+            console.log(
+                "🔍 fetchArtistTracks - Response status:",
+                response.status,
             );
 
             if (response.ok) {
                 const data = await response.json();
-                setArtistTracks(data || []);
+                console.log("🔍 fetchArtistTracks - Raw response data:", {
+                    isArray: Array.isArray(data),
+                    count: data?.length || 0,
+                    dataType: typeof data,
+                    firstTrack: data?.[0],
+                    currentTrackId: currentTrack.id,
+                    allTrackIds: data?.map((t: any) => t.id) || [],
+                });
+
+                // Filter out current track
+                const filteredTracks = Array.isArray(data)
+                    ? data.filter((track) => track.id !== currentTrack.id)
+                    : [];
+
+                console.log("🔍 fetchArtistTracks - After filtering:", {
+                    originalCount: data?.length || 0,
+                    filteredCount: filteredTracks.length,
+                    removedCurrentTrack:
+                        (data?.length || 0) !== filteredTracks.length,
+                });
+
+                setArtistTracks(filteredTracks);
             } else {
+                const errorText = await response.text();
+                console.error("🔍 fetchArtistTracks - Failed to fetch:", {
+                    status: response.status,
+                    statusText: response.statusText,
+                    errorText,
+                });
                 setArtistTracks([]);
             }
         } catch (error) {
-            console.error("Error fetching artist tracks:", error);
+            console.error("🔍 fetchArtistTracks - Error:", error);
             setArtistTracks([]);
         } finally {
             setIsLoadingArtistTracks(false);
         }
     }, [currentTrack?.id]);
-
-    useEffect(() => {
-        if (currentTrack?.id && currentTrack.id !== prevTrackIdRef.current) {
-            fetchRecommendedTracks();
-            fetchArtistTracks();
-            prevTrackIdRef.current = currentTrack.id;
-        }
-    }, [currentTrack?.id, fetchRecommendedTracks, fetchArtistTracks]);
 
     const {
         currentTrack: audioCurrentTrack,
@@ -118,7 +155,22 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
         togglePlayPause,
     } = useAudioPlayer();
     const { downloadTrack, isDownloading, isTrackDownloading } = useDownload();
-    const { getTrackLikeStatus, toggleTrackLike } = useLikesFollows();
+    const { getTrackLikeStatus, toggleTrackLike, fetchTrackLikeStatus } =
+        useLikesFollows();
+
+    useEffect(() => {
+        if (currentTrack?.id && currentTrack.id !== prevTrackIdRef.current) {
+            fetchRecommendedTracks();
+            fetchArtistTracks();
+            fetchTrackLikeStatus(currentTrack.id);
+            prevTrackIdRef.current = currentTrack.id;
+        }
+    }, [
+        currentTrack?.id,
+        fetchRecommendedTracks,
+        fetchArtistTracks,
+        fetchTrackLikeStatus,
+    ]);
 
     const handleTrackPlay = useCallback(
         (selectedTrack: Track) => {
@@ -150,10 +202,24 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
             userOwnsTrack,
             artistData: currentTrack?.artist,
         });
+        console.log("Track Detail - Current track mood:", {
+            trackId: currentTrack?.id,
+            mood: currentTrack?.mood,
+            moodType: typeof currentTrack?.mood,
+            moodLength: currentTrack?.mood?.length,
+        });
     }, [user, currentTrack, userOwnsTrack]);
 
     const handleTrackUpdate = (updatedTrack: Track) => {
         setCurrentTrack(updatedTrack);
+
+        // If custom_url changed, redirect to new URL
+        if (
+            updatedTrack.custom_url &&
+            updatedTrack.custom_url !== track.custom_url
+        ) {
+            router.push(`/track/${updatedTrack.custom_url}`);
+        }
     };
 
     if (isLoading) {
@@ -185,6 +251,20 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
             </div>
 
             <div className="container mx-auto p-4 sm:p-6 lg:p-8">
+                {/* Back to Music Button */}
+                <div className="mb-6">
+                    <Link href="/music">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex items-center gap-2 hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                        >
+                            <ArrowLeft className="h-4 w-4" />
+                            Back to Music
+                        </Button>
+                    </Link>
+                </div>
+
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Track Info */}
                     <div className="lg:col-span-2 space-y-4">
@@ -229,25 +309,71 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
                                 )}
                             </div>
 
-                            <div className="flex flex-wrap items-center gap-2">
+                            <div className="flex flex-wrap items-center gap-4">
                                 <Badge className="bg-purple-100 text-purple-700 dark:bg-purple-800 dark:text-purple-300 border-0">
                                     {currentTrack.genre?.name ||
                                         "Unknown Genre"}
                                 </Badge>
-                                <span className="text-gray-500 dark:text-gray-400">
-                                    <Clock className="h-4 w-4 inline-block mr-1" />
-                                    {currentTrack.duration
-                                        ? `${Math.floor(currentTrack.duration / 60)}:${(currentTrack.duration % 60).toString().padStart(2, "0")}`
-                                        : "Unknown"}
-                                </span>
-                                <span className="text-gray-500 dark:text-gray-400">
-                                    <Headphones className="h-4 w-4 inline-block mr-1" />
-                                    {currentTrack.view_count
-                                        ? currentTrack.view_count.toLocaleString()
-                                        : "0"}{" "}
-                                    views
-                                </span>
+                                <div className="flex items-center gap-4 text-gray-500 dark:text-gray-400">
+                                    <div className="flex items-center gap-1">
+                                        <Clock className="h-4 w-4" />
+                                        <span className="text-sm font-medium">
+                                            {currentTrack.duration
+                                                ? `${Math.floor(currentTrack.duration / 60)}:${(currentTrack.duration % 60).toString().padStart(2, "0")}`
+                                                : "Unknown"}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                        <Headphones className="h-4 w-4" />
+                                        <span className="text-sm font-medium">
+                                            {currentTrack.view_count
+                                                ? currentTrack.view_count.toLocaleString()
+                                                : "0"}{" "}
+                                            views
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                        <Heart className="h-4 w-4" />
+                                        <span className="text-sm font-medium">
+                                            {getTrackLikeStatus(currentTrack.id)
+                                                .totalLikes || 0}{" "}
+                                            likes
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
+
+                            {/* Mood Tags Display */}
+                            {currentTrack.mood &&
+                                currentTrack.mood.length > 0 && (
+                                    <div className="mt-4">
+                                        <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                                            Mood & Vibe
+                                        </h4>
+                                        <div className="flex flex-wrap gap-2">
+                                            {currentTrack.mood.map(
+                                                (mood, index) => (
+                                                    <div
+                                                        key={index}
+                                                        className="relative group"
+                                                    >
+                                                        <div className="px-4 py-1 rounded-full bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-200 dark:border-purple-700/50 backdrop-blur-sm hover:from-purple-500/20 hover:to-pink-500/20 transition-all duration-300">
+                                                            <span className="text-sm font-medium text-purple-700 dark:text-purple-300">
+                                                                {mood
+                                                                    .charAt(0)
+                                                                    .toUpperCase() +
+                                                                    mood.slice(
+                                                                        1,
+                                                                    )}
+                                                            </span>
+                                                        </div>
+                                                        <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500/5 to-pink-500/5 blur-sm group-hover:blur-md transition-all duration-300"></div>
+                                                    </div>
+                                                ),
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
                         </div>
 
                         <Separator className="my-4" />
@@ -333,142 +459,101 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
 
                     {/* Related Content */}
                     <div>
-                        <Card className="w-full">
-                            <CardContent className="p-4">
-                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                                    More by {currentTrack.artist?.name}
-                                </h3>
-                                {!isLoadingArtistTracks &&
-                                artistTracks.length > 0 ? (
-                                    <>
-                                        {console.log(
-                                            "TracksDetailUI - Artist tracks data:",
-                                            {
-                                                count: artistTracks.length,
-                                                sample: artistTracks[0],
-                                                mapped: artistTracks
-                                                    .slice(0, 10)
-                                                    .map((track) => ({
-                                                        id: track.id,
-                                                        title: track.title,
-                                                        custom_url:
-                                                            track.custom_url,
-                                                        artist: {
-                                                            id:
-                                                                track.artist
-                                                                    ?.id || 0,
-                                                            name:
-                                                                track.artist
-                                                                    ?.name ||
-                                                                "Unknown Artist",
-                                                            profile_image_url:
-                                                                track.artist
-                                                                    ?.profile_image_url,
-                                                            custom_url:
-                                                                track.artist
-                                                                    ?.custom_url,
-                                                        },
-                                                        album: track.album
-                                                            ? {
-                                                                  id: track
-                                                                      .album.id,
-                                                                  title: track
-                                                                      .album
-                                                                      .title,
-                                                                  cover_image_url:
-                                                                      track
-                                                                          .album
-                                                                          .cover_image_url,
-                                                                  custom_url:
-                                                                      track
-                                                                          .album
-                                                                          .custom_url,
-                                                              }
-                                                            : undefined,
-                                                        duration:
-                                                            track.duration,
-                                                        file_url:
-                                                            track.file_url,
-                                                        view_count:
-                                                            track.view_count,
-                                                    })),
-                                            },
-                                        )}
-                                        <TracksListLight
-                                            tracks={artistTracks
-                                                .slice(0, 10)
-                                                .map((track) => ({
-                                                    id: track.id,
-                                                    title: track.title,
-                                                    custom_url:
-                                                        track.custom_url,
-                                                    artist: {
-                                                        id:
-                                                            track.artist?.id ||
-                                                            0,
-                                                        name:
-                                                            track.artist
-                                                                ?.name ||
-                                                            "Unknown Artist",
-                                                        profile_image_url:
-                                                            track.artist
-                                                                ?.profile_image_url,
-                                                        custom_url:
-                                                            track.artist
-                                                                ?.custom_url,
-                                                    },
-                                                    album: track.album
-                                                        ? {
-                                                              id: track.album
-                                                                  .id,
-                                                              title: track.album
-                                                                  .title,
-                                                              cover_image_url:
-                                                                  track.album
-                                                                      .cover_image_url,
-                                                              custom_url:
-                                                                  track.album
-                                                                      .custom_url,
-                                                          }
-                                                        : undefined,
-                                                    duration: track.duration,
-                                                    file_url: track.file_url,
-                                                    view_count:
-                                                        track.view_count,
-                                                }))}
-                                            className="max-h-96 overflow-y-auto"
-                                        />
-                                    </>
-                                ) : isLoadingArtistTracks ? (
-                                    <div className="flex items-center justify-center p-8">
-                                        <Loader2 className="h-8 w-8 animate-spin" />
-                                    </div>
-                                ) : (
-                                    <div className="text-center py-8">
-                                        <Music className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                                        <p className="text-gray-500">
-                                            No other tracks by this artist
-                                        </p>
-                                    </div>
-                                )}
-                            </CardContent>
-                        </Card>
+
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                            More by {currentTrack.artist?.name}
+                        </h3>
+
+                        {!isLoadingArtistTracks &&
+                        Array.isArray(artistTracks) &&
+                        artistTracks.length > 0 ? (
+                            <TracksListLight
+                                tracks={artistTracks
+                                    .filter(
+                                        (track) =>
+                                            track &&
+                                            track.id &&
+                                            track.id !== currentTrack.id,
+                                    ) // Exclude current track
+                                    .slice(0, 10)
+                                    .map((track) => ({
+                                        id: track.id,
+                                        title: track.title,
+                                        custom_url: track.custom_url,
+                                        artist: {
+                                            id: track.artist?.id || 0,
+                                            name:
+                                                track.artist?.name ||
+                                                "Unknown Artist",
+                                            profile_image_url:
+                                                track.artist?.profile_image_url,
+                                            custom_url:
+                                                track.artist?.custom_url,
+                                        },
+                                        album: track.album
+                                            ? {
+                                                  id: track.album.id,
+                                                  title: track.album.title,
+                                                  cover_image_url:
+                                                      track.album
+                                                          .cover_image_url,
+                                                  custom_url:
+                                                      track.album.custom_url,
+                                              }
+                                            : undefined,
+                                        duration: track.duration,
+                                        file_url: track.file_url,
+                                        view_count: track.view_count,
+                                    }))}
+                                className="max-h-96 overflow-y-auto"
+                            />
+                        ) : isLoadingArtistTracks ? (
+                            <div className="flex items-center justify-center p-8">
+                                <Loader2 className="h-8 w-8 animate-spin" />
+                                <span className="ml-2 text-gray-500">
+                                    Loading artist tracks...
+                                </span>
+                            </div>
+                        ) : (
+                            <div className="text-center py-8">
+                                <Music className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                                <p className="text-gray-500">
+                                    No other tracks by this artist
+                                </p>
+                            </div>
+                        )}
                     </div>
                 </div>
 
                 {/* Recommended Tracks Section */}
-                {recommendedTracks.length > 0 && (
-                    <section className="mt-12">
-                        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-                            Recommended for you
-                        </h2>
-                        <TrackGrid
-                            tracks={recommendedTracks.slice(0, 6)}
+                <section className="mt-12">
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+                        Recommended Songs
+                    </h2>
+                    {!isLoadingRecommended &&
+                    Array.isArray(recommendedTracks) &&
+                    recommendedTracks.length > 0 ? (
+                        <TrackGridSm
+                            tracks={recommendedTracks.slice(0, 12)}
                             isLoading={isLoadingRecommended}
-                            gridCols="grid grid-cols-1 sm:grid-cols-2 gap-6"
+                            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4"
                         />
-                    </section>
-                )}
+                    ) : isLoadingRecommended ? (
+                        <div className="flex items-center justify-center p-8">
+                            <Loader2 className="h-8 w-8 animate-spin" />
+                            <span className="ml-2 text-gray-500">
+                                Loading recommendations...
+                            </span>
+                        </div>
+                    ) : (
+                        <div className="text-center py-8">
+                            <Music className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                            <p className="text-gray-500">
+                                No recommendations available
+                            </p>
+                        </div>
+                    )}
+                </section>
 
                 {/* Edit Track Modal */}
                 {userOwnsTrack && (
