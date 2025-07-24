@@ -21,30 +21,7 @@ import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 import { useDownload } from "@/hooks/use-download";
 import { useLikesFollows } from "@/hooks/use-likes-follows";
 import AddToPlaylist from "@/components/playlist/add-to-playlist";
-
-interface Track {
-    id: number;
-    title: string;
-    duration: number | null;
-    custom_url: string | null;
-    artist?: {
-        id: number;
-        name: string;
-        custom_url: string | null;
-        profile_image_url?: string | null;
-    } | null;
-    album?: {
-        id: number;
-        title: string;
-        cover_image_url: string | null;
-        custom_url: string | null;
-    } | null;
-    genre?: {
-        id: number;
-        name: string;
-    } | null;
-    view_count?: number;
-}
+import { Track } from "@/lib/definitions/Track";
 
 interface TrackGridSmProps {
     tracks: Track[];
@@ -55,7 +32,7 @@ interface TrackGridSmProps {
 }
 
 // Helper function to format time
-const formatDuration = (seconds: number | null) => {
+const formatDuration = (seconds: number | null | undefined) => {
     if (!seconds) return "--:--";
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
@@ -63,7 +40,8 @@ const formatDuration = (seconds: number | null) => {
 };
 
 // Helper function to format view count
-const formatViewCount = (count: number) => {
+const formatViewCount = (count: number | null | undefined) => {
+    if (!count || count === 0) return "0";
     if (count >= 1000000) {
         return (count / 1000000).toFixed(1).replace(/\.0$/, "") + "M";
     }
@@ -138,6 +116,7 @@ export const TrackGridSm = React.memo(function TrackGridSm({
         if (onTrackPlay) {
             onTrackPlay(track, tracks);
         } else {
+            // Default behavior: set track list and play the track
             setTrackList(tracks);
             setTimeout(() => {
                 playTrack(track);
@@ -320,7 +299,7 @@ export const TrackGridSm = React.memo(function TrackGridSm({
                                                 <span>{track.genre.name}</span>
                                             </div>
                                         )}
-                                        {track.view_count !== undefined && (
+                                        {track.view_count !== undefined && track.view_count !== null && (
                                             <div className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30 px-2 py-1 rounded-full">
                                                 <Headphones className="h-3 w-3" />
                                                 <span className="font-mono">
