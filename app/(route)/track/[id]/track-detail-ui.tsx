@@ -1,398 +1,293 @@
-// app/(route)/track/[id]/track-detail-ui.tsx
 "use client";
 
+import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
+import Link from "next/link";
+import {
+    Play,
+    Pause,
+    Download,
+    Heart,
+    Share,
+    Clock,
+    Headphones,
+    Music,
+    Album,
+    Plus,
+    Shuffle,
+    ArrowLeft,
+    Edit,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Play,
-  Pause,
-  Clock,
-  Music,
-  Heart,
-  Share,
-  Download,
-  Plus,
-  ArrowLeft,
-  Loader2,
-  Headphones,
-  Calendar,
-  User,
-  Disc,
-} from "lucide-react";
-import Link from "next/link";
-import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
+import { Separator } from "@/components/ui/separator";
 import { Track } from "@/lib/definitions/Track";
+import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 import { useDownload } from "@/hooks/use-download";
+import { TrackGrid } from "@/components/music/track-grid";
 import AddToPlaylist from "@/components/playlist/add-to-playlist";
 import { useLikesFollows } from "@/hooks/use-likes-follows";
-import { useEffect, useState } from "react";
 import { showSuccess } from "@/lib/services/notification-service";
-import { TrackGridSm } from "@/components/music/track-grid-sm";
-import TracksListLight from "@/components/music/tracks-list-light";
-
-// Helper function to format time
-const formatDuration = (seconds: number | null | undefined) => {
-  if (!seconds || typeof seconds !== "number") return "--:--";
-  const mins = Math.floor(seconds / 60);
-  const secs = Math.floor(seconds % 60);
-  return `${mins}:${secs.toString().padStart(2, "0")}`;
-};
-
-// Helper function to format view count
-const formatViewCount = (views: number | undefined) => {
-  if (!views || views === 0) return "0";
-  if (views < 1000) return views.toString();
-  if (views < 1000000) return `${(views / 1000).toFixed(1)}K`;
-  return `${(views / 1000000).toFixed(1)}M`;
-};
-
-// Helper function to format date
-const formatDate = (dateString: string | null) => {
-  if (!dateString) return "Unknown";
-  return new Date(dateString).toLocaleDateString("vi-VN", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-};
+import { EditTrackModal } from "@/components/music/edit-track-modal";
+import { useCurrentUser } from "@/hooks/use-current-user";
 
 interface TrackDetailUIProps {
-  track: any;
-  isLoading?: boolean;
+    track: Track;
+    isLoading?: boolean;
 }
 
-export function TrackDetailUI({
-  track,
-  isLoading = false,
-}: TrackDetailUIProps) {
-  const { currentTrack, isPlaying, playTrack, setTrackList, togglePlayPause } =
-    useAudioPlayer();
-  const { downloadTrack, isDownloading, isTrackDownloading } = useDownload();
-  const { getTrackLikeStatus, fetchTrackLikeStatus, toggleTrackLike } =
-    useLikesFollows();
-  const [recommendedTracks, setRecommendedTracks] = useState<any[]>([]);
-  const [loadingRecommended, setLoadingRecommended] = useState(false);
-  const [artistTracks, setArtistTracks] = useState<any[]>([]);
-  const [loadingArtistTracks, setLoadingArtistTracks] = useState(false);
+export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
+    const [recommendedTracks, setRecommendedTracks] = useState<Track[]>([]);
+    const [artistTracks, setArtistTracks] = useState<Track[]>([]);
+    const [isLoadingRecommended, setIsLoadingRecommended] = useState(true);
+    const [isLoadingArtistTracks, setIsLoadingArtistTracks] = useState(true);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [currentTrack, setCurrentTrack] = useState(track);
+    const prevTrackIdRef = useRef<number | null>(null);
+    const { user } = useCurrentUser();
 
-  // Safe track data with fallbacks
-  const safeTrack = {
-    id: track?.id || 0,
-    title: track?.title || "Unknown Track",
-    description: track?.description || null,
-    duration: track?.duration || null,
-    file_url: track?.file_url || null,
-    view_count: track?.view_count || 0,
-    artist: track?.artist || { id: 0, name: "Unknown Artist" },
-    album: track?.album || null,
-    genre: track?.genre || null,
-    created_at: track?.created_at || null,
-  };
+    // Update current track when prop changes
+    useEffect(() => {
+        setCurrentTrack(track);
+    }, [track]);
 
-  const handlePlayTrack = () => {
-    if (safeTrack.file_url) {
-      if (currentTrack?.id === safeTrack.id && isPlaying) {
-        togglePlayPause();
-      } else {
-        setTrackList([safeTrack]);
-        setTimeout(() => {
-          playTrack(safeTrack);
-        }, 10);
-      }
-    }
-  };
+    // Fetch recommended tracks based on current track
+    const fetchRecommendedTracks = useCallback(async () => {
+        if (!currentTrack?.id) return;
 
-  // Fetch track like status when component mounts
-  useEffect(() => {
-    if (safeTrack.id && !isLoading) {
-      const trackLikeStatus = getTrackLikeStatus(safeTrack.id);
-      // Only fetch if we haven't fetched yet and it's not currently loading
-      if (trackLikeStatus.isLiked === undefined && !trackLikeStatus.isLoading) {
-        fetchTrackLikeStatus(safeTrack.id);
-      }
-    }
-  }, [safeTrack.id, isLoading]);
-
-  // Fetch recommended tracks
-  useEffect(() => {
-    const fetchRecommendedTracks = async () => {
-      if (safeTrack.id && !isLoading) {
-        setLoadingRecommended(true);
         try {
-          const response = await fetch(`/api/tracks/${safeTrack.id}/recommended`);
-          if (response.ok) {
-            const data = await response.json();
-            setRecommendedTracks(data.tracks || []);
-          }
+            setIsLoadingRecommended(true);
+            const response = await fetch(`/api/tracks/${currentTrack.id}/recommended?limit=12`);
+
+            if (response.ok) {
+                const data = await response.json();
+                setRecommendedTracks(data || []);
+            } else {
+                setRecommendedTracks([]);
+            }
         } catch (error) {
-          console.error("Error fetching recommended tracks:", error);
+            console.error("Error fetching recommended tracks:", error);
+            setRecommendedTracks([]);
         } finally {
-          setLoadingRecommended(false);
+            setIsLoadingRecommended(false);
         }
-      }
+    }, [currentTrack?.id]);
+
+    // Fetch other tracks by the same artist
+    const fetchArtistTracks = useCallback(async () => {
+        if (!currentTrack?.id) return;
+
+        try {
+            setIsLoadingArtistTracks(true);
+            const response = await fetch(`/api/tracks/${currentTrack.id}/artist-tracks?limit=20`);
+
+            if (response.ok) {
+                const data = await response.json();
+                setArtistTracks(data || []);
+            } else {
+                setArtistTracks([]);
+            }
+        } catch (error) {
+            console.error("Error fetching artist tracks:", error);
+            setArtistTracks([]);
+        } finally {
+            setIsLoadingArtistTracks(false);
+        }
+    }, [currentTrack?.id]);
+
+    useEffect(() => {
+        if (currentTrack?.id && currentTrack.id !== prevTrackIdRef.current) {
+            fetchRecommendedTracks();
+            fetchArtistTracks();
+            prevTrackIdRef.current = currentTrack.id;
+        }
+    }, [currentTrack?.id, fetchRecommendedTracks, fetchArtistTracks]);
+
+    const { currentTrack: audioCurrentTrack, isPlaying, playTrack, setTrackList, togglePlayPause } = useAudioPlayer();
+    const { downloadTrack, isDownloading, isTrackDownloading } = useDownload();
+    const { getTrackLikeStatus, fetchTrackLikeStatus, toggleTrackLike } = useLikesFollows();
+
+    const handleTrackPlay = useCallback((selectedTrack: Track) => {
+        if (audioCurrentTrack?.id === selectedTrack.id && isPlaying) {
+            togglePlayPause();
+        } else {
+            setTrackList([selectedTrack]);
+            playTrack(selectedTrack);
+        }
+    }, [audioCurrentTrack?.id, isPlaying, togglePlayPause, setTrackList, playTrack]);
+
+    // Check if current user owns this track
+    const userOwnsTrack = user && currentTrack?.artist?.user_id === user.id;
+
+    const handleTrackUpdate = (updatedTrack: Track) => {
+        setCurrentTrack(updatedTrack);
     };
 
-    fetchRecommendedTracks();
-  }, [safeTrack.id, isLoading]);
-
-  // Fetch artist tracks
-  useEffect(() => {
-    const fetchArtistTracks = async () => {
-      if (safeTrack.id && !isLoading) {
-        setLoadingArtistTracks(true);
-        try {
-          const response = await fetch(`/api/tracks/${safeTrack.id}/artist-tracks`);
-          if (response.ok) {
-            const data = await response.json();
-            setArtistTracks(data.tracks || []);
-          }
-        } catch (error) {
-          console.error("Error fetching artist tracks:", error);
-        } finally {
-          setLoadingArtistTracks(false);
-        }
-      }
-    };
-
-    fetchArtistTracks();
-  }, [safeTrack.id, isLoading]);
-
-  const trackLikeStatus = getTrackLikeStatus(safeTrack.id);
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20">
-      {/* Header Section */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-slate-800 via-purple-900 to-slate-900 text-white">
-        <div className="absolute inset-0 bg-black/10"></div>
-        <div className="relative container mx-auto px-6 py-16">
-          {/* Back to Music Button */}
-          <div className="mb-6">
-            <Link href="/music">
-              <Button
-                size="sm"
-                className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all duration-200 border-0"
-              >
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Music
-              </Button>
-            </Link>
-          </div>
-          <div className="flex flex-col md:flex-row gap-8 items-center md:items-end">
-            <div className="w-48 h-48 md:w-64 md:h-64 rounded-xl overflow-hidden bg-white/10 backdrop-blur-sm flex items-center justify-center shadow-2xl">
-              {safeTrack.album?.cover_image_url ? (
-                <Image
-                  src={safeTrack.album.cover_image_url}
-                  alt={safeTrack.title}
-                  width={256}
-                  height={256}
-                  className="object-cover w-full h-full"
-                />
-              ) : (
-                <Music className="h-20 w-20 text-white/60" />
-              )}
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center h-screen">
+                <Loader2 className="h-10 w-10 animate-spin" />
             </div>
-            <div className="flex-1 flex flex-col gap-4 text-center md:text-left">
-              <Badge className="bg-white/20 text-white border-white/30 w-fit mx-auto md:mx-0">
-                Track
-              </Badge>
-              <h1 className="text-4xl md:text-6xl font-bold leading-tight">
-                {safeTrack.title}
-              </h1>
-              <div className="flex items-center gap-3 text-lg text-purple-100 justify-center md:justify-start flex-wrap">
-                <Link
-                  href={`/artist/${safeTrack.artist.custom_url || safeTrack.artist.id}`}
-                  prefetch={false}
-                  className="font-medium hover:underline flex items-center gap-1"
-                >
-                  <User className="h-4 w-4" />
-                  {safeTrack.artist.name}
-                </Link>
-                {safeTrack.album && (
-                  <>
-                    <span>•</span>
-                    <Link
-                      href={`/album/${safeTrack.album.custom_url || safeTrack.album.id}`}
-                      prefetch={false}
-                      className="font-medium hover:underline flex items-center gap-1"
-                    >
-                      <Disc className="h-4 w-4" />
-                      {safeTrack.album.title}
-                    </Link>
-                  </>
-                )}
-                {safeTrack.duration && (
-                  <>
-                    <span>•</span>
-                    <span className="flex items-center gap-1">
-                      <Clock className="h-4 w-4" />
-                      {formatDuration(safeTrack.duration)}
-                    </span>
-                  </>
-                )}
-                <span>•</span>
-                <span className="flex items-center gap-1">
-                  <Headphones className="h-4 w-4" />
-                  {formatViewCount(safeTrack.view_count)}
-                </span>
-                {trackLikeStatus.totalLikes !== undefined ? (
-                  <>
-                    <span>•</span>
-                    <Heart className="h-4 w-4 text-white fill-white drop-shadow-lg" />
-                    <span>{trackLikeStatus.totalLikes}</span>
-                  </>
-                ) : trackLikeStatus.isLoading ? (
-                  <>
-                    <span>•</span>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  </>
-                ) : null}
-              </div>
-              <div className="flex gap-4 justify-center md:justify-start mt-4">
-                <Button
-                  size="lg"
-                  className="bg-white text-purple-600 hover:bg-white/90"
-                  onClick={handlePlayTrack}
-                  disabled={!safeTrack.file_url}
-                >
-                  {currentTrack?.id === safeTrack.id && isPlaying ? (
-                    <Pause className="mr-2 h-5 w-5" />
-                  ) : (
-                    <Play className="mr-2 h-5 w-5" />
-                  )}
-                  {currentTrack?.id === safeTrack.id && isPlaying
-                    ? "Pause"
-                    : "Play"}
-                </Button>
-                <Button
-                  size="lg"
-                  className={`backdrop-blur-sm transition-all duration-200 border-0 ${
-                    trackLikeStatus.isLiked
-                      ? "bg-red-500 text-white hover:bg-red-600"
-                      : "bg-white/10 text-white hover:bg-white/20"
-                  }`}
-                  onClick={() => toggleTrackLike(safeTrack.id)}
-                  disabled={trackLikeStatus.isLoading}
-                >
-                  <Heart
-                    className={`mr-2 h-5 w-5 ${trackLikeStatus.isLiked ? "fill-current" : ""}`}
-                  />
-                  <div className="min-w-[60px] flex justify-center items-center">
-                    {trackLikeStatus.isLoading ? (
-                      <Loader2 className="h-5 w-5 animate-spin" />
-                    ) : trackLikeStatus.isLiked ? (
-                      "Liked"
-                    ) : (
-                      "Like"
-                    )}
-                  </div>
-                </Button>
-                <AddToPlaylist
-                  trackId={safeTrack.id}
-                  trackTitle={safeTrack.title}
-                >
-                  <Button
-                    size="lg"
-                    className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all duration-200 border-0"
-                  >
-                    <Plus className="mr-2 h-5 w-5" />
-                    Add to Playlist
-                  </Button>
-                </AddToPlaylist>
-                <Button
-                  size="lg"
-                  className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all duration-200 border-0"
-                  onClick={() => downloadTrack(safeTrack)}
-                  disabled={isTrackDownloading(safeTrack.id)}
-                >
-                  {isTrackDownloading(safeTrack.id) ? (
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  ) : (
-                    <Download className="mr-2 h-5 w-5" />
-                  )}
-                  Download
-                </Button>
-                <Button
-                  size="lg"
-                  className="bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all duration-200 border-0"
-                  onClick={() => {
-                    const currentUrl = window.location.href;
-                    navigator.clipboard.writeText(currentUrl);
-                    showSuccess({
-                      title: "Copied!",
-                      message: "Link copied to clipboard!",
-                    });
-                  }}
-                >
-                  <Share className="mr-2 h-5 w-5" />
-                  Share
-                </Button>
-              </div>
+        );
+    }
+
+    return (
+        <div className="bg-white dark:bg-gray-900">
+            <div className="relative w-full h-[300px] sm:h-[400px] lg:h-[500px] overflow-hidden">
+                {currentTrack.album?.cover_image_url ? (
+                                <Image
+                                    src={currentTrack.album.cover_image_url}
+                                    alt={currentTrack.album?.title || currentTrack.title}
+                                    fill
+                                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                                    className="object-cover"
+                                    priority
+                                />
+                            ) : (
+                                <div className="w-full h-full bg-gradient-to-br from-purple-400 via-pink-400 to-rose-400 flex items-center justify-center">
+                                    <Music className="h-32 w-32 text-white/80" />
+                                </div>
+                            )}
+                <div className="absolute inset-0 bg-black/20 dark:bg-black/60"></div>
             </div>
-          </div>
-        </div>
-      </div>
 
-      {/* Artist Tracks Section */}
-      <div className="container mx-auto px-6 py-12">
-        {/* Section Title */}
-        <div className="flex items-center gap-3 mb-8">
-          <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center">
-            <User className="h-5 w-5 text-white" />
-          </div>
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-            More from {safeTrack.artist.name}
-          </h2>
-        </div>
+            <div className="container mx-auto p-4 sm:p-6 lg:p-8">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Track Info */}
+                    <div className="lg:col-span-2 space-y-4">
+                        <div className="space-y-2">
+                                <div className="flex items-center justify-between">
+                                    <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white leading-tight">
+                                        {currentTrack.title}
+                                    </h1>
+                                    {userOwnsTrack && (
+                                        <Button
+                                            onClick={() => setShowEditModal(true)}
+                                            variant="outline"
+                                            size="sm"
+                                            className="ml-4"
+                                        >
+                                            <Edit className="h-4 w-4 mr-2" />
+                                            Edit Track
+                                        </Button>
+                                    )}
+                                </div>
+                                <div className="flex flex-wrap items-center gap-2 text-lg">
+                                    <span className="text-gray-600 dark:text-gray-400">by</span>
+                                    <Link
+                                        href={`/artist/${currentTrack.artist?.custom_url || currentTrack.artist?.id}`}
+                                        className="text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-semibold transition-colors"
+                                    >
+                                        {currentTrack.artist?.name || "Unknown Artist"}
+                                    </Link>
+                                    {currentTrack.album && (
+                                        <>
+                                            <span className="text-gray-400">•</span>
+                                            <Link
+                                                href={`/album/${currentTrack.album?.custom_url || currentTrack.album?.id}`}
+                                                className="text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-medium transition-colors"
+                                            >
+                                                {currentTrack.album.title}
+                                            </Link>
+                                        </>
+                                    )}
+                                </div>
 
-        {/* Artist Tracks List */}
-        {loadingArtistTracks ? (
-          <div className="space-y-4">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="flex items-center gap-4 p-3 rounded-lg animate-pulse">
-                <div className="w-12 h-12 bg-white/20 dark:bg-gray-700/50 rounded-lg"></div>
-                <div className="flex-1 space-y-2">
-                  <div className="w-48 h-4 bg-white/20 dark:bg-gray-700/50 rounded"></div>
-                  <div className="w-32 h-3 bg-white/20 dark:bg-gray-700/50 rounded"></div>
+                            <div className="flex flex-wrap items-center gap-2">
+                                <Badge className="bg-purple-100 text-purple-700 dark:bg-purple-800 dark:text-purple-300 border-0">
+                                    {currentTrack.genre?.name || "Unknown Genre"}
+                                </Badge>
+                                <span className="text-gray-500 dark:text-gray-400">
+                                    <Clock className="h-4 w-4 inline-block mr-1" />
+                                    {currentTrack.duration ? `${Math.floor(currentTrack.duration / 60)}:${(currentTrack.duration % 60).toString().padStart(2, '0')}` : "Unknown"}
+                                </span>
+                                <span className="text-gray-500 dark:text-gray-400">
+                                    <Headphones className="h-4 w-4 inline-block mr-1" />
+                                    {currentTrack.view_count ? currentTrack.view_count.toLocaleString() : "0"} views
+                                </span>
+                            </div>
+                        </div>
+
+                        <Separator className="my-4" />
+
+                        <div className="space-y-4">
+                            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                                {currentTrack.description || "No description available."}
+                            </p>
+                            <div className="flex flex-wrap items-center gap-4">
+                                <Button
+                                    onClick={() => handleTrackPlay(currentTrack)}
+                                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+                                >
+                                    {audioCurrentTrack?.id === currentTrack.id && isPlaying ? (
+                                        <Pause className="h-5 w-5 mr-2" />
+                                    ) : (
+                                        <Play className="h-5 w-5 mr-2" />
+                                    )}
+                                    {audioCurrentTrack?.id === currentTrack.id && isPlaying ? "Pause" : "Play"}
+                                </Button>
+
+                                <AddToPlaylist trackId={currentTrack.id} trackTitle={currentTrack.title}>
+                                    <Button variant="outline">
+                                        <Plus className="h-4 w-4 mr-2" />
+                                        Add to Playlist
+                                    </Button>
+                                </AddToPlaylist>
+
+                                <Button
+                                    variant="outline"
+                                    onClick={() => downloadTrack(currentTrack)}
+                                    disabled={isTrackDownloading(currentTrack.id)}
+                                >
+                                    <Download className="h-4 w-4 mr-2" />
+                                    {isTrackDownloading(currentTrack.id) ? "Downloading..." : "Download"}
+                                </Button>
+
+                                <Button
+                                    variant="outline"
+                                    className={`transition-all duration-200 ${
+                                        getTrackLikeStatus(currentTrack.id).isLiked
+                                            ? "bg-red-50 border-red-300 text-red-600 hover:bg-red-100"
+                                            : "hover:bg-gray-50"
+                                    }`}
+                                    onClick={() => toggleTrackLike(currentTrack.id)}
+                                    disabled={getTrackLikeStatus(currentTrack.id).isLoading}
+                                >
+                                    <Heart
+                                        className={`h-4 w-4 mr-2 ${
+                                            getTrackLikeStatus(currentTrack.id).isLiked ? "fill-current" : ""
+                                        }`}
+                                    />
+                                    {getTrackLikeStatus(currentTrack.id).isLiked ? "Liked" : "Like"}
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Related Content */}
+                    <div>
+                        <Card className="w-full">
+                            <CardContent className="p-4">
+                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                                    More by {currentTrack.artist?.name}
+                                </h3>
+                                <TrackGrid tracks={artistTracks} isLoading={isLoadingArtistTracks} />
+                            </CardContent>
+                        </Card>
+                    </div>
                 </div>
-                <div className="w-12 h-4 bg-white/20 dark:bg-gray-700/50 rounded"></div>
-              </div>
-            ))}
-          </div>
-        ) : artistTracks.length > 0 ? (
-          <TracksListLight tracks={artistTracks} />
-        ) : (
-          <div className="text-center py-8">
-            <Music className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-500 dark:text-gray-400">
-              No other tracks found from this artist
-            </p>
-          </div>
-        )}
 
-        {/* Recommended Tracks Section */}
-        {recommendedTracks.length > 0 && (
-          <section className="mt-12">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center">
-                <Music className="h-5 w-5 text-white" />
-              </div>
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                Recommended Tracks
-              </h2>
+                {/* Edit Track Modal */}
+                {userOwnsTrack && (
+                    <EditTrackModal
+                        track={currentTrack}
+                        isOpen={showEditModal}
+                        onClose={() => setShowEditModal(false)}
+                        onUpdate={handleTrackUpdate}
+                    />
+                )}
             </div>
-            <TrackGridSm
-              tracks={recommendedTracks}
-              isLoading={loadingRecommended}
-              loadingCount={12}
-            />
-          </section>
-        )}
-      </div>
-
-      {/* Bottom spacing for music player */}
-      <div className="pb-32"></div>
-    </div>
-  );
+        </div>
+    );
 }

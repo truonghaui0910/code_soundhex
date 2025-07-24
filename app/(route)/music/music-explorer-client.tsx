@@ -301,6 +301,10 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
                 params.append('search', debouncedSearchQuery);
             }
 
+            if (selectedMoods.size > 0) {
+                params.append('moods', Array.from(selectedMoods).join(','));
+            }
+
             const response = await fetch(`/api/tracks?${params}`);
 
             if (response.ok) {
@@ -337,7 +341,7 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
         } finally {
             setIsSearching(false);
         }
-    }, [currentView, debouncedSearchQuery, selectedGenre, itemsPerPage]); // USE DEBOUNCED QUERY
+    }, [currentView, debouncedSearchQuery, selectedGenre, selectedMoods, itemsPerPage]); // USE DEBOUNCED QUERY
 
     // State for search trigger - REMOVE THIS, USE DEBOUNCED EFFECT INSTEAD
     // const [shouldSearch, setShouldSearch] = useState(false);
@@ -348,7 +352,7 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
             fetchLibraryTracks(1, true);
             setForceSearch(false); // RESET FORCE SEARCH
         }
-    }, [debouncedSearchQuery, currentView, forceSearch, fetchLibraryTracks]); // USE DEBOUNCED QUERY
+    }, [debouncedSearchQuery, currentView, forceSearch, selectedMoods, fetchLibraryTracks]); // USE DEBOUNCED QUERY
 
     // Handle Enter key press - FIX AUTO SWITCH TO LIBRARY
     const handleSearchKeyPress = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -372,7 +376,7 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
         if (currentView === "library") {
             fetchLibraryTracks(1, true); // Reset to page 1 when view/genre changes
         }
-    }, [currentView, selectedGenre, fetchLibraryTracks]);
+    }, [currentView, selectedGenre, selectedMoods, fetchLibraryTracks]);
 
     // Separate effect for page changes to avoid duplicate calls - FIX DUPLICATE CALLS
     useEffect(() => {
