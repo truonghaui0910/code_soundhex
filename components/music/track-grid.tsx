@@ -107,6 +107,9 @@ const TrackGrid = memo(function TrackGrid({
         ],
     );
 
+    // Determine final className before using it
+    const finalClassName = gridCols || className;
+
     if (isLoading) {
         return (
             <div className={finalClassName}>
@@ -147,8 +150,6 @@ const TrackGrid = memo(function TrackGrid({
             }
         }
     }, [trackIds, isLoading, fetchBatchTrackLikesStatus]);
-
-    const finalClassName = gridCols || className;
 
     return (
         <div className={finalClassName}>

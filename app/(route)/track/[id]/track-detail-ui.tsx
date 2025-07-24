@@ -272,11 +272,29 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
                                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                                     More by {currentTrack.artist?.name}
                                 </h3>
-                                <TrackGrid tracks={artistTracks} isLoading={isLoadingArtistTracks} />
+                                <TrackGrid 
+                                    tracks={artistTracks} 
+                                    isLoading={isLoadingArtistTracks}
+                                    gridCols="grid grid-cols-1 gap-4"
+                                />
                             </CardContent>
                         </Card>
                     </div>
                 </div>
+
+                {/* Recommended Tracks Section */}
+                {recommendedTracks.length > 0 && (
+                    <section className="mt-12">
+                        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+                            Recommended for you
+                        </h2>
+                        <TrackGrid 
+                            tracks={recommendedTracks.slice(0, 5)} 
+                            isLoading={isLoadingRecommended}
+                            gridCols="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6"
+                        />
+                    </section>
+                )}
 
                 {/* Edit Track Modal */}
                 {userOwnsTrack && (
