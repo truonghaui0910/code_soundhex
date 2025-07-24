@@ -142,15 +142,6 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
         }
     }, [currentTrack?.id]);
 
-    useEffect(() => {
-        if (currentTrack?.id && currentTrack.id !== prevTrackIdRef.current) {
-            fetchRecommendedTracks();
-            fetchArtistTracks();
-            fetchTrackLikeStatus(currentTrack.id);
-            prevTrackIdRef.current = currentTrack.id;
-        }
-    }, [currentTrack?.id, fetchRecommendedTracks, fetchArtistTracks, fetchTrackLikeStatus]);
-
     const {
         currentTrack: audioCurrentTrack,
         isPlaying,
@@ -160,6 +151,15 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
     } = useAudioPlayer();
     const { downloadTrack, isDownloading, isTrackDownloading } = useDownload();
     const { getTrackLikeStatus, toggleTrackLike, fetchTrackLikeStatus } = useLikesFollows();
+
+    useEffect(() => {
+        if (currentTrack?.id && currentTrack.id !== prevTrackIdRef.current) {
+            fetchRecommendedTracks();
+            fetchArtistTracks();
+            fetchTrackLikeStatus(currentTrack.id);
+            prevTrackIdRef.current = currentTrack.id;
+        }
+    }, [currentTrack?.id, fetchRecommendedTracks, fetchArtistTracks, fetchTrackLikeStatus]);
 
     const handleTrackPlay = useCallback(
         (selectedTrack: Track) => {
