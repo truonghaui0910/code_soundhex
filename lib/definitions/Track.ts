@@ -9,6 +9,7 @@ export interface Track {
   view_count?: number;
   custom_url?: string | null;
   mood?: string[] | null;
+  user_id:string|null;
   artist?: {
     id: number;
     name: string;

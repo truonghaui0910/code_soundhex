@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -24,10 +23,15 @@ interface EditTrackModalProps {
     onUpdate: (updatedTrack: Track) => void;
 }
 
-export function EditTrackModal({ track, isOpen, onClose, onUpdate }: EditTrackModalProps) {
+export function EditTrackModal({
+    track,
+    isOpen,
+    onClose,
+    onUpdate,
+}: EditTrackModalProps) {
     const [customUrl, setCustomUrl] = useState(track.custom_url || "");
     const [selectedMoods, setSelectedMoods] = useState<Set<string>>(
-        new Set(track.mood || [])
+        new Set(track.mood || []),
     );
     const [isLoading, setIsLoading] = useState(false);
     const [urlError, setUrlError] = useState("");
@@ -46,15 +50,19 @@ export function EditTrackModal({ track, isOpen, onClose, onUpdate }: EditTrackMo
         // Check format
         const urlRegex = /^[a-z0-9-]+$/;
         if (!urlRegex.test(url)) {
-            setUrlError("URL can only contain lowercase letters, numbers, and hyphens");
+            setUrlError(
+                "URL can only contain lowercase letters, numbers, and hyphens",
+            );
             return false;
         }
 
         // Check if URL is already taken (excluding current track)
         try {
-            const response = await fetch(`/api/tracks/check-url?custom_url=${encodeURIComponent(url)}&exclude_id=${track.id}`);
+            const response = await fetch(
+                `/api/tracks/check-url?custom_url=${encodeURIComponent(url)}&exclude_id=${track.id}`,
+            );
             const data = await response.json();
-            
+
             if (!data.available) {
                 setUrlError("This URL is already taken");
                 return false;
@@ -112,7 +120,7 @@ export function EditTrackModal({ track, isOpen, onClose, onUpdate }: EditTrackMo
             }
 
             const updatedTrack = await response.json();
-            
+
             showSuccess({
                 title: "Success!",
                 message: "Track updated successfully",
@@ -133,7 +141,7 @@ export function EditTrackModal({ track, isOpen, onClose, onUpdate }: EditTrackMo
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+            <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto bg-purple-900 border border-purple-700">
                 <DialogHeader>
                     <DialogTitle className="text-2xl font-bold">
                         Edit Track: {track.title}
@@ -157,7 +165,9 @@ export function EditTrackModal({ track, isOpen, onClose, onUpdate }: EditTrackMo
                             <Input
                                 id="custom_url"
                                 value={customUrl}
-                                onChange={(e) => handleCustomUrlChange(e.target.value)}
+                                onChange={(e) =>
+                                    handleCustomUrlChange(e.target.value)
+                                }
                                 placeholder="my-awesome-track"
                                 className="flex-1"
                             />
@@ -170,19 +180,21 @@ export function EditTrackModal({ track, isOpen, onClose, onUpdate }: EditTrackMo
                     {/* Mood Selection */}
                     <div className="space-y-4">
                         <div>
-                            <Label className="text-lg font-semibold">Mood Tags</Label>
+                            <Label className="text-lg font-semibold">
+                                Mood Tags
+                            </Label>
                             <p className="text-sm text-gray-500 mt-1">
                                 Select moods that best describe your track
                             </p>
                         </div>
-                        
+
                         <MoodGrid
                             selectedMoods={selectedMoods}
                             onMoodToggle={handleMoodToggle}
                             isModal={true}
                             className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"
                         />
-                        
+
                         {selectedMoods.size > 0 && (
                             <div className="text-sm text-gray-600">
                                 Selected: {Array.from(selectedMoods).join(", ")}
@@ -195,8 +207,8 @@ export function EditTrackModal({ track, isOpen, onClose, onUpdate }: EditTrackMo
                     <Button variant="outline" onClick={onClose}>
                         Cancel
                     </Button>
-                    <Button 
-                        onClick={handleSave} 
+                    <Button
+                        onClick={handleSave}
                         disabled={isLoading || !!urlError}
                         className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
                     >
