@@ -11,6 +11,7 @@ export async function GET(request: NextRequest) {
     const albumId = searchParams.get("albumId");
     const artistId = searchParams.get("artistId");
     const genre = searchParams.get("genre");
+    const moods = searchParams.get("moods");
     const limit = searchParams.get("limit");
     const page = searchParams.get("page");
     const search = searchParams.get("search");
@@ -37,17 +38,19 @@ export async function GET(request: NextRequest) {
     }
 
     // Check if this is a paginated request
-    if (page || search || (genre && genre !== 'all')) {
+    if (page || search || (genre && genre !== 'all') || moods) {
       const pageNum = page ? parseInt(page) : 1;
       const limitNum = limit ? parseInt(limit) : 50;
       const searchQuery = search || '';
       const genreFilter = genre || 'all';
+      const moodFilters = moods ? moods.split(',').filter(m => m.trim()) : [];
 
       const result = await TracksController.getTracksWithPagination({
         page: pageNum,
         limit: limitNum,
         search: searchQuery,
-        genre: genreFilter
+        genre: genreFilter,
+        moods: moodFilters
       });
 
       return NextResponse.json(result);

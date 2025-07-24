@@ -38,6 +38,8 @@ import { SearchSuggestions } from "@/components/music/SearchSuggestions";
 import { AlbumGrid } from "@/components/music/album-grid";
 import { ArtistGrid } from "@/components/music/artist-grid";
 import { TrackGrid } from "@/components/music/track-grid";
+import { MoodGrid } from "@/components/music/mood-grid";
+import { MoodFilterModal } from "@/components/music/mood-filter-modal";
 
 // Helper function to format time
 const formatDuration = (seconds: number | null) => {
@@ -98,6 +100,8 @@ interface MusicExplorerUIProps {
     setSearchQuery: (query: string) => void;
     selectedGenre: string;
     setSelectedGenre: (genre: string) => void;
+    selectedMoods: Set<string>;
+    setSelectedMoods: (moods: Set<string>) => void;
     currentView: "featured" | "library" | "upload" | "albums" | "artists";
     setCurrentView: (
         view: "featured" | "library" | "upload" | "albums" | "artists",
@@ -141,6 +145,8 @@ export function MusicExplorerUI({
     setSearchQuery,
     selectedGenre,
     setSelectedGenre,
+    selectedMoods,
+    setSelectedMoods,
     currentView,
     setCurrentView,
     isLoadingFeatured,
@@ -176,6 +182,15 @@ export function MusicExplorerUI({
     } = useAudioPlayer();
     const { downloadTrack, isTrackDownloading } = useDownload();
     const [showSuggestions, setShowSuggestions] = useState(false);
+    const [showMoodModal, setShowMoodModal] = useState(false);
+
+    const handleMoodFilterApply = (moods: Set<string>) => {
+        setSelectedMoods(moods);
+        // Auto switch to library view when moods are applied
+        if (moods.size > 0) {
+            setCurrentView("library");
+        }
+    };
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20">
@@ -323,6 +338,25 @@ export function MusicExplorerUI({
                                     </option>
                                 ))}
                             </select>
+
+                            {/* Moods Filter Button */}
+                            <Button
+                                variant="outline"
+                                onClick={() => setShowMoodModal(true)}
+                                className={`px-4 py-2 rounded-full text-sm font-medium ${
+                                    selectedMoods.size > 0 
+                                        ? "bg-purple-100 dark:bg-purple-900/20 border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300" 
+                                        : ""
+                                }`}
+                            >
+                                <Music className="mr-2 h-4 w-4" />
+                                Moods
+                                {selectedMoods.size > 0 && (
+                                    <span className="ml-2 bg-purple-500 text-white text-xs px-2 py-0.5 rounded-full">
+                                        {selectedMoods.size}
+                                    </span>
+                                )}
+                            </Button>
                         </div>
 
                         <div className="text-sm text-gray-600 dark:text-gray-400">
@@ -344,6 +378,8 @@ export function MusicExplorerUI({
             <div className="container mx-auto px-4 sm:px-6 pb-32 space-y-8 sm:space-y-16 pt-8 sm:pt-12">
                 {currentView === "featured" && (
                     <div className="space-y-16">
+                        
+
                         {/* Featured Tracks */}
                         <section>
                             <div className="flex items-center justify-between mb-8">
@@ -1116,6 +1152,14 @@ export function MusicExplorerUI({
 
                 {currentView === "upload" && <UploadRedirect />}
             </div>
+
+            {/* Mood Filter Modal */}
+            <MoodFilterModal
+                isOpen={showMoodModal}
+                onClose={() => setShowMoodModal(false)}
+                selectedMoods={selectedMoods}
+                onApply={handleMoodFilterApply}
+            />
         </div>
     );
 }

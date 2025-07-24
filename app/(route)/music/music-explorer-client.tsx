@@ -66,6 +66,7 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
     const [featuredArtists, setFeaturedArtists] = useState<FeaturedArtist[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedGenre, setSelectedGenre] = useState<string>("all");
+    const [selectedMoods, setSelectedMoods] = useState<Set<string>>(new Set());
     const [currentView, setCurrentView] = useState<
         "featured" | "library" | "albums" | "artists"
     >("featured");
@@ -114,7 +115,7 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
         if (searchTimeoutRef.current) {
             clearTimeout(searchTimeoutRef.current);
         }
-        
+
         searchTimeoutRef.current = setTimeout(() => {
             setDebouncedSearchQuery(searchQuery);
             setForceSearch(false); // RESET FORCE SEARCH WHEN DEBOUNCED
@@ -247,7 +248,7 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
                         ...artist,
                         tracksCount: artist.tracksCount || 0
                     }));
-                    
+
                     setAllArtists(artistsWithCount);
                     setTotalArtists(data.total || 0);
                     setArtistsTotalPages(data.totalPages || 0);
@@ -358,7 +359,7 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
             }
             setDebouncedSearchQuery(searchQuery);
             setForceSearch(true); // ADD THIS TO FORCE SEARCH
-            
+
             // AUTO SWITCH TO LIBRARY VIEW WHEN ENTER IS PRESSED - ADD THIS
             if (searchQuery.trim()) {
                 setCurrentView("library");
@@ -380,7 +381,7 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
             const timeoutId = setTimeout(() => {
                 fetchLibraryTracks(currentPage, false);
             }, 100);
-            
+
             return () => clearTimeout(timeoutId);
         }
     }, [currentPage, totalPages, currentView, fetchLibraryTracks]); // ADDED currentView check
@@ -609,6 +610,8 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
             setSearchQuery={setSearchQuery}
             selectedGenre={selectedGenre}
             setSelectedGenre={setSelectedGenre}
+            selectedMoods={selectedMoods}
+            setSelectedMoods={setSelectedMoods}
             currentView={currentView}
             setCurrentView={setCurrentView}
             isLoadingFeatured={isLoadingFeatured}
