@@ -139,7 +139,7 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
     );
 
     // Check if current user owns this track
-    const userOwnsTrack = user && currentTrack?.artist?.user_id === user.id;
+    const userOwnsTrack = user && currentTrack?.user_id === user.id;
     
     // Debug log
     useEffect(() => {
