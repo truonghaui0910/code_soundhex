@@ -28,13 +28,13 @@ interface Track {
     duration: number | null;
     custom_url: string | null;
     artist?: {
-        id: string | number;
+        id: number;
         name: string;
         custom_url: string | null;
         profile_image_url?: string | null;
     } | null;
     album?: {
-        id: string | number;
+        id: number;
         title: string;
         cover_image_url: string | null;
         custom_url: string | null;

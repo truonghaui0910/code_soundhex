@@ -19,9 +19,9 @@ export class TracksController {
       .from("tracks")
       .select(
         `
-        id, title, description, duration, file_url, source_type, created_at, view_count, custom_url,
-        artist:artist_id (id, name, profile_image_url, custom_url),
-        album:album_id (id, title, cover_image_url, custom_url),
+        id, title, description, duration, file_url, source_type, created_at, view_count, custom_url,user_id,
+        artist:artist_id (id, name, profile_image_url, custom_url,user_id),
+        album:album_id (id, title, cover_image_url, custom_url,user_id),
         genre:genre_id (id, name)
       `,
       )
@@ -50,8 +50,8 @@ export class TracksController {
       .select(
         `
         *, view_count, custom_url,
-        artist:artist_id(id, name, profile_image_url, custom_url),
-        album:album_id(id, title, cover_image_url, custom_url),
+        artist:artist_id(id, name, profile_image_url, custom_url,user_id),
+        album:album_id(id, title, cover_image_url, custom_url,user_id),
         genre:genre_id(id, name)
       `,
       )
@@ -80,9 +80,9 @@ export class TracksController {
       .from("tracks")
       .select(
         `
-        *, view_count, custom_url,
-        artist:artist_id(id, name, profile_image_url, custom_url),
-        album:album_id(id, title, cover_image_url),
+        *, view_count, custom_url,user_id,
+        artist:artist_id(id, name, profile_image_url, custom_url,user_id),
+        album:album_id(id, title, cover_image_url,user_id),
         genre:genre_id(id, name)
       `,
       )
@@ -111,9 +111,9 @@ export class TracksController {
       .from("tracks")
       .select(
         `
-        *, view_count, custom_url,
-        artist:artist_id(id, name, profile_image_url, custom_url),
-        album:album_id(id, title, cover_image_url),
+        *, view_count, custom_url,user_id,
+        artist:artist_id(id, name, profile_image_url, custom_url,user_id),
+        album:album_id(id, title, cover_image_url,user_id),
         genre:genre_id(id, name)
       `,
       )
@@ -148,7 +148,7 @@ export class TracksController {
     const { data, error } = await supabase
       .from("tracks")
       .select(
-        `id, title, description, duration, file_url, created_at, album_id, artist_id, genre_id, view_count`,
+        `id, title, description, duration, file_url, created_at, album_id, artist_id, genre_id, view_count,user_id,mood`,
       )
       .eq("album_id", albumId)
       .order("created_at", { ascending: false });
@@ -182,7 +182,7 @@ export class TracksController {
     if (artistIds.length > 0) {
       const { data: artistsData } = await supabase
         .from("artists")
-        .select("id, name, profile_image_url, custom_url")
+        .select("id, name, profile_image_url, custom_url,user_id")
         .in("id", artistIds);
       if (artistsData) {
         for (const artist of artistsData) {
@@ -197,7 +197,7 @@ export class TracksController {
     if (albumIds.length > 0) {
       const { data: albumsData } = await supabase
         .from("albums")
-        .select("id, title, cover_image_url")
+        .select("id, title, cover_image_url,user_id,custom_url")
         .in("id", albumIds);
       if (albumsData) {
         for (const album of albumsData) {
@@ -256,8 +256,8 @@ export class TracksController {
       .select(
         `
         *, view_count,
-        artist:artist_id(id, name),
-        album:album_id(id, name, cover_url),
+        artist:artist_id(id, name,profile_image_url,custom_url,user_id),
+        album:album_id(id, name, cover_image_url,user_id),
         genre:genre_id(id, name)
       `,
       )
@@ -439,23 +439,7 @@ export class TracksController {
     };
   }
 
-  static async getArtistByCustomUrl(customUrl: string): Promise<Artist | null> {
-    const supabase = createServerComponentClient<Database>({ cookies });
-    const { data: artist, error } = await supabase
-      .from("artists")
-      .select("*")
-      .eq("custom_url", customUrl)
-      .single();
 
-    if (error) {
-      if (error.code === "PGRST116") {
-        return null; // No rows found
-      }
-      throw error;
-    }
-
-    return artist;
-  }
 
   /**
    * Lấy thông tin một bài hát theo custom_url
