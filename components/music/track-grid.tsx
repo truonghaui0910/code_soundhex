@@ -76,7 +76,7 @@ const TrackGrid = memo(function TrackGrid({
 
     // OPTIMIZE trackIds to prevent unnecessary API calls - ADD THIS
     const trackIds = useMemo(() => {
-        if (!tracks || tracks.length === 0) return [];
+        if (!tracks || !Array.isArray(tracks) || tracks.length === 0) return [];
         return tracks.map((track) => track.id);
     }, [tracks]);
 
@@ -150,6 +150,18 @@ const TrackGrid = memo(function TrackGrid({
             }
         }
     }, [trackIds, isLoading, fetchBatchTrackLikesStatus]);
+
+    // Safety check for tracks
+    if (!tracks || !Array.isArray(tracks)) {
+        return (
+            <div className={finalClassName}>
+                <div className="text-center py-20">
+                    <Music className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                    <p className="text-gray-500">No tracks available</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className={finalClassName}>

@@ -59,9 +59,11 @@ interface MusicExplorerClientProps {
 }
 
 export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps) {
-    const [tracks] = useState<Track[]>(initialTracks);
+    // Add safety check for initialTracks
+    const safeInitialTracks = Array.isArray(initialTracks) ? initialTracks : [];
+    const [tracks] = useState<Track[]>(safeInitialTracks);
     // Use initialTracks as featured tracks (already sorted by view_count)
-    const [featuredTracks] = useState<Track[]>(initialTracks);
+    const [featuredTracks] = useState<Track[]>(safeInitialTracks);
     const [featuredAlbums, setFeaturedAlbums] = useState<FeaturedAlbum[]>([]);
     const [featuredArtists, setFeaturedArtists] = useState<FeaturedArtist[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
