@@ -55,7 +55,7 @@ export function MoodFilterModal({
 
     return (
         <Dialog open={isOpen} onOpenChange={handleClose}>
-            <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+            <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto bg-purple-900 border border-purple-700">
                 <DialogHeader>
                     <div className="flex items-center justify-between">
                         <div>

@@ -167,14 +167,14 @@ const MoodGrid = memo(function MoodGrid({
                                     }
                                 `}
                                 style={{
-                                    width: '160px',
-                                    height: '160px',
+                                    width: '120px',
+                                    height: '120px',
                                     clipPath: 'polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)'
                                 }}
                             >
                                 {/* Icon */}
                                 <div className="flex items-center justify-center h-full">
-                                    <IconComponent className="h-20 w-20 text-white drop-shadow-lg" />
+                                    <IconComponent className="h-16 w-16 text-white drop-shadow-lg" />
                                 </div>
                             </div>
                         </div>

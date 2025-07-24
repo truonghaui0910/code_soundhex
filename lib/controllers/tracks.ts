@@ -300,13 +300,15 @@ export class TracksController {
     page = 1,
     limit = 50,
     search = '',
-    genre = 'all'
+    genre = 'all',
+    moods = []
   }: {
     page?: number;
     limit?: number;
     search?: string;
     genre?: string;
-  }): Promise<{ tracks: Track[]; total: number; totalPages: number }> {
+    moods?: string[];
+  } = {}) {
     const supabase = createServerComponentClient<Database>({ cookies });
 
     // Calculate offset
@@ -368,6 +370,12 @@ export class TracksController {
       if (genreData) {
         query = query.eq("genre_id", genreData.id);
       }
+    }
+
+    // Apply mood filtering
+    if (moods && moods.length > 0) {
+      // Use overlap operator to check if any of the selected moods match
+      query = query.overlaps('mood', moods);
     }
 
     // Apply pagination and ordering
