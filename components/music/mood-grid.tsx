@@ -135,15 +135,17 @@ const MoodGrid = memo(function MoodGrid({
             {moods.map((mood) => {
                 const IconComponent = mood.icon;
                 return (
-                    <div key={mood.id} className="group text-center">
+                    <div 
+                        key={mood.id} 
+                        className="group text-center cursor-pointer transition-all duration-300 rounded-2xl p-4 hover:bg-white/20"
+                        onClick={() => handleMoodClick(mood)}
+                    >
                         <div className="relative mb-4 flex justify-center">
-                            <Button
-                                onClick={() => handleMoodClick(mood)}
+                            <div
                                 className={`
-                                    relative p-0 border-none shadow-lg 
-                                    hover:shadow-xl transition-all duration-300 transform 
-                                    hover:-translate-y-1 hover:scale-105 
-                                    ${mood.bgColor} hover:brightness-110
+                                    relative shadow-lg transition-all duration-300 transform 
+                                    group-hover:scale-105 
+                                    ${mood.bgColor}
                                     ${selectedMood === mood.id ? 'ring-4 ring-purple-500 ring-offset-2' : ''}
                                 `}
                                 style={{
@@ -152,27 +154,11 @@ const MoodGrid = memo(function MoodGrid({
                                     clipPath: 'polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)'
                                 }}
                             >
-                                {/* Hexagonal background overlay for better icon visibility */}
-                                <div 
-                                    className="absolute inset-0 bg-black/10 backdrop-blur-sm"
-                                    style={{
-                                        clipPath: 'polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)'
-                                    }}
-                                />
-                                
                                 {/* Icon */}
-                                <div className="relative z-10 flex items-center justify-center h-full">
-                                    <IconComponent className="h-12 w-12 text-white drop-shadow-lg" />
+                                <div className="flex items-center justify-center h-full">
+                                    <IconComponent className="h-16 w-16 text-white drop-shadow-lg" />
                                 </div>
-
-                                {/* Hover effect overlay */}
-                                <div 
-                                    className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                                    style={{
-                                        clipPath: 'polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)'
-                                    }}
-                                />
-                            </Button>
+                            </div>
                         </div>
                         
                         <div className="space-y-1">
