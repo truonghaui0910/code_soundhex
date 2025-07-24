@@ -66,6 +66,7 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
     const [featuredArtists, setFeaturedArtists] = useState<FeaturedArtist[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedGenre, setSelectedGenre] = useState<string>("all");
+    const [selectedMoods, setSelectedMoods] = useState<Set<string>>(new Set());
     const [currentView, setCurrentView] = useState<
         "featured" | "library" | "albums" | "artists"
     >("featured");
@@ -609,6 +610,8 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
             setSearchQuery={setSearchQuery}
             selectedGenre={selectedGenre}
             setSelectedGenre={setSelectedGenre}
+            selectedMoods={selectedMoods}
+            setSelectedMoods={setSelectedMoods}
             currentView={currentView}
             setCurrentView={setCurrentView}
             isLoadingFeatured={isLoadingFeatured}

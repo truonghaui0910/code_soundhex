@@ -28,6 +28,9 @@ interface Mood {
 
 interface MoodGridProps {
     onMoodSelect?: (mood: Mood) => void;
+    selectedMoods?: Set<string>;
+    onMoodToggle?: (moodId: string) => void;
+    isModal?: boolean;
     className?: string;
 }
 
@@ -120,14 +123,21 @@ const moods: Mood[] = [
 
 const MoodGrid = memo(function MoodGrid({ 
     onMoodSelect,
+    selectedMoods = new Set(),
+    onMoodToggle,
+    isModal = false,
     className = "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"
 }: MoodGridProps) {
     const [selectedMood, setSelectedMood] = useState<string | null>(null);
 
     const handleMoodClick = (mood: Mood) => {
-        setSelectedMood(mood.id);
-        onMoodSelect?.(mood);
-        console.log(`Selected mood: ${mood.name}`);
+        if (isModal && onMoodToggle) {
+            onMoodToggle(mood.id);
+        } else {
+            setSelectedMood(mood.id);
+            onMoodSelect?.(mood);
+            console.log(`Selected mood: ${mood.name}`);
+        }
     };
 
     return (
@@ -137,7 +147,11 @@ const MoodGrid = memo(function MoodGrid({
                 return (
                     <div 
                         key={mood.id} 
-                        className="group text-center cursor-pointer transition-all duration-300 rounded-2xl p-4 hover:bg-white/20"
+                        className={`group text-center cursor-pointer transition-all duration-300 rounded-2xl p-4 ${
+                            isModal && selectedMoods.has(mood.id) 
+                                ? 'bg-white/10' 
+                                : 'hover:bg-white/20'
+                        }`}
                         onClick={() => handleMoodClick(mood)}
                     >
                         <div className="relative mb-4 flex justify-center">
@@ -146,7 +160,11 @@ const MoodGrid = memo(function MoodGrid({
                                     relative shadow-lg transition-all duration-300 transform 
                                     group-hover:scale-105 
                                     ${mood.bgColor}
-                                    ${selectedMood === mood.id ? 'ring-4 ring-purple-500 ring-offset-2' : ''}
+                                    ${
+                                        isModal 
+                                            ? selectedMoods.has(mood.id) ? 'ring-4 ring-purple-500 ring-offset-2' : ''
+                                            : selectedMood === mood.id ? 'ring-4 ring-purple-500 ring-offset-2' : ''
+                                    }
                                 `}
                                 style={{
                                     width: '160px',
@@ -164,9 +182,14 @@ const MoodGrid = memo(function MoodGrid({
                         <div className="space-y-1">
                             <h3 className={`
                                 font-bold text-sm sm:text-base transition-colors truncate
-                                ${selectedMood === mood.id 
-                                    ? 'text-purple-600 dark:text-purple-400' 
-                                    : `${mood.textColor} dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400`
+                                ${
+                                    isModal
+                                        ? selectedMoods.has(mood.id)
+                                            ? 'text-purple-600 dark:text-purple-400'
+                                            : `${mood.textColor} dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400`
+                                        : selectedMood === mood.id 
+                                            ? 'text-purple-600 dark:text-purple-400' 
+                                            : `${mood.textColor} dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400`
                                 }
                             `}>
                                 {mood.name}
