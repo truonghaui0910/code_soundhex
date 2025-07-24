@@ -276,6 +276,7 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
                                     tracks={artistTracks} 
                                     isLoading={isLoadingArtistTracks}
                                     gridCols="grid grid-cols-1 gap-4"
+                                    loadingCount={5}
                                 />
                             </CardContent>
                         </Card>
