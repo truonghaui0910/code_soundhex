@@ -1,25 +1,29 @@
 export interface Track {
   id: number;
   title: string;
-  description?: string;
-  duration: number | null;
-  file_url?: string;
-  audio_file_url?: string;
+  description?: string | null;
+  duration?: number | null;
+  file_url?: string | null;
+  source_type?: string | null;
+  created_at?: string | null;
   view_count?: number;
   custom_url?: string | null;
+  mood?: string[] | null;
   artist?: {
-    id: string | number;
+    id: number;
     name: string;
-    custom_url: string | null;
     profile_image_url?: string | null;
-  } | null;
+    custom_url?: string | null;
+    user_id?: string;
+  };
   album?: {
-    id: string | number;
+    id: number;
     title: string;
     cover_image_url?: string | null;
     custom_url?: string | null;
-  } | null;
+  };
   genre?: {
+    id: number;
     name: string;
   };
 }
