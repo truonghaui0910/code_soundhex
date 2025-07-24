@@ -347,8 +347,14 @@ export default function TracksListLight({ tracks, className = "" }: TracksListLi
                     ref={(el) => {
                       menuRefs.current[track.id] = el;
                     }}
-                    className={`absolute right-0 mt-2 w-80 z-[100] bg-purple-900 border border-purple-700 shadow-2xl rounded-xl overflow-hidden ${openMenuId === track.id ? '' : 'hidden'
+                    className={`absolute right-0 mt-2 w-80 z-[9999] bg-purple-900 border border-purple-700 shadow-2xl rounded-xl overflow-hidden ${openMenuId === track.id ? '' : 'hidden'
                       }`}
+                    style={{
+                      position: 'absolute',
+                      top: '100%',
+                      right: '0',
+                      zIndex: 9999
+                    }}
                   >
                     {/* Header Section */}
                     <div className="p-4 border-b border-purple-700">
