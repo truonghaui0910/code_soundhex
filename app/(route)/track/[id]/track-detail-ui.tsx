@@ -91,16 +91,19 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
             trackId: currentTrack.id,
             trackTitle: currentTrack.title,
             artistId: currentTrack.artist?.id,
-            artistName: currentTrack.artist?.name
+            artistName: currentTrack.artist?.name,
         });
 
         try {
             setIsLoadingArtistTracks(true);
             const apiUrl = `/api/tracks/${currentTrack.id}/artist-tracks?limit=20`;
             console.log("🔍 fetchArtistTracks - API URL:", apiUrl);
-            
+
             const response = await fetch(apiUrl);
-            console.log("🔍 fetchArtistTracks - Response status:", response.status);
+            console.log(
+                "🔍 fetchArtistTracks - Response status:",
+                response.status,
+            );
 
             if (response.ok) {
                 const data = await response.json();
@@ -110,18 +113,19 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
                     dataType: typeof data,
                     firstTrack: data?.[0],
                     currentTrackId: currentTrack.id,
-                    allTrackIds: data?.map((t: any) => t.id) || []
+                    allTrackIds: data?.map((t: any) => t.id) || [],
                 });
 
                 // Filter out current track
-                const filteredTracks = Array.isArray(data) 
-                    ? data.filter(track => track.id !== currentTrack.id)
+                const filteredTracks = Array.isArray(data)
+                    ? data.filter((track) => track.id !== currentTrack.id)
                     : [];
-                
+
                 console.log("🔍 fetchArtistTracks - After filtering:", {
                     originalCount: data?.length || 0,
                     filteredCount: filteredTracks.length,
-                    removedCurrentTrack: (data?.length || 0) !== filteredTracks.length
+                    removedCurrentTrack:
+                        (data?.length || 0) !== filteredTracks.length,
                 });
 
                 setArtistTracks(filteredTracks);
@@ -130,7 +134,7 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
                 console.error("🔍 fetchArtistTracks - Failed to fetch:", {
                     status: response.status,
                     statusText: response.statusText,
-                    errorText
+                    errorText,
                 });
                 setArtistTracks([]);
             }
@@ -150,7 +154,8 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
         togglePlayPause,
     } = useAudioPlayer();
     const { downloadTrack, isDownloading, isTrackDownloading } = useDownload();
-    const { getTrackLikeStatus, toggleTrackLike, fetchTrackLikeStatus } = useLikesFollows();
+    const { getTrackLikeStatus, toggleTrackLike, fetchTrackLikeStatus } =
+        useLikesFollows();
 
     useEffect(() => {
         if (currentTrack?.id && currentTrack.id !== prevTrackIdRef.current) {
@@ -159,7 +164,12 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
             fetchTrackLikeStatus(currentTrack.id);
             prevTrackIdRef.current = currentTrack.id;
         }
-    }, [currentTrack?.id, fetchRecommendedTracks, fetchArtistTracks, fetchTrackLikeStatus]);
+    }, [
+        currentTrack?.id,
+        fetchRecommendedTracks,
+        fetchArtistTracks,
+        fetchTrackLikeStatus,
+    ]);
 
     const handleTrackPlay = useCallback(
         (selectedTrack: Track) => {
@@ -195,15 +205,18 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
             trackId: currentTrack?.id,
             mood: currentTrack?.mood,
             moodType: typeof currentTrack?.mood,
-            moodLength: currentTrack?.mood?.length
+            moodLength: currentTrack?.mood?.length,
         });
     }, [user, currentTrack, userOwnsTrack]);
 
     const handleTrackUpdate = (updatedTrack: Track) => {
         setCurrentTrack(updatedTrack);
-        
+
         // If custom_url changed, redirect to new URL
-        if (updatedTrack.custom_url && updatedTrack.custom_url !== track.custom_url) {
+        if (
+            updatedTrack.custom_url &&
+            updatedTrack.custom_url !== track.custom_url
+        ) {
             router.push(`/track/${updatedTrack.custom_url}`);
         }
     };
@@ -314,41 +327,52 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
                                         <span className="text-sm font-medium">
                                             {currentTrack.view_count
                                                 ? currentTrack.view_count.toLocaleString()
-                                                : "0"} views
+                                                : "0"}{" "}
+                                            views
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-1">
                                         <Heart className="h-4 w-4" />
                                         <span className="text-sm font-medium">
-                                            {getTrackLikeStatus(currentTrack.id).totalLikes || 0} likes
+                                            {getTrackLikeStatus(currentTrack.id)
+                                                .totalLikes || 0}{" "}
+                                            likes
                                         </span>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Mood Tags Display */}
-                            {currentTrack.mood && currentTrack.mood.length > 0 && (
-                                <div className="mt-4">
-                                    <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                                        Mood & Vibe
-                                    </h4>
-                                    <div className="flex flex-wrap gap-2">
-                                        {currentTrack.mood.map((mood, index) => (
-                                            <div
-                                                key={index}
-                                                className="relative group"
-                                            >
-                                                <div className="px-4 py-2 rounded-full bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-200 dark:border-purple-700/50 backdrop-blur-sm hover:from-purple-500/20 hover:to-pink-500/20 transition-all duration-300">
-                                                    <span className="text-sm font-medium text-purple-700 dark:text-purple-300">
-                                                        {mood.charAt(0).toUpperCase() + mood.slice(1)}
-                                                    </span>
-                                                </div>
-                                                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500/5 to-pink-500/5 blur-sm group-hover:blur-md transition-all duration-300"></div>
-                                            </div>
-                                        ))}
+                            {currentTrack.mood &&
+                                currentTrack.mood.length > 0 && (
+                                    <div className="mt-4">
+                                        <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                                            Mood & Vibe
+                                        </h4>
+                                        <div className="flex flex-wrap gap-2">
+                                            {currentTrack.mood.map(
+                                                (mood, index) => (
+                                                    <div
+                                                        key={index}
+                                                        className="relative group"
+                                                    >
+                                                        <div className="px-4 py-2 rounded-full bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-200 dark:border-purple-700/50 backdrop-blur-sm hover:from-purple-500/20 hover:to-pink-500/20 transition-all duration-300">
+                                                            <span className="text-sm font-medium text-purple-700 dark:text-purple-300">
+                                                                {mood
+                                                                    .charAt(0)
+                                                                    .toUpperCase() +
+                                                                    mood.slice(
+                                                                        1,
+                                                                    )}
+                                                            </span>
+                                                        </div>
+                                                        <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500/5 to-pink-500/5 blur-sm group-hover:blur-md transition-all duration-300"></div>
+                                                    </div>
+                                                ),
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
-                            )}
+                                )}
                         </div>
 
                         <Separator className="my-4" />
@@ -434,12 +458,12 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
 
                     {/* Related Content */}
                     <div>
-                        <Card className="w-full">
-                            <CardContent className="p-4">
-                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                                    More by {currentTrack.artist?.name}
-                                </h3>
-                                {(() => {
+                        {/* <Card className="w-full"> */}
+                        {/* <CardContent className="p-4"> */}
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                            More by {currentTrack.artist?.name}
+                        </h3>
+                        {/* {(() => {
                                     console.log("🔍 UI Debug - Artist tracks section:", {
                                         isLoadingArtistTracks,
                                         artistTracksLength: artistTracks.length,
@@ -450,54 +474,67 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
                                             .map(t => ({ id: t.id, title: t.title }))
                                     });
                                     return null;
-                                })()}
-                                {!isLoadingArtistTracks &&
-                                Array.isArray(artistTracks) &&
-                                artistTracks.length > 0 ? (
-                                    <TracksListLight
-                                        tracks={artistTracks
-                                            .filter(track => track && track.id && track.id !== currentTrack.id) // Exclude current track
-                                            .slice(0, 10)
-                                            .map((track) => ({
-                                                id: track.id,
-                                                title: track.title,
-                                                custom_url: track.custom_url,
-                                                artist: {
-                                                    id: track.artist?.id || 0,
-                                                    name: track.artist?.name || "Unknown Artist",
-                                                    profile_image_url: track.artist?.profile_image_url,
-                                                    custom_url: track.artist?.custom_url,
-                                                },
-                                                album: track.album ? {
-                                                    id: track.album.id,
-                                                    title: track.album.title,
-                                                    cover_image_url: track.album.cover_image_url,
-                                                    custom_url: track.album.custom_url,
-                                                } : undefined,
-                                                duration: track.duration,
-                                                file_url: track.file_url,
-                                                view_count: track.view_count,
-                                            }))}
-                                        className="max-h-96 overflow-y-auto"
-                                    />
-                                ) : isLoadingArtistTracks ? (
-                                    <div className="flex items-center justify-center p-8">
-                                        <Loader2 className="h-8 w-8 animate-spin" />
-                                        <span className="ml-2 text-gray-500">Loading artist tracks...</span>
-                                    </div>
-                                ) : (
-                                    <div className="text-center py-8">
-                                        <Music className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                                        <p className="text-gray-500">
-                                            No other tracks by this artist
-                                        </p>
-                                        <p className="text-xs text-gray-400 mt-2">
-                                            Debug: {artistTracks.length} tracks found, loading: {isLoadingArtistTracks.toString()}
-                                        </p>
-                                    </div>
-                                )}
-                            </CardContent>
-                        </Card>
+                                })()} */}
+                        {!isLoadingArtistTracks &&
+                        Array.isArray(artistTracks) &&
+                        artistTracks.length > 0 ? (
+                            <TracksListLight
+                                tracks={artistTracks
+                                    .filter(
+                                        (track) =>
+                                            track &&
+                                            track.id &&
+                                            track.id !== currentTrack.id,
+                                    ) // Exclude current track
+                                    .slice(0, 10)
+                                    .map((track) => ({
+                                        id: track.id,
+                                        title: track.title,
+                                        custom_url: track.custom_url,
+                                        artist: {
+                                            id: track.artist?.id || 0,
+                                            name:
+                                                track.artist?.name ||
+                                                "Unknown Artist",
+                                            profile_image_url:
+                                                track.artist?.profile_image_url,
+                                            custom_url:
+                                                track.artist?.custom_url,
+                                        },
+                                        album: track.album
+                                            ? {
+                                                  id: track.album.id,
+                                                  title: track.album.title,
+                                                  cover_image_url:
+                                                      track.album
+                                                          .cover_image_url,
+                                                  custom_url:
+                                                      track.album.custom_url,
+                                              }
+                                            : undefined,
+                                        duration: track.duration,
+                                        file_url: track.file_url,
+                                        view_count: track.view_count,
+                                    }))}
+                                className="max-h-96 overflow-y-auto"
+                            />
+                        ) : isLoadingArtistTracks ? (
+                            <div className="flex items-center justify-center p-8">
+                                <Loader2 className="h-8 w-8 animate-spin" />
+                                <span className="ml-2 text-gray-500">
+                                    Loading artist tracks...
+                                </span>
+                            </div>
+                        ) : (
+                            <div className="text-center py-8">
+                                <Music className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                                <p className="text-gray-500">
+                                    No other tracks by this artist
+                                </p>
+                            </div>
+                        )}
+                        {/* </CardContent>
+                        </Card> */}
                     </div>
                 </div>
 
@@ -506,9 +543,9 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
                     <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
                         Recommended Songs
                     </h2>
-                    {!isLoadingRecommended && 
-                     Array.isArray(recommendedTracks) && 
-                     recommendedTracks.length > 0 ? (
+                    {!isLoadingRecommended &&
+                    Array.isArray(recommendedTracks) &&
+                    recommendedTracks.length > 0 ? (
                         <TrackGrid
                             tracks={recommendedTracks.slice(0, 12)}
                             isLoading={isLoadingRecommended}
@@ -517,12 +554,16 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
                     ) : isLoadingRecommended ? (
                         <div className="flex items-center justify-center p-8">
                             <Loader2 className="h-8 w-8 animate-spin" />
-                            <span className="ml-2 text-gray-500">Loading recommendations...</span>
+                            <span className="ml-2 text-gray-500">
+                                Loading recommendations...
+                            </span>
                         </div>
                     ) : (
                         <div className="text-center py-8">
                             <Music className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                            <p className="text-gray-500">No recommendations available</p>
+                            <p className="text-gray-500">
+                                No recommendations available
+                            </p>
                         </div>
                     )}
                 </section>
