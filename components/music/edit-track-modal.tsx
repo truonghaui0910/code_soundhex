@@ -107,9 +107,9 @@ export function EditTrackModal({
                 custom_url: customUrl || null,
                 mood: Array.from(selectedMoods),
             };
-            
+
             console.log("Updating track with data:", updateData);
-            
+
             const response = await fetch(`/api/tracks/${track.id}`, {
                 method: "PATCH",
                 headers: {
@@ -159,11 +159,11 @@ export function EditTrackModal({
                     {/* Custom URL Section */}
                     <div className="space-y-2">
                         <Label htmlFor="custom_url">Custom URL</Label>
-                        <div className="text-sm text-gray-500 mb-2">
+                        <div className="text-sm text-muted-foreground mb-2">
                             Choose a custom URL for your track (optional)
                         </div>
                         <div className="flex items-center space-x-2">
-                            <span className="text-sm text-gray-500">
+                            <span className="text-sm text-white-500">
                                 soundhex.com/track/
                             </span>
                             <Input
@@ -187,7 +187,7 @@ export function EditTrackModal({
                             <Label className="text-lg font-semibold">
                                 Mood Tags
                             </Label>
-                            <p className="text-sm text-gray-500 mt-1">
+                            <p className="text-sm text-muted-foreground mt-1">
                                 Select moods that best describe your track
                             </p>
                         </div>
