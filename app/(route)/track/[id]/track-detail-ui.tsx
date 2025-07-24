@@ -27,6 +27,7 @@ import { Track } from "@/lib/definitions/Track";
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 import { useDownload } from "@/hooks/use-download";
 import { TrackGrid } from "@/components/music/track-grid";
+import TracksListLight from "@/components/music/tracks-list-light";
 import AddToPlaylist from "@/components/playlist/add-to-playlist";
 import { useLikesFollows } from "@/hooks/use-likes-follows";
 import { showSuccess } from "@/lib/services/notification-service";
@@ -139,6 +140,17 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
 
     // Check if current user owns this track
     const userOwnsTrack = user && currentTrack?.artist?.user_id === user.id;
+    
+    // Debug log
+    useEffect(() => {
+        console.log("Edit Track Debug:", {
+            hasUser: !!user,
+            userId: user?.id,
+            trackArtistUserId: currentTrack?.artist?.user_id,
+            userOwnsTrack,
+            artistData: currentTrack?.artist
+        });
+    }, [user, currentTrack, userOwnsTrack]);
 
     const handleTrackUpdate = (updatedTrack: Track) => {
         setCurrentTrack(updatedTrack);
@@ -326,12 +338,40 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
                                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                                     More by {currentTrack.artist?.name}
                                 </h3>
-                                <TrackGrid
-                                    tracks={artistTracks}
-                                    isLoading={isLoadingArtistTracks}
-                                    gridCols="grid grid-cols-2 gap-4"
-                                    loadingCount={4}
-                                />
+                                {!isLoadingArtistTracks && artistTracks.length > 0 ? (
+                                    <TracksListLight 
+                                        tracks={artistTracks.slice(0, 10).map(track => ({
+                                            id: track.id,
+                                            title: track.title,
+                                            custom_url: track.custom_url,
+                                            artist: {
+                                                id: track.artist?.id || 0,
+                                                name: track.artist?.name || "Unknown Artist",
+                                                profile_image_url: track.artist?.profile_image_url,
+                                                custom_url: track.artist?.custom_url,
+                                            },
+                                            album: track.album ? {
+                                                id: track.album.id,
+                                                title: track.album.title,
+                                                cover_image_url: track.album.cover_image_url,
+                                                custom_url: track.album.custom_url,
+                                            } : undefined,
+                                            duration: track.duration,
+                                            file_url: track.file_url,
+                                            view_count: track.view_count,
+                                        }))} 
+                                        className="max-h-96 overflow-y-auto"
+                                    />
+                                ) : isLoadingArtistTracks ? (
+                                    <div className="flex items-center justify-center p-8">
+                                        <Loader2 className="h-8 w-8 animate-spin" />
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-8">
+                                        <Music className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                                        <p className="text-gray-500">No other tracks by this artist</p>
+                                    </div>
+                                )}
                             </CardContent>
                         </Card>
                     </div>
