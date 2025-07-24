@@ -357,7 +357,7 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
                                                         key={index}
                                                         className="relative group"
                                                     >
-                                                        <div className="px-4 py-2 rounded-full bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-200 dark:border-purple-700/50 backdrop-blur-sm hover:from-purple-500/20 hover:to-pink-500/20 transition-all duration-300">
+                                                        <div className="px-4 py-1 rounded-full bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-200 dark:border-purple-700/50 backdrop-blur-sm hover:from-purple-500/20 hover:to-pink-500/20 transition-all duration-300">
                                                             <span className="text-sm font-medium text-purple-700 dark:text-purple-300">
                                                                 {mood
                                                                     .charAt(0)
@@ -459,23 +459,9 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
 
                     {/* Related Content */}
                     <div>
-                        {/* <Card className="w-full"> */}
-                        {/* <CardContent className="p-4"> */}
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                             More by {currentTrack.artist?.name}
                         </h3>
-                        {/* {(() => {
-                                    console.log("🔍 UI Debug - Artist tracks section:", {
-                                        isLoadingArtistTracks,
-                                        artistTracksLength: artistTracks.length,
-                                        currentTrackId: currentTrack.id,
-                                        artistTracks: artistTracks.map(t => ({ id: t.id, title: t.title })),
-                                        filteredTracks: artistTracks
-                                            .filter(track => track.id !== currentTrack.id)
-                                            .map(t => ({ id: t.id, title: t.title }))
-                                    });
-                                    return null;
-                                })()} */}
                         {!isLoadingArtistTracks &&
                         Array.isArray(artistTracks) &&
                         artistTracks.length > 0 ? (
@@ -487,7 +473,7 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
                                             track.id &&
                                             track.id !== currentTrack.id,
                                     ) // Exclude current track
-                                    .slice(0, 10)
+                                    .slice(0, 5)
                                     .map((track) => ({
                                         id: track.id,
                                         title: track.title,
@@ -517,7 +503,7 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
                                         file_url: track.file_url,
                                         view_count: track.view_count,
                                     }))}
-                                className="max-h-96 overflow-y-auto"
+                                className="overflow-y-auto"
                             />
                         ) : isLoadingArtistTracks ? (
                             <div className="flex items-center justify-center p-8">
@@ -534,8 +520,6 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
                                 </p>
                             </div>
                         )}
-                        {/* </CardContent>
-                        </Card> */}
                     </div>
                 </div>
 
