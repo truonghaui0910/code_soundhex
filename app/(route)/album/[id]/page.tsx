@@ -15,22 +15,21 @@ export default async function AlbumDetailPage({
   params: { id: string };
 }) {
   const { id } = params;
-  
+
   let album;
   let albumId: number;
 
   // Check if ID is numeric (old format) or custom URL
-  if (/^\d+$/.test(id)) {
+  album = await AlbumsController.getAlbumByCustomUrl(id);
+  if (!album && /^\d+$/.test(id)) {
     // Numeric ID
     albumId = parseInt(id);
     album = await AlbumsController.getAlbumById(albumId);
-  } else {
-    // Custom URL
-    album = await AlbumsController.getAlbumByCustomUrl(id);
-    if (album) {
-      albumId = album.id;
-    }
   }
+  if (album) {
+    albumId = album.id;
+  }
+
 
   if (!album) {
     notFound();

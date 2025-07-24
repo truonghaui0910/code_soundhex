@@ -69,7 +69,8 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
 
             if (response.ok) {
                 const data = await response.json();
-                setRecommendedTracks(data || []);
+                // API trả về { success: true, tracks: [...] }
+                setRecommendedTracks(data.tracks || []);
             } else {
                 setRecommendedTracks([]);
             }
@@ -459,11 +460,9 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
 
                     {/* Related Content */}
                     <div>
-
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                             More by {currentTrack.artist?.name}
                         </h3>
-
                         {!isLoadingArtistTracks &&
                         Array.isArray(artistTracks) &&
                         artistTracks.length > 0 ? (
@@ -475,7 +474,7 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
                                             track.id &&
                                             track.id !== currentTrack.id,
                                     ) // Exclude current track
-                                    .slice(0, 10)
+                                    .slice(0, 5)
                                     .map((track) => ({
                                         id: track.id,
                                         title: track.title,
@@ -505,7 +504,7 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
                                         file_url: track.file_url,
                                         view_count: track.view_count,
                                     }))}
-                                className="max-h-96 overflow-y-auto"
+                                className="overflow-y-auto"
                             />
                         ) : isLoadingArtistTracks ? (
                             <div className="flex items-center justify-center p-8">
@@ -536,7 +535,7 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
                         <TrackGridSm
                             tracks={recommendedTracks.slice(0, 12)}
                             isLoading={isLoadingRecommended}
-                            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4"
+                            // className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4"
                         />
                     ) : isLoadingRecommended ? (
                         <div className="flex items-center justify-center p-8">

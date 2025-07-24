@@ -147,10 +147,18 @@ export function EditTrackModal({
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 border border-purple-600/50 backdrop-blur-xl">
+                {/* <DialogHeader>
+                    <DialogTitle className="text-2xl font-bold text-white">
+                        Edit Track: {track.title}
+                    </DialogTitle>
+                    <DialogDescription className="text-purple-200">
+                        Update your track's custom URL and mood tags.
+                    </DialogDescription>
+                </DialogHeader> */}
                 <DialogHeader>
                     <div className="flex items-center justify-between">
                         <div>
-                            <DialogTitle className="text-2xl font-bold text-white">
+                            <DialogTitle className="text-2xl font-bold text-white-200">
                                 Edit Track: {track.title}
                             </DialogTitle>
                             <DialogDescription className="mt-2">
@@ -176,9 +184,7 @@ export function EditTrackModal({
                         >
                             Custom URL
                         </Label>
-                        {/* <div className="text-sm text-purple-200 mb-2">
-                            Choose a custom URL for your track (optional)
-                        </div> */}
+
                         <div className="flex items-center space-x-2">
                             <span className="text-sm text-purple-300 font-medium">
                                 soundhex.com/track/
@@ -216,14 +222,14 @@ export function EditTrackModal({
                             className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"
                         />
 
-                        {selectedMoods.size > 0 && (
+                        {/* {selectedMoods.size > 0 && (
                             <div className="text-sm text-purple-200 bg-purple-800/30 rounded-lg p-3 border border-purple-600/30">
                                 <span className="font-medium">
                                     Selected moods:
                                 </span>{" "}
                                 {Array.from(selectedMoods).join(", ")}
                             </div>
-                        )}
+                        )} */}
                     </div>
                 </div>
 

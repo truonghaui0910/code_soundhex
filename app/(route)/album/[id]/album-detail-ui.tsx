@@ -252,7 +252,6 @@ export function AlbumDetailUI({
           tracks={safeTracks}
           isLoading={tracksLoading}
           loadingCount={15}
-          onPlayAll={handlePlayAlbum}
         />
 
         {/* Recommended Albums Section */}

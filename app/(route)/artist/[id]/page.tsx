@@ -16,16 +16,15 @@ export default async function ArtistPage({ params }: ArtistPageProps) {
   let artistId: number;
 
   // Check if ID is numeric (old format) or custom URL
-  if (/^\d+$/.test(id)) {
+  artist = await ArtistsController.getArtistByCustomUrl(id);
+
+  if (!artist && /^\d+$/.test(id)) {
     // Numeric ID
     artistId = parseInt(id);
     artist = await ArtistsController.getArtistById(artistId);
-  } else {
-    // Custom URL
-    artist = await ArtistsController.getArtistByCustomUrl(id);
-    if (artist) {
-      artistId = artist.id;
-    }
+  } 
+  if (artist) {
+    artistId = artist.id;
   }
 
   if (!artist) {

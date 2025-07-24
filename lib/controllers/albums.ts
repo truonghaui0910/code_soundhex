@@ -210,7 +210,7 @@ export class AlbumsController {
   }
 
   static async getAlbumById(id: number): Promise<Album | null> {
-    console.log("🎵 AlbumsController.getAlbumById - Starting fetch for id:", id);
+    console.log("AlbumsController.getAlbumById - Starting fetch for id:", id);
     const supabase = createServerComponentClient<Database>({ cookies });
 
     const { data, error } = await supabase
@@ -230,7 +230,7 @@ export class AlbumsController {
       .single();
 
     if (error) {
-      console.error("❌ Error fetching album:", error);
+      console.error("Error fetching album:", error);
       return null;
     }
 
@@ -248,7 +248,7 @@ export class AlbumsController {
   }
 
   static async getAlbumByCustomUrl(customUrl: string): Promise<Album | null> {
-    console.log("🎵 AlbumsController.getAlbumByCustomUrl - Starting fetch for custom_url:", customUrl);
+    console.log("AlbumsController.getAlbumByCustomUrl - Starting fetch for custom_url:", customUrl);
     const supabase = createServerComponentClient<Database>({ cookies });
 
     const { data, error } = await supabase
@@ -271,7 +271,7 @@ export class AlbumsController {
       if (error.code === 'PGRST116') {
         return null; // No rows found
       }
-      console.error("❌ Error fetching album by custom_url:", error);
+      console.error("Error fetching album by custom_url:", error);
       return null;
     }
 
