@@ -110,6 +110,22 @@ const TrackGrid = memo(function TrackGrid({
     // Determine final className before using it
     const finalClassName = gridCols || className;
 
+    // OPTIMIZE batch fetch to prevent duplicate API calls - FIX THIS
+    useEffect(() => {
+        if (!isLoading && trackIds.length > 0) {
+            // PREVENT DUPLICATE API CALLS - ADD THIS CHECK
+            const currentTrackIdsString = trackIds.sort().join(",");
+            const prevTrackIdsString = prevTrackIdsRef.current.sort().join(",");
+
+            // Only call API if trackIds actually changed
+            if (currentTrackIdsString !== prevTrackIdsString) {
+                console.log("TrackGrid - Fetching likes for tracks:", trackIds);
+                fetchBatchTrackLikesStatus(trackIds);
+                prevTrackIdsRef.current = [...trackIds];
+            }
+        }
+    }, [trackIds, isLoading, fetchBatchTrackLikesStatus]);
+
     if (isLoading) {
         return (
             <div className={finalClassName}>
@@ -134,22 +150,6 @@ const TrackGrid = memo(function TrackGrid({
             </div>
         );
     }
-
-    // OPTIMIZE batch fetch to prevent duplicate API calls - FIX THIS
-    useEffect(() => {
-        if (!isLoading && trackIds.length > 0) {
-            // PREVENT DUPLICATE API CALLS - ADD THIS CHECK
-            const currentTrackIdsString = trackIds.sort().join(",");
-            const prevTrackIdsString = prevTrackIdsRef.current.sort().join(",");
-
-            // Only call API if trackIds actually changed
-            if (currentTrackIdsString !== prevTrackIdsString) {
-                console.log("TrackGrid - Fetching likes for tracks:", trackIds);
-                fetchBatchTrackLikesStatus(trackIds);
-                prevTrackIdsRef.current = [...trackIds];
-            }
-        }
-    }, [trackIds, isLoading, fetchBatchTrackLikesStatus]);
 
     // Safety check for tracks
     if (!tracks || !Array.isArray(tracks)) {
