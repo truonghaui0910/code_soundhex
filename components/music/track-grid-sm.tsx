@@ -151,19 +151,15 @@ export const TrackGridSm = React.memo(function TrackGridSm({
     if (isLoading) {
         return (
             <div className={className}>
-                {Array.from({ length: Math.ceil(loadingCount / 3) }).map((_, rowIndex) => (
-                    <div key={rowIndex} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {Array.from({ length: 3 }).map((_, colIndex) => (
-                            <div key={colIndex} className="flex items-center gap-4 p-6 bg-white/50 dark:bg-gray-800/50 rounded-xl animate-pulse">
-                                <div className="w-32 h-32 bg-gray-200 dark:bg-gray-700 rounded-lg flex-shrink-0"></div>
-                                <div className="flex-1 min-w-0 px-2">
-                                    <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
-                                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
-                                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
-                                </div>
-                                <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                            </div>
-                        ))}
+                {Array.from({ length: loadingCount }).map((_, index) => (
+                    <div key={index} className="flex items-center gap-4 p-4 bg-white/50 dark:bg-gray-800/50 rounded-xl animate-pulse border border-gray-200/50 dark:border-gray-700/50">
+                        <div className="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-lg flex-shrink-0"></div>
+                        <div className="flex-1 min-w-0">
+                            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
+                            <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
+                            <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+                        </div>
+                        <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
                     </div>
                 ))}
             </div>
@@ -181,26 +177,18 @@ export const TrackGridSm = React.memo(function TrackGridSm({
         );
     }
 
-    // Group tracks into groups of 3 for 3-column layout
-    const trackGroups = [];
-    for (let i = 0; i < tracks.length; i += 3) {
-        trackGroups.push(tracks.slice(i, i + 3));
-    }
-
     return (
         <div className={className}>
-            {trackGroups.map((group, rowIndex) => (
-                <div key={rowIndex} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {group.map((track) => {
-                        const trackLikeStatus = getTrackLikeStatus(track.id);
+            {tracks.map((track) => {
+                const trackLikeStatus = getTrackLikeStatus(track.id);
                         
-                        return (
-                        <div
-                            key={track.id}
-                            className="group flex items-center gap-2 p-3 rounded-xl hover:bg-white/10 dark:hover:bg-white/10 transition-all duration-200"
-                        >
+                return (
+                    <div
+                        key={track.id}
+                        className="group flex items-center gap-4 p-4 rounded-xl hover:bg-white/10 dark:hover:bg-white/10 transition-all duration-200 border border-gray-200/50 dark:border-gray-700/50"
+                    >
                             {/* Album Cover */}
-                            <div className="relative w-32 h-32 flex-shrink-0">
+                            <div className="relative w-16 h-16 flex-shrink-0">
                                 {track.album?.cover_image_url ? (
                                     <Image
                                         src={track.album.cover_image_url}
@@ -373,10 +361,8 @@ export const TrackGridSm = React.memo(function TrackGridSm({
                                 </div>
                             </div>
                         </div>
-                        );
-                    })}
-                </div>
-            ))}
+                );
+            })}
         </div>
     );
 });
