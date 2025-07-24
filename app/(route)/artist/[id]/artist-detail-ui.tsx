@@ -185,19 +185,7 @@ export function ArtistDetailUI({ artist, tracks, albums }: ArtistDetailUIProps) 
     }
   };
 
-  const handlePlayTrack = (track: Track) => {
-    // If this track is currently playing, just toggle play/pause
-    if (currentTrack?.id === track.id && isPlaying) {
-      togglePlayPause();
-      return;
-    }
-
-    // Otherwise, set the track list and play the new track
-    setTrackList(tracks);
-    setTimeout(() => {
-      playTrack(track);
-    }, 50);
-  };
+  // TrackGridSm now handles its own play logic, no need for custom handler
 
   const handleArtistUpdate = (updatedArtist: Artist) => {
     setCurrentArtist(updatedArtist);
@@ -425,7 +413,6 @@ export function ArtistDetailUI({ artist, tracks, albums }: ArtistDetailUIProps) 
             </div>
             <TrackGridSm 
               tracks={tracks}
-              onTrackPlay={handlePlayTrack}
             />
           </section>
         )}

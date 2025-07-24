@@ -533,29 +533,7 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
                     Array.isArray(recommendedTracks) &&
                     recommendedTracks.length > 0 ? (
                         <TrackGridSm
-                            tracks={recommendedTracks.slice(0, 12).map((track) => ({
-                                id: track.id,
-                                title: track.title,
-                                duration: track.duration ?? null,
-                                custom_url: track.custom_url ?? null,
-                                artist: track.artist ? {
-                                    id: track.artist.id,
-                                    name: track.artist.name,
-                                    custom_url: track.artist.custom_url ?? null,
-                                    profile_image_url: track.artist.profile_image_url ?? null,
-                                } : null,
-                                album: track.album ? {
-                                    id: track.album.id,
-                                    title: track.album.title,
-                                    cover_image_url: track.album.cover_image_url ?? null,
-                                    custom_url: track.album.custom_url ?? null,
-                                } : null,
-                                genre: track.genre ? {
-                                    id: track.genre.id,
-                                    name: track.genre.name,
-                                } : null,
-                                view_count: track.view_count,
-                            }))}
+                            tracks={recommendedTracks.slice(0, 12)}
                             isLoading={isLoadingRecommended}
                             // className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4"
                         />
