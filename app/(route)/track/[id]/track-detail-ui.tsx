@@ -159,7 +159,7 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
         togglePlayPause,
     } = useAudioPlayer();
     const { downloadTrack, isDownloading, isTrackDownloading } = useDownload();
-    const { getTrackLikeStatus, toggleTrackLike } = useLikesFollows();
+    const { getTrackLikeStatus, toggleTrackLike, fetchTrackLikeStatus } = useLikesFollows();
 
     const handleTrackPlay = useCallback(
         (selectedTrack: Track) => {
