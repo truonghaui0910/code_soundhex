@@ -103,15 +103,19 @@ export function EditTrackModal({
 
         setIsLoading(true);
         try {
+            const updateData = {
+                custom_url: customUrl || null,
+                mood: Array.from(selectedMoods),
+            };
+            
+            console.log("Updating track with data:", updateData);
+            
             const response = await fetch(`/api/tracks/${track.id}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({
-                    custom_url: customUrl || null,
-                    mood: Array.from(selectedMoods),
-                }),
+                body: JSON.stringify(updateData),
             });
 
             if (!response.ok) {

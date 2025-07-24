@@ -91,7 +91,16 @@ export async function PATCH(
     }
 
     if (mood !== undefined) {
-      updateData.mood = mood;
+      updateData.mood = Array.isArray(mood) ? mood : [];
+    }
+
+    console.log("PATCH Track - Update data:", updateData);
+
+    if (Object.keys(updateData).length === 0) {
+      return NextResponse.json(
+        { error: "No fields to update" },
+        { status: 400 }
+      );
     }
 
     // Update track

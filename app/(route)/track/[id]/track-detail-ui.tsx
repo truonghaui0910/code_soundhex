@@ -138,8 +138,8 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
         ],
     );
 
-    // Check if current user owns this track
-    const userOwnsTrack = user && currentTrack?.user_id === user.id;
+    // Check if current user owns this track (through artist relationship)
+    const userOwnsTrack = user && currentTrack?.artist?.user_id === user.id;
     
     // Debug log
     useEffect(() => {
@@ -339,29 +339,55 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
                                     More by {currentTrack.artist?.name}
                                 </h3>
                                 {!isLoadingArtistTracks && artistTracks.length > 0 ? (
-                                    <TracksListLight 
-                                        tracks={artistTracks.slice(0, 10).map(track => ({
-                                            id: track.id,
-                                            title: track.title,
-                                            custom_url: track.custom_url,
-                                            artist: {
-                                                id: track.artist?.id || 0,
-                                                name: track.artist?.name || "Unknown Artist",
-                                                profile_image_url: track.artist?.profile_image_url,
-                                                custom_url: track.artist?.custom_url,
-                                            },
-                                            album: track.album ? {
-                                                id: track.album.id,
-                                                title: track.album.title,
-                                                cover_image_url: track.album.cover_image_url,
-                                                custom_url: track.album.custom_url,
-                                            } : undefined,
-                                            duration: track.duration,
-                                            file_url: track.file_url,
-                                            view_count: track.view_count,
-                                        }))} 
-                                        className="max-h-96 overflow-y-auto"
-                                    />
+                                    <>
+                                        {console.log("TracksDetailUI - Artist tracks data:", {
+                                            count: artistTracks.length,
+                                            sample: artistTracks[0],
+                                            mapped: artistTracks.slice(0, 10).map(track => ({
+                                                id: track.id,
+                                                title: track.title,
+                                                custom_url: track.custom_url,
+                                                artist: {
+                                                    id: track.artist?.id || 0,
+                                                    name: track.artist?.name || "Unknown Artist",
+                                                    profile_image_url: track.artist?.profile_image_url,
+                                                    custom_url: track.artist?.custom_url,
+                                                },
+                                                album: track.album ? {
+                                                    id: track.album.id,
+                                                    title: track.album.title,
+                                                    cover_image_url: track.album.cover_image_url,
+                                                    custom_url: track.album.custom_url,
+                                                } : undefined,
+                                                duration: track.duration,
+                                                file_url: track.file_url,
+                                                view_count: track.view_count,
+                                            }))
+                                        })}
+                                        <TracksListLight 
+                                            tracks={artistTracks.slice(0, 10).map(track => ({
+                                                id: track.id,
+                                                title: track.title,
+                                                custom_url: track.custom_url,
+                                                artist: {
+                                                    id: track.artist?.id || 0,
+                                                    name: track.artist?.name || "Unknown Artist",
+                                                    profile_image_url: track.artist?.profile_image_url,
+                                                    custom_url: track.artist?.custom_url,
+                                                },
+                                                album: track.album ? {
+                                                    id: track.album.id,
+                                                    title: track.album.title,
+                                                    cover_image_url: track.album.cover_image_url,
+                                                    custom_url: track.album.custom_url,
+                                                } : undefined,
+                                                duration: track.duration,
+                                                file_url: track.file_url,
+                                                view_count: track.view_count,
+                                            }))} 
+                                            className="max-h-96 overflow-y-auto"
+                                        />
+                                    </>
                                 ) : isLoadingArtistTracks ? (
                                     <div className="flex items-center justify-center p-8">
                                         <Loader2 className="h-8 w-8 animate-spin" />

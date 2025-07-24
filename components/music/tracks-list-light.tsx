@@ -58,6 +58,15 @@ export default function TracksListLight({ tracks, className = "" }: TracksListLi
   const { getTrackLikeStatus, fetchBatchTrackLikesStatus, toggleTrackLike } = useLikesFollows();
   const { downloadTrack } = useDownload();
 
+  // Debug logging
+  useEffect(() => {
+    console.log("TracksListLight - Received tracks:", {
+      count: tracks?.length || 0,
+      tracks: tracks?.slice(0, 3).map(t => ({ id: t.id, title: t.title })),
+      className
+    });
+  }, [tracks, className]);
+
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
   const [openPlaylistMenuId, setOpenPlaylistMenuId] = useState<number | null>(null);
   const [playlists, setPlaylists] = useState<any[]>([]);
