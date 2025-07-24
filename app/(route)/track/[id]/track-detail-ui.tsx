@@ -17,6 +17,7 @@ import {
     Shuffle,
     ArrowLeft,
     Edit,
+    Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -106,7 +107,7 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
 
     const { currentTrack: audioCurrentTrack, isPlaying, playTrack, setTrackList, togglePlayPause } = useAudioPlayer();
     const { downloadTrack, isDownloading, isTrackDownloading } = useDownload();
-    const { getTrackLikeStatus, fetchTrackLikeStatus, toggleTrackLike } = useLikesFollows();
+    const { getTrackLikeStatus, toggleTrackLike } = useLikesFollows();
 
     const handleTrackPlay = useCallback((selectedTrack: Track) => {
         if (audioCurrentTrack?.id === selectedTrack.id && isPlaying) {
