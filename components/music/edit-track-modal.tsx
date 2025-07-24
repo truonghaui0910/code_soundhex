@@ -15,6 +15,7 @@ import {
 import { Track } from "@/lib/definitions/Track";
 import { MoodGrid } from "./mood-grid";
 import { showSuccess, showError } from "@/lib/services/notification-service";
+import { X } from "lucide-react";
 
 interface EditTrackModalProps {
     track: Track;
@@ -147,21 +148,37 @@ export function EditTrackModal({
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 border border-purple-600/50 backdrop-blur-xl">
                 <DialogHeader>
-                    <DialogTitle className="text-2xl font-bold text-white">
-                        Edit Track: {track.title}
-                    </DialogTitle>
-                    <DialogDescription className="text-purple-200">
-                        Update your track's custom URL and mood tags.
-                    </DialogDescription>
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <DialogTitle className="text-2xl font-bold text-white">
+                                Edit Track: {track.title}
+                            </DialogTitle>
+                            <DialogDescription className="mt-2">
+                                Update your track's custom URL and mood tags.
+                            </DialogDescription>
+                        </div>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={onClose}
+                            className="h-8 w-8 p-0"
+                        >
+                            <X className="h-4 w-4" />
+                        </Button>
+                    </div>
                 </DialogHeader>
-
                 <div className="space-y-6 py-4">
                     {/* Custom URL Section */}
                     <div className="space-y-2">
-                        <Label htmlFor="custom_url" className="text-white font-medium">Custom URL</Label>
-                        <div className="text-sm text-purple-200 mb-2">
+                        <Label
+                            htmlFor="custom_url"
+                            className="text-white font-medium"
+                        >
+                            Custom URL
+                        </Label>
+                        {/* <div className="text-sm text-purple-200 mb-2">
                             Choose a custom URL for your track (optional)
-                        </div>
+                        </div> */}
                         <div className="flex items-center space-x-2">
                             <span className="text-sm text-purple-300 font-medium">
                                 soundhex.com/track/
@@ -201,17 +218,19 @@ export function EditTrackModal({
 
                         {selectedMoods.size > 0 && (
                             <div className="text-sm text-purple-200 bg-purple-800/30 rounded-lg p-3 border border-purple-600/30">
-                                <span className="font-medium">Selected moods:</span> {Array.from(selectedMoods).join(", ")}
+                                <span className="font-medium">
+                                    Selected moods:
+                                </span>{" "}
+                                {Array.from(selectedMoods).join(", ")}
                             </div>
                         )}
                     </div>
                 </div>
 
                 <DialogFooter className="bg-purple-800/20 -mx-6 -mb-6 px-6 py-4 border-t border-purple-600/30">
-                    <Button 
-                        variant="outline" 
+                    <Button
                         onClick={onClose}
-                        className="border-purple-500/50 text-white hover:bg-purple-700/50"
+                        className="bg-white/20 text-white hover:bg-white/30 transition-colors"
                     >
                         Cancel
                     </Button>
