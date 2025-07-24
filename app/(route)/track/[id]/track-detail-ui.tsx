@@ -28,6 +28,7 @@ import { Track } from "@/lib/definitions/Track";
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 import { useDownload } from "@/hooks/use-download";
 import { TrackGrid } from "@/components/music/track-grid";
+import { TrackGridSm } from "@/components/music/track-grid-sm";
 import TracksListLight from "@/components/music/tracks-list-light";
 import AddToPlaylist from "@/components/playlist/add-to-playlist";
 import { useLikesFollows } from "@/hooks/use-likes-follows";
@@ -546,10 +547,10 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
                     {!isLoadingRecommended &&
                     Array.isArray(recommendedTracks) &&
                     recommendedTracks.length > 0 ? (
-                        <TrackGrid
+                        <TrackGridSm
                             tracks={recommendedTracks.slice(0, 12)}
                             isLoading={isLoadingRecommended}
-                            gridCols="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4"
                         />
                     ) : isLoadingRecommended ? (
                         <div className="flex items-center justify-center p-8">
