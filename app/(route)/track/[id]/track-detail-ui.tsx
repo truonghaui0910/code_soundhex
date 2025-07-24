@@ -156,6 +156,12 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
             userOwnsTrack,
             artistData: currentTrack?.artist,
         });
+        console.log("Track Detail - Current track mood:", {
+            trackId: currentTrack?.id,
+            mood: currentTrack?.mood,
+            moodType: typeof currentTrack?.mood,
+            moodLength: currentTrack?.mood?.length
+        });
     }, [user, currentTrack, userOwnsTrack]);
 
     const handleTrackUpdate = (updatedTrack: Track) => {
@@ -371,7 +377,7 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
                                             .map((track) => ({
                                                 id: track.id,
                                                 title: track.title,
-                                                custom_url: track.custom_url || undefined,
+                                                custom_url: track.custom_url,
                                                 artist: {
                                                     id: track.artist?.id || 0,
                                                     name: track.artist?.name || "Unknown Artist",
@@ -384,9 +390,9 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
                                                     cover_image_url: track.album.cover_image_url,
                                                     custom_url: track.album.custom_url,
                                                 } : undefined,
-                                                duration: track.duration || 0,
+                                                duration: track.duration,
                                                 file_url: track.file_url,
-                                                view_count: track.view_count || 0,
+                                                view_count: track.view_count,
                                             }))}
                                         className="max-h-96 overflow-y-auto"
                                     />
