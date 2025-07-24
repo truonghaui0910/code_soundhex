@@ -36,91 +36,91 @@ const moods: Mood[] = [
         id: "happy",
         name: "Happy",
         icon: Smile,
-        bgColor: "bg-green-400",
-        textColor: "text-green-900"
+        bgColor: "bg-gradient-to-br from-green-400 to-green-500",
+        textColor: "text-green-700"
     },
     {
         id: "dreamy",
         name: "Dreamy",
         icon: Cloud,
-        bgColor: "bg-pink-400",
-        textColor: "text-pink-900"
+        bgColor: "bg-gradient-to-br from-pink-400 to-pink-500",
+        textColor: "text-pink-700"
     },
     {
         id: "epic",
         name: "Epic",
         icon: Zap,
-        bgColor: "bg-orange-400",
-        textColor: "text-orange-900"
+        bgColor: "bg-gradient-to-br from-orange-400 to-orange-500",
+        textColor: "text-orange-700"
     },
     {
         id: "laid-back",
         name: "Laid Back",
         icon: Coffee,
-        bgColor: "bg-yellow-400",
-        textColor: "text-yellow-900"
+        bgColor: "bg-gradient-to-br from-yellow-400 to-yellow-500",
+        textColor: "text-yellow-700"
     },
     {
         id: "euphoric",
         name: "Euphoric",
         icon: Sparkles,
-        bgColor: "bg-pink-400",
-        textColor: "text-pink-900"
+        bgColor: "bg-gradient-to-br from-purple-400 to-purple-500",
+        textColor: "text-purple-700"
     },
     {
         id: "quirky",
         name: "Quirky",
         icon: Bot,
-        bgColor: "bg-orange-400",
-        textColor: "text-orange-900"
+        bgColor: "bg-gradient-to-br from-indigo-400 to-indigo-500",
+        textColor: "text-indigo-700"
     },
     {
         id: "suspense",
         name: "Suspense",
         icon: Shield,
-        bgColor: "bg-gray-400",
-        textColor: "text-gray-900"
+        bgColor: "bg-gradient-to-br from-gray-500 to-gray-600",
+        textColor: "text-gray-700"
     },
     {
         id: "running",
         name: "Running",
         icon: Activity,
-        bgColor: "bg-lime-400",
-        textColor: "text-lime-900"
+        bgColor: "bg-gradient-to-br from-lime-400 to-lime-500",
+        textColor: "text-lime-700"
     },
     {
         id: "relaxing",
         name: "Relaxing",
         icon: Umbrella,
-        bgColor: "bg-teal-300",
-        textColor: "text-teal-900"
+        bgColor: "bg-gradient-to-br from-teal-400 to-teal-500",
+        textColor: "text-teal-700"
     },
     {
         id: "mysterious",
         name: "Mysterious",
         icon: Eye,
-        bgColor: "bg-purple-400",
-        textColor: "text-purple-900"
+        bgColor: "bg-gradient-to-br from-violet-400 to-violet-500",
+        textColor: "text-violet-700"
     },
     {
         id: "sentimental",
         name: "Sentimental",
         icon: Camera,
-        bgColor: "bg-cyan-400",
-        textColor: "text-cyan-900"
+        bgColor: "bg-gradient-to-br from-cyan-400 to-cyan-500",
+        textColor: "text-cyan-700"
     },
     {
         id: "sad",
         name: "Sad",
         icon: Frown,
-        bgColor: "bg-red-400",
-        textColor: "text-red-900"
+        bgColor: "bg-gradient-to-br from-red-400 to-red-500",
+        textColor: "text-red-700"
     }
 ];
 
 const MoodGrid = memo(function MoodGrid({ 
     onMoodSelect,
-    className = "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"
+    className = "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"
 }: MoodGridProps) {
     const [selectedMood, setSelectedMood] = useState<string | null>(null);
 
@@ -136,24 +136,25 @@ const MoodGrid = memo(function MoodGrid({
                 const IconComponent = mood.icon;
                 return (
                     <div key={mood.id} className="group text-center">
-                        <div className="relative mb-3">
+                        <div className="relative mb-4 flex justify-center">
                             <Button
                                 onClick={() => handleMoodClick(mood)}
                                 className={`
-                                    relative w-full aspect-square p-0 border-none shadow-lg 
+                                    relative p-0 border-none shadow-lg 
                                     hover:shadow-xl transition-all duration-300 transform 
                                     hover:-translate-y-1 hover:scale-105 
                                     ${mood.bgColor} hover:brightness-110
                                     ${selectedMood === mood.id ? 'ring-4 ring-purple-500 ring-offset-2' : ''}
                                 `}
                                 style={{
-                                    clipPath: 'polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)',
-                                    minHeight: '80px'
+                                    width: '120px',
+                                    height: '120px',
+                                    clipPath: 'polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)'
                                 }}
                             >
                                 {/* Hexagonal background overlay for better icon visibility */}
                                 <div 
-                                    className="absolute inset-0 bg-white/20 backdrop-blur-sm"
+                                    className="absolute inset-0 bg-black/10 backdrop-blur-sm"
                                     style={{
                                         clipPath: 'polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)'
                                     }}
@@ -161,12 +162,12 @@ const MoodGrid = memo(function MoodGrid({
                                 
                                 {/* Icon */}
                                 <div className="relative z-10 flex items-center justify-center h-full">
-                                    <IconComponent className="h-8 w-8 sm:h-10 sm:w-10 text-white drop-shadow-lg" />
+                                    <IconComponent className="h-12 w-12 text-white drop-shadow-lg" />
                                 </div>
 
                                 {/* Hover effect overlay */}
                                 <div 
-                                    className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                                    className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                                     style={{
                                         clipPath: 'polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)'
                                     }}
@@ -176,10 +177,10 @@ const MoodGrid = memo(function MoodGrid({
                         
                         <div className="space-y-1">
                             <h3 className={`
-                                font-semibold text-sm sm:text-base transition-colors truncate
+                                font-bold text-sm sm:text-base transition-colors truncate
                                 ${selectedMood === mood.id 
                                     ? 'text-purple-600 dark:text-purple-400' 
-                                    : 'text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400'
+                                    : `${mood.textColor} dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400`
                                 }
                             `}>
                                 {mood.name}
