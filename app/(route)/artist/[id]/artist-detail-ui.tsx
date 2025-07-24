@@ -11,7 +11,7 @@ import { TrackList } from "@/components/music/track-list";
 import { AlbumGrid } from "@/components/music/album-grid";
 import { TrackGridSm } from "@/components/music/track-grid-sm";
 import { useLikesFollows } from "@/hooks/use-likes-follows";
-import { useUser } from "@supabase/auth-helpers-react";
+import { useUser } from "@/contexts/UserContext";
 import {
   Play,
   Pause,

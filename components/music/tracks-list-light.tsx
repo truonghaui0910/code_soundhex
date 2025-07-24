@@ -312,8 +312,8 @@ export default function TracksListLight({ tracks, className = "" }: TracksListLi
 
               {/* Duration and Menu Container - Fixed Width */}
               <div className="w-20 flex items-center justify-center gap-2">
-                {/* Duration (hidden when menu is open) */}
-                <div className={`${openMenuId === track.id ? 'hidden' : 'flex'} items-center gap-1 text-xs text-purple-300`}>
+                {/* Duration (always visible) */}
+                <div className="flex items-center gap-1 text-xs text-purple-300">
                   <Clock className="h-3 w-3" />
                   <span className="font-mono">{formatDuration(track.duration || null)}</span>
                 </div>

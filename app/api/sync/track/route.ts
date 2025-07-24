@@ -65,6 +65,66 @@ async function getOrCreateTrack(
     }
 
     if (existingTrack) {
+        // Update existing track with new data
+        const updateData: any = {};
+        
+        if (trackData.title && trackData.title !== existingTrack.title) {
+            updateData.title = trackData.title;
+        }
+        
+        if (trackData.description && trackData.description !== existingTrack.description) {
+            updateData.description = trackData.description;
+        }
+        
+        if (trackData.duration && Math.round(trackData.duration) !== existingTrack.duration) {
+            updateData.duration = Math.round(trackData.duration);
+        }
+        
+        if (trackData.file_url && trackData.file_url !== existingTrack.file_url) {
+            updateData.file_url = trackData.file_url;
+        }
+        
+        if (trackData.preview_url && trackData.preview_url !== existingTrack.preview_url) {
+            updateData.preview_url = trackData.preview_url;
+        }
+        
+        if (trackData.popularity !== undefined && trackData.popularity !== existingTrack.popularity) {
+            updateData.popularity = trackData.popularity;
+        }
+        
+        if (trackData.isrc && trackData.isrc !== existingTrack.isrc) {
+            updateData.isrc = trackData.isrc;
+        }
+        
+        if (trackData.user_id && trackData.user_id !== existingTrack.user_id) {
+            updateData.user_id = trackData.user_id;
+        }
+        
+        // Handle genre update
+        if (trackData.genre_name) {
+            const genre = await getOrCreateGenre(supabase, trackData.genre_name);
+            if (genre && genre.id !== existingTrack.genre_id) {
+                updateData.genre_id = genre.id;
+            }
+        }
+        
+        // Only update if there are changes
+        if (Object.keys(updateData).length > 0) {
+            const { data: updatedTrack, error: updateError } = await supabase
+                .from("tracks")
+                .update(updateData)
+                .eq("id", existingTrack.id)
+                .select()
+                .single();
+                
+            if (updateError) {
+                console.error("TRACK_UPDATE_ERROR:", updateError);
+                throw new Error(`Failed to update track: ${updateError.message}`);
+            }
+            
+            return updatedTrack;
+        }
+        
         return existingTrack;
     }
 

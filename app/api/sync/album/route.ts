@@ -29,6 +29,46 @@ async function getOrCreateAlbum(
     }
 
     if (existingAlbum) {
+        // Update existing album with new data
+        const updateData: any = {};
+        
+        if (albumData.title && albumData.title !== existingAlbum.title) {
+            updateData.title = albumData.title;
+        }
+        
+        if (albumData.cover_image_url && albumData.cover_image_url !== existingAlbum.cover_image_url) {
+            updateData.cover_image_url = albumData.cover_image_url;
+        }
+        
+        if (albumData.release_date && albumData.release_date !== existingAlbum.release_date) {
+            updateData.release_date = albumData.release_date;
+        }
+        
+        if (albumData.description && albumData.description !== existingAlbum.description) {
+            updateData.description = albumData.description;
+        }
+        
+        if (albumData.user_id && albumData.user_id !== existingAlbum.user_id) {
+            updateData.user_id = albumData.user_id;
+        }
+        
+        // Only update if there are changes
+        if (Object.keys(updateData).length > 0) {
+            const { data: updatedAlbum, error: updateError } = await supabase
+                .from("albums")
+                .update(updateData)
+                .eq("id", existingAlbum.id)
+                .select()
+                .single();
+                
+            if (updateError) {
+                console.error("ALBUM_UPDATE_ERROR:", updateError);
+                throw new Error(`Failed to update album: ${updateError.message}`);
+            }
+            
+            return updatedAlbum;
+        }
+        
         return existingAlbum;
     }
 
