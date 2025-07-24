@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -21,13 +20,15 @@ interface MoodFilterModalProps {
     onApply: (moods: Set<string>) => void;
 }
 
-export function MoodFilterModal({ 
-    isOpen, 
-    onClose, 
-    selectedMoods, 
-    onApply 
+export function MoodFilterModal({
+    isOpen,
+    onClose,
+    selectedMoods,
+    onApply,
 }: MoodFilterModalProps) {
-    const [tempSelectedMoods, setTempSelectedMoods] = useState<Set<string>>(new Set(selectedMoods));
+    const [tempSelectedMoods, setTempSelectedMoods] = useState<Set<string>>(
+        new Set(selectedMoods),
+    );
 
     const handleMoodToggle = (moodId: string) => {
         const newSelected = new Set(tempSelectedMoods);
@@ -63,7 +64,8 @@ export function MoodFilterModal({
                                 Select Moods
                             </DialogTitle>
                             <DialogDescription className="mt-2">
-                                Choose multiple moods to filter your music. Selected moods will be highlighted.
+                                Choose multiple moods to filter your music.
+                                Selected moods will be highlighted.
                             </DialogDescription>
                         </div>
                         <Button
@@ -93,8 +95,7 @@ export function MoodFilterModal({
                         </span>
                         {tempSelectedMoods.size > 0 && (
                             <Button
-                                variant="outline"
-                                size="sm"
+                                className="bg-white/20 text-white hover:bg-white/30 transition-colors"
                                 onClick={handleClear}
                             >
                                 Clear All
@@ -103,7 +104,7 @@ export function MoodFilterModal({
                     </div>
                     <div className="flex gap-3">
                         <Button
-                            variant="outline"
+                            className="bg-white/20 text-white hover:bg-white/30 transition-colors"
                             onClick={handleClose}
                         >
                             Cancel
