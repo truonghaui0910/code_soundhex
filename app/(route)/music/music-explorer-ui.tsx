@@ -38,6 +38,7 @@ import { SearchSuggestions } from "@/components/music/SearchSuggestions";
 import { AlbumGrid } from "@/components/music/album-grid";
 import { ArtistGrid } from "@/components/music/artist-grid";
 import { TrackGrid } from "@/components/music/track-grid";
+import { MoodGrid } from "@/components/music/mood-grid";
 
 // Helper function to format time
 const formatDuration = (seconds: number | null) => {
@@ -344,6 +345,27 @@ export function MusicExplorerUI({
             <div className="container mx-auto px-4 sm:px-6 pb-32 space-y-8 sm:space-y-16 pt-8 sm:pt-12">
                 {currentView === "featured" && (
                     <div className="space-y-16">
+                        {/* Featured Moods */}
+                        <section>
+                            <div className="flex items-center justify-between mb-8">
+                                <h2 className="text-xl font-bold flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 rounded-2xl flex items-center justify-center shadow-lg">
+                                        <Music className="h-5 w-5 text-white" />
+                                    </div>
+                                    <span className="bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                                        Featured Moods
+                                    </span>
+                                </h2>
+                            </div>
+
+                            <MoodGrid
+                                onMoodSelect={(mood) => {
+                                    console.log(`Selected mood: ${mood.name}`);
+                                    // TODO: Filter tracks by mood or implement mood-based search
+                                }}
+                            />
+                        </section>
+
                         {/* Featured Tracks */}
                         <section>
                             <div className="flex items-center justify-between mb-8">
