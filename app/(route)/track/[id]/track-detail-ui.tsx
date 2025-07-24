@@ -138,9 +138,9 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
         ],
     );
 
-    // Check if current user owns this track
+    // Check if current user owns this track (through artist relationship)
     const userOwnsTrack = user && currentTrack?.user_id === user.id;
-    
+
     // Debug log
     useEffect(() => {
         console.log("Edit Track Debug:", {
@@ -148,7 +148,7 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
             userId: user?.id,
             trackArtistUserId: currentTrack?.artist?.user_id,
             userOwnsTrack,
-            artistData: currentTrack?.artist
+            artistData: currentTrack?.artist,
         });
     }, [user, currentTrack, userOwnsTrack]);
 
@@ -338,30 +338,107 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
                                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                                     More by {currentTrack.artist?.name}
                                 </h3>
-                                {!isLoadingArtistTracks && artistTracks.length > 0 ? (
-                                    <TracksListLight 
-                                        tracks={artistTracks.slice(0, 10).map(track => ({
-                                            id: track.id,
-                                            title: track.title,
-                                            custom_url: track.custom_url,
-                                            artist: {
-                                                id: track.artist?.id || 0,
-                                                name: track.artist?.name || "Unknown Artist",
-                                                profile_image_url: track.artist?.profile_image_url,
-                                                custom_url: track.artist?.custom_url,
+                                {!isLoadingArtistTracks &&
+                                artistTracks.length > 0 ? (
+                                    <>
+                                        {console.log(
+                                            "TracksDetailUI - Artist tracks data:",
+                                            {
+                                                count: artistTracks.length,
+                                                sample: artistTracks[0],
+                                                mapped: artistTracks
+                                                    .slice(0, 10)
+                                                    .map((track) => ({
+                                                        id: track.id,
+                                                        title: track.title,
+                                                        custom_url:
+                                                            track.custom_url,
+                                                        artist: {
+                                                            id:
+                                                                track.artist
+                                                                    ?.id || 0,
+                                                            name:
+                                                                track.artist
+                                                                    ?.name ||
+                                                                "Unknown Artist",
+                                                            profile_image_url:
+                                                                track.artist
+                                                                    ?.profile_image_url,
+                                                            custom_url:
+                                                                track.artist
+                                                                    ?.custom_url,
+                                                        },
+                                                        album: track.album
+                                                            ? {
+                                                                  id: track
+                                                                      .album.id,
+                                                                  title: track
+                                                                      .album
+                                                                      .title,
+                                                                  cover_image_url:
+                                                                      track
+                                                                          .album
+                                                                          .cover_image_url,
+                                                                  custom_url:
+                                                                      track
+                                                                          .album
+                                                                          .custom_url,
+                                                              }
+                                                            : undefined,
+                                                        duration:
+                                                            track.duration,
+                                                        file_url:
+                                                            track.file_url,
+                                                        view_count:
+                                                            track.view_count,
+                                                    })),
                                             },
-                                            album: track.album ? {
-                                                id: track.album.id,
-                                                title: track.album.title,
-                                                cover_image_url: track.album.cover_image_url,
-                                                custom_url: track.album.custom_url,
-                                            } : undefined,
-                                            duration: track.duration,
-                                            file_url: track.file_url,
-                                            view_count: track.view_count,
-                                        }))} 
-                                        className="max-h-96 overflow-y-auto"
-                                    />
+                                        )}
+                                        <TracksListLight
+                                            tracks={artistTracks
+                                                .slice(0, 10)
+                                                .map((track) => ({
+                                                    id: track.id,
+                                                    title: track.title,
+                                                    custom_url:
+                                                        track.custom_url,
+                                                    artist: {
+                                                        id:
+                                                            track.artist?.id ||
+                                                            0,
+                                                        name:
+                                                            track.artist
+                                                                ?.name ||
+                                                            "Unknown Artist",
+                                                        profile_image_url:
+                                                            track.artist
+                                                                ?.profile_image_url,
+                                                        custom_url:
+                                                            track.artist
+                                                                ?.custom_url,
+                                                    },
+                                                    album: track.album
+                                                        ? {
+                                                              id: track.album
+                                                                  .id,
+                                                              title: track.album
+                                                                  .title,
+                                                              cover_image_url:
+                                                                  track.album
+                                                                      .cover_image_url,
+                                                              custom_url:
+                                                                  track.album
+                                                                      .custom_url,
+                                                          }
+                                                        : undefined,
+                                                    duration: track.duration,
+                                                    file_url: track.file_url,
+                                                    view_count:
+                                                        track.view_count,
+                                                }))}
+                                            className="max-h-96 overflow-y-auto"
+                                        />
+                                    </>
                                 ) : isLoadingArtistTracks ? (
                                     <div className="flex items-center justify-center p-8">
                                         <Loader2 className="h-8 w-8 animate-spin" />
@@ -369,7 +446,9 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
                                 ) : (
                                     <div className="text-center py-8">
                                         <Music className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                                        <p className="text-gray-500">No other tracks by this artist</p>
+                                        <p className="text-gray-500">
+                                            No other tracks by this artist
+                                        </p>
                                     </div>
                                 )}
                             </CardContent>
