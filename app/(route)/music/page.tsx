@@ -1,6 +1,6 @@
 
 import { Metadata } from "next";
-import { TracksOptimizedController } from "@/lib/controllers/tracks-optimized";
+import { TracksController } from "@/lib/controllers/tracks";
 import { MusicExplorerClient } from "./music-explorer-client";
 
 export const metadata: Metadata = {
@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 export default async function MusicPage() {
   try {
     // Get only most viewed tracks instead of all tracks
-    const tracks = await TracksOptimizedController.getMostViewedTracks(12);
+    const tracks = await TracksController.getMostViewedTracks(12);
 
     return (
       <div className="min-h-screen">
