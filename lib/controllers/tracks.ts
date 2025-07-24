@@ -618,48 +618,97 @@ export class TracksController {
     trackId: number,
     limit: number = 20,
   ): Promise<Track[]> {
+    console.log(`🎵 TracksController.getTracksByArtistFromTrack - Starting:`, {
+      trackId,
+      limit,
+      trackIdType: typeof trackId
+    });
+
     const supabase = createServerComponentClient<Database>({ cookies });
 
-    // First get the track to find its artist
-    const { data: track } = await supabase
-      .from("tracks")
-      .select("artist_id")
-      .eq("id", trackId)
-      .single();
+    try {
+      // First get the track to find its artist
+      console.log(`🎵 TracksController - Fetching track info for ID: ${trackId}`);
+      const { data: track, error: trackError } = await supabase
+        .from("tracks")
+        .select("artist_id, title, artist:artist_id(id, name)")
+        .eq("id", trackId)
+        .single();
 
-    if (!track) {
-      console.log(`Track not found for ID: ${trackId}`);
+      console.log(`🎵 TracksController - Track query result:`, {
+        trackFound: !!track,
+        trackError: trackError?.message,
+        trackData: track ? {
+          artist_id: track.artist_id,
+          title: track.title,
+          artistName: track.artist?.name
+        } : null
+      });
+
+      if (trackError) {
+        console.error(`🎵 TracksController - Error fetching track:`, trackError);
+        return [];
+      }
+
+      if (!track) {
+        console.log(`🎵 TracksController - Track not found for ID: ${trackId}`);
+        return [];
+      }
+
+      if (!track.artist_id) {
+        console.log(`🎵 TracksController - Track has no artist_id: ${trackId}`);
+        return [];
+      }
+
+      console.log(`🎵 TracksController - Getting tracks for artist_id: ${track.artist_id}`);
+
+      // Get other tracks from the same artist
+      const { data, error } = await supabase
+        .from("tracks")
+        .select(
+          `
+          *, view_count, custom_url,
+          artist:artist_id(id, name, profile_image_url, custom_url),
+          album:album_id(id, title, cover_image_url, custom_url),
+          genre:genre_id(id, name)
+        `,
+        )
+        .eq("artist_id", track.artist_id)
+        .neq("id", trackId) // Exclude current track
+        .order("view_count", { ascending: false })
+        .order("created_at", { ascending: false })
+        .limit(limit);
+
+      console.log(`🎵 TracksController - Artist tracks query result:`, {
+        dataFound: !!data,
+        tracksCount: data?.length || 0,
+        error: error?.message,
+        artistId: track.artist_id,
+        excludedTrackId: trackId,
+        firstTrackSample: data?.[0] ? {
+          id: data[0].id,
+          title: data[0].title,
+          artist_id: data[0].artist_id
+        } : null
+      });
+
+      if (error) {
+        console.error(
+          `🎵 TracksController - Error fetching tracks for artist from track ${trackId}:`,
+          error,
+        );
+        throw new Error(`Failed to fetch tracks: ${error.message}`);
+      }
+
+      const tracks = data as unknown as Track[];
+      console.log(
+        `🎵 TracksController.getTracksByArtistFromTrack - Final result: ${tracks?.length || 0} tracks`,
+      );
+      
+      return tracks || [];
+    } catch (error) {
+      console.error(`🎵 TracksController - Unexpected error:`, error);
       return [];
     }
-
-    // Get other tracks from the same artist
-    const { data, error } = await supabase
-      .from("tracks")
-      .select(
-        `
-        *, view_count, custom_url,
-        artist:artist_id(id, name, profile_image_url, custom_url),
-        album:album_id(id, title, cover_image_url, custom_url),
-        genre:genre_id(id, name)
-      `,
-      )
-      .eq("artist_id", track.artist_id)
-      .neq("id", trackId) // Exclude current track
-      .order("view_count", { ascending: false })
-      .order("created_at", { ascending: false })
-      .limit(limit);
-
-    if (error) {
-      console.error(
-        `Error fetching tracks for artist from track ${trackId}:`,
-        error,
-      );
-      throw new Error(`Failed to fetch tracks: ${error.message}`);
-    }
-
-    console.log(
-      `TracksController.getTracksByArtistFromTrack - Found ${data?.length || 0} tracks`,
-    );
-    return data as unknown as Track[];
   }
 }

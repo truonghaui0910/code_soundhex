@@ -80,28 +80,60 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
 
     // Fetch other tracks by the same artist
     const fetchArtistTracks = useCallback(async () => {
-        if (!currentTrack?.id) return;
+        if (!currentTrack?.id) {
+            console.log("🔍 fetchArtistTracks - No currentTrack.id, skipping");
+            return;
+        }
+
+        console.log("🔍 fetchArtistTracks - Starting fetch:", {
+            trackId: currentTrack.id,
+            trackTitle: currentTrack.title,
+            artistId: currentTrack.artist?.id,
+            artistName: currentTrack.artist?.name
+        });
 
         try {
             setIsLoadingArtistTracks(true);
-            const response = await fetch(
-                `/api/tracks/${currentTrack.id}/artist-tracks?limit=20`,
-            );
+            const apiUrl = `/api/tracks/${currentTrack.id}/artist-tracks?limit=20`;
+            console.log("🔍 fetchArtistTracks - API URL:", apiUrl);
+            
+            const response = await fetch(apiUrl);
+            console.log("🔍 fetchArtistTracks - Response status:", response.status);
 
             if (response.ok) {
                 const data = await response.json();
-                console.log("Artist tracks raw data:", {
+                console.log("🔍 fetchArtistTracks - Raw response data:", {
+                    isArray: Array.isArray(data),
                     count: data?.length || 0,
-                    sample: data?.[0],
-                    currentTrackId: currentTrack.id
+                    dataType: typeof data,
+                    firstTrack: data?.[0],
+                    currentTrackId: currentTrack.id,
+                    allTrackIds: data?.map((t: any) => t.id) || []
                 });
-                setArtistTracks(data || []);
+
+                // Filter out current track
+                const filteredTracks = Array.isArray(data) 
+                    ? data.filter(track => track.id !== currentTrack.id)
+                    : [];
+                
+                console.log("🔍 fetchArtistTracks - After filtering:", {
+                    originalCount: data?.length || 0,
+                    filteredCount: filteredTracks.length,
+                    removedCurrentTrack: (data?.length || 0) !== filteredTracks.length
+                });
+
+                setArtistTracks(filteredTracks);
             } else {
-                console.error("Failed to fetch artist tracks:", response.status);
+                const errorText = await response.text();
+                console.error("🔍 fetchArtistTracks - Failed to fetch:", {
+                    status: response.status,
+                    statusText: response.statusText,
+                    errorText
+                });
                 setArtistTracks([]);
             }
         } catch (error) {
-            console.error("Error fetching artist tracks:", error);
+            console.error("🔍 fetchArtistTracks - Error:", error);
             setArtistTracks([]);
         } finally {
             setIsLoadingArtistTracks(false);
@@ -368,6 +400,18 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
                                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                                     More by {currentTrack.artist?.name}
                                 </h3>
+                                {(() => {
+                                    console.log("🔍 UI Debug - Artist tracks section:", {
+                                        isLoadingArtistTracks,
+                                        artistTracksLength: artistTracks.length,
+                                        currentTrackId: currentTrack.id,
+                                        artistTracks: artistTracks.map(t => ({ id: t.id, title: t.title })),
+                                        filteredTracks: artistTracks
+                                            .filter(track => track.id !== currentTrack.id)
+                                            .map(t => ({ id: t.id, title: t.title }))
+                                    });
+                                    return null;
+                                })()}
                                 {!isLoadingArtistTracks &&
                                 artistTracks.length > 0 ? (
                                     <TracksListLight
@@ -399,12 +443,16 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
                                 ) : isLoadingArtistTracks ? (
                                     <div className="flex items-center justify-center p-8">
                                         <Loader2 className="h-8 w-8 animate-spin" />
+                                        <span className="ml-2 text-gray-500">Loading artist tracks...</span>
                                     </div>
                                 ) : (
                                     <div className="text-center py-8">
                                         <Music className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                                         <p className="text-gray-500">
                                             No other tracks by this artist
+                                        </p>
+                                        <p className="text-xs text-gray-400 mt-2">
+                                            Debug: {artistTracks.length} tracks found, loading: {isLoadingArtistTracks.toString()}
                                         </p>
                                     </div>
                                 )}
