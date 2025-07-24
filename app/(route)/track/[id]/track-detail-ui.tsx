@@ -320,7 +320,7 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
                                     <div className="flex items-center gap-1">
                                         <Heart className="h-4 w-4" />
                                         <span className="text-sm font-medium">
-                                            {getTrackLikeStatus(currentTrack.id).count || 0} likes
+                                            {getTrackLikeStatus(currentTrack.id).totalLikes || 0} likes
                                         </span>
                                     </div>
                                 </div>
@@ -452,10 +452,11 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
                                     return null;
                                 })()}
                                 {!isLoadingArtistTracks &&
+                                Array.isArray(artistTracks) &&
                                 artistTracks.length > 0 ? (
                                     <TracksListLight
                                         tracks={artistTracks
-                                            .filter(track => track.id !== currentTrack.id) // Exclude current track
+                                            .filter(track => track && track.id && track.id !== currentTrack.id) // Exclude current track
                                             .slice(0, 10)
                                             .map((track) => ({
                                                 id: track.id,
@@ -505,7 +506,9 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
                     <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
                         Recommended Songs
                     </h2>
-                    {!isLoadingRecommended && recommendedTracks.length > 0 ? (
+                    {!isLoadingRecommended && 
+                     Array.isArray(recommendedTracks) && 
+                     recommendedTracks.length > 0 ? (
                         <TrackGrid
                             tracks={recommendedTracks.slice(0, 12)}
                             isLoading={isLoadingRecommended}
