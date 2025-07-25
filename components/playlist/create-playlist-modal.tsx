@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -17,32 +16,33 @@ import { Plus, X } from "lucide-react";
 import { toast } from "sonner";
 
 interface CreatePlaylistModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onPlaylistCreated?: (playlist: any) => void;
+  isOpen: boolean;
+  onClose: () => void;
+  onPlaylistCreated?: (playlistId: number) => void;
+  trackToAdd?: {
+    id: number;
+    title: string;
+  };
 }
 
-interface PlaylistFormData {
-  name: string;
-  isPublic: boolean;
-  shuffleEnabled: boolean;
-}
-
-export function CreatePlaylistModal({
-  open,
-  onOpenChange,
+export default function CreatePlaylistModal({
+  isOpen,
+  onClose,
   onPlaylistCreated,
+  trackToAdd,
 }: CreatePlaylistModalProps) {
   const [isCreating, setIsCreating] = useState(false);
-  const [formData, setFormData] = useState<PlaylistFormData>({
-    name: "",
-    isPublic: true,
-    shuffleEnabled: true,
-  });
+  const [name, setName] = useState("");
+  const [isPublic, setIsPublic] = useState(false);
+  const [playRandomly, setPlayRandomly] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.name.trim()) {
+  const addPlaylist = (playlist: any) => {
+    // This function is intentionally left empty.
+    // In a real application, this would add the new playlist to a context or state management system.
+  };
+
+  const handleSubmit = async () => {
+    if (!name.trim()) {
       toast.error("Playlist name is required");
       return;
     }
@@ -55,8 +55,8 @@ export function CreatePlaylistModal({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          name: formData.name,
-          private: !formData.isPublic,
+          name: name,
+          private: !isPublic,
         }),
       });
 
@@ -70,13 +70,45 @@ export function CreatePlaylistModal({
       }
 
       const newPlaylist = await response.json();
-      onOpenChange(false);
-      setFormData({ name: "", isPublic: true, shuffleEnabled: true });
-      toast.success("Playlist created successfully!");
-      
-      if (onPlaylistCreated) {
-        onPlaylistCreated(newPlaylist);
+
+      // Add to context
+      addPlaylist(newPlaylist);
+
+      // If there's a track to add, add it to the new playlist
+      if (trackToAdd) {
+        try {
+          const addTrackResponse = await fetch(`/api/playlists/${newPlaylist.id}/tracks`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ track_id: trackToAdd.id }),
+          });
+
+          if (!addTrackResponse.ok) {
+            throw new Error("Failed to add track to playlist");
+          }
+
+          toast.success(`Created "${name}" and added "${trackToAdd.title}"`);
+        } catch (error) {
+          console.error("Error adding track to playlist:", error);
+          toast.success(`Created playlist "${name}"`);
+          toast.error("Failed to add track to playlist");
+        }
+      } else {
+        toast.success(`Created playlist "${name}"`);
       }
+
+      // Call callback if provided
+      if (onPlaylistCreated) {
+        onPlaylistCreated(newPlaylist.id);
+      }
+
+      // Reset form and close
+      setName("");
+      setIsPublic(false);
+      setPlayRandomly(false);
+      onClose();
     } catch (error: any) {
       console.error("Error creating playlist:", error);
       toast.error(error.message || "Failed to create playlist");
@@ -85,17 +117,12 @@ export function CreatePlaylistModal({
     }
   };
 
-  const handleCancel = () => {
-    onOpenChange(false);
-    setFormData({ name: "", isPublic: true, shuffleEnabled: true });
-  };
-
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800 border-purple-500 text-white">
         <DialogHeader className="relative">
           <button 
-            onClick={handleCancel}
+            onClick={onClose}
             className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
           >
             <X className="h-4 w-4 text-white" />
@@ -104,18 +131,19 @@ export function CreatePlaylistModal({
             Create New Playlist
           </DialogTitle>
         </DialogHeader>
-        
-        <form onSubmit={handleSubmit} className="space-y-6">
+
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSubmit();
+          }}
+          className="space-y-6"
+        >
           {/* Playlist Name Input */}
           <div className="space-y-2">
             <Input
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  name: e.target.value,
-                })
-              }
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               placeholder="Enter playlist name"
               className="bg-white/20 border-white/30 text-white placeholder:text-white/70 focus:border-white/50 focus:ring-white/30"
               required
@@ -131,14 +159,14 @@ export function CreatePlaylistModal({
               </div>
               <button
                 type="button"
-                onClick={() => setFormData({ ...formData, isPublic: !formData.isPublic })}
+                onClick={() => setIsPublic(!isPublic)}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  formData.isPublic ? 'bg-pink-500' : 'bg-white/30'
+                  isPublic ? 'bg-pink-500' : 'bg-white/30'
                 }`}
               >
                 <span
                   className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                    formData.isPublic ? 'translate-x-6' : 'translate-x-1'
+                    isPublic ? 'translate-x-6' : 'translate-x-1'
                   }`}
                 />
               </button>
