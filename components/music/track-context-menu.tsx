@@ -205,10 +205,10 @@ export function TrackContextMenu({
 
             const playlist = playlists.find((p) => p.id === playlistId);
             toast.success(`Added "${track.title}" to "${playlist?.name}"`);
-            
+
             // Reload playlists after successful addition
             await refetchPlaylists();
-            
+
             onClose();
             setShowPlaylistSubmenu(false);
         } catch (error: any) {
