@@ -4,6 +4,8 @@ import { Inter } from "next/font/google";
 import { NotificationProvider } from "@/components/ui/notification";
 import { UserProvider } from "@/contexts/UserContext";
 import { AudioPlayerProvider } from "@/contexts/AudioPlayerContext";
+import { PlaylistProvider } from "@/contexts/PlaylistContext";
+
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -37,7 +39,6 @@ export default function RootLayout({
           type="image/x-icon"
           sizes="48x48"
         />
-        {/* <link rel="icon" href="/favicon.svg?v=4" type="image/svg+xml" /> */}
       </head>
       <body
         className={`${inter.className} dark:bg-background dark:text-foreground bg-background text-foreground`}
@@ -45,8 +46,10 @@ export default function RootLayout({
       >
         <UserProvider>
           <AudioPlayerProvider>
-            {children}
-            <NotificationProvider />
+            <PlaylistProvider>
+              {children}
+              <NotificationProvider />
+            </PlaylistProvider>
           </AudioPlayerProvider>
         </UserProvider>
       </body>

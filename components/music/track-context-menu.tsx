@@ -1,6 +1,7 @@
+
 "use client";
 
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import {
     Play,
     Pause,
@@ -12,10 +13,14 @@ import {
     Link as LinkIcon,
     Headphones,
     Clock,
+    ChevronRight,
+    List as ListIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Track } from "@/lib/definitions/Track";
-import AddToPlaylist from "@/components/playlist/add-to-playlist";
+import { usePlaylist } from "@/contexts/PlaylistContext";
+import { useCurrentUser } from "@/hooks/use-current-user";
+import { showWarning } from '@/lib/services/notification-service';
 import { toast } from "sonner";
 
 export interface TrackContextMenuAction {
@@ -80,6 +85,10 @@ export function TrackContextMenu({
     variant = "default",
 }: TrackContextMenuProps) {
     const menuRef = useRef<HTMLDivElement>(null);
+    const { user } = useCurrentUser();
+    const { playlists } = usePlaylist();
+    const [showPlaylistSubmenu, setShowPlaylistSubmenu] = useState(false);
+    const [isAddingToPlaylist, setIsAddingToPlaylist] = useState<number | null>(null);
 
     // Handle click outside to close menu
     useEffect(() => {
@@ -90,6 +99,7 @@ export function TrackContextMenu({
                 !menuRef.current.contains(event.target as Node)
             ) {
                 onClose();
+                setShowPlaylistSubmenu(false);
             }
         };
 
@@ -127,6 +137,85 @@ export function TrackContextMenu({
         onClose();
     };
 
+    const handleAddToPlaylist = async (playlistId: number) => {
+        if (!user) {
+            showWarning({
+                title: "Login Required",
+                message: "You need to login to add tracks to playlists"
+            });
+            return;
+        }
+
+        setIsAddingToPlaylist(playlistId);
+        
+        try {
+            const response = await fetch(`/api/playlists/${playlistId}/tracks`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ track_id: track.id }),
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || "Failed to add track to playlist");
+            }
+
+            const playlist = playlists.find((p) => p.id === playlistId);
+            toast.success(`Added "${track.title}" to "${playlist?.name}"`);
+            onClose();
+            setShowPlaylistSubmenu(false);
+        } catch (error: any) {
+            console.error("Error adding track to playlist:", error);
+
+            if (error.message === "Track already exists in playlist") {
+                toast.error("This track is already in the playlist");
+            } else {
+                toast.error(error.message || "Failed to add track to playlist");
+            }
+        } finally {
+            setIsAddingToPlaylist(null);
+        }
+    };
+
+    const handleCreateNewPlaylist = async () => {
+        if (!user) {
+            showWarning({
+                title: "Login Required",
+                message: "You need to login to create playlists"
+            });
+            return;
+        }
+
+        const playlistName = prompt("Enter playlist name:");
+        if (!playlistName?.trim()) return;
+
+        try {
+            // Create new playlist
+            const createResponse = await fetch("/api/playlists", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ name: playlistName.trim() }),
+            });
+
+            if (!createResponse.ok) {
+                const errorData = await createResponse.json();
+                throw new Error(errorData.error || "Failed to create playlist");
+            }
+
+            const newPlaylist = await createResponse.json();
+
+            // Add track to the new playlist
+            await handleAddToPlaylist(newPlaylist.id);
+        } catch (error: any) {
+            console.error("Error creating playlist:", error);
+            toast.error(error.message || "Failed to create playlist");
+        }
+    };
+
     const positionClasses =
         position === "top" ? "bottom-full mb-2" : "top-full mt-2";
 
@@ -139,15 +228,15 @@ export function TrackContextMenu({
     if (isLightVariant) {
         containerClass = `absolute right-0 ${positionClasses} w-80 z-[99999] bg-purple-900 border border-purple-700 shadow-2xl rounded-xl overflow-visible ${className}`;
         buttonClass =
-            "flex items-center w-full px-4 py-3 text-white hover:bg-purple-700/50 transition-colors cursor-pointer";
+            "flex items-center w-full px-4 py-3 text-white hover:bg-purple-700/50 transition-colors cursor-pointer relative";
     } else if (isPurpleVariant) {
         containerClass = `absolute right-0 ${positionClasses} w-48 z-[99999] bg-purple-900 border border-purple-700 shadow-2xl rounded-md overflow-visible ${className}`;
         buttonClass =
-            "block w-full text-left px-4 py-2 text-sm text-white hover:bg-purple-700/50 transition-colors cursor-pointer";
+            "block w-full text-left px-4 py-2 text-sm text-white hover:bg-purple-700/50 transition-colors cursor-pointer relative";
     } else {
         containerClass = `absolute right-0 ${positionClasses} w-48 z-[99999] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg rounded-md overflow-visible ${className}`;
         buttonClass =
-            "block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer";
+            "block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer relative";
     }
 
     if (!isOpen) return null;
@@ -240,12 +329,12 @@ export function TrackContextMenu({
                     </button>
                 )}
 
-                {/* Add to Playlist Action */}
+                {/* Add to Playlist Action with Hover Submenu */}
                 {actions.addToPlaylist && (
-                    <AddToPlaylist
-                        trackId={track.id}
-                        trackTitle={track.title}
-                        onOpen={() => onClose()}
+                    <div 
+                        className="relative"
+                        onMouseEnter={() => setShowPlaylistSubmenu(true)}
+                        onMouseLeave={() => setShowPlaylistSubmenu(false)}
                     >
                         <button className={buttonClass}>
                             <Plus
@@ -254,14 +343,67 @@ export function TrackContextMenu({
                             <span
                                 className={
                                     isLightVariant || isPurpleVariant
-                                        ? "text-sm"
-                                        : ""
+                                        ? "text-sm flex-1"
+                                        : "flex-1"
                                 }
                             >
                                 Add to Playlist
                             </span>
+                            <ChevronRight
+                                className={`${isLightVariant || isPurpleVariant ? "h-4 w-4 ml-2" : "h-4 w-4 ml-2 inline-block"}`}
+                            />
                         </button>
-                    </AddToPlaylist>
+
+                        {/* Playlist Submenu */}
+                        {showPlaylistSubmenu && (
+                            <div className="absolute left-full top-0 ml-1 w-64 bg-purple-900 border border-purple-700 shadow-2xl rounded-lg z-[100000] max-h-80 overflow-y-auto">
+                                {/* Search/Filter Header */}
+                                <div className="px-3 py-2 border-b border-purple-700">
+                                    <div className="text-xs text-purple-300 font-medium">
+                                        Select Playlist
+                                    </div>
+                                </div>
+
+                                {/* Create New Playlist Option */}
+                                <button
+                                    onClick={handleCreateNewPlaylist}
+                                    className="flex items-center w-full px-3 py-2 text-white hover:bg-purple-700/50 transition-colors text-sm border-b border-purple-700/50"
+                                >
+                                    <Plus className="h-4 w-4 mr-3 text-green-400" />
+                                    <span>Create new playlist</span>
+                                </button>
+
+                                {/* Playlists List */}
+                                {playlists.length === 0 ? (
+                                    <div className="px-3 py-4 text-center text-purple-300 text-sm">
+                                        No playlists found
+                                    </div>
+                                ) : (
+                                    playlists.map((playlist) => (
+                                        <button
+                                            key={playlist.id}
+                                            onClick={() => handleAddToPlaylist(playlist.id)}
+                                            disabled={isAddingToPlaylist === playlist.id}
+                                            className="flex items-center w-full px-3 py-2 text-white hover:bg-purple-700/50 transition-colors text-sm disabled:opacity-50"
+                                        >
+                                            <ListIcon className="h-4 w-4 mr-3 text-purple-300" />
+                                            <div className="flex-1 text-left">
+                                                <div className="font-medium truncate">
+                                                    {playlist.name}
+                                                </div>
+                                                <div className="text-xs text-purple-400">
+                                                    {playlist.track_count} tracks
+                                                </div>
+                                            </div>
+                                            {isAddingToPlaylist === playlist.id && (
+                                                <div className="w-4 h-4 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />
+                                            )}
+                                        </button>
+                                    ))
+                                )}
+                            </div>
+                        )}
+                    </div>
                 )}
 
                 {/* Download Action */}

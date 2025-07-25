@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { usePlaylist } from "@/contexts/PlaylistContext";
 import { showWarning } from '@/lib/services/notification-service';
 import {
   Dialog,
@@ -46,7 +47,7 @@ export default function AddToPlaylist({
   onOpen,
 }: AddToPlaylistProps) {
   const { user } = useCurrentUser();
-  const [playlists, setPlaylists] = useState<Playlist[]>([]);
+  const { playlists, refetchPlaylists, addPlaylist } = usePlaylist();
   const [isLoading, setIsLoading] = useState(false);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [newPlaylistName, setNewPlaylistName] = useState("");
@@ -54,22 +55,7 @@ export default function AddToPlaylist({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [togglingPrivacy, setTogglingPrivacy] = useState<number | null>(null);
 
-  const fetchPlaylists = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch("/api/playlists");
-      if (!response.ok) {
-        throw new Error("Failed to fetch playlists");
-      }
-      const data = await response.json();
-      setPlaylists(data);
-    } catch (error) {
-      console.error("Error fetching playlists:", error);
-      toast.error("Failed to load playlists");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  
 
   const handleAddToPlaylist = async (playlistId: number) => {
     try {
@@ -162,8 +148,9 @@ export default function AddToPlaylist({
       setNewPlaylistName("");
       toast.success(`Created "${newPlaylist.name}" and added "${trackTitle}"`);
 
-      // Force refresh playlists to ensure UI is up to date
-      await fetchPlaylists();
+      // Add to global context and refresh
+      addPlaylist(newPlaylist);
+      await refetchPlaylists();
     } catch (error: any) {
       console.error("Error creating playlist and adding track:", error);
       toast.error(error.message || "Failed to create playlist");
@@ -188,7 +175,7 @@ export default function AddToPlaylist({
     onOpen?.();
     
     setIsModalOpen(true);
-    fetchPlaylists();
+    // Playlists are already loaded globally, no need to fetch
   };
 
   const togglePlaylistPrivacy = async (
@@ -209,14 +196,8 @@ export default function AddToPlaylist({
         throw new Error("Failed to update playlist privacy");
       }
 
-      // Update local state
-      setPlaylists((prevPlaylists) =>
-        prevPlaylists.map((playlist) =>
-          playlist.id === playlistId
-            ? { ...playlist, private: !currentPrivateStatus }
-            : playlist,
-        ),
-      );
+      // Update global context - this will be handled by refetch if needed
+      await refetchPlaylists();
     } catch (error) {
       console.error("Error updating playlist privacy:", error);
     } finally {
