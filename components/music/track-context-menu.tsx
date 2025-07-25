@@ -21,6 +21,7 @@ import { usePlaylist } from "@/contexts/PlaylistContext";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { showWarning } from "@/lib/services/notification-service";
 import { toast } from "sonner";
+import { CreatePlaylistModal } from "@/components/create-playlist-modal";
 
 export interface TrackContextMenuAction {
     play?: boolean;
@@ -89,6 +90,10 @@ export function TrackContextMenu({
     const [showPlaylistSubmenu, setShowPlaylistSubmenu] = useState(false);
     const [isAddingToPlaylist, setIsAddingToPlaylist] = useState<number | null>(
         null,
+    );
+    const [createPlaylistOpen, setCreatePlaylistOpen] = useState(false);
+    const [submenuPosition, setSubmenuPosition] = useState<"right" | "left">(
+        "right",
     );
 
     // Handle click outside to close menu
@@ -185,41 +190,15 @@ export function TrackContextMenu({
         }
     };
 
-    const handleCreateNewPlaylist = async () => {
-        if (!user) {
-            showWarning({
-                title: "Login Required",
-                message: "You need to login to create playlists",
-            });
-            return;
-        }
+    const handleCreateNewPlaylist = () => {
+        setCreatePlaylistOpen(true);
+        onClose();
+        setShowPlaylistSubmenu(false);
+    };
 
-        const playlistName = prompt("Enter playlist name:");
-        if (!playlistName?.trim()) return;
-
-        try {
-            // Create new playlist
-            const createResponse = await fetch("/api/playlists", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ name: playlistName.trim() }),
-            });
-
-            if (!createResponse.ok) {
-                const errorData = await createResponse.json();
-                throw new Error(errorData.error || "Failed to create playlist");
-            }
-
-            const newPlaylist = await createResponse.json();
-
-            // Add track to the new playlist
-            await handleAddToPlaylist(newPlaylist.id);
-        } catch (error: any) {
-            console.error("Error creating playlist:", error);
-            toast.error(error.message || "Failed to create playlist");
-        }
+    const handlePlaylistCreated = () => {
+        // refetchPlaylists(); // Assuming you have a refetch playlists function
+        console.log("Playlist created successfully!");
     };
 
     const positionClasses =
@@ -248,7 +227,8 @@ export function TrackContextMenu({
     if (!isOpen) return null;
 
     return (
-        <div ref={menuRef} className={containerClass}>
+        <>
+            <div ref={menuRef} className={containerClass}>
             {/* Header Section - Only for light variant */}
             {isLightVariant && (
                 <div className="p-4 border-b border-purple-700">
@@ -362,7 +342,15 @@ export function TrackContextMenu({
 
                         {/* Playlist Submenu */}
                         {showPlaylistSubmenu && (
-                            <div className="absolute left-full top-0 ml-0 w-64 bg-purple-900 border border-purple-700 shadow-2xl rounded-lg z-[100000] max-h-80 overflow-y-auto">
+                            <div 
+                                className={`absolute ${submenuPosition === 'right' ? 'left-full ml-1' : 'right-full mr-1'} top-0 w-64 bg-purple-900 border border-purple-700 shadow-2xl rounded-lg z-[999999] max-h-80 overflow-y-auto`}
+                                onMouseEnter={() => setShowPlaylistSubmenu(true)}
+                                onMouseLeave={() => setShowPlaylistSubmenu(false)}
+                            >
+                                {/* Prevent hover gap */}
+                                <div className="absolute -left-1 top-0 w-1 h-full bg-transparent" />
+                                <div className="absolute -right-1 top-0 w-1 h-full bg-transparent" />
+
                                 {/* Search/Filter Header */}
                                 <div className="px-3 py-2 border-b border-purple-700">
                                     <div className="text-xs text-purple-300 font-medium">
@@ -485,6 +473,14 @@ export function TrackContextMenu({
                 )}
             </div>
         </div>
+
+            {/* Create Playlist Modal */}
+            <CreatePlaylistModal
+                open={createPlaylistOpen}
+                onOpenChange={setCreatePlaylistOpen}
+                onPlaylistCreated={handlePlaylistCreated}
+            />
+        </>
     );
 }
 
