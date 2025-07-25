@@ -330,13 +330,7 @@ export function TrackContextMenu({
                             setSubmenuPosition(spaceOnRight < submenuWidth ? 'left' : 'right');
                             setShowPlaylistSubmenu(true);
                         }}
-                        onMouseLeave={(e) => {
-                            // Only hide if not moving to submenu
-                            const relatedTarget = e.relatedTarget as HTMLElement;
-                            if (!relatedTarget || !e.currentTarget.contains(relatedTarget)) {
-                                setTimeout(() => setShowPlaylistSubmenu(false), 100);
-                            }
-                        }}
+                        onMouseLeave={() => setShowPlaylistSubmenu(false)}
                     >
                         <button className={buttonClass}>
                             <Plus
@@ -358,20 +352,7 @@ export function TrackContextMenu({
 
                         {/* Playlist Submenu */}
                         {showPlaylistSubmenu && (
-                            <div className={`absolute ${submenuPosition === 'right' ? 'left-full ml-1' : 'right-full mr-1'} top-0 w-64 bg-purple-900 border border-purple-700 shadow-2xl rounded-lg z-[999999] max-h-80 overflow-y-auto`}
-                                style={{ 
-                                    position: 'fixed',
-                                    zIndex: 999999,
-                                    transform: submenuPosition === 'right' 
-                                        ? 'translateX(0)' 
-                                        : 'translateX(-100%)',
-                                }}
-                                onMouseEnter={() => setShowPlaylistSubmenu(true)}
-                                onMouseLeave={() => setShowPlaylistSubmenu(false)}
-                            >
-                                {/* Prevent hover gap */}
-                                <div className="absolute -left-1 top-0 w-1 h-full bg-transparent" />
-                                <div className="absolute -right-1 top-0 w-1 h-full bg-transparent" />
+                            <div className={`absolute ${submenuPosition === 'right' ? 'left-full ml-1' : 'right-full mr-1'} top-0 w-64 bg-purple-900 border border-purple-700 shadow-2xl rounded-lg z-[100000] max-h-80 overflow-y-auto`}
                                 {/* Search/Filter Header */}
                                 <div className="px-3 py-2 border-b border-purple-700">
                                     <div className="text-xs text-purple-300 font-medium">
