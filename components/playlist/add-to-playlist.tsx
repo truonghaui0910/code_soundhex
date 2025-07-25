@@ -170,9 +170,11 @@ export default function AddToPlaylist({
     }
   };
 
-  const handleModalOpen = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleModalOpen = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
 
     if (!user) {
       showWarning({
@@ -228,7 +230,14 @@ export default function AddToPlaylist({
 
   return (
     <>
-      <div onClick={handleModalOpen} className="w-full cursor-pointer">
+      <div 
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          handleModalOpen(e);
+        }} 
+        className="w-full cursor-pointer"
+      >
         {children}
       </div>
 

@@ -130,11 +130,11 @@ export function TrackContextMenu({
     // Style variants
     const isLightVariant = variant === "light";
     const isPurpleVariant = variant === "purple";
-    
+
     let containerClass, buttonClass;
-    
+
     if (isLightVariant) {
-        containerClass = `absolute right-0 ${positionClasses} w-80 z-[99999] bg-purple-900 border border-purple-700 shadow-2xl rounded-xl overflow-visible ${className}`;
+        containerClass = `fixed ${positionClasses} w-80 z-[99999] bg-purple-900 border border-purple-700 shadow-2xl rounded-xl overflow-visible ${className}`;
         buttonClass = "flex items-center w-full px-4 py-3 text-white hover:bg-purple-700/50 transition-colors cursor-pointer";
     } else if (isPurpleVariant) {
         containerClass = `absolute right-0 ${positionClasses} w-48 z-[99999] bg-purple-900 border border-purple-700 shadow-2xl rounded-md overflow-visible ${className}`;
@@ -310,4 +310,4 @@ export function TrackContextMenuTrigger({
             <MoreHorizontal className="h-4 w-4" />
         </Button>
     );
-} 
+}

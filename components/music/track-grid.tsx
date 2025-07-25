@@ -214,27 +214,9 @@ const TrackGrid = memo(function TrackGrid({
                             {/* Gradient overlay */}
                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-                            {/* Play button */}
-                            <div className="absolute inset-0 flex items-center justify-center">
-                                <Button
-                                    size="lg"
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        handleTrackPlay(track);
-                                    }}
-                                    className="opacity-0 group-hover:opacity-100 rounded-full bg-white/90 text-purple-600 hover:bg-white shadow-lg backdrop-blur-sm z-10"
-                                >
-                                    {currentTrack?.id === track.id &&
-                                    isPlaying ? (
-                                        <Pause className="h-6 w-6" />
-                                    ) : (
-                                        <Play className="h-6 w-6" />
-                                    )}
-                                </Button>
-                            </div>
+                            
 
-                            {/* Bottom Controls - Like and Menu */}
+                            {/* Bottom Controls - Like, Play and Menu aligned */}
                             <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity z-50">
                                 {/* Like Button - Left */}
                                 <LikeButton
@@ -242,51 +224,72 @@ const TrackGrid = memo(function TrackGrid({
                                     id={track.id}
                                     variant="overlay"
                                     size="sm"
-                                    className="rounded-full"
+                                    className="w-8 h-8 rounded-full bg-black/50 backdrop-blur-sm hover:bg-black/70"
                                 />
                                 
-                                {/* Context Menu Button - Right */}
-                                <div className="relative">
-                                    <TrackContextMenuTrigger
-                                        isOpen={openMenuId === track.id}
-                                        onToggle={() => toggleMenu(track.id)}
-                                        className="w-8 h-8 bg-black/50 backdrop-blur-sm hover:bg-black/70 rounded-full"
-                                    />
-                                    
-                                    <TrackContextMenu
-                                        track={track}
-                                        isOpen={openMenuId === track.id}
-                                        onClose={() => setOpenMenuId(null)}
-                                        position="top"
-                                        className="z-[99999] !fixed"
-                                        variant="light"
-                                        actions={{
-                                            play: true,
-                                            addToPlaylist: true,
-                                            download: true,
-                                            like: false,
-                                            share: true,
+                                {/* Center Controls - Play and Menu aligned */}
+                                <div className="flex items-center gap-2">
+                                    {/* Play button */}
+                                    <Button
+                                        size="sm"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            handleTrackPlay(track);
                                         }}
-                                        onPlayToggle={handleTogglePlay}
-                                        onDownload={downloadTrack}
-                                        onLikeToggle={toggleTrackLike}
-                                        onShare={(track) => {
-                                            const trackPath = track.custom_url || track.id;
-                                            const url = `${window.location.origin}/track/${trackPath}`;
-                                            navigator.clipboard.writeText(url);
-                                            showSuccess({
-                                                title: "Copied!",
-                                                message: "Link copied to clipboard!",
-                                            });
-                                        }}
-                                        isPlaying={isPlaying}
-                                        isCurrentTrack={currentTrack?.id === track.id}
-                                        likeStatus={{
-                                            isLiked: getTrackLikeStatus(track.id).isLiked || false,
-                                            isLoading: getTrackLikeStatus(track.id).isLoading,
-                                            totalLikes: getTrackLikeStatus(track.id).totalLikes,
-                                        }}
-                                    />
+                                        className="w-8 h-8 rounded-full bg-white/90 text-purple-600 hover:bg-white shadow-lg backdrop-blur-sm p-0"
+                                    >
+                                        {currentTrack?.id === track.id &&
+                                        isPlaying ? (
+                                            <Pause className="h-3 w-3" />
+                                        ) : (
+                                            <Play className="h-3 w-3" />
+                                        )}
+                                    </Button>
+
+                                    {/* Context Menu Button */}
+                                    <div className="relative">
+                                        <TrackContextMenuTrigger
+                                            isOpen={openMenuId === track.id}
+                                            onToggle={() => toggleMenu(track.id)}
+                                            className="w-8 h-8 bg-black/50 backdrop-blur-sm hover:bg-black/70 rounded-full"
+                                        />
+                                        
+                                        <TrackContextMenu
+                                            track={track}
+                                            isOpen={openMenuId === track.id}
+                                            onClose={() => setOpenMenuId(null)}
+                                            position="top"
+                                            className="z-[99999]"
+                                            variant="light"
+                                            actions={{
+                                                play: true,
+                                                addToPlaylist: true,
+                                                download: true,
+                                                like: false,
+                                                share: true,
+                                            }}
+                                            onPlayToggle={handleTogglePlay}
+                                            onDownload={downloadTrack}
+                                            onLikeToggle={toggleTrackLike}
+                                            onShare={(track) => {
+                                                const trackPath = track.custom_url || track.id;
+                                                const url = `${window.location.origin}/track/${trackPath}`;
+                                                navigator.clipboard.writeText(url);
+                                                showSuccess({
+                                                    title: "Copied!",
+                                                    message: "Link copied to clipboard!",
+                                                });
+                                            }}
+                                            isPlaying={isPlaying}
+                                            isCurrentTrack={currentTrack?.id === track.id}
+                                            likeStatus={{
+                                                isLiked: getTrackLikeStatus(track.id).isLiked || false,
+                                                isLoading: getTrackLikeStatus(track.id).isLoading,
+                                                totalLikes: getTrackLikeStatus(track.id).totalLikes,
+                                            }}
+                                        />
+                                    </div>
                                 </div>
                             </div>
 
