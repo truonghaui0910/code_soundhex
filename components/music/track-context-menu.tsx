@@ -46,8 +46,8 @@ interface TrackContextMenuProps {
         isLoading: boolean;
         totalLikes?: number;
     };
-         // Style variants
-     variant?: "default" | "light" | "purple";
+    // Style variants
+    variant?: "default" | "light" | "purple";
 }
 
 // Helper function to format view count
@@ -84,14 +84,18 @@ export function TrackContextMenu({
     // Handle click outside to close menu
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            if (isOpen && menuRef.current && !menuRef.current.contains(event.target as Node)) {
+            if (
+                isOpen &&
+                menuRef.current &&
+                !menuRef.current.contains(event.target as Node)
+            ) {
                 onClose();
             }
         };
 
-        document.addEventListener('mousedown', handleClickOutside);
+        document.addEventListener("mousedown", handleClickOutside);
         return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener("mousedown", handleClickOutside);
         };
     }, [isOpen, onClose]);
 
@@ -118,14 +122,13 @@ export function TrackContextMenu({
             const trackPath = track.custom_url || track.id;
             const url = `${window.location.origin}/track/${trackPath}`;
             navigator.clipboard.writeText(url);
-            toast.success('Link copied to clipboard!');
+            toast.success("Link copied to clipboard!");
         }
         onClose();
     };
 
-    const positionClasses = position === "top" 
-        ? "bottom-full mb-2" 
-        : "top-full mt-2";
+    const positionClasses =
+        position === "top" ? "bottom-full mb-2" : "top-full mt-2";
 
     // Style variants
     const isLightVariant = variant === "light";
@@ -134,23 +137,23 @@ export function TrackContextMenu({
     let containerClass, buttonClass;
 
     if (isLightVariant) {
-        containerClass = `fixed ${positionClasses} w-80 z-[99999] bg-purple-900 border border-purple-700 shadow-2xl rounded-xl overflow-visible ${className}`;
-        buttonClass = "flex items-center w-full px-4 py-3 text-white hover:bg-purple-700/50 transition-colors cursor-pointer";
+        containerClass = `absolute right-0 ${positionClasses} w-80 z-[99999] bg-purple-900 border border-purple-700 shadow-2xl rounded-xl overflow-visible ${className}`;
+        buttonClass =
+            "flex items-center w-full px-4 py-3 text-white hover:bg-purple-700/50 transition-colors cursor-pointer";
     } else if (isPurpleVariant) {
         containerClass = `absolute right-0 ${positionClasses} w-48 z-[99999] bg-purple-900 border border-purple-700 shadow-2xl rounded-md overflow-visible ${className}`;
-        buttonClass = "block w-full text-left px-4 py-2 text-sm text-white hover:bg-purple-700/50 transition-colors cursor-pointer";
+        buttonClass =
+            "block w-full text-left px-4 py-2 text-sm text-white hover:bg-purple-700/50 transition-colors cursor-pointer";
     } else {
         containerClass = `absolute right-0 ${positionClasses} w-48 z-[99999] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg rounded-md overflow-visible ${className}`;
-        buttonClass = "block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer";
+        buttonClass =
+            "block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer";
     }
 
     if (!isOpen) return null;
 
     return (
-        <div
-            ref={menuRef}
-            className={containerClass}
-        >
+        <div ref={menuRef} className={containerClass}>
             {/* Header Section - Only for light variant */}
             {isLightVariant && (
                 <div className="p-4 border-b border-purple-700">
@@ -160,12 +163,14 @@ export function TrackContextMenu({
                             {track.artist?.profile_image_url ? (
                                 <img
                                     src={track.artist.profile_image_url}
-                                    alt={track.artist?.name || 'Artist'}
+                                    alt={track.artist?.name || "Artist"}
                                     className="w-full h-full object-cover rounded-full"
                                 />
                             ) : (
                                 <span className="text-white font-bold text-lg">
-                                    {(track.artist?.name || track.title).charAt(0).toUpperCase()}
+                                    {(track.artist?.name || track.title)
+                                        .charAt(0)
+                                        .toUpperCase()}
                                 </span>
                             )}
                         </div>
@@ -178,11 +183,17 @@ export function TrackContextMenu({
                             <div className="flex items-center gap-4 mt-1 text-purple-300 text-sm">
                                 <div className="flex items-center gap-1">
                                     <Heart className="h-3 w-3" />
-                                    <span>{formatViewCount(likeStatus.totalLikes || 0)}</span>
+                                    <span>
+                                        {formatViewCount(
+                                            likeStatus.totalLikes || 0,
+                                        )}
+                                    </span>
                                 </div>
                                 <div className="flex items-center gap-1">
                                     <Headphones className="h-3 w-3" />
-                                    <span>{formatViewCount(track.view_count || 0)}</span>
+                                    <span>
+                                        {formatViewCount(track.view_count || 0)}
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -194,19 +205,36 @@ export function TrackContextMenu({
             <div className={isLightVariant ? "py-2" : ""}>
                 {/* Play/Pause Action */}
                 {actions.play && onPlayToggle && (
-                    <button
-                        onClick={handlePlayToggle}
-                        className={buttonClass}
-                    >
+                    <button onClick={handlePlayToggle} className={buttonClass}>
                         {isCurrentTrack && isPlaying ? (
                             <>
-                                <Pause className={`${isLightVariant || isPurpleVariant ? 'h-4 w-4 mr-3' : 'h-4 w-4 mr-2 inline-block'}`} />
-                                <span className={isLightVariant || isPurpleVariant ? 'text-sm' : ''}>Pause</span>
+                                <Pause
+                                    className={`${isLightVariant || isPurpleVariant ? "h-4 w-4 mr-3" : "h-4 w-4 mr-2 inline-block"}`}
+                                />
+                                <span
+                                    className={
+                                        isLightVariant || isPurpleVariant
+                                            ? "text-sm"
+                                            : ""
+                                    }
+                                >
+                                    Pause
+                                </span>
                             </>
                         ) : (
                             <>
-                                <Play className={`${isLightVariant || isPurpleVariant ? 'h-4 w-4 mr-3' : 'h-4 w-4 mr-2 inline-block'}`} />
-                                <span className={isLightVariant || isPurpleVariant ? 'text-sm' : ''}>Play</span>
+                                <Play
+                                    className={`${isLightVariant || isPurpleVariant ? "h-4 w-4 mr-3" : "h-4 w-4 mr-2 inline-block"}`}
+                                />
+                                <span
+                                    className={
+                                        isLightVariant || isPurpleVariant
+                                            ? "text-sm"
+                                            : ""
+                                    }
+                                >
+                                    Play
+                                </span>
                             </>
                         )}
                     </button>
@@ -214,26 +242,43 @@ export function TrackContextMenu({
 
                 {/* Add to Playlist Action */}
                 {actions.addToPlaylist && (
-                    <AddToPlaylist 
-                        trackId={track.id} 
+                    <AddToPlaylist
+                        trackId={track.id}
                         trackTitle={track.title}
                         onOpen={() => onClose()}
                     >
                         <button className={buttonClass}>
-                            <Plus className={`${isLightVariant || isPurpleVariant ? 'h-4 w-4 mr-3' : 'h-4 w-4 mr-2 inline-block'}`} />
-                            <span className={isLightVariant || isPurpleVariant ? 'text-sm' : ''}>Add to Playlist</span>
+                            <Plus
+                                className={`${isLightVariant || isPurpleVariant ? "h-4 w-4 mr-3" : "h-4 w-4 mr-2 inline-block"}`}
+                            />
+                            <span
+                                className={
+                                    isLightVariant || isPurpleVariant
+                                        ? "text-sm"
+                                        : ""
+                                }
+                            >
+                                Add to Playlist
+                            </span>
                         </button>
                     </AddToPlaylist>
                 )}
 
                 {/* Download Action */}
                 {actions.download && onDownload && (
-                    <button
-                        onClick={handleDownload}
-                        className={buttonClass}
-                    >
-                        <Download className={`${isLightVariant || isPurpleVariant ? 'h-4 w-4 mr-3' : 'h-4 w-4 mr-2 inline-block'}`} />
-                        <span className={isLightVariant || isPurpleVariant ? 'text-sm' : ''}>Download</span>
+                    <button onClick={handleDownload} className={buttonClass}>
+                        <Download
+                            className={`${isLightVariant || isPurpleVariant ? "h-4 w-4 mr-3" : "h-4 w-4 mr-2 inline-block"}`}
+                        />
+                        <span
+                            className={
+                                isLightVariant || isPurpleVariant
+                                    ? "text-sm"
+                                    : ""
+                            }
+                        >
+                            Download
+                        </span>
                     </button>
                 )}
 
@@ -245,23 +290,31 @@ export function TrackContextMenu({
                         disabled={likeStatus.isLoading}
                     >
                         <Heart
-                            className={`${isLightVariant || isPurpleVariant ? 'h-4 w-4 mr-3' : 'h-4 w-4 mr-2 inline-block'} ${likeStatus.isLiked ? "fill-current text-red-500" : ""}`}
+                            className={`${isLightVariant || isPurpleVariant ? "h-4 w-4 mr-3" : "h-4 w-4 mr-2 inline-block"} ${likeStatus.isLiked ? "fill-current text-red-500" : ""}`}
                         />
-                        <span className={isLightVariant || isPurpleVariant ? 'text-sm' : ''}>
+                        <span
+                            className={
+                                isLightVariant || isPurpleVariant
+                                    ? "text-sm"
+                                    : ""
+                            }
+                        >
                             {likeStatus.isLiked ? "Unlike" : "Like"}
-                            {!isLightVariant && !isPurpleVariant && likeStatus.totalLikes !== undefined && likeStatus.totalLikes > 0 && (
-                                <span className="ml-1">({likeStatus.totalLikes})</span>
-                            )}
+                            {!isLightVariant &&
+                                !isPurpleVariant &&
+                                likeStatus.totalLikes !== undefined &&
+                                likeStatus.totalLikes > 0 && (
+                                    <span className="ml-1">
+                                        ({likeStatus.totalLikes})
+                                    </span>
+                                )}
                         </span>
                     </button>
                 )}
 
                 {/* Share Action */}
                 {actions.share && (
-                    <button
-                        onClick={handleShare}
-                        className={buttonClass}
-                    >
+                    <button onClick={handleShare} className={buttonClass}>
                         {isLightVariant || isPurpleVariant ? (
                             <>
                                 <LinkIcon className="h-4 w-4 mr-3" />
