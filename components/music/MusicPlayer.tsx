@@ -15,11 +15,7 @@ import {
   Repeat,
   Repeat1,
   List,
-  Heart,
-  MoreHorizontal,
-  Plus,
-  Download,
-  Share
+  Heart
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CustomSlider } from "@/components/ui/custom-slider";
@@ -28,6 +24,7 @@ import { useLikesFollows } from "@/hooks/use-likes-follows";
 import { useDownload } from "@/hooks/use-download";
 import { QueuePanel } from "./QueuePanel";
 import AddToPlaylist from "@/components/playlist/add-to-playlist";
+import { TrackContextMenu, TrackContextMenuTrigger } from "./track-context-menu";
 import { toast } from "sonner";
 import { showImportSuccess, showError, showProcessing, dismissNotifications } from "@/lib/services/notification-service";
 
@@ -67,7 +64,6 @@ export function MusicPlayer() {
 
   // References and state
   const progressRef = useRef<HTMLDivElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // Handle progress bar click
@@ -79,19 +75,7 @@ export function MusicPlayer() {
     seekTo(pos * duration);
   };
 
-  // Handle click outside to close menu
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (isMenuOpen && menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setIsMenuOpen(false);
-      }
-    };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isMenuOpen]);
 
   // Fetch like status for current track only
   useEffect(() => {
@@ -141,7 +125,7 @@ export function MusicPlayer() {
                   <div className="text-xs text-gray-400 truncate">
                     {currentTrack.artist?.name && (
                       <>
-                        <Link 
+                        <Link
                           href={`/artist/${currentTrack.artist.id}`}
                           className="hover:text-rose-500 transition-colors"
                         >
@@ -151,7 +135,7 @@ export function MusicPlayer() {
                       </>
                     )}
                     {currentTrack.album?.title && (
-                      <Link 
+                      <Link
                         href={`/album/${currentTrack.album.id}`}
                         className="hover:text-rose-500 transition-colors"
                       >
@@ -173,11 +157,10 @@ export function MusicPlayer() {
             <Button
               size="icon"
               variant="ghost"
-              className={`h-8 w-8 transition-colors ${
-                isShuffled 
-                  ? 'text-rose-500 hover:text-rose-600' 
+              className={`h-8 w-8 transition-colors ${isShuffled
+                  ? 'text-rose-500 hover:text-rose-600'
                   : 'text-gray-400 dark:hover:bg-white/10 hover:bg-white/10'
-              }`}
+                }`}
               onClick={toggleShuffle}
               disabled={!currentTrack || !trackList || trackList.length <= 1}
             >
@@ -222,11 +205,10 @@ export function MusicPlayer() {
             <Button
               size="icon"
               variant="ghost"
-              className={`h-8 w-8 transition-colors ${
-                repeatMode !== 'none'
-                  ? 'text-rose-500 hover:text-rose-600' 
+              className={`h-8 w-8 transition-colors ${repeatMode !== 'none'
+                  ? 'text-rose-500 hover:text-rose-600'
                   : 'text-gray-400 dark:hover:bg-white/10 hover:bg-white/10'
-              }`}
+                }`}
               onClick={toggleRepeat}
               disabled={!currentTrack}
             >
@@ -247,17 +229,15 @@ export function MusicPlayer() {
                 <Button
                   size="icon"
                   variant="ghost"
-                  className={`h-8 w-8 transition-colors ${
-                    likeStatus.isLiked
+                  className={`h-8 w-8 transition-colors ${likeStatus.isLiked
                       ? 'text-red-500 hover:text-red-600 dark:hover:bg-white/10 hover:bg-white/10'
                       : 'text-gray-400 dark:hover:bg-white/10 hover:bg-white/10'
-                  }`}
+                    }`}
                   onClick={() => toggleTrackLike(currentTrack.id)}
                   disabled={likeStatus.isLoading}
                 >
-                  <Heart className={`h-4 w-4 ${
-                    likeStatus.isLiked ? 'fill-current text-red-500' : ''
-                  }`} />
+                  <Heart className={`h-4 w-4 ${likeStatus.isLiked ? 'fill-current text-red-500' : ''
+                    }`} />
                 </Button>
               );
             })()}
@@ -276,54 +256,27 @@ export function MusicPlayer() {
             {/* More options menu */}
             {currentTrack && (
               <div className="relative">
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="h-8 w-8 text-gray-400 dark:hover:bg-white/10 hover:bg-white/10 transition-colors"
-                  onClick={() => setIsMenuOpen(!isMenuOpen)}
-                >
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-                
-                <div
-                  ref={menuRef}
-                  className={`absolute right-0 bottom-full mb-2 w-48 z-[100] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg rounded-md overflow-hidden ${isMenuOpen ? '' : 'hidden'}`}
-                >
-                  <AddToPlaylist trackId={currentTrack.id} trackTitle={currentTrack.title}>
-                    <button
-                      onClick={() => setIsMenuOpen(false)}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
-                    >
-                      <Plus className="h-4 w-4 mr-2 inline-block" />
-                      Add to Playlist
-                    </button>
-                  </AddToPlaylist>
-                  
-                  <button
-                    onClick={() => {
-                      downloadTrack(currentTrack);
-                      setIsMenuOpen(false);
-                    }}
-                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
-                  >
-                    <Download className="h-4 w-4 mr-2 inline-block" />
-                    Download
-                  </button>
-                  
-                  <button
-                    onClick={() => {
-                      // Implement share functionality
-                      const url = `${window.location.origin}/track/${currentTrack.id}`;
-                      navigator.clipboard.writeText(url);
-                      toast.success('Link copied to clipboard!');
-                      setIsMenuOpen(false);
-                    }}
-                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
-                  >
-                    <Share className="h-4 w-4 mr-2 inline-block" />
-                    Share
-                  </button>
-                </div>
+                <TrackContextMenuTrigger
+                  isOpen={isMenuOpen}
+                  onToggle={() => setIsMenuOpen(!isMenuOpen)}
+                  className="h-8 w-8"
+                />
+
+                                 <TrackContextMenu
+                   track={currentTrack}
+                   isOpen={isMenuOpen}
+                   onClose={() => setIsMenuOpen(false)}
+                   position="top"
+                   variant="light"
+                   actions={{
+                     play: false,
+                     addToPlaylist: true,
+                     download: true,
+                     like: false,
+                     share: true,
+                   }}
+                   onDownload={downloadTrack}
+                 />
               </div>
             )}
 
@@ -370,25 +323,25 @@ export function MusicPlayer() {
                 </div>
 
                 {/* Thumb/handle - positioned at the end of progress with higher z-index */}
-                <div 
+                <div
                   className="absolute top-1/2 h-5 w-5 bg-primary rounded-full border-2 border-white shadow-lg opacity-100 transform -translate-y-1/2 z-10 transition-all duration-200 hover:scale-110"
-                  style={{ 
+                  style={{
                     left: `calc(${duration ? (currentTime / duration) * 100 : 0}% - 2.5px)`,
                   }}
                 />
               </div>
 
               {/* Total duration */}
-              <span className="text-xs text-gray-400 min-w-[35px]">{formatDuration(currentTrack.duration)}</span>
+              <span className="text-xs text-gray-400 min-w-[35px]">{formatDuration(currentTrack.duration || null)}</span>
             </div>
           </div>
         )}
       </div>
 
       {/* Queue Panel */}
-      <QueuePanel 
-        isOpen={isQueueOpen} 
-        onClose={toggleQueue} 
+      <QueuePanel
+        isOpen={isQueueOpen}
+        onClose={toggleQueue}
       />
     </>
   );

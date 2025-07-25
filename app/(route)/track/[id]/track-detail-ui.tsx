@@ -459,7 +459,7 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
                     </div>
 
                     {/* Related Content */}
-                    <div>
+                    <div className="relative overflow-visible">
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                             More by {currentTrack.artist?.name}
                         </h3>
@@ -504,7 +504,7 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
                                         file_url: track.file_url,
                                         view_count: track.view_count,
                                     }))}
-                                className="overflow-y-auto"
+                                className="overflow-visible"
                             />
                         ) : isLoadingArtistTracks ? (
                             <div className="flex items-center justify-center p-8">

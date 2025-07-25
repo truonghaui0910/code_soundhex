@@ -8,10 +8,6 @@ import {
     Play,
     Pause,
     Clock,
-    Plus,
-    Download,
-    Heart,
-    Share,
     Headphones,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -20,9 +16,11 @@ import { Track } from "@/lib/definitions/Track";
 import { useAudioPlayer } from "@/contexts/AudioPlayerContext";
 import { useDownload } from "@/hooks/use-download";
 import AddToPlaylist from "@/components/playlist/add-to-playlist";
-import { useEffect, useCallback, useMemo, useRef } from "react";
+import { useEffect, useCallback, useMemo, useRef, useState } from "react";
 import { useLikesFollows } from "@/hooks/use-likes-follows";
+import { TrackContextMenu, TrackContextMenuTrigger } from "./track-context-menu";
 import { showSuccess } from "@/lib/services/notification-service";
+import { LikeButton } from "@/components/ui/like-button";
 
 interface TrackGridProps {
     tracks: Track[];
@@ -59,6 +57,8 @@ const TrackGrid = memo(function TrackGrid({
     className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6",
     gridCols,
 }: TrackGridProps) {
+    const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+    
     const {
         currentTrack,
         isPlaying,
@@ -106,6 +106,18 @@ const TrackGrid = memo(function TrackGrid({
             playTrack,
         ],
     );
+
+    const toggleMenu = (trackId: number) => {
+        setOpenMenuId(openMenuId === trackId ? null : trackId);
+    };
+
+    const handleTogglePlay = (track: Track) => {
+        if (currentTrack?.id === track.id) {
+            togglePlayPause();
+        } else {
+            handleTrackPlay(track);
+        }
+    };
 
     // Determine final className before using it
     const finalClassName = gridCols || className;
@@ -174,9 +186,9 @@ const TrackGrid = memo(function TrackGrid({
                     }}
                 >
                     {/* Main Card */}
-                    <div className="relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-500 transform hover:-translate-y-2 border border-white/20 dark:border-gray-700/30">
+                    <div className="relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl shadow-lg hover:shadow-xl transition-all duration-500 transform hover:-translate-y-2 border border-white/20 dark:border-gray-700/30 overflow-visible">
                         {/* Album Cover */}
-                        <div className="relative aspect-square overflow-hidden">
+                        <div className="relative aspect-square overflow-hidden rounded-t-3xl">
                             {track.album?.cover_image_url ? (
                                 <Link href={`/track/${track.id}`}>
                                     <Image
@@ -202,24 +214,83 @@ const TrackGrid = memo(function TrackGrid({
                             {/* Gradient overlay */}
                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-                            {/* Play button */}
-                            <div className="absolute inset-0 flex items-center justify-center">
-                                <Button
-                                    size="lg"
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        handleTrackPlay(track);
-                                    }}
-                                    className="opacity-0 group-hover:opacity-100 rounded-full bg-white/90 text-purple-600 hover:bg-white shadow-lg backdrop-blur-sm z-10"
-                                >
-                                    {currentTrack?.id === track.id &&
-                                    isPlaying ? (
-                                        <Pause className="h-6 w-6" />
-                                    ) : (
-                                        <Play className="h-6 w-6" />
-                                    )}
-                                </Button>
+                            
+
+                            {/* Bottom Controls - Like, Play and Menu aligned */}
+                            <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity z-50">
+                                {/* Like Button - Left */}
+                                <LikeButton
+                                    type="track"
+                                    id={track.id}
+                                    variant="overlay"
+                                    size="sm"
+                                    className="w-8 h-8 rounded-full bg-black/50 backdrop-blur-sm hover:bg-black/70"
+                                />
+                                
+                                {/* Center Controls - Play and Menu aligned */}
+                                <div className="flex items-center gap-2">
+                                    {/* Play button */}
+                                    <Button
+                                        size="sm"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            handleTrackPlay(track);
+                                        }}
+                                        className="w-8 h-8 rounded-full bg-white/90 text-purple-600 hover:bg-white shadow-lg backdrop-blur-sm p-0"
+                                    >
+                                        {currentTrack?.id === track.id &&
+                                        isPlaying ? (
+                                            <Pause className="h-3 w-3" />
+                                        ) : (
+                                            <Play className="h-3 w-3" />
+                                        )}
+                                    </Button>
+
+                                    {/* Context Menu Button */}
+                                    <div className="relative">
+                                        <TrackContextMenuTrigger
+                                            isOpen={openMenuId === track.id}
+                                            onToggle={() => toggleMenu(track.id)}
+                                            className="w-8 h-8 bg-black/50 backdrop-blur-sm hover:bg-black/70 rounded-full"
+                                        />
+                                        
+                                        <TrackContextMenu
+                                            track={track}
+                                            isOpen={openMenuId === track.id}
+                                            onClose={() => setOpenMenuId(null)}
+                                            position="top"
+                                            className="z-[99999]"
+                                            variant="light"
+                                            actions={{
+                                                play: true,
+                                                addToPlaylist: true,
+                                                download: true,
+                                                like: false,
+                                                share: true,
+                                            }}
+                                            onPlayToggle={handleTogglePlay}
+                                            onDownload={downloadTrack}
+                                            onLikeToggle={toggleTrackLike}
+                                            onShare={(track) => {
+                                                const trackPath = track.custom_url || track.id;
+                                                const url = `${window.location.origin}/track/${trackPath}`;
+                                                navigator.clipboard.writeText(url);
+                                                showSuccess({
+                                                    title: "Copied!",
+                                                    message: "Link copied to clipboard!",
+                                                });
+                                            }}
+                                            isPlaying={isPlaying}
+                                            isCurrentTrack={currentTrack?.id === track.id}
+                                            likeStatus={{
+                                                isLiked: getTrackLikeStatus(track.id).isLiked || false,
+                                                isLoading: getTrackLikeStatus(track.id).isLoading,
+                                                totalLikes: getTrackLikeStatus(track.id).totalLikes,
+                                            }}
+                                        />
+                                    </div>
+                                </div>
                             </div>
 
                             {/* Now playing indicator */}
@@ -317,80 +388,14 @@ const TrackGrid = memo(function TrackGrid({
                                         <div className="flex items-center gap-1 text-xs text-gray-500 bg-gray-100 dark:bg-gray-700/50 px-2 py-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600/50 transition-colors cursor-pointer">
                                             <Clock className="h-3 w-3" />
                                             <span className="font-mono">
-                                                {formatDuration(track.duration)}
+                                                {formatDuration(track.duration || null)}
                                             </span>
                                         </div>
                                     </Link>
                                 </div>
                             </div>
 
-                            {/* Action buttons */}
-                            <div className="mt-4 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 relative z-20">
-                                <AddToPlaylist
-                                    trackId={track.id}
-                                    trackTitle={track.title}
-                                >
-                                    <Button
-                                        size="sm"
-                                        variant="ghost"
-                                        className="flex-1"
-                                    >
-                                        <Plus className="h-4 w-4" />
-                                    </Button>
-                                </AddToPlaylist>
-                                <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        downloadTrack(track);
-                                    }}
-                                    className="flex-1"
-                                >
-                                    <Download className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                    size="sm"
-                                    className={`backdrop-blur-sm transition-all duration-200 border-0 p-2 h-8 w-8 ${
-                                        getTrackLikeStatus(track.id).isLiked
-                                            ? "bg-red-500 text-white hover:bg-red-600"
-                                            : "bg-white/10 text-white hover:bg-white/20"
-                                    }`}
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        toggleTrackLike(track.id);
-                                    }}
-                                    disabled={
-                                        getTrackLikeStatus(track.id).isLoading
-                                    }
-                                >
-                                    <Heart
-                                        className={`h-4 w-4 ${getTrackLikeStatus(track.id).isLiked ? "fill-current" : ""}`}
-                                    />
-                                </Button>
-                                <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    className="flex-1"
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        const currentUrl = window.location.href;
-                                        navigator.clipboard.writeText(
-                                            currentUrl,
-                                        );
-                                        showSuccess({
-                                            title: "Copied!",
-                                            message:
-                                                "Link copied to clipboard!",
-                                        });
-                                    }}
-                                >
-                                    <Share className="h-4 w-4" />
-                                </Button>
-                            </div>
+
                         </div>
                     </div>
 

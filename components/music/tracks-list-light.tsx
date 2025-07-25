@@ -10,6 +10,7 @@ import { Track } from "@/lib/definitions/Track";
 import Link from "next/link";
 import { toast } from "sonner";
 import AddToPlaylist from "@/components/playlist/add-to-playlist";
+import { TrackContextMenu, TrackContextMenuTrigger } from "./track-context-menu";
 
 
 interface LikedTrack {
@@ -68,35 +69,8 @@ export default function TracksListLight({ tracks, className = "" }: TracksListLi
   }, [tracks, className]);
 
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
-  const [openPlaylistMenuId, setOpenPlaylistMenuId] = useState<number | null>(null);
-  const [playlists, setPlaylists] = useState<any[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isLoadingPlaylists, setIsLoadingPlaylists] = useState(false);
-  const menuRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
-  const playlistMenuRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
 
-  // Handle click outside to close menu
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (openMenuId !== null) {
-        const menuElement = menuRefs.current[openMenuId];
-        if (menuElement && !menuElement.contains(event.target as Node)) {
-          setOpenMenuId(null);
-        }
-      }
-      if (openPlaylistMenuId !== null) {
-        const playlistMenuElement = playlistMenuRefs.current[openPlaylistMenuId];
-        if (playlistMenuElement && !playlistMenuElement.contains(event.target as Node)) {
-          setOpenPlaylistMenuId(null);
-        }
-      }
-    };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [openMenuId, openPlaylistMenuId]);
 
   // Batch fetch like status for all tracks
   useEffect(() => {
@@ -116,60 +90,6 @@ export default function TracksListLight({ tracks, className = "" }: TracksListLi
 
   const toggleMenu = (trackId: number) => {
     setOpenMenuId(openMenuId === trackId ? null : trackId);
-  };
-
-  const togglePlaylistMenu = (trackId: number) => {
-    console.log('togglePlaylistMenu called with trackId:', trackId, 'current openPlaylistMenuId:', openPlaylistMenuId);
-    if (openPlaylistMenuId === trackId) {
-      setOpenPlaylistMenuId(null);
-    } else {
-      setOpenPlaylistMenuId(trackId);
-      fetchPlaylists();
-    }
-  };
-
-  const fetchPlaylists = async () => {
-    setIsLoadingPlaylists(true);
-    try {
-      const response = await fetch("/api/playlists");
-      if (!response.ok) {
-        throw new Error("Failed to fetch playlists");
-      }
-      const data = await response.json();
-      setPlaylists(data);
-    } catch (error) {
-      console.error("Error fetching playlists:", error);
-    } finally {
-      setIsLoadingPlaylists(false);
-    }
-  };
-
-  const handleAddToPlaylist = async (playlistId: number, trackId: number, trackTitle: string) => {
-    try {
-      const response = await fetch(`/api/playlists/${playlistId}/tracks`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ track_id: trackId }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Failed to add track to playlist");
-      }
-
-      const playlist = playlists.find((p) => p.id === playlistId);
-      toast.success(`Added "${trackTitle}" to "${playlist?.name}"`);
-      setOpenPlaylistMenuId(null);
-    } catch (error: any) {
-      console.error("Error adding track to playlist:", error);
-      if (error.message === "Track already exists in playlist") {
-        toast.error("This track is already in the playlist");
-      } else {
-        toast.error(error.message || "Failed to add track to playlist");
-      }
-    }
   };
 
   const handleTrackPlay = (track: LikedTrack) => {
@@ -329,172 +249,50 @@ export default function TracksListLight({ tracks, className = "" }: TracksListLi
 
                 {/* Three Dots Menu (always visible) */}
                 <div className="relative">
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      toggleMenu(track.id);
-                    }}
+                  <TrackContextMenuTrigger
+                    isOpen={openMenuId === track.id}
+                    onToggle={() => toggleMenu(track.id)}
                     className="p-1 h-8 w-8 text-purple-300 hover:text-white dark:hover:bg-white/10"
-                  >
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
-
-                  {/* Dropdown Menu */}
-                  <div
-                    ref={(el) => {
-                      menuRefs.current[track.id] = el;
+                  />
+                  
+                  <TrackContextMenu
+                    track={{
+                      id: track.id,
+                      title: track.title,
+                      artist: {
+                        id: track.artist.id,
+                        name: track.artist.name,
+                        custom_url: track.artist.custom_url || track.artist.id.toString(),
+                        profile_image_url: track.artist.profile_image_url,
+                      },
+                      album: track.album ? {
+                        id: track.album.id,
+                        title: track.album.title,
+                        cover_image_url: track.album.cover_image_url,
+                      } : undefined,
+                      duration: track.duration || null,
+                      file_url: track.file_url,
+                      view_count: track.view_count,
                     }}
-                    className={`absolute right-0 mt-2 w-80 z-[100] bg-purple-900 border border-purple-700 shadow-2xl rounded-xl overflow-hidden ${openMenuId === track.id ? '' : 'hidden'
-                      }`}
-                  >
-                    {/* Header Section */}
-                    <div className="p-4 border-b border-purple-700">
-                      <div className="flex items-start gap-3">
-                        {/* Artist Profile Picture */}
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0">
-                          {track.artist.profile_image_url ? (
-                            <img
-                              src={track.artist.profile_image_url}
-                              alt={track.artist.name}
-                              className="w-full h-full object-cover rounded-full"
-                            />
-                          ) : (
-                            <span className="text-white font-bold text-lg">
-                              {track.artist.name.charAt(0).toUpperCase()}
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Song Info */}
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-white font-bold text-lg truncate">
-                            {track.title}
-                          </h3>
-                          <div className="flex items-center gap-4 mt-1 text-purple-300 text-sm">
-                            <div className="flex items-center gap-1">
-                              <Heart className="h-3 w-3" />
-                              <span>{formatViewCount(likeStatus.totalLikes || 0)}</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Headphones className="h-3 w-3" />
-                              <span>{formatViewCount(track.view_count || 0)}</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-
-
-                    {/* Action List */}
-                    <div className="py-2">
-                      {/* <AddToPlaylist trackId={track.id} trackTitle={track.title}>
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setOpenMenuId(null);
-                          }}
-                          className="flex items-center w-full px-4 py-3 text-white hover:bg-purple-700/50 transition-colors"
-                        >
-                          <Plus className="h-4 w-4 mr-3" />
-                          <span className="text-sm">Add to Queue</span>
-                        </button>
-                      </AddToPlaylist> */}
-{/* 
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          // Add to queue next
-                          setOpenMenuId(null);
-                        }}
-                        className="flex items-center w-full px-4 py-3 text-white hover:bg-purple-700/50 transition-colors"
-                      >
-                        <SkipForward className="h-4 w-4 mr-3" />
-                        <span className="text-sm">Play Next</span>
-                      </button> */}
-
-                      {/* <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          // Play similar content
-                          setOpenMenuId(null);
-                        }}
-                        className="flex items-center w-full px-4 py-3 text-white hover:bg-purple-700/50 transition-colors"
-                      >
-                        <Radio className="h-4 w-4 mr-3" />
-                        <span className="text-sm">Play Similar</span>
-                      </button> */}
-
-
-
-                      <AddToPlaylist 
-                        trackId={track.id} 
-                        trackTitle={track.title}
-                        onOpen={() => setOpenMenuId(null)}
-                      >
-                        <div className="flex items-center w-full px-4 py-3 text-white hover:bg-purple-700/50 transition-colors cursor-pointer">
-                          <Plus className="h-4 w-4 mr-3" />
-                          <span className="text-sm">Add to Playlist</span>
-                        </div>
-                      </AddToPlaylist>
-
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          const trackToDownload: Track = {
-                            id: track.id,
-                            title: track.title,
-                            artist: {
-                              id: track.artist.id,
-                              name: track.artist.name,
-                              custom_url: track.artist.custom_url || track.artist.id.toString(),
-                              profile_image_url: track.artist.profile_image_url,
-                            },
-                            album: track.album ? {
-                              id: track.album.id,
-                              title: track.album.title,
-                              cover_image_url: track.album.cover_image_url,
-                            } : undefined,
-                            duration: track.duration || null,
-                            file_url: track.file_url,
-                            view_count: track.view_count,
-                          };
-                          downloadTrack(trackToDownload);
-                          setOpenMenuId(null);
-                        }}
-                        className="flex items-center w-full px-4 py-3 text-white hover:bg-purple-700/50 transition-colors"
-                      >
-                        <Download className="h-4 w-4 mr-3" />
-                        <span className="text-sm">Download</span>
-                      </button>
-
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          const url = `${window.location.origin}/track/${track.custom_url || track.id}`;
-                          navigator.clipboard.writeText(url);
-                          toast.success('Link copied to clipboard!');
-                          setOpenMenuId(null);
-                        }}
-                        className="flex items-center w-full px-4 py-3 text-white hover:bg-purple-700/50 transition-colors"
-                      >
-                        <LinkIcon className="h-4 w-4 mr-3" />
-                        <span className="text-sm">Copy Link</span>
-                      </button>
-
-
-                    </div>
-
-
-                  </div>
+                    isOpen={openMenuId === track.id}
+                    onClose={() => setOpenMenuId(null)}
+                    variant="light"
+                    actions={{
+                      play: false,
+                      addToPlaylist: true,
+                      download: true,
+                      like: false,
+                      share: true,
+                    }}
+                    onDownload={(trackToDownload) => {
+                      downloadTrack(trackToDownload);
+                    }}
+                    likeStatus={{
+                      isLiked: likeStatus.isLiked || false,
+                      isLoading: likeStatus.isLoading,
+                      totalLikes: likeStatus.totalLikes,
+                    }}
+                  />
                 </div>
               </div>
             </div>
