@@ -297,49 +297,6 @@ export const TrackGridSm = React.memo(function TrackGridSm({
 
                                 {/* Control Buttons */}
                                 <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    {/* Like Button */}
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            toggleTrackLike(track.id);
-                                        }}
-                                        disabled={trackLikeStatus.isLoading}
-                                        className="w-8 h-8 rounded-full bg-black/50 backdrop-blur-sm hover:bg-black/70 flex items-center justify-center transition-all duration-200"
-                                    >
-                                        <svg
-                                            className={`w-4 h-4 transition-colors ${
-                                                trackLikeStatus.isLiked
-                                                    ? "fill-red-500 text-red-500"
-                                                    : "fill-none text-white"
-                                            }`}
-                                            stroke="currentColor"
-                                            strokeWidth="2"
-                                            viewBox="0 0 24 24"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                        >
-                                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                                        </svg>
-                                    </button>
-
-                                    {/* Play Button */}
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleTogglePlay(track);
-                                        }}
-                                        className="w-8 h-8 rounded-full bg-black/50 backdrop-blur-sm hover:bg-black/70 flex items-center justify-center transition-all duration-200"
-                                    >
-                                        {currentTrack?.id === track.id && isPlaying ? (
-                                            <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                                <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
-                                            </svg>
-                                        ) : (
-                                            <svg className="w-4 h-4 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24">
-                                                <path d="M8 5v14l11-7z"/>
-                                            </svg>
-                                        )}
-                                    </button>
-
                                     {/* Context Menu */}
                                     <div className="relative">
                                         <TrackContextMenuTrigger
@@ -357,7 +314,7 @@ export const TrackGridSm = React.memo(function TrackGridSm({
                                                 play: true,
                                                 addToPlaylist: true,
                                                 download: true,
-                                                like: false,
+                                                like: true,
                                                 share: true,
                                             }}
                                             onPlayToggle={handleTogglePlay}
