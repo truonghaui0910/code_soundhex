@@ -115,6 +115,20 @@ export function TrackContextMenu({
         };
     }, [isOpen, onClose]);
 
+    // Reset submenu state when main menu closes
+    useEffect(() => {
+        if (!isOpen) {
+            setShowPlaylistSubmenu(false);
+        }
+    }, [isOpen]);
+
+    // Close submenu when modal opens
+    useEffect(() => {
+        if (createPlaylistOpen) {
+            setShowPlaylistSubmenu(false);
+        }
+    }, [createPlaylistOpen]);
+
     const handlePlayToggle = () => {
         onPlayToggle?.(track);
         onClose();
@@ -191,13 +205,16 @@ export function TrackContextMenu({
     };
 
     const handleCreateNewPlaylist = () => {
-        setCreatePlaylistOpen(true);
-        onClose();
         setShowPlaylistSubmenu(false);
+        onClose();
+        // Delay to ensure menu is closed before opening modal
+        setTimeout(() => {
+            setCreatePlaylistOpen(true);
+        }, 100);
     };
 
     const handlePlaylistCreated = () => {
-        // refetchPlaylists(); // Assuming you have a refetch playlists function
+        setCreatePlaylistOpen(false);
         console.log("Playlist created successfully!");
     };
 
@@ -319,8 +336,16 @@ export function TrackContextMenu({
                 {actions.addToPlaylist && (
                     <div
                         className="relative"
-                        onMouseEnter={() => setShowPlaylistSubmenu(true)}
-                        onMouseLeave={() => setShowPlaylistSubmenu(false)}
+                        onMouseEnter={() => {
+                            if (!createPlaylistOpen) {
+                                setShowPlaylistSubmenu(true);
+                            }
+                        }}
+                        onMouseLeave={() => {
+                            if (!createPlaylistOpen) {
+                                setShowPlaylistSubmenu(false);
+                            }
+                        }}
                     >
                         <button className={buttonClass}>
                             <Plus
@@ -329,27 +354,26 @@ export function TrackContextMenu({
                             <span
                                 className={
                                     isLightVariant || isPurpleVariant
-                                        ? "text-sm"
-                                        : ""
+                                        ? "text-sm text-left"
+                                        : "text-left"
                                 }
                             >
                                 Add to Playlist
                             </span>
                             <ChevronRight
-                                className={`${isLightVariant || isPurpleVariant ? "h-4 w-4 ml-2" : "h-4 w-4 ml-2 inline-block"}`}
+                                className={`${isLightVariant || isPurpleVariant ? "h-4 w-4 ml-auto" : "h-4 w-4 ml-auto inline-block"}`}
                             />
                         </button>
 
                         {/* Playlist Submenu */}
-                        {showPlaylistSubmenu && (
+                        {showPlaylistSubmenu && !createPlaylistOpen && (
                             <div 
-                                className={`absolute ${submenuPosition === 'right' ? 'left-full ml-1' : 'right-full mr-1'} top-0 w-64 bg-purple-900 border border-purple-700 shadow-2xl rounded-lg z-[999999] max-h-80 overflow-y-auto`}
+                                className={`absolute left-full top-0 w-64 bg-purple-900 border border-purple-700 shadow-2xl rounded-lg z-[999999] max-h-80 overflow-y-auto ml-1`}
                                 onMouseEnter={() => setShowPlaylistSubmenu(true)}
                                 onMouseLeave={() => setShowPlaylistSubmenu(false)}
                             >
                                 {/* Prevent hover gap */}
                                 <div className="absolute -left-1 top-0 w-1 h-full bg-transparent" />
-                                <div className="absolute -right-1 top-0 w-1 h-full bg-transparent" />
 
                                 {/* Search/Filter Header */}
                                 <div className="px-3 py-2 border-b border-purple-700">
@@ -477,7 +501,13 @@ export function TrackContextMenu({
             {/* Create Playlist Modal */}
             <CreatePlaylistModal
                 open={createPlaylistOpen}
-                onOpenChange={setCreatePlaylistOpen}
+                onOpenChange={(open) => {
+                    setCreatePlaylistOpen(open);
+                    if (!open) {
+                        // Modal closed, ensure we can open menu again
+                        setShowPlaylistSubmenu(false);
+                    }
+                }}
                 onPlaylistCreated={handlePlaylistCreated}
             />
         </>
