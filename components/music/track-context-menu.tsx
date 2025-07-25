@@ -134,13 +134,13 @@ export function TrackContextMenu({
     let containerClass, buttonClass;
     
     if (isLightVariant) {
-        containerClass = `absolute right-0 ${positionClasses} w-80 z-[9999] bg-purple-900 border border-purple-700 shadow-2xl rounded-xl overflow-hidden ${className}`;
+        containerClass = `absolute right-0 ${positionClasses} w-80 z-[99999] bg-purple-900 border border-purple-700 shadow-2xl rounded-xl overflow-visible ${className}`;
         buttonClass = "flex items-center w-full px-4 py-3 text-white hover:bg-purple-700/50 transition-colors cursor-pointer";
     } else if (isPurpleVariant) {
-        containerClass = `absolute right-0 ${positionClasses} w-48 z-[200] bg-purple-900 border border-purple-700 shadow-2xl rounded-md overflow-hidden ${className}`;
+        containerClass = `absolute right-0 ${positionClasses} w-48 z-[99999] bg-purple-900 border border-purple-700 shadow-2xl rounded-md overflow-visible ${className}`;
         buttonClass = "block w-full text-left px-4 py-2 text-sm text-white hover:bg-purple-700/50 transition-colors cursor-pointer";
     } else {
-        containerClass = `absolute right-0 ${positionClasses} w-48 z-[200] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg rounded-md overflow-hidden ${className}`;
+        containerClass = `absolute right-0 ${positionClasses} w-48 z-[99999] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg rounded-md overflow-visible ${className}`;
         buttonClass = "block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer";
     }
 
@@ -214,11 +214,12 @@ export function TrackContextMenu({
 
                 {/* Add to Playlist Action */}
                 {actions.addToPlaylist && (
-                    <AddToPlaylist trackId={track.id} trackTitle={track.title}>
-                        <button
-                            className={buttonClass}
-                            onClick={() => onClose()}
-                        >
+                    <AddToPlaylist 
+                        trackId={track.id} 
+                        trackTitle={track.title}
+                        onOpen={() => onClose()}
+                    >
+                        <button className={buttonClass}>
                             <Plus className={`${isLightVariant || isPurpleVariant ? 'h-4 w-4 mr-3' : 'h-4 w-4 mr-2 inline-block'}`} />
                             <span className={isLightVariant || isPurpleVariant ? 'text-sm' : ''}>Add to Playlist</span>
                         </button>
