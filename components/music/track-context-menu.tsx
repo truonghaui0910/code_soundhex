@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useRef, useEffect, useState } from "react";
@@ -20,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Track } from "@/lib/definitions/Track";
 import { usePlaylist } from "@/contexts/PlaylistContext";
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { showWarning } from '@/lib/services/notification-service';
+import { showWarning } from "@/lib/services/notification-service";
 import { toast } from "sonner";
 
 export interface TrackContextMenuAction {
@@ -88,7 +87,9 @@ export function TrackContextMenu({
     const { user } = useCurrentUser();
     const { playlists } = usePlaylist();
     const [showPlaylistSubmenu, setShowPlaylistSubmenu] = useState(false);
-    const [isAddingToPlaylist, setIsAddingToPlaylist] = useState<number | null>(null);
+    const [isAddingToPlaylist, setIsAddingToPlaylist] = useState<number | null>(
+        null,
+    );
 
     // Handle click outside to close menu
     useEffect(() => {
@@ -141,25 +142,30 @@ export function TrackContextMenu({
         if (!user) {
             showWarning({
                 title: "Login Required",
-                message: "You need to login to add tracks to playlists"
+                message: "You need to login to add tracks to playlists",
             });
             return;
         }
 
         setIsAddingToPlaylist(playlistId);
-        
+
         try {
-            const response = await fetch(`/api/playlists/${playlistId}/tracks`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
+            const response = await fetch(
+                `/api/playlists/${playlistId}/tracks`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ track_id: track.id }),
                 },
-                body: JSON.stringify({ track_id: track.id }),
-            });
+            );
 
             if (!response.ok) {
                 const error = await response.json();
-                throw new Error(error.error || "Failed to add track to playlist");
+                throw new Error(
+                    error.error || "Failed to add track to playlist",
+                );
             }
 
             const playlist = playlists.find((p) => p.id === playlistId);
@@ -183,7 +189,7 @@ export function TrackContextMenu({
         if (!user) {
             showWarning({
                 title: "Login Required",
-                message: "You need to login to create playlists"
+                message: "You need to login to create playlists",
             });
             return;
         }
@@ -291,7 +297,7 @@ export function TrackContextMenu({
             )}
 
             {/* Action List */}
-            <div className={isLightVariant ? "py-2" : ""}>
+            <div className={isLightVariant ? "" : ""}>
                 {/* Play/Pause Action */}
                 {actions.play && onPlayToggle && (
                     <button onClick={handlePlayToggle} className={buttonClass}>
@@ -331,7 +337,7 @@ export function TrackContextMenu({
 
                 {/* Add to Playlist Action with Hover Submenu */}
                 {actions.addToPlaylist && (
-                    <div 
+                    <div
                         className="relative"
                         onMouseEnter={() => setShowPlaylistSubmenu(true)}
                         onMouseLeave={() => setShowPlaylistSubmenu(false)}
@@ -343,8 +349,8 @@ export function TrackContextMenu({
                             <span
                                 className={
                                     isLightVariant || isPurpleVariant
-                                        ? "text-sm flex-1"
-                                        : "flex-1"
+                                        ? "text-sm"
+                                        : ""
                                 }
                             >
                                 Add to Playlist
@@ -356,7 +362,7 @@ export function TrackContextMenu({
 
                         {/* Playlist Submenu */}
                         {showPlaylistSubmenu && (
-                            <div className="absolute left-full top-0 ml-1 w-64 bg-purple-900 border border-purple-700 shadow-2xl rounded-lg z-[100000] max-h-80 overflow-y-auto">
+                            <div className="absolute left-full top-0 ml-0 w-64 bg-purple-900 border border-purple-700 shadow-2xl rounded-lg z-[100000] max-h-80 overflow-y-auto">
                                 {/* Search/Filter Header */}
                                 <div className="px-3 py-2 border-b border-purple-700">
                                     <div className="text-xs text-purple-300 font-medium">
@@ -382,8 +388,13 @@ export function TrackContextMenu({
                                     playlists.map((playlist) => (
                                         <button
                                             key={playlist.id}
-                                            onClick={() => handleAddToPlaylist(playlist.id)}
-                                            disabled={isAddingToPlaylist === playlist.id}
+                                            onClick={() =>
+                                                handleAddToPlaylist(playlist.id)
+                                            }
+                                            disabled={
+                                                isAddingToPlaylist ===
+                                                playlist.id
+                                            }
                                             className="flex items-center w-full px-3 py-2 text-white hover:bg-purple-700/50 transition-colors text-sm disabled:opacity-50"
                                         >
                                             <ListIcon className="h-4 w-4 mr-3 text-purple-300" />
@@ -392,10 +403,12 @@ export function TrackContextMenu({
                                                     {playlist.name}
                                                 </div>
                                                 <div className="text-xs text-purple-400">
-                                                    {playlist.track_count} tracks
+                                                    {playlist.track_count}{" "}
+                                                    tracks
                                                 </div>
                                             </div>
-                                            {isAddingToPlaylist === playlist.id && (
+                                            {isAddingToPlaylist ===
+                                                playlist.id && (
                                                 <div className="w-4 h-4 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />
                                             )}
                                         </button>
