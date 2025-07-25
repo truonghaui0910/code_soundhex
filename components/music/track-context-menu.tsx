@@ -21,7 +21,7 @@ import { usePlaylist } from "@/contexts/PlaylistContext";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { showWarning } from "@/lib/services/notification-service";
 import { toast } from "sonner";
-import { CreatePlaylistModal } from "@/components/create-playlist-modal";
+import { CreatePlaylistModal } from "@/components/playlist/create-playlist-modal";
 
 export interface TrackContextMenuAction {
     play?: boolean;
