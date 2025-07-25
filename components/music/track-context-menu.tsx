@@ -235,11 +235,39 @@ export function TrackContextMenu({
         }, 50);
     };
 
-    const handlePlaylistCreated = async () => {
+    const handlePlaylistCreated = async (newPlaylist?: any) => {
         setCreatePlaylistOpen(false);
+        
+        // If we have the new playlist, automatically add the track to it
+        if (newPlaylist) {
+            try {
+                const response = await fetch(
+                    `/api/playlists/${newPlaylist.id}/tracks`,
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({ track_id: track.id }),
+                    },
+                );
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(
+                        error.error || "Failed to add track to playlist",
+                    );
+                }
+
+                toast.success(`Created "${newPlaylist.name}" and added "${track.title}"`);
+            } catch (error: any) {
+                console.error("Error adding track to new playlist:", error);
+                toast.error(error.message || "Failed to add track to new playlist");
+            }
+        }
+        
         // Reload playlists after creating new playlist
         await refetchPlaylists();
-        console.log("Playlist created successfully!");
     };
 
     // Filter playlists based on search query
