@@ -24,6 +24,7 @@ import {
     ChevronLeft,
     ChevronRight,
 } from "lucide-react";
+import { Pagination } from "@/components/ui/pagination";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -559,132 +560,15 @@ export function MusicExplorerUI({
                         )}
 
                         {/* Pagination Controls */}
-                        {totalPages > 1 && (
-                            <div className="mt-12 flex items-center justify-center gap-4">
-                                <Button
-                                    variant="ghost_bg"
-                                    size="sm"
-                                    onClick={() =>
-                                        setCurrentPage(
-                                            Math.max(1, currentPage - 1),
-                                        )
-                                    }
-                                    disabled={currentPage === 1}
-                                    className="flex items-center gap-2 h-10"
-                                >
-                                    <ChevronLeft className="h-4 w-4" />
-                                    Previous
-                                </Button>
-
-                                <div className="flex items-center gap-2">
-                                    {/* First page */}
-                                    {currentPage > 3 && (
-                                        <>
-                                            <Button
-                                                variant={
-                                                    1 === currentPage
-                                                        ? "default"
-                                                        : "ghost_bg"
-                                                }
-                                                size="sm"
-                                                onClick={() =>
-                                                    setCurrentPage(1)
-                                                }
-                                                className="w-10 h-10 "
-                                            >
-                                                1
-                                            </Button>
-                                            {currentPage > 4 && (
-                                                <span className="text-gray-500">
-                                                    ...
-                                                </span>
-                                            )}
-                                        </>
-                                    )}
-
-                                    {/* Page numbers around current page */}
-                                    {Array.from(
-                                        { length: Math.min(5, totalPages) },
-                                        (_, i) => {
-                                            const pageNumber =
-                                                Math.max(
-                                                    1,
-                                                    Math.min(
-                                                        totalPages - 4,
-                                                        currentPage - 2,
-                                                    ),
-                                                ) + i;
-                                            if (pageNumber > totalPages)
-                                                return null;
-
-                                            return (
-                                                <Button
-                                                    key={pageNumber}
-                                                    variant={
-                                                        pageNumber ===
-                                                        currentPage
-                                                            ? "default"
-                                                            : "ghost_bg"
-                                                    }
-                                                    size="sm"
-                                                    onClick={() =>
-                                                        setCurrentPage(
-                                                            pageNumber,
-                                                        )
-                                                    }
-                                                    className="w-10 h-10"
-                                                >
-                                                    {pageNumber}
-                                                </Button>
-                                            );
-                                        },
-                                    )}
-
-                                    {/* Last page */}
-                                    {currentPage < totalPages - 2 && (
-                                        <>
-                                            {currentPage < totalPages - 3 && (
-                                                <span className="text-gray-500">
-                                                    ...
-                                                </span>
-                                            )}
-                                            <Button
-                                                variant={
-                                                    totalPages === currentPage
-                                                        ? "default"
-                                                        : "ghost_bg"
-                                                }
-                                                size="sm"
-                                                onClick={() =>
-                                                    setCurrentPage(totalPages)
-                                                }
-                                                className="w-10 h-10"
-                                            >
-                                                {totalPages}
-                                            </Button>
-                                        </>
-                                    )}
-                                </div>
-
-                                <Button
-                                    variant="ghost_bg"
-                                    size="sm"
-                                    onClick={() =>
-                                        setCurrentPage(
-                                            Math.min(
-                                                totalPages,
-                                                currentPage + 1,
-                                            ),
-                                        )
-                                    }
-                                    disabled={currentPage === totalPages}
-                                    className="flex items-center gap-2 h-10"
-                                >
-                                    Next
-                                    <ChevronRight className="h-4 w-4" />
-                                </Button>
-                            </div>
-                        )}
+                        <Pagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            onPageChange={setCurrentPage}
+                            className="mt-12"
+                            buttonVariant="ghost_bg"
+                            buttonSize="sm"
+                            customHeight="10"
+                        />
                     </div>
                 )}
                 {currentView === "albums" && (
@@ -768,144 +652,16 @@ export function MusicExplorerUI({
                         )}
 
                         {/* Pagination Controls for Albums */}
-                        {albumsTotalPages > 1 && (
-                            <div className="mt-12 flex items-center justify-center gap-4">
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() =>
-                                        setAlbumsCurrentPage(
-                                            Math.max(1, albumsCurrentPage - 1),
-                                        )
-                                    }
-                                    disabled={albumsCurrentPage === 1}
-                                    className="flex items-center gap-2"
-                                >
-                                    <ChevronLeft className="h-4 w-4" />
-                                    Previous
-                                </Button>
-
-                                <div className="flex items-center gap-2">
-                                    {/* First page */}
-                                    {albumsCurrentPage > 3 && (
-                                        <>
-                                            <Button
-                                                variant={
-                                                    1 === albumsCurrentPage
-                                                        ? "default"
-                                                        : "outline"
-                                                }
-                                                size="sm"
-                                                onClick={() =>
-                                                    setAlbumsCurrentPage(1)
-                                                }
-                                                className="w-10 h-10"
-                                            >
-                                                1
-                                            </Button>
-                                            {albumsCurrentPage > 4 && (
-                                                <span className="text-gray-500">
-                                                    ...
-                                                </span>
-                                            )}
-                                        </>
-                                    )}
-
-                                    {/* Page numbers around current page */}
-                                    {Array.from(
-                                        {
-                                            length: Math.min(
-                                                5,
-                                                albumsTotalPages,
-                                            ),
-                                        },
-                                        (_, i) => {
-                                            const pageNumber =
-                                                Math.max(
-                                                    1,
-                                                    Math.min(
-                                                        albumsTotalPages - 4,
-                                                        albumsCurrentPage - 2,
-                                                    ),
-                                                ) + i;
-                                            if (pageNumber > albumsTotalPages)
-                                                return null;
-
-                                            return (
-                                                <Button
-                                                    key={pageNumber}
-                                                    variant={
-                                                        pageNumber ===
-                                                        albumsCurrentPage
-                                                            ? "default"
-                                                            : "outline"
-                                                    }
-                                                    size="sm"
-                                                    onClick={() =>
-                                                        setAlbumsCurrentPage(
-                                                            pageNumber,
-                                                        )
-                                                    }
-                                                    className="w-10 h-10"
-                                                >
-                                                    {pageNumber}
-                                                </Button>
-                                            );
-                                        },
-                                    )}
-
-                                    {/* Last page */}
-                                    {albumsCurrentPage <
-                                        albumsTotalPages - 2 && (
-                                        <>
-                                            {albumsCurrentPage <
-                                                albumsTotalPages - 3 && (
-                                                <span className="text-gray-500">
-                                                    ...
-                                                </span>
-                                            )}
-                                            <Button
-                                                variant={
-                                                    albumsTotalPages ===
-                                                    albumsCurrentPage
-                                                        ? "default"
-                                                        : "outline"
-                                                }
-                                                size="sm"
-                                                onClick={() =>
-                                                    setAlbumsCurrentPage(
-                                                        albumsTotalPages,
-                                                    )
-                                                }
-                                                className="w-10 h-10"
-                                            >
-                                                {albumsTotalPages}
-                                            </Button>
-                                        </>
-                                    )}
-                                </div>
-
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() =>
-                                        setAlbumsCurrentPage(
-                                            Math.min(
-                                                albumsTotalPages,
-                                                albumsCurrentPage + 1,
-                                            ),
-                                        )
-                                    }
-                                    disabled={
-                                        albumsCurrentPage === albumsTotalPages
-                                    }
-                                    className="flex items-center gap-2"
-                                >
-                                    Next
-                                    <ChevronRight className="h-4 w-4" />
-                                </Button>
-                            </div>
-                        )}
+                        <Pagination
+                            currentPage={albumsCurrentPage}
+                            totalPages={albumsTotalPages}
+                            onPageChange={setAlbumsCurrentPage}
+                            className="mt-12"
+                            buttonVariant="ghost_bg"
+                            buttonSize="sm"
+                            customWidth="10"
+                            customHeight="10"
+                        />
                     </div>
                 )}
                 {currentView === "artists" && (
@@ -988,148 +744,18 @@ export function MusicExplorerUI({
                         )}
 
                         {/* Pagination Controls for Artists */}
-                        {artistsTotalPages > 1 && (
-                            <div className="mt-12 flex items-center justify-center gap-4">
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() =>
-                                        setArtistsCurrentPage(
-                                            Math.max(1, artistsCurrentPage - 1),
-                                        )
-                                    }
-                                    disabled={artistsCurrentPage === 1}
-                                    className="flex items-center gap-2"
-                                >
-                                    <ChevronLeft className="h-4 w-4" />
-                                    Previous
-                                </Button>
-
-                                <div className="flex items-center gap-2">
-                                    {/* First page */}
-                                    {artistsCurrentPage > 3 && (
-                                        <>
-                                            <Button
-                                                variant={
-                                                    1 === artistsCurrentPage
-                                                        ? "default"
-                                                        : "outline"
-                                                }
-                                                size="sm"
-                                                onClick={() =>
-                                                    setArtistsCurrentPage(1)
-                                                }
-                                                className="w-10 h-10"
-                                            >
-                                                1
-                                            </Button>
-                                            {artistsCurrentPage > 4 && (
-                                                <span className="text-gray-500">
-                                                    ...
-                                                </span>
-                                            )}
-                                        </>
-                                    )}
-
-                                    {/* Page numbers around current page */}
-                                    {Array.from(
-                                        {
-                                            length: Math.min(
-                                                5,
-                                                artistsTotalPages,
-                                            ),
-                                        },
-                                        (_, i) => {
-                                            const pageNumber =
-                                                Math.max(
-                                                    1,
-                                                    Math.min(
-                                                        artistsTotalPages - 4,
-                                                        artistsCurrentPage - 2,
-                                                    ),
-                                                ) + i;
-                                            if (pageNumber > artistsTotalPages)
-                                                return null;
-
-                                            return (
-                                                <Button
-                                                    key={pageNumber}
-                                                    variant={
-                                                        pageNumber ===
-                                                        artistsCurrentPage
-                                                            ? "default"
-                                                            : "outline"
-                                                    }
-                                                    size="sm"
-                                                    onClick={() =>
-                                                        setArtistsCurrentPage(
-                                                            pageNumber,
-                                                        )
-                                                    }
-                                                    className="w-10 h-10"
-                                                >
-                                                    {pageNumber}
-                                                </Button>
-                                            );
-                                        },
-                                    )}
-
-                                    {/* Last page */}
-                                    {artistsCurrentPage <
-                                        artistsTotalPages - 2 && (
-                                        <>
-                                            {artistsCurrentPage <
-                                                artistsTotalPages - 3 && (
-                                                <span className="text-gray-500">
-                                                    ...
-                                                </span>
-                                            )}
-                                            <Button
-                                                variant={
-                                                    artistsTotalPages ===
-                                                    artistsCurrentPage
-                                                        ? "default"
-                                                        : "outline"
-                                                }
-                                                size="sm"
-                                                onClick={() =>
-                                                    setArtistsCurrentPage(
-                                                        artistsTotalPages,
-                                                    )
-                                                }
-                                                className="w-10 h-10"
-                                            >
-                                                {artistsTotalPages}
-                                            </Button>
-                                        </>
-                                    )}
-                                </div>
-
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() =>
-                                        setArtistsCurrentPage(
-                                            Math.min(
-                                                artistsTotalPages,
-                                                artistsCurrentPage + 1,
-                                            ),
-                                        )
-                                    }
-                                    disabled={
-                                        artistsCurrentPage === artistsTotalPages
-                                    }
-                                    className="flex items-center gap-2"
-                                >
-                                    Next
-                                    <ChevronRight className="h-4 w-4" />
-                                </Button>
-                            </div>
-                        )}
+                        <Pagination
+                            currentPage={artistsCurrentPage}
+                            totalPages={artistsTotalPages}
+                            onPageChange={setArtistsCurrentPage}
+                            className="mt-12"
+                            buttonVariant="ghost_bg"
+                            buttonSize="sm"
+                            customWidth="2.5rem"
+                            customHeight="2.5rem"
+                        />
                     </div>
                 )}
-
-                {currentView === "upload" && <UploadRedirect />}
             </div>
 
             {/* Mood Filter Modal */}
