@@ -70,7 +70,7 @@ const TrackGrid = memo(function TrackGrid({
         fetchBatchTrackLikesStatus,
     } = useLikesFollows();
 
-    // OPTIMIZE trackIds to prevent unnecessary API calls - ADD THIS
+    // Memoize trackIds to prevent unnecessary recalculations
     const trackIds = useMemo(() => {
         if (!tracks || !Array.isArray(tracks) || tracks.length === 0) return [];
         return tracks.map((track) => track.id);
@@ -115,17 +115,19 @@ const TrackGrid = memo(function TrackGrid({
         }
     };
 
-    // OPTIMIZE batch fetch to prevent duplicate API calls - FIX THIS
-    // Fetch likes status for visible tracks
+    // Batch fetch likes status for visible tracks
     useEffect(() => {
-        if (tracks.length > 0 && !isLoading) {
-            const trackIds = tracks.map((track) => track.id);
-            const currentTrackIdsString = trackIds.sort().join(",");
-            const prevTrackIdsString = prevTrackIdsRef.current.sort().join(",");
+        if (trackIds.length > 0 && !isLoading) {
+            // Create string representation for comparison
+            const currentIdsString = [...trackIds].sort().join(",");
+            const prevIdsString = [...prevTrackIdsRef.current].sort().join(",");
 
             // Only call API if trackIds actually changed
-            if (currentTrackIdsString !== prevTrackIdsString) {
+            if (currentIdsString !== prevIdsString) {
                 console.log("TrackGrid - Fetching likes for tracks:", trackIds);
+                console.log("TrackGrid - Previous IDs:", prevTrackIdsRef.current);
+                console.log("TrackGrid - Current IDs:", trackIds);
+                
                 fetchBatchTrackLikesStatus(trackIds);
                 prevTrackIdsRef.current = [...trackIds];
             }
