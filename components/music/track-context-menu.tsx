@@ -100,6 +100,12 @@ export function TrackContextMenu({
     // Handle click outside to close menu
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
+            // Don't close context menu if modal is open
+            if (createPlaylistOpen) {
+                console.log("📍 Context Menu - Modal is open, ignoring outside click");
+                return;
+            }
+            
             if (
                 isOpen &&
                 menuRef.current &&
@@ -115,7 +121,7 @@ export function TrackContextMenu({
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
         };
-    }, [isOpen, onClose]);
+    }, [isOpen, onClose, createPlaylistOpen]);
 
     // Reset submenu state when main menu closes
     useEffect(() => {
