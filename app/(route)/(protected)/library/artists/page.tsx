@@ -56,12 +56,41 @@ export default function LibraryArtistsPage() {
   const fetchArtists = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("/api/user/followed-artists");
-      if (response.ok) {
-        const data = await response.json();
-        setArtists(data || []);
-        setFilteredArtists(data || []);
+      // Fetch followed artists + user-owned artists
+      const [followedArtistsResponse, userArtistsResponse] = await Promise.all([
+        fetch("/api/user/followed-artists"),
+        fetch("/api/artists/user")
+      ]);
+
+      let allArtists: FollowedArtist[] = [];
+      
+      // Get followed artists
+      if (followedArtistsResponse.ok) {
+        const followedArtistsData = await followedArtistsResponse.json();
+        allArtists = [...(followedArtistsData || [])];
       }
+
+      // Get user-owned artists and merge
+      if (userArtistsResponse.ok) {
+        const userArtistsData = await userArtistsResponse.json();
+        const transformedUserArtists = (userArtistsData || []).map((artist: any) => ({
+          id: artist.id,
+          name: artist.name,
+          profile_image_url: artist.profile_image_url,
+          custom_url: artist.custom_url,
+          tracksCount: 0 // Will be updated if needed
+        }));
+        
+        // Merge and remove duplicates based on artist id
+        const artistMap = new Map();
+        [...allArtists, ...transformedUserArtists].forEach(artist => {
+          artistMap.set(artist.id, artist);
+        });
+        allArtists = Array.from(artistMap.values());
+      }
+
+      setArtists(allArtists);
+      setFilteredArtists(allArtists);
     } catch (error) {
       console.error("Error fetching artists:", error);
     } finally {
@@ -184,7 +213,7 @@ export default function LibraryArtistsPage() {
                 <ArrowLeft className="h-4 w-4 text-purple-300 group-hover:text-white transition-colors" />
               </div>
             </Link>
-            <h1 className="text-xl sm:text-2xl font-normal">Followed Artists</h1>
+            <h1 className="text-xl sm:text-2xl font-normal">Your Artists</h1>
           </div>
           <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
             <div className="relative flex items-center">
