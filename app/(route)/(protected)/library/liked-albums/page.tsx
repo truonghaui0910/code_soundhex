@@ -46,10 +46,10 @@ export default function LibraryLikedAlbumsPage() {
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
-    if (user) {
+    if (user && albums.length === 0) {
       fetchLikedAlbums();
     }
-  }, [user]);
+  }, [user, albums.length]);
 
   useEffect(() => {
     // Filter albums based on search query
