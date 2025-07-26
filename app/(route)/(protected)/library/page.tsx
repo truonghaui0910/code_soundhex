@@ -116,10 +116,10 @@ export default function YourLibraryPage() {
   });
 
   useEffect(() => {
-    if (user) {
+    if (user && playlists.length === 0 && followedArtists.length === 0 && likedTracks.length === 0 && likedAlbums.length === 0) {
       fetchLibraryData();
     }
-  }, [user]);
+  }, [user, playlists.length, followedArtists.length, likedTracks.length, likedAlbums.length]);
 
   const fetchLibraryData = async () => {
     setIsLoading(true);

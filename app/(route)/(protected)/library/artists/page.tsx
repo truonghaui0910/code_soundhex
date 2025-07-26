@@ -35,10 +35,10 @@ export default function LibraryArtistsPage() {
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
-    if (user) {
+    if (user && artists.length === 0) {
       fetchArtists();
     }
-  }, [user]);
+  }, [user, artists.length]);
 
   useEffect(() => {
     // Filter artists based on search query

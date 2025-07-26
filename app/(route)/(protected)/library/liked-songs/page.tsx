@@ -51,10 +51,10 @@ export default function LibraryLikedSongsPage() {
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
-    if (user) {
+    if (user && tracks.length === 0) {
       fetchLikedTracks();
     }
-  }, [user]);
+  }, [user, tracks.length]);
 
   useEffect(() => {
     // Filter tracks based on search query
