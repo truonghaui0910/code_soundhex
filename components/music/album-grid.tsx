@@ -29,124 +29,162 @@ interface AlbumGridProps {
     className?: string;
 }
 
-const AlbumGrid = memo(function AlbumGrid({ 
-    albums, 
-    isLoading = false, 
-    loadingCount = 5, 
+const AlbumGrid = memo(function AlbumGrid({
+    albums,
+    isLoading = false,
+    loadingCount = 5,
     onAlbumPlay,
-    className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6"
+    className = "grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6",
 }: AlbumGridProps) {
     const { setTrackList, playTrack } = useAudioPlayer();
-    const { getAlbumLikeStatus, fetchBatchAlbumLikesStatus, toggleAlbumLike } = useLikesFollows();
+    const { getAlbumLikeStatus, fetchBatchAlbumLikesStatus, toggleAlbumLike } =
+        useLikesFollows();
     const [loadingAlbums, setLoadingAlbums] = useState<Set<number>>(new Set());
 
     // Batch fetch album like status for all albums when component mounts
     useEffect(() => {
         if (!isLoading && albums.length > 0) {
-            const albumIds = albums.map(album => album.id);
+            const albumIds = albums.map((album) => album.id);
             // Only fetch for albums that haven't been fetched yet
-            const unfetchedAlbumIds = albumIds.filter(id => {
+            const unfetchedAlbumIds = albumIds.filter((id) => {
                 const status = getAlbumLikeStatus(id);
                 return status.isLiked === undefined && !status.isLoading;
             });
-            
+
             if (unfetchedAlbumIds.length > 0) {
                 fetchBatchAlbumLikesStatus(unfetchedAlbumIds);
             }
         }
     }, [albums, isLoading, fetchBatchAlbumLikesStatus, getAlbumLikeStatus]);
 
-    const handleAlbumPlay = useCallback(async (album: Album) => {
-        console.log(`🎵 AlbumGrid - Playing album: "${album.title}" (ID: ${album.id})`);
-        
-        if (onAlbumPlay) {
-            console.log('🎵 AlbumGrid - Using custom onAlbumPlay callback');
-            onAlbumPlay(album);
-            return;
-        }
+    const handleAlbumPlay = useCallback(
+        async (album: Album) => {
+            console.log(
+                `🎵 AlbumGrid - Playing album: "${album.title}" (ID: ${album.id})`,
+            );
 
-        // Set loading state for this album
-        setLoadingAlbums(prev => new Set(prev).add(album.id));
-
-        try {
-            console.log(`🎵 AlbumGrid - Fetching tracks for album ${album.id}...`);
-            const response = await fetch(`/api/albums/${album.id}/tracks`);
-            console.log(`🎵 AlbumGrid - API response status: ${response.status}`);
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error(`🎵 AlbumGrid - API Error ${response.status}:`, errorText);
-                toast.error(`Failed to load album: ${response.status} error`);
+            if (onAlbumPlay) {
+                console.log("🎵 AlbumGrid - Using custom onAlbumPlay callback");
+                onAlbumPlay(album);
                 return;
             }
 
-            const data = await response.json();
-            console.log(`🎵 AlbumGrid - API response data:`, {
-                dataType: typeof data,
-                isArray: Array.isArray(data),
-                length: Array.isArray(data) ? data.length : 'N/A',
-                hasTracksProperty: 'tracks' in data,
-                firstItem: Array.isArray(data) ? data[0] : data.tracks?.[0] || 'No tracks'
-            });
+            // Set loading state for this album
+            setLoadingAlbums((prev) => new Set(prev).add(album.id));
 
-            // Handle both formats: { tracks: [...] } and direct array [...]
-            const tracksArray = Array.isArray(data) ? data : (data.tracks || []);
+            try {
+                console.log(
+                    `🎵 AlbumGrid - Fetching tracks for album ${album.id}...`,
+                );
+                const response = await fetch(`/api/albums/${album.id}/tracks`);
+                console.log(
+                    `🎵 AlbumGrid - API response status: ${response.status}`,
+                );
 
-            if (!Array.isArray(tracksArray)) {
-                console.error('🎵 AlbumGrid - Invalid tracks data format:', tracksArray);
-                toast.error('Invalid album data format');
-                return;
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error(
+                        `🎵 AlbumGrid - API Error ${response.status}:`,
+                        errorText,
+                    );
+                    toast.error(
+                        `Failed to load album: ${response.status} error`,
+                    );
+                    return;
+                }
+
+                const data = await response.json();
+                console.log(`🎵 AlbumGrid - API response data:`, {
+                    dataType: typeof data,
+                    isArray: Array.isArray(data),
+                    length: Array.isArray(data) ? data.length : "N/A",
+                    hasTracksProperty: "tracks" in data,
+                    firstItem: Array.isArray(data)
+                        ? data[0]
+                        : data.tracks?.[0] || "No tracks",
+                });
+
+                // Handle both formats: { tracks: [...] } and direct array [...]
+                const tracksArray = Array.isArray(data)
+                    ? data
+                    : data.tracks || [];
+
+                if (!Array.isArray(tracksArray)) {
+                    console.error(
+                        "🎵 AlbumGrid - Invalid tracks data format:",
+                        tracksArray,
+                    );
+                    toast.error("Invalid album data format");
+                    return;
+                }
+
+                if (tracksArray.length === 0) {
+                    console.warn(
+                        `🎵 AlbumGrid - Album "${album.title}" has no tracks`,
+                    );
+                    toast.error("This album has no tracks to play");
+                    return;
+                }
+
+                // Validate first track has required properties
+                const firstTrack = tracksArray[0];
+                if (!firstTrack || !firstTrack.id || !firstTrack.file_url) {
+                    console.error(
+                        "🎵 AlbumGrid - First track is invalid:",
+                        firstTrack,
+                    );
+                    toast.error("Album tracks are missing required data");
+                    return;
+                }
+
+                console.log(
+                    `🎵 AlbumGrid - Setting trackList with ${tracksArray.length} tracks`,
+                );
+                console.log(`🎵 AlbumGrid - First track:`, {
+                    id: firstTrack.id,
+                    title: firstTrack.title,
+                    hasFileUrl: !!firstTrack.file_url,
+                    hasArtist: !!firstTrack.artist,
+                    hasAlbum: !!firstTrack.album,
+                });
+
+                setTrackList(tracksArray);
+
+                // Add small delay to ensure setTrackList completes
+                setTimeout(() => {
+                    console.log(
+                        `🎵 AlbumGrid - Playing first track: "${firstTrack.title}"`,
+                    );
+                    playTrack(firstTrack);
+                }, 50);
+            } catch (error) {
+                console.error(
+                    "🎵 AlbumGrid - Error loading album tracks:",
+                    error,
+                );
+                toast.error(
+                    `Failed to load album: ${error instanceof Error ? error.message : "Unknown error"}`,
+                );
+            } finally {
+                // Remove loading state
+                setLoadingAlbums((prev) => {
+                    const newSet = new Set(prev);
+                    newSet.delete(album.id);
+                    return newSet;
+                });
             }
-
-            if (tracksArray.length === 0) {
-                console.warn(`🎵 AlbumGrid - Album "${album.title}" has no tracks`);
-                toast.error('This album has no tracks to play');
-                return;
-            }
-
-            // Validate first track has required properties
-            const firstTrack = tracksArray[0];
-            if (!firstTrack || !firstTrack.id || !firstTrack.file_url) {
-                console.error('🎵 AlbumGrid - First track is invalid:', firstTrack);
-                toast.error('Album tracks are missing required data');
-                return;
-            }
-
-            console.log(`🎵 AlbumGrid - Setting trackList with ${tracksArray.length} tracks`);
-            console.log(`🎵 AlbumGrid - First track:`, {
-                id: firstTrack.id,
-                title: firstTrack.title,
-                hasFileUrl: !!firstTrack.file_url,
-                hasArtist: !!firstTrack.artist,
-                hasAlbum: !!firstTrack.album
-            });
-
-            setTrackList(tracksArray);
-            
-            // Add small delay to ensure setTrackList completes
-            setTimeout(() => {
-                console.log(`🎵 AlbumGrid - Playing first track: "${firstTrack.title}"`);
-                playTrack(firstTrack);
-            }, 50);
-
-        } catch (error) {
-            console.error('🎵 AlbumGrid - Error loading album tracks:', error);
-            toast.error(`Failed to load album: ${error instanceof Error ? error.message : 'Unknown error'}`);
-        } finally {
-            // Remove loading state
-            setLoadingAlbums(prev => {
-                const newSet = new Set(prev);
-                newSet.delete(album.id);
-                return newSet;
-            });
-        }
-    }, [onAlbumPlay, setTrackList, playTrack]);
+        },
+        [onAlbumPlay, setTrackList, playTrack],
+    );
 
     if (isLoading) {
         return (
             <div className={className}>
                 {Array.from({ length: loadingCount }).map((_, index) => (
-                    <div key={index} className="group text-center animate-pulse">
+                    <div
+                        key={index}
+                        className="group text-center animate-pulse"
+                    >
                         <div className="aspect-square mb-3 bg-white/20 dark:bg-white/20 rounded-lg"></div>
                         <div className="space-y-1">
                             <div className="h-4 bg-white/20 dark:bg-white/20 rounded mx-auto"></div>
@@ -192,21 +230,27 @@ const AlbumGrid = memo(function AlbumGrid({
                                     e.stopPropagation();
                                     toggleAlbumLike(album.id);
                                 }}
-                                disabled={getAlbumLikeStatus(album.id).isLoading}
+                                disabled={
+                                    getAlbumLikeStatus(album.id).isLoading
+                                }
                                 className={`opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-full shadow-lg backdrop-blur-sm w-10 h-10 p-0 absolute left-3 ${
-                                    getAlbumLikeStatus(album.id).isLiked 
-                                        ? 'bg-red-500 text-white hover:bg-red-600' 
-                                        : 'bg-white/90 text-red-500 hover:bg-white hover:text-red-600'
+                                    getAlbumLikeStatus(album.id).isLiked
+                                        ? "bg-red-500 text-white hover:bg-red-600"
+                                        : "bg-white/90 text-red-500 hover:bg-white hover:text-red-600"
                                 }`}
                             >
-                                <Heart className={`h-5 w-5 ${getAlbumLikeStatus(album.id).isLiked ? 'fill-current' : ''}`} />
+                                <Heart
+                                    className={`h-5 w-5 ${getAlbumLikeStatus(album.id).isLiked ? "fill-current" : ""}`}
+                                />
                             </Button>
 
                             {/* Play Button - Center */}
                             <Button
                                 size="lg"
                                 onClick={(e) => {
-                                    console.log(`🎵 AlbumGrid - Play button clicked for album: "${album.title}" (ID: ${album.id})`);
+                                    console.log(
+                                        `🎵 AlbumGrid - Play button clicked for album: "${album.title}" (ID: ${album.id})`,
+                                    );
                                     e.preventDefault();
                                     e.stopPropagation();
                                     handleAlbumPlay(album);
@@ -248,6 +292,6 @@ const AlbumGrid = memo(function AlbumGrid({
     );
 });
 
-AlbumGrid.displayName = 'AlbumGrid';
+AlbumGrid.displayName = "AlbumGrid";
 
 export { AlbumGrid };

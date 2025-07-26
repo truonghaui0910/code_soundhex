@@ -15,42 +15,42 @@ export default function LibraryPlaylistsLoading() {
             </Link>
             <div className="h-8 w-40 bg-white/20 rounded animate-pulse"></div>
           </div>
-          
+
           <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
             {/* Search Button Skeleton */}
             <div className="w-8 h-8 rounded-full bg-white/20 animate-pulse"></div>
-            
+
             {/* Create Button Skeleton */}
             <div className="w-8 h-8 rounded-full bg-white/20 animate-pulse"></div>
           </div>
         </div>
 
         {/* Playlists Grid Skeleton */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6 mb-8">
           {Array.from({ length: 12 }).map((_, index) => (
             <div key={index} className="text-center">
               <div className="relative aspect-square mb-3">
                 {/* Playlist Cover Skeleton */}
                 <div className="w-full h-full rounded-lg bg-white/20 animate-pulse"></div>
-                
+
                 {/* Play Button Skeleton - Center */}
                 <div className="absolute inset-0 flex items-center justify-center rounded-lg overflow-hidden">
                   {/* <div className="w-12 h-12 rounded-full bg-white/20 animate-pulse"></div> */}
                 </div>
-                
+
                 {/* Menu Button Skeleton - Top Right */}
                 <div className="absolute top-2 right-2">
                   {/* <div className="w-8 h-8 rounded-full bg-white/20 animate-pulse"></div> */}
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 {/* Playlist Name Skeleton */}
                 <div className="h-4 w-24 mx-auto bg-white/20 rounded animate-pulse"></div>
-                
+
                 {/* Track Count Skeleton */}
                 <div className="h-3 w-16 mx-auto bg-white/20 rounded animate-pulse"></div>
-                
+
                 {/* Description Skeleton */}
                 <div className="h-3 w-20 mx-auto bg-white/20 rounded animate-pulse"></div>
               </div>
@@ -82,4 +82,4 @@ export default function LibraryPlaylistsLoading() {
       <div className="pb-32"></div>
     </div>
   );
-} 
+}

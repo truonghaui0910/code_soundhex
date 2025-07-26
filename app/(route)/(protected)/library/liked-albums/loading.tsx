@@ -20,7 +20,7 @@ export default function LikedAlbumsLoading() {
         </div>
 
         {/* Albums Grid Skeleton */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6 mb-8">
           {Array.from({ length: 12 }).map((_, index) => (
             <div key={index} className="text-center animate-pulse">
               <Skeleton className="aspect-square mb-3 rounded-lg bg-white/20" />
@@ -52,4 +52,4 @@ export default function LikedAlbumsLoading() {
       </div>
     </div>
   );
-} 
+}
