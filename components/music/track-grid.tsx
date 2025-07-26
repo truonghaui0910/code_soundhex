@@ -120,18 +120,31 @@ const TrackGrid = memo(function TrackGrid({
         console.log("TrackGrid - isLoading:", isLoading);
         console.log("TrackGrid - Previous IDs:", prevTrackIdsRef.current);
         console.log("TrackGrid - Current IDs:", trackIds);
+        
         if (trackIds.length > 0 && !isLoading) {
             // Create string representation for comparison
             const currentIdsString = [...trackIds].sort().join(",");
             const prevIdsString = [...prevTrackIdsRef.current].sort().join(",");
 
+            console.log("TrackGrid - Current IDs string:", currentIdsString);
+            console.log("TrackGrid - Previous IDs string:", prevIdsString);
+            console.log("TrackGrid - IDs changed:", currentIdsString !== prevIdsString);
+
             // Only call API if trackIds actually changed
             if (currentIdsString !== prevIdsString) {
                 console.log("TrackGrid - Fetching likes for tracks:", trackIds);
+                console.log("TrackGrid - Number of tracks to fetch:", trackIds.length);
 
                 fetchBatchTrackLikesStatus(trackIds);
                 prevTrackIdsRef.current = [...trackIds];
+            } else {
+                console.log("TrackGrid - Skipping fetch, IDs unchanged");
             }
+        } else {
+            console.log("TrackGrid - Skipping fetch:", { 
+                trackIdsLength: trackIds.length, 
+                isLoading 
+            });
         }
     }, [trackIds, isLoading, fetchBatchTrackLikesStatus]);
 
