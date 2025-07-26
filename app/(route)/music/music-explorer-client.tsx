@@ -58,14 +58,18 @@ interface MusicExplorerClientProps {
     initialTracks: Track[];
 }
 
-export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps) {
+export function MusicExplorerClient({
+    initialTracks,
+}: MusicExplorerClientProps) {
     // Add safety check for initialTracks
     const safeInitialTracks = Array.isArray(initialTracks) ? initialTracks : [];
     const [tracks] = useState<Track[]>(safeInitialTracks);
     // Use initialTracks as featured tracks (already sorted by view_count)
     const [featuredTracks] = useState<Track[]>(safeInitialTracks);
     const [featuredAlbums, setFeaturedAlbums] = useState<FeaturedAlbum[]>([]);
-    const [featuredArtists, setFeaturedArtists] = useState<FeaturedArtist[]>([]);
+    const [featuredArtists, setFeaturedArtists] = useState<FeaturedArtist[]>(
+        [],
+    );
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedGenre, setSelectedGenre] = useState<string>("all");
     const [selectedMoods, setSelectedMoods] = useState<Set<string>>(new Set());
@@ -77,10 +81,14 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
     const searchParams = useSearchParams();
 
     // Get unique genres from tracks
-    const genres = useMemo(() => 
-        Array.from(
-            new Set(tracks.map((track) => track.genre?.name).filter(Boolean)),
-        ), [tracks]
+    const genres = useMemo(
+        () =>
+            Array.from(
+                new Set(
+                    tracks.map((track) => track.genre?.name).filter(Boolean),
+                ),
+            ),
+        [tracks],
     );
 
     // State for library tracks (server-side pagination)
@@ -90,7 +98,7 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
 
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage] = useState(50); 
+    const [itemsPerPage] = useState(50);
     const [totalPages, setTotalPages] = useState(0);
 
     // Albums view state
@@ -100,7 +108,7 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
     const [totalAlbums, setTotalAlbums] = useState(0);
     const [isLoadingAlbums, setIsLoadingAlbums] = useState(false);
 
-    // Artists view state  
+    // Artists view state
     const [allArtists, setAllArtists] = useState<FeaturedArtist[]>([]);
     const [artistsCurrentPage, setArtistsCurrentPage] = useState(1);
     const [artistsTotalPages, setArtistsTotalPages] = useState(0);
@@ -185,193 +193,225 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
     }, [initialTracks]);
 
     // Function to fetch albums with pagination - ADD useCallback
-    const fetchAllAlbums = useCallback(async (page: number = 1, resetPage: boolean = false) => {
-        if (currentView !== "albums") return;
+    const fetchAllAlbums = useCallback(
+        async (page: number = 1, resetPage: boolean = false) => {
+            if (currentView !== "albums") return;
 
-        setIsLoadingAlbums(true);
-        try {
-            const params = new URLSearchParams({
-                page: resetPage ? '1' : page.toString(),
-                limit: itemsPerPage.toString(),
-            });
+            setIsLoadingAlbums(true);
+            try {
+                const params = new URLSearchParams({
+                    page: resetPage ? "1" : page.toString(),
+                    limit: itemsPerPage.toString(),
+                });
 
-            const response = await fetch(`/api/albums?${params}`);
-            if (response.ok) {
-                const data = await response.json();
-                if (data.albums && Array.isArray(data.albums)) {
-                    setAllAlbums(data.albums);
-                    setTotalAlbums(data.total || 0);
-                    setAlbumsTotalPages(data.totalPages || 0);
-                    if (resetPage) {
-                        setAlbumsCurrentPage(1);
+                const response = await fetch(`/api/albums?${params}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.albums && Array.isArray(data.albums)) {
+                        setAllAlbums(data.albums);
+                        setTotalAlbums(data.total || 0);
+                        setAlbumsTotalPages(data.totalPages || 0);
+                        if (resetPage) {
+                            setAlbumsCurrentPage(1);
+                        }
+                    } else {
+                        setAllAlbums([]);
+                        setTotalAlbums(0);
+                        setAlbumsTotalPages(0);
+                        if (resetPage) {
+                            setAlbumsCurrentPage(1);
+                        }
                     }
                 } else {
                     setAllAlbums([]);
                     setTotalAlbums(0);
                     setAlbumsTotalPages(0);
-                    if (resetPage) {
-                        setAlbumsCurrentPage(1);
-                    }
+                    setAlbumsCurrentPage(1);
                 }
-            } else {
+            } catch (error) {
+                console.error("Error fetching albums:", error);
                 setAllAlbums([]);
                 setTotalAlbums(0);
                 setAlbumsTotalPages(0);
                 setAlbumsCurrentPage(1);
+            } finally {
+                setIsLoadingAlbums(false);
             }
-        } catch (error) {
-            console.error("Error fetching albums:", error);
-            setAllAlbums([]);
-            setTotalAlbums(0);
-            setAlbumsTotalPages(0);
-            setAlbumsCurrentPage(1);
-        } finally {
-            setIsLoadingAlbums(false);
-        }
-    }, [currentView, itemsPerPage]); // SIMPLIFIED DEPENDENCIES
+        },
+        [currentView, itemsPerPage],
+    ); // SIMPLIFIED DEPENDENCIES
 
     // Function to fetch artists with pagination - ADD useCallback
-    const fetchAllArtists = useCallback(async (page: number = 1, resetPage: boolean = false) => {
-        if (currentView !== "artists") return;
+    const fetchAllArtists = useCallback(
+        async (page: number = 1, resetPage: boolean = false) => {
+            if (currentView !== "artists") return;
 
-        setIsLoadingArtists(true);
-        try {
-            const params = new URLSearchParams({
-                page: resetPage ? '1' : page.toString(),
-                limit: itemsPerPage.toString(),
-            });
+            setIsLoadingArtists(true);
+            try {
+                const params = new URLSearchParams({
+                    page: resetPage ? "1" : page.toString(),
+                    limit: itemsPerPage.toString(),
+                });
 
-            const response = await fetch(`/api/artists?${params}`);
-            if (response.ok) {
-                const data = await response.json();
-                if (data.artists && Array.isArray(data.artists)) {
-                    // Use tracks count from API response
-                    const artistsWithCount = data.artists.map(artist => ({
-                        ...artist,
-                        tracksCount: artist.tracksCount || 0
-                    }));
+                const response = await fetch(`/api/artists?${params}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.artists && Array.isArray(data.artists)) {
+                        // Use tracks count from API response
+                        const artistsWithCount = data.artists.map((artist) => ({
+                            ...artist,
+                            tracksCount: artist.tracksCount || 0,
+                        }));
 
-                    setAllArtists(artistsWithCount);
-                    setTotalArtists(data.total || 0);
-                    setArtistsTotalPages(data.totalPages || 0);
-                    if (resetPage) {
-                        setArtistsCurrentPage(1);
+                        setAllArtists(artistsWithCount);
+                        setTotalArtists(data.total || 0);
+                        setArtistsTotalPages(data.totalPages || 0);
+                        if (resetPage) {
+                            setArtistsCurrentPage(1);
+                        }
+                    } else {
+                        setAllArtists([]);
+                        setTotalArtists(0);
+                        setArtistsTotalPages(0);
+                        if (resetPage) {
+                            setArtistsCurrentPage(1);
+                        }
                     }
                 } else {
                     setAllArtists([]);
                     setTotalArtists(0);
                     setArtistsTotalPages(0);
-                    if (resetPage) {
-                        setArtistsCurrentPage(1);
-                    }
+                    setArtistsCurrentPage(1);
                 }
-            } else {
+            } catch (error) {
+                console.error("Error fetching artists:", error);
                 setAllArtists([]);
                 setTotalArtists(0);
                 setArtistsTotalPages(0);
                 setArtistsCurrentPage(1);
+            } finally {
+                setIsLoadingArtists(false);
             }
-        } catch (error) {
-            console.error("Error fetching artists:", error);
-            setAllArtists([]);
-            setTotalArtists(0);
-            setArtistsTotalPages(0);
-            setArtistsCurrentPage(1);
-        } finally {
-            setIsLoadingArtists(false);
-        }
-    }, [currentView, itemsPerPage, tracks]); // SIMPLIFIED DEPENDENCIES
+        },
+        [currentView, itemsPerPage, tracks],
+    ); // SIMPLIFIED DEPENDENCIES
 
     // Function to fetch library tracks with pagination, search and filters - ADD useCallback
-    const fetchLibraryTracks = useCallback(async (page: number = 1, resetPage: boolean = false) => {
-        if (currentView !== "library") return;
+    const fetchLibraryTracks = useCallback(
+        async (page: number = 1, resetPage: boolean = false) => {
+            if (currentView !== "library") return;
 
-        console.log(`🔄 MusicExplorerClient - Fetching library tracks: page=${page}, resetPage=${resetPage}`);
+            console.log(
+                `🔄 MusicExplorerClient - Fetching library tracks: page=${page}, resetPage=${resetPage}`,
+            );
 
-        // Only show loading if it's a fresh search or view change, not pagination
-        if (resetPage || page === 1) {
-            setIsSearching(true);
-        }
-        try {
-            const params = new URLSearchParams({
-                page: resetPage ? '1' : page.toString(),
-                limit: itemsPerPage.toString(),
-                genre: selectedGenre,
-            });
-
-            if (debouncedSearchQuery.trim()) { // USE DEBOUNCED QUERY
-                params.append('search', debouncedSearchQuery);
+            // Only show loading if it's a fresh search or view change, not pagination
+            if (resetPage || page === 1) {
+                setIsSearching(true);
             }
+            try {
+                const params = new URLSearchParams({
+                    page: resetPage ? "1" : page.toString(),
+                    limit: itemsPerPage.toString(),
+                    genre: selectedGenre,
+                });
 
-            if (selectedMoods.size > 0) {
-                params.append('moods', Array.from(selectedMoods).join(','));
-            }
+                if (debouncedSearchQuery.trim()) {
+                    // USE DEBOUNCED QUERY
+                    params.append("search", debouncedSearchQuery);
+                }
 
-            const response = await fetch(`/api/tracks?${params}`);
+                if (selectedMoods.size > 0) {
+                    params.append("moods", Array.from(selectedMoods).join(","));
+                }
 
-            if (response.ok) {
-                const data = await response.json();
-                if (data.tracks && Array.isArray(data.tracks)) {
-                    console.log(`✅ MusicExplorerClient - Received ${data.tracks.length} tracks for page ${page}`);
-                    setLibraryTracks(data.tracks);
-                    setTotalTracks(data.total || 0);
-                    setTotalPages(data.totalPages || 0);
-                    if (resetPage) {
-                        setCurrentPage(1);
+                const response = await fetch(`/api/tracks?${params}`);
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.tracks && Array.isArray(data.tracks)) {
+                        console.log(
+                            `✅ MusicExplorerClient - Received ${data.tracks.length} tracks for page ${page}`,
+                        );
+                        setLibraryTracks(data.tracks);
+                        setTotalTracks(data.total || 0);
+                        setTotalPages(data.totalPages || 0);
+                        if (resetPage) {
+                            setCurrentPage(1);
+                        }
+                    } else {
+                        setLibraryTracks([]);
+                        setTotalTracks(0);
+                        setTotalPages(0);
+                        if (resetPage) {
+                            setCurrentPage(1);
+                        }
                     }
                 } else {
+                    // If error response, reset everything and go back to page 1
                     setLibraryTracks([]);
                     setTotalTracks(0);
                     setTotalPages(0);
-                    if (resetPage) {
-                        setCurrentPage(1);
-                    }
+                    setCurrentPage(1);
                 }
-            } else {
-                // If error response, reset everything and go back to page 1
+            } catch (error) {
+                console.error("Error fetching library tracks:", error);
                 setLibraryTracks([]);
                 setTotalTracks(0);
                 setTotalPages(0);
                 setCurrentPage(1);
+            } finally {
+                setIsSearching(false);
             }
-        } catch (error) {
-            console.error("Error fetching library tracks:", error);
-            setLibraryTracks([]);
-            setTotalTracks(0);
-            setTotalPages(0);
-            setCurrentPage(1);
-        } finally {
-            setIsSearching(false);
-        }
-    }, [currentView, debouncedSearchQuery, selectedGenre, selectedMoods, itemsPerPage]); // USE DEBOUNCED QUERY
+        },
+        [
+            currentView,
+            debouncedSearchQuery,
+            selectedGenre,
+            selectedMoods,
+            itemsPerPage,
+        ],
+    ); // USE DEBOUNCED QUERY
 
     // State for search trigger - REMOVE THIS, USE DEBOUNCED EFFECT INSTEAD
     // const [shouldSearch, setShouldSearch] = useState(false);
 
     // Search effect when triggered - FIX RACE CONDITION
     useEffect(() => {
-        if (currentView === "library" && (debouncedSearchQuery !== undefined || forceSearch)) {
+        if (
+            currentView === "library" &&
+            (debouncedSearchQuery !== undefined || forceSearch)
+        ) {
             fetchLibraryTracks(1, true);
             setForceSearch(false); // RESET FORCE SEARCH
         }
-    }, [debouncedSearchQuery, currentView, forceSearch, selectedMoods, fetchLibraryTracks]); // USE DEBOUNCED QUERY
+    }, [
+        debouncedSearchQuery,
+        currentView,
+        forceSearch,
+        selectedMoods,
+        fetchLibraryTracks,
+    ]); // USE DEBOUNCED QUERY
 
     // Handle Enter key press - FIX AUTO SWITCH TO LIBRARY
-    const handleSearchKeyPress = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') {
-            // Clear timeout and immediately set debounced query
-            if (searchTimeoutRef.current) {
-                clearTimeout(searchTimeoutRef.current);
-            }
-            setDebouncedSearchQuery(searchQuery);
-            setForceSearch(true); // ADD THIS TO FORCE SEARCH
+    const handleSearchKeyPress = useCallback(
+        (e: React.KeyboardEvent<HTMLInputElement>) => {
+            if (e.key === "Enter") {
+                // Clear timeout and immediately set debounced query
+                if (searchTimeoutRef.current) {
+                    clearTimeout(searchTimeoutRef.current);
+                }
+                setDebouncedSearchQuery(searchQuery);
+                setForceSearch(true); // ADD THIS TO FORCE SEARCH
 
-            // AUTO SWITCH TO LIBRARY VIEW WHEN ENTER IS PRESSED - ADD THIS
-            if (searchQuery.trim()) {
-                setCurrentView("library");
+                // AUTO SWITCH TO LIBRARY VIEW WHEN ENTER IS PRESSED - ADD THIS
+                if (searchQuery.trim()) {
+                    setCurrentView("library");
+                }
             }
-        }
-    }, [searchQuery]);
+        },
+        [searchQuery],
+    );
 
     // Fetch library tracks when view or genre changes (but not page changes) - OPTIMIZED
     useEffect(() => {
@@ -382,7 +422,12 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
 
     // Separate effect for page changes to avoid duplicate calls - FIX DUPLICATE CALLS
     useEffect(() => {
-        if (currentView === "library" && totalPages > 0 && currentPage <= totalPages && currentPage > 1) {
+        if (
+            currentView === "library" &&
+            totalPages > 0 &&
+            currentPage <= totalPages &&
+            currentPage > 1
+        ) {
             // ADD DELAY TO PREVENT RACE CONDITION WITH VIEW/GENRE EFFECT
             const timeoutId = setTimeout(() => {
                 fetchLibraryTracks(currentPage, false);
@@ -445,10 +490,11 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
             const artistsResponse = await fetch(`/api/artists?page=1&limit=12`);
             if (artistsResponse.ok) {
                 const artistsData = await artistsResponse.json();
-                const artistsWithCount = artistsData.artists?.map((artist: any) => ({
-                    ...artist,
-                    tracksCount: artist.tracksCount || 0
-                })) || [];
+                const artistsWithCount =
+                    artistsData.artists?.map((artist: any) => ({
+                        ...artist,
+                        tracksCount: artist.tracksCount || 0,
+                    })) || [];
                 setFeaturedArtists(artistsWithCount.slice(0, 12));
             }
         } catch (error) {
@@ -529,7 +575,7 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
                             <div className="h-10 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-8">
+                        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-8">
                             {Array.from({ length: 10 }).map((_, index) => (
                                 <div key={index} className="group relative">
                                     <div className="relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl overflow-hidden shadow-lg border border-white/20 dark:border-gray-700/30">
@@ -561,7 +607,7 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
                             <div className="h-6 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
+                        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
                             {Array.from({ length: 10 }).map((_, index) => (
                                 <div key={index} className="group text-center">
                                     <div className="aspect-square bg-gray-200 dark:bg-gray-700 rounded-lg mb-3 animate-pulse"></div>
@@ -584,7 +630,7 @@ export function MusicExplorerClient({ initialTracks }: MusicExplorerClientProps)
                             <div className="h-6 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
+                        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
                             {Array.from({ length: 10 }).map((_, index) => (
                                 <div key={index} className="group text-center">
                                     <div className="aspect-square bg-gray-200 dark:bg-gray-700 rounded-full mb-3 animate-pulse"></div>

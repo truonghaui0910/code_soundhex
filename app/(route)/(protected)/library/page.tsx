@@ -102,8 +102,12 @@ export default function YourLibraryPage() {
   const [createPlaylistOpen, setCreatePlaylistOpen] = useState(false);
   const [editPlaylistOpen, setEditPlaylistOpen] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-  const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist | null>(null);
-  const [playlistToDelete, setPlaylistToDelete] = useState<Playlist | null>(null);
+  const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist | null>(
+    null,
+  );
+  const [playlistToDelete, setPlaylistToDelete] = useState<Playlist | null>(
+    null,
+  );
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState<number | null>(null);
   const [editFormData, setEditFormData] = useState({
@@ -151,8 +155,6 @@ export default function YourLibraryPage() {
       setIsLoading(false);
     }
   };
-
-
 
   const handlePlaylistCreated = (newPlaylist: any) => {
     setPlaylists([newPlaylist, ...playlists]);
@@ -282,7 +284,7 @@ export default function YourLibraryPage() {
               <p className="text-purple-300">No followed artists yet</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
               <ArtistGrid
                 artists={followedArtists.slice(0, 5)}
                 className="contents"
@@ -329,14 +331,14 @@ export default function YourLibraryPage() {
               <p className="text-purple-300">No playlists yet</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
-              <PlaylistGrid 
-                playlists={playlists.slice(0, 5)} 
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
+              <PlaylistGrid
+                playlists={playlists.slice(0, 5)}
                 onPlaylistEdit={openEditDialog}
                 onPlaylistDelete={openDeleteConfirm}
                 className="contents"
               />
-              
+
               {playlists.length > 5 && (
                 <Link href="/library/playlists">
                   <div className="group cursor-pointer text-center">
@@ -405,9 +407,9 @@ export default function YourLibraryPage() {
               <p className="text-purple-300">No liked albums yet</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
-              <AlbumGrid 
-                albums={likedAlbums.slice(0, 5).map(album => ({
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
+              <AlbumGrid
+                albums={likedAlbums.slice(0, 5).map((album) => ({
                   id: album.id,
                   title: album.title,
                   cover_image_url: album.cover_image_url || null,
@@ -416,7 +418,7 @@ export default function YourLibraryPage() {
                     id: album.artist.id,
                     name: album.artist.name,
                     custom_url: album.artist.custom_url || null,
-                  }
+                  },
                 }))}
                 className="contents"
               />
@@ -479,7 +481,10 @@ export default function YourLibraryPage() {
                   id="edit-description"
                   value={editFormData.description}
                   onChange={(e) =>
-                    setEditFormData({ ...editFormData, description: e.target.value })
+                    setEditFormData({
+                      ...editFormData,
+                      description: e.target.value,
+                    })
                   }
                   placeholder="Enter playlist description"
                   rows={3}

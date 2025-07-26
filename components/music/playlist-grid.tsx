@@ -28,18 +28,20 @@ interface PlaylistGridProps {
   className?: string;
 }
 
-const PlaylistGrid = memo(function PlaylistGrid({ 
-  playlists, 
-  isLoading = false, 
+const PlaylistGrid = memo(function PlaylistGrid({
+  playlists,
+  isLoading = false,
   loadingCount = 12,
   onPlaylistPlay,
   onPlaylistEdit,
   onPlaylistDelete,
   showActions = false,
-  className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6"
+  className = "grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6",
 }: PlaylistGridProps) {
   const { setTrackList, playTrack } = useAudioPlayer();
-  const [loadingPlaylists, setLoadingPlaylists] = useState<Set<number>>(new Set());
+  const [loadingPlaylists, setLoadingPlaylists] = useState<Set<number>>(
+    new Set(),
+  );
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
   const menuRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
 
@@ -54,101 +56,121 @@ const PlaylistGrid = memo(function PlaylistGrid({
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [openMenuId]);
 
-  const handlePlaylistPlay = useCallback(async (playlist: Playlist) => {
-    console.log(`🎵 PlaylistGrid - Playing playlist: "${playlist.name}" (ID: ${playlist.id})`);
-    
-    if (onPlaylistPlay) {
-      console.log('🎵 PlaylistGrid - Using custom onPlaylistPlay callback');
-      onPlaylistPlay(playlist);
-      return;
-    }
+  const handlePlaylistPlay = useCallback(
+    async (playlist: Playlist) => {
+      console.log(
+        `🎵 PlaylistGrid - Playing playlist: "${playlist.name}" (ID: ${playlist.id})`,
+      );
 
-    if (playlist.track_count === 0) {
-      toast.error("This playlist is empty");
-      return;
-    }
-
-    // Set loading state for this playlist
-    setLoadingPlaylists(prev => new Set(prev).add(playlist.id));
-
-    try {
-      console.log(`🎵 PlaylistGrid - Fetching tracks for playlist ${playlist.id}...`);
-      const response = await fetch(`/api/playlists/${playlist.id}/tracks`);
-      console.log(`🎵 PlaylistGrid - API response status: ${response.status}`);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`🎵 PlaylistGrid - API Error ${response.status}:`, errorText);
-        toast.error(`Failed to load playlist: ${response.status} error`);
+      if (onPlaylistPlay) {
+        console.log("🎵 PlaylistGrid - Using custom onPlaylistPlay callback");
+        onPlaylistPlay(playlist);
         return;
       }
 
-      const tracksData = await response.json();
-      console.log(`🎵 PlaylistGrid - API response data:`, {
-        dataType: typeof tracksData,
-        isArray: Array.isArray(tracksData),
-        length: Array.isArray(tracksData) ? tracksData.length : 'N/A'
-      });
-
-      if (tracksData.length === 0) {
+      if (playlist.track_count === 0) {
         toast.error("This playlist is empty");
         return;
       }
 
-      // Handle both formats: playlist_tracks with track property or direct tracks
-      let tracks: Track[];
-      if (tracksData[0]?.track) {
-        tracks = tracksData.map((pt: any) => pt.track);
-      } else {
-        tracks = tracksData;
+      // Set loading state for this playlist
+      setLoadingPlaylists((prev) => new Set(prev).add(playlist.id));
+
+      try {
+        console.log(
+          `🎵 PlaylistGrid - Fetching tracks for playlist ${playlist.id}...`,
+        );
+        const response = await fetch(`/api/playlists/${playlist.id}/tracks`);
+        console.log(
+          `🎵 PlaylistGrid - API response status: ${response.status}`,
+        );
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error(
+            `🎵 PlaylistGrid - API Error ${response.status}:`,
+            errorText,
+          );
+          toast.error(`Failed to load playlist: ${response.status} error`);
+          return;
+        }
+
+        const tracksData = await response.json();
+        console.log(`🎵 PlaylistGrid - API response data:`, {
+          dataType: typeof tracksData,
+          isArray: Array.isArray(tracksData),
+          length: Array.isArray(tracksData) ? tracksData.length : "N/A",
+        });
+
+        if (tracksData.length === 0) {
+          toast.error("This playlist is empty");
+          return;
+        }
+
+        // Handle both formats: playlist_tracks with track property or direct tracks
+        let tracks: Track[];
+        if (tracksData[0]?.track) {
+          tracks = tracksData.map((pt: any) => pt.track);
+        } else {
+          tracks = tracksData;
+        }
+
+        const processedTracks = tracks.map((track) => ({
+          ...track,
+          file_url: track.file_url || track.audio_file_url,
+          audio_file_url: track.audio_file_url || track.file_url,
+        }));
+
+        const validTracks = processedTracks.filter(
+          (track) =>
+            track &&
+            track.id &&
+            track.title &&
+            (track.file_url || track.audio_file_url),
+        );
+
+        if (validTracks.length === 0) {
+          toast.error("No valid tracks found in playlist");
+          return;
+        }
+
+        console.log(
+          `🎵 PlaylistGrid - Setting trackList with ${validTracks.length} tracks`,
+        );
+        setTrackList(validTracks);
+
+        // Add small delay to ensure setTrackList completes
+        setTimeout(() => {
+          console.log(
+            `🎵 PlaylistGrid - Playing first track: "${validTracks[0].title}"`,
+          );
+          playTrack(validTracks[0]);
+        }, 50);
+      } catch (error) {
+        console.error(
+          "🎵 PlaylistGrid - Error loading playlist tracks:",
+          error,
+        );
+        toast.error(
+          `Failed to load playlist: ${error instanceof Error ? error.message : "Unknown error"}`,
+        );
+      } finally {
+        // Remove loading state
+        setLoadingPlaylists((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(playlist.id);
+          return newSet;
+        });
       }
-
-      const processedTracks = tracks.map((track) => ({
-        ...track,
-        file_url: track.file_url || track.audio_file_url,
-        audio_file_url: track.audio_file_url || track.file_url,
-      }));
-
-      const validTracks = processedTracks.filter(
-        (track) =>
-          track &&
-          track.id &&
-          track.title &&
-          (track.file_url || track.audio_file_url),
-      );
-
-      if (validTracks.length === 0) {
-        toast.error("No valid tracks found in playlist");
-        return;
-      }
-
-      console.log(`🎵 PlaylistGrid - Setting trackList with ${validTracks.length} tracks`);
-      setTrackList(validTracks);
-      
-      // Add small delay to ensure setTrackList completes
-      setTimeout(() => {
-        console.log(`🎵 PlaylistGrid - Playing first track: "${validTracks[0].title}"`);
-        playTrack(validTracks[0]);
-      }, 50);
-
-    } catch (error) {
-      console.error('🎵 PlaylistGrid - Error loading playlist tracks:', error);
-      toast.error(`Failed to load playlist: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    } finally {
-      // Remove loading state
-      setLoadingPlaylists(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(playlist.id);
-        return newSet;
-      });
-    }
-  }, [onPlaylistPlay, setTrackList, playTrack]);
+    },
+    [onPlaylistPlay, setTrackList, playTrack],
+  );
 
   const toggleMenu = (playlistId: number) => {
     setOpenMenuId(openMenuId === playlistId ? null : playlistId);
@@ -161,25 +183,25 @@ const PlaylistGrid = memo(function PlaylistGrid({
           <div key={index} className="group text-center animate-pulse">
             <div className="relative aspect-square mb-3">
               <div className="w-full h-full bg-white/20 rounded-lg"></div>
-              
+
               {/* Play Button Skeleton - Center */}
               <div className="absolute inset-0 flex items-center justify-center rounded-lg overflow-hidden">
                 <div className="w-12 h-12 rounded-full bg-white/20"></div>
               </div>
-              
+
               {/* Menu Button Skeleton - Top Right */}
               <div className="absolute top-2 right-2">
                 <div className="w-8 h-8 rounded-full bg-white/20"></div>
               </div>
             </div>
-            
+
             <div className="space-y-2">
               {/* Playlist Name Skeleton */}
               <div className="h-4 w-24 mx-auto bg-white/20 rounded"></div>
-              
+
               {/* Track Count Skeleton */}
               <div className="h-3 w-16 mx-auto bg-white/20 rounded"></div>
-              
+
               {/* Description Skeleton */}
               <div className="h-3 w-20 mx-auto bg-white/20 rounded"></div>
             </div>
@@ -192,10 +214,7 @@ const PlaylistGrid = memo(function PlaylistGrid({
   return (
     <div className={className}>
       {playlists.map((playlist) => (
-        <div
-          key={playlist.id}
-          className="group cursor-pointer text-center"
-        >
+        <div key={playlist.id} className="group cursor-pointer text-center">
           <div className="relative aspect-square mb-3">
             <Link href={`/playlists/${playlist.id}`}>
               <div className="w-full h-full bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg relative overflow-hidden">
@@ -218,7 +237,7 @@ const PlaylistGrid = memo(function PlaylistGrid({
               <Button
                 size="sm"
                 onClick={(e) => {
-                  console.log(`🎵 PlaylistGrid - Play button clicked for playlist: "${playlist.name}" (ID: ${playlist.id})`);
+                  // console.log(`🎵 PlaylistGrid - Play button clicked for playlist: "${playlist.name}" (ID: ${playlist.id})`);
                   e.preventDefault();
                   e.stopPropagation();
                   handlePlaylistPlay(playlist);
@@ -233,7 +252,7 @@ const PlaylistGrid = memo(function PlaylistGrid({
                 )}
               </Button>
             </div>
-            
+
             {/* Three Dots Menu - Top Right */}
             <div className="absolute top-2 right-2">
               <Button
@@ -247,14 +266,14 @@ const PlaylistGrid = memo(function PlaylistGrid({
               >
                 <MoreVertical className="h-4 w-4" />
               </Button>
-              
+
               {/* Dropdown Menu */}
               <div
-                ref={(el) => { 
-                  menuRefs.current[playlist.id] = el; 
+                ref={(el) => {
+                  menuRefs.current[playlist.id] = el;
                 }}
                 className={`absolute right-0 mt-2 w-80 z-[100] bg-purple-900 border border-purple-700 shadow-2xl rounded-xl overflow-hidden ${
-                  openMenuId === playlist.id ? '' : 'hidden'
+                  openMenuId === playlist.id ? "" : "hidden"
                 }`}
               >
                 {/* Header Section */}
@@ -272,7 +291,7 @@ const PlaylistGrid = memo(function PlaylistGrid({
                         <List className="h-6 w-6 text-white" />
                       )}
                     </div>
-                    
+
                     {/* Playlist Info */}
                     <div className="flex-1 min-w-0">
                       <h3 className="text-white font-bold text-lg truncate text-left">
@@ -285,7 +304,9 @@ const PlaylistGrid = memo(function PlaylistGrid({
                         </div>
                         {playlist.description && (
                           <div className="flex items-center gap-1">
-                            <span className="truncate">{playlist.description}</span>
+                            <span className="truncate">
+                              {playlist.description}
+                            </span>
                           </div>
                         )}
                       </div>
@@ -334,7 +355,7 @@ const PlaylistGrid = memo(function PlaylistGrid({
               </h3>
             </Link>
             <p className="text-sm text-purple-300 truncate">
-              {playlist.track_count || 0} songs
+              {playlist.track_count || 0} tracks
             </p>
             {playlist.description && (
               <p className="text-xs text-purple-400 truncate">
@@ -348,6 +369,6 @@ const PlaylistGrid = memo(function PlaylistGrid({
   );
 });
 
-PlaylistGrid.displayName = 'PlaylistGrid';
+PlaylistGrid.displayName = "PlaylistGrid";
 
-export { PlaylistGrid }; 
+export { PlaylistGrid };

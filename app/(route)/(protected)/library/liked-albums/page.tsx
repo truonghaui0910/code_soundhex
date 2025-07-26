@@ -56,9 +56,10 @@ export default function LibraryLikedAlbumsPage() {
     if (searchQuery.trim() === "") {
       setFilteredAlbums(albums);
     } else {
-      const filtered = albums.filter((album) =>
-        album.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        album.artist.name.toLowerCase().includes(searchQuery.toLowerCase())
+      const filtered = albums.filter(
+        (album) =>
+          album.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          album.artist.name.toLowerCase().includes(searchQuery.toLowerCase()),
       );
       setFilteredAlbums(filtered);
       setCurrentPage(1); // Reset to first page when searching
@@ -120,15 +121,14 @@ export default function LibraryLikedAlbumsPage() {
               >
                 1
               </Button>
-              {currentPage > 4 && (
-                <span className="text-purple-300">...</span>
-              )}
+              {currentPage > 4 && <span className="text-purple-300">...</span>}
             </>
           )}
 
           {/* Page numbers around current page */}
           {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-            const pageNumber = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
+            const pageNumber =
+              Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
             if (pageNumber > totalPages) return null;
 
             return (
@@ -170,7 +170,9 @@ export default function LibraryLikedAlbumsPage() {
 
         <Button
           size="sm"
-          onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+          onClick={() =>
+            handlePageChange(Math.min(totalPages, currentPage + 1))
+          }
           disabled={currentPage === totalPages}
           className="flex items-center gap-2 bg-white/10 backdrop-blur-sm hover:bg-white/20 text-purple-300 hover:text-white transition-all duration-300 border-0"
         >
@@ -219,16 +221,15 @@ export default function LibraryLikedAlbumsPage() {
               {searchQuery ? "No albums found" : "No liked albums yet"}
             </h3>
             <p className="text-purple-300">
-              {searchQuery 
-                ? "Try adjusting your search terms" 
-                : "Start liking albums to see them here"
-              }
+              {searchQuery
+                ? "Try adjusting your search terms"
+                : "Start liking albums to see them here"}
             </p>
           </div>
         ) : (
           <>
-            <AlbumGrid 
-              albums={currentAlbums.map(album => ({
+            <AlbumGrid
+              albums={currentAlbums.map((album) => ({
                 id: album.id,
                 title: album.title,
                 cover_image_url: album.cover_image_url || null,
@@ -237,9 +238,9 @@ export default function LibraryLikedAlbumsPage() {
                   id: album.artist.id,
                   name: album.artist.name,
                   custom_url: album.artist.custom_url || null,
-                }
+                },
               }))}
-              className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6 mb-8"
+              className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6 mb-8"
             />
 
             {/* Pagination */}
@@ -253,7 +254,9 @@ export default function LibraryLikedAlbumsPage() {
             <div className="flex justify-center mt-8">
               <div className="bg-white/5 backdrop-blur-sm border border-purple-400/30 rounded-lg px-4 py-2">
                 <span className="text-sm text-purple-300">
-                  Showing {startIndex + 1}-{Math.min(endIndex, filteredAlbums.length)} of {filteredAlbums.length} albums
+                  Showing {startIndex + 1}-
+                  {Math.min(endIndex, filteredAlbums.length)} of{" "}
+                  {filteredAlbums.length} albums
                 </span>
               </div>
             </div>
@@ -262,4 +265,4 @@ export default function LibraryLikedAlbumsPage() {
       </div>
     </div>
   );
-} 
+}

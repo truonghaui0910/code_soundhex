@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 export default async function MusicPage() {
   try {
     // Get only most viewed tracks instead of all tracks
-    const tracks = await TracksController.getMostViewedTracks(12);
+    const tracks = await TracksController.getMostViewedTracks(10);
 
     return (
       <div className="min-h-screen">

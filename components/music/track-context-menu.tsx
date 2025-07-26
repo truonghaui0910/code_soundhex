@@ -510,7 +510,7 @@ export function TrackContextMenu({
                                                         e.target.value,
                                                     )
                                                 }
-                                                className="w-full px-2 py-1 text-xs bg-purple-800 border border-purple-600 rounded text-white placeholder-purple-400 focus:outline-none focus:border-purple-500"
+                                                className="w-full px-2 py-1 text-xs bg-purple-800 border border-purple-600 rounded-lg text-white placeholder-purple-400 focus:outline-none focus:border-purple-500"
                                                 onClick={(e) =>
                                                     e.stopPropagation()
                                                 }

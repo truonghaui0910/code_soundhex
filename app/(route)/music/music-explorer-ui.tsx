@@ -49,22 +49,7 @@ const formatDuration = (seconds: number | null) => {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
 };
 
-// Component to handle upload page redirect
-function UploadRedirect() {
-    const router = useRouter();
 
-    useEffect(() => {
-        router.replace("/upload");
-    }, [router]);
-
-    return (
-        <div className="text-center">
-            <p className="text-lg text-gray-600 dark:text-gray-400 mb-6">
-                Redirecting to upload page...
-            </p>
-        </div>
-    );
-}
 
 interface FeaturedAlbum {
     id: number;
@@ -344,8 +329,8 @@ export function MusicExplorerUI({
                                 variant="outline"
                                 onClick={() => setShowMoodModal(true)}
                                 className={`px-4 py-2 rounded-full text-sm font-medium ${
-                                    selectedMoods.size > 0 
-                                        ? "bg-purple-100 dark:bg-purple-900/20 border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300" 
+                                    selectedMoods.size > 0
+                                        ? "bg-purple-100 dark:bg-purple-900/20 border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300"
                                         : ""
                                 }`}
                             >
@@ -378,8 +363,6 @@ export function MusicExplorerUI({
             <div className="container mx-auto px-4 sm:px-6 pb-32 space-y-8 sm:space-y-16 pt-8 sm:pt-12">
                 {currentView === "featured" && (
                     <div className="space-y-16">
-                        
-
                         {/* Featured Tracks */}
                         <section>
                             <div className="flex items-center justify-between mb-8">
@@ -411,7 +394,7 @@ export function MusicExplorerUI({
 
                             <TrackGrid
                                 tracks={featuredTracks}
-                                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6"
+                                className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6"
                             />
 
                             {/* View all button */}
@@ -446,10 +429,7 @@ export function MusicExplorerUI({
                                 </Button>
                             </div>
 
-                            
-                            <AlbumGrid
-                                albums={featuredAlbums}
-                            />
+                            <AlbumGrid albums={featuredAlbums} />
                         </section>
 
                         {/* Artists Section */}

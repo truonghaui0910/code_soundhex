@@ -3,13 +3,7 @@
 import { memo } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import {
-    Music,
-    Play,
-    Pause,
-    Clock,
-    Headphones,
-} from "lucide-react";
+import { Music, Play, Pause, Clock, Headphones } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Track } from "@/lib/definitions/Track";
@@ -18,7 +12,10 @@ import { useDownload } from "@/hooks/use-download";
 import AddToPlaylist from "@/components/playlist/add-to-playlist";
 import { useEffect, useCallback, useMemo, useRef, useState } from "react";
 import { useLikesFollows } from "@/hooks/use-likes-follows";
-import { TrackContextMenu, TrackContextMenuTrigger } from "./track-context-menu";
+import {
+    TrackContextMenu,
+    TrackContextMenuTrigger,
+} from "./track-context-menu";
 import { showSuccess } from "@/lib/services/notification-service";
 import { LikeButton } from "@/components/ui/like-button";
 
@@ -29,7 +26,6 @@ interface TrackGridProps {
     showTrackNumbers?: boolean;
     onTrackPlay?: (track: Track, tracks: Track[]) => void;
     className?: string;
-    gridCols?: string;
 }
 
 // Helper function to format time
@@ -54,11 +50,10 @@ const TrackGrid = memo(function TrackGrid({
     loadingCount = 10,
     showTrackNumbers = true,
     onTrackPlay,
-    className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6",
-    gridCols,
+    className = "grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6",
 }: TrackGridProps) {
     const [openMenuId, setOpenMenuId] = useState<number | null>(null);
-    
+
     const {
         currentTrack,
         isPlaying,
@@ -119,9 +114,6 @@ const TrackGrid = memo(function TrackGrid({
         }
     };
 
-    // Determine final className before using it
-    const finalClassName = gridCols || className;
-
     // OPTIMIZE batch fetch to prevent duplicate API calls - FIX THIS
     useEffect(() => {
         if (!isLoading && trackIds.length > 0) {
@@ -140,7 +132,7 @@ const TrackGrid = memo(function TrackGrid({
 
     if (isLoading) {
         return (
-            <div className={finalClassName}>
+            <div className={className}>
                 {Array.from({ length: loadingCount }).map((_, index) => (
                     <div key={index} className="group relative">
                         <div className="relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl overflow-hidden shadow-lg border border-white/20 dark:border-gray-700/30 animate-pulse">
@@ -166,7 +158,7 @@ const TrackGrid = memo(function TrackGrid({
     // Safety check for tracks
     if (!tracks || !Array.isArray(tracks)) {
         return (
-            <div className={finalClassName}>
+            <div className={className}>
                 <div className="text-center py-20">
                     <Music className="h-12 w-12 mx-auto mb-4 text-gray-400" />
                     <p className="text-gray-500">No tracks available</p>
@@ -176,7 +168,7 @@ const TrackGrid = memo(function TrackGrid({
     }
 
     return (
-        <div className={finalClassName}>
+        <div className={className}>
             {tracks.map((track, index) => (
                 <div
                     key={track.id}
@@ -214,8 +206,6 @@ const TrackGrid = memo(function TrackGrid({
                             {/* Gradient overlay */}
                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-                            
-
                             {/* Bottom Controls - Like, Play and Menu aligned */}
                             <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity z-50">
                                 {/* Like Button - Left */}
@@ -226,7 +216,7 @@ const TrackGrid = memo(function TrackGrid({
                                     size="sm"
                                     className="w-8 h-8 rounded-full bg-black/50 backdrop-blur-sm hover:bg-black/70"
                                 />
-                                
+
                                 {/* Center Controls - Play and Menu aligned */}
                                 <div className="flex items-center gap-2">
                                     {/* Play button */}
@@ -251,10 +241,12 @@ const TrackGrid = memo(function TrackGrid({
                                     <div className="relative">
                                         <TrackContextMenuTrigger
                                             isOpen={openMenuId === track.id}
-                                            onToggle={() => toggleMenu(track.id)}
+                                            onToggle={() =>
+                                                toggleMenu(track.id)
+                                            }
                                             className="w-8 h-8 bg-black/50 backdrop-blur-sm hover:bg-black/70 rounded-full"
                                         />
-                                        
+
                                         <TrackContextMenu
                                             track={track}
                                             isOpen={openMenuId === track.id}
@@ -273,20 +265,33 @@ const TrackGrid = memo(function TrackGrid({
                                             onDownload={downloadTrack}
                                             onLikeToggle={toggleTrackLike}
                                             onShare={(track) => {
-                                                const trackPath = track.custom_url || track.id;
+                                                const trackPath =
+                                                    track.custom_url ||
+                                                    track.id;
                                                 const url = `${window.location.origin}/track/${trackPath}`;
-                                                navigator.clipboard.writeText(url);
+                                                navigator.clipboard.writeText(
+                                                    url,
+                                                );
                                                 showSuccess({
                                                     title: "Copied!",
-                                                    message: "Link copied to clipboard!",
+                                                    message:
+                                                        "Link copied to clipboard!",
                                                 });
                                             }}
                                             isPlaying={isPlaying}
-                                            isCurrentTrack={currentTrack?.id === track.id}
+                                            isCurrentTrack={
+                                                currentTrack?.id === track.id
+                                            }
                                             likeStatus={{
-                                                isLiked: getTrackLikeStatus(track.id).isLiked || false,
-                                                isLoading: getTrackLikeStatus(track.id).isLoading,
-                                                totalLikes: getTrackLikeStatus(track.id).totalLikes,
+                                                isLiked:
+                                                    getTrackLikeStatus(track.id)
+                                                        .isLiked || false,
+                                                isLoading: getTrackLikeStatus(
+                                                    track.id,
+                                                ).isLoading,
+                                                totalLikes: getTrackLikeStatus(
+                                                    track.id,
+                                                ).totalLikes,
                                             }}
                                         />
                                     </div>
@@ -388,14 +393,14 @@ const TrackGrid = memo(function TrackGrid({
                                         <div className="flex items-center gap-1 text-xs text-gray-500 bg-gray-100 dark:bg-gray-700/50 px-2 py-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600/50 transition-colors cursor-pointer">
                                             <Clock className="h-3 w-3" />
                                             <span className="font-mono">
-                                                {formatDuration(track.duration || null)}
+                                                {formatDuration(
+                                                    track.duration || null,
+                                                )}
                                             </span>
                                         </div>
                                     </Link>
                                 </div>
                             </div>
-
-
                         </div>
                     </div>
 
