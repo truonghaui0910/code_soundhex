@@ -55,7 +55,12 @@ export function useLikesFollows() {
 
   // Batch fetch track likes status
   const fetchBatchTrackLikesStatus = useCallback(async (trackIds: number[]) => {
-    if (!user || trackIds.length === 0) return;
+    if (!user || trackIds.length === 0) {
+      console.log("useLikesFollows - Skipping batch fetch:", { user: !!user, trackIdsLength: trackIds.length });
+      return;
+    }
+
+    console.log("useLikesFollows - Starting batch fetch for tracks:", trackIds);
 
     // Set loading state for all tracks
     setTrackLikes(prev => {
@@ -67,22 +72,28 @@ export function useLikesFollows() {
     });
 
     try {
+      const requestBody = { trackIds };
+      console.log("useLikesFollows - Request body:", requestBody);
+      
       const response = await fetch('/api/tracks/likes/batch', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ trackIds }),
+        body: JSON.stringify(requestBody),
       });
 
       const data = await response.json();
+      console.log("useLikesFollows - Response data:", data);
 
       if (response.ok) {
-        setTrackLikes(prev => ({
-          ...prev,
-          ...data
-        }));
+        setTrackLikes(prev => {
+          const newState = { ...prev, ...data };
+          console.log("useLikesFollows - Updated trackLikes state:", newState);
+          return newState;
+        });
       } else {
+        console.error("useLikesFollows - API error:", data);
         // Set error state for all tracks
         setTrackLikes(prev => {
           const updated = { ...prev };
@@ -93,6 +104,7 @@ export function useLikesFollows() {
         });
       }
     } catch (error) {
+      console.error("useLikesFollows - Fetch error:", error);
       // Set error state for all tracks
       setTrackLikes(prev => {
         const updated = { ...prev };
