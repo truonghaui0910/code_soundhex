@@ -21,7 +21,7 @@ import { usePlaylist } from "@/contexts/PlaylistContext";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { showWarning } from "@/lib/services/notification-service";
 import { toast } from "sonner";
-import { CreatePlaylistModal } from "@/components/create-playlist-modal";
+import { CreatePlaylistModal } from "@/components/playlist/create-playlist-modal";
 
 export interface TrackContextMenuAction {
     play?: boolean;
@@ -86,7 +86,7 @@ export function TrackContextMenu({
 }: TrackContextMenuProps) {
     const menuRef = useRef<HTMLDivElement>(null);
     const { user } = useCurrentUser();
-    const { playlists } = usePlaylist();
+    const { playlists, refetchPlaylists } = usePlaylist();
     const [showPlaylistSubmenu, setShowPlaylistSubmenu] = useState(false);
     const [isAddingToPlaylist, setIsAddingToPlaylist] = useState<number | null>(
         null,
@@ -95,6 +95,7 @@ export function TrackContextMenu({
     const [submenuPosition, setSubmenuPosition] = useState<"right" | "left">(
         "right",
     );
+    const [playlistSearchQuery, setPlaylistSearchQuery] = useState("");
 
     // Handle click outside to close menu
     useEffect(() => {
@@ -114,6 +115,35 @@ export function TrackContextMenu({
             document.removeEventListener("mousedown", handleClickOutside);
         };
     }, [isOpen, onClose]);
+
+    // Reset submenu state when main menu closes
+    useEffect(() => {
+        if (!isOpen) {
+            setShowPlaylistSubmenu(false);
+            setPlaylistSearchQuery(""); // Reset search query
+        }
+    }, [isOpen]);
+
+    // Close submenu when modal opens and ensure submenu stays closed
+    useEffect(() => {
+        if (createPlaylistOpen) {
+            setShowPlaylistSubmenu(false);
+            setPlaylistSearchQuery(""); // Reset search query
+        }
+    }, [createPlaylistOpen]);
+
+    // Prevent submenu from opening when modal is open
+    const handleMouseEnterPlaylist = () => {
+        if (!createPlaylistOpen) {
+            setShowPlaylistSubmenu(true);
+        }
+    };
+
+    const handleMouseLeavePlaylist = () => {
+        if (!createPlaylistOpen) {
+            setShowPlaylistSubmenu(false);
+        }
+    };
 
     const handlePlayToggle = () => {
         onPlayToggle?.(track);
@@ -175,6 +205,10 @@ export function TrackContextMenu({
 
             const playlist = playlists.find((p) => p.id === playlistId);
             toast.success(`Added "${track.title}" to "${playlist?.name}"`);
+
+            // Reload playlists after successful addition
+            await refetchPlaylists();
+
             onClose();
             setShowPlaylistSubmenu(false);
         } catch (error: any) {
@@ -191,15 +225,55 @@ export function TrackContextMenu({
     };
 
     const handleCreateNewPlaylist = () => {
-        setCreatePlaylistOpen(true);
-        onClose();
+        // Immediately hide submenu and close context menu
         setShowPlaylistSubmenu(false);
+        setPlaylistSearchQuery(""); // Reset search query
+        onClose();
+        // Open modal after a short delay
+        setTimeout(() => {
+            setCreatePlaylistOpen(true);
+        }, 50);
     };
 
-    const handlePlaylistCreated = () => {
-        // refetchPlaylists(); // Assuming you have a refetch playlists function
-        console.log("Playlist created successfully!");
+    const handlePlaylistCreated = async (newPlaylist?: any) => {
+        setCreatePlaylistOpen(false);
+        
+        // If we have the new playlist, automatically add the track to it
+        if (newPlaylist) {
+            try {
+                const response = await fetch(
+                    `/api/playlists/${newPlaylist.id}/tracks`,
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({ track_id: track.id }),
+                    },
+                );
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(
+                        error.error || "Failed to add track to playlist",
+                    );
+                }
+
+                toast.success(`Created "${newPlaylist.name}" and added "${track.title}"`);
+            } catch (error: any) {
+                console.error("Error adding track to new playlist:", error);
+                toast.error(error.message || "Failed to add track to new playlist");
+            }
+        }
+        
+        // Reload playlists after creating new playlist
+        await refetchPlaylists();
     };
+
+    // Filter playlists based on search query
+    const filteredPlaylists = playlists.filter((playlist) =>
+        playlist.name.toLowerCase().includes(playlistSearchQuery.toLowerCase())
+    );
 
     const positionClasses =
         position === "top" ? "bottom-full mb-2" : "top-full mt-2";
@@ -229,101 +303,211 @@ export function TrackContextMenu({
     return (
         <>
             <div ref={menuRef} className={containerClass}>
-            {/* Header Section - Only for light variant */}
-            {isLightVariant && (
-                <div className="p-4 border-b border-purple-700">
-                    <div className="flex items-start gap-3">
-                        {/* Artist Profile Picture */}
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0">
-                            {track.artist?.profile_image_url ? (
-                                <img
-                                    src={track.artist.profile_image_url}
-                                    alt={track.artist?.name || "Artist"}
-                                    className="w-full h-full object-cover rounded-full"
-                                />
-                            ) : (
-                                <span className="text-white font-bold text-lg">
-                                    {(track.artist?.name || track.title)
-                                        .charAt(0)
-                                        .toUpperCase()}
-                                </span>
-                            )}
-                        </div>
+                {/* Header Section - Only for light variant */}
+                {isLightVariant && (
+                    <div className="p-4 border-b border-purple-700">
+                        <div className="flex items-start gap-3">
+                            {/* Artist Profile Picture */}
+                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0">
+                                {track.artist?.profile_image_url ? (
+                                    <img
+                                        src={track.artist.profile_image_url}
+                                        alt={track.artist?.name || "Artist"}
+                                        className="w-full h-full object-cover rounded-full"
+                                    />
+                                ) : (
+                                    <span className="text-white font-bold text-lg">
+                                        {(track.artist?.name || track.title)
+                                            .charAt(0)
+                                            .toUpperCase()}
+                                    </span>
+                                )}
+                            </div>
 
-                        {/* Song Info */}
-                        <div className="flex-1 min-w-0">
-                            <h3 className="text-white font-bold text-lg truncate">
-                                {track.title}
-                            </h3>
-                            <div className="flex items-center gap-4 mt-1 text-purple-300 text-sm">
-                                <div className="flex items-center gap-1">
-                                    <Heart className="h-3 w-3" />
-                                    <span>
-                                        {formatViewCount(
-                                            likeStatus.totalLikes || 0,
-                                        )}
-                                    </span>
-                                </div>
-                                <div className="flex items-center gap-1">
-                                    <Headphones className="h-3 w-3" />
-                                    <span>
-                                        {formatViewCount(track.view_count || 0)}
-                                    </span>
+                            {/* Song Info */}
+                            <div className="flex-1 min-w-0">
+                                <h3 className="text-white font-bold text-lg truncate">
+                                    {track.title}
+                                </h3>
+                                <div className="flex items-center gap-4 mt-1 text-purple-300 text-sm">
+                                    <div className="flex items-center gap-1">
+                                        <Heart className="h-3 w-3" />
+                                        <span>
+                                            {formatViewCount(
+                                                likeStatus.totalLikes || 0,
+                                            )}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                        <Headphones className="h-3 w-3" />
+                                        <span>
+                                            {formatViewCount(
+                                                track.view_count || 0,
+                                            )}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            )}
-
-            {/* Action List */}
-            <div className={isLightVariant ? "" : ""}>
-                {/* Play/Pause Action */}
-                {actions.play && onPlayToggle && (
-                    <button onClick={handlePlayToggle} className={buttonClass}>
-                        {isCurrentTrack && isPlaying ? (
-                            <>
-                                <Pause
-                                    className={`${isLightVariant || isPurpleVariant ? "h-4 w-4 mr-3" : "h-4 w-4 mr-2 inline-block"}`}
-                                />
-                                <span
-                                    className={
-                                        isLightVariant || isPurpleVariant
-                                            ? "text-sm"
-                                            : ""
-                                    }
-                                >
-                                    Pause
-                                </span>
-                            </>
-                        ) : (
-                            <>
-                                <Play
-                                    className={`${isLightVariant || isPurpleVariant ? "h-4 w-4 mr-3" : "h-4 w-4 mr-2 inline-block"}`}
-                                />
-                                <span
-                                    className={
-                                        isLightVariant || isPurpleVariant
-                                            ? "text-sm"
-                                            : ""
-                                    }
-                                >
-                                    Play
-                                </span>
-                            </>
-                        )}
-                    </button>
                 )}
 
-                {/* Add to Playlist Action with Hover Submenu */}
-                {actions.addToPlaylist && (
-                    <div
-                        className="relative"
-                        onMouseEnter={() => setShowPlaylistSubmenu(true)}
-                        onMouseLeave={() => setShowPlaylistSubmenu(false)}
-                    >
-                        <button className={buttonClass}>
-                            <Plus
+                {/* Action List */}
+                <div className={isLightVariant ? "" : ""}>
+                    {/* Play/Pause Action */}
+                    {actions.play && onPlayToggle && (
+                        <button
+                            onClick={handlePlayToggle}
+                            className={buttonClass}
+                        >
+                            {isCurrentTrack && isPlaying ? (
+                                <>
+                                    <Pause
+                                        className={`${isLightVariant || isPurpleVariant ? "h-4 w-4 mr-3" : "h-4 w-4 mr-2 inline-block"}`}
+                                    />
+                                    <span
+                                        className={
+                                            isLightVariant || isPurpleVariant
+                                                ? "text-sm"
+                                                : ""
+                                        }
+                                    >
+                                        Pause
+                                    </span>
+                                </>
+                            ) : (
+                                <>
+                                    <Play
+                                        className={`${isLightVariant || isPurpleVariant ? "h-4 w-4 mr-3" : "h-4 w-4 mr-2 inline-block"}`}
+                                    />
+                                    <span
+                                        className={
+                                            isLightVariant || isPurpleVariant
+                                                ? "text-sm"
+                                                : ""
+                                        }
+                                    >
+                                        Play
+                                    </span>
+                                </>
+                            )}
+                        </button>
+                    )}
+
+                    {/* Add to Playlist Action with Hover Submenu */}
+                    {actions.addToPlaylist && (
+                        <div
+                            className="relative"
+                            onMouseEnter={handleMouseEnterPlaylist}
+                            onMouseLeave={handleMouseLeavePlaylist}
+                        >
+                            <button className={buttonClass}>
+                                <Plus
+                                    className={`${isLightVariant || isPurpleVariant ? "h-4 w-4 mr-3" : "h-4 w-4 mr-2 inline-block"}`}
+                                />
+                                <span
+                                    className={
+                                        isLightVariant || isPurpleVariant
+                                            ? "text-sm text-left"
+                                            : "text-left"
+                                    }
+                                >
+                                    Add to Playlist
+                                </span>
+                                <ChevronRight
+                                    className={`${isLightVariant || isPurpleVariant ? "h-4 w-4 ml-auto" : "h-4 w-4 ml-auto inline-block"}`}
+                                />
+                            </button>
+
+                            {/* Playlist Submenu - Hidden when modal is open */}
+                            {showPlaylistSubmenu && !createPlaylistOpen && (
+                                <div
+                                    className={`absolute right-full top-0 -left-64 w-64 bg-purple-900 border border-purple-700 shadow-2xl rounded-lg z-[999999] max-h-80 overflow-hidden flex flex-col`}
+                                    onMouseEnter={() =>
+                                        setShowPlaylistSubmenu(true)
+                                    }
+                                    onMouseLeave={() =>
+                                        setShowPlaylistSubmenu(false)
+                                    }
+                                >
+                                    {/* Search Header */}
+                                    <div className="px-3 py-2 border-b border-purple-700 flex-shrink-0">
+                                        <div className="text-xs text-purple-300 font-medium mb-2">
+                                            Select Playlist
+                                        </div>
+                                        <div className="relative">
+                                            <input
+                                                type="text"
+                                                placeholder="Search playlists..."
+                                                value={playlistSearchQuery}
+                                                onChange={(e) => setPlaylistSearchQuery(e.target.value)}
+                                                className="w-full px-2 py-1 text-xs bg-purple-800 border border-purple-600 rounded text-white placeholder-purple-400 focus:outline-none focus:border-purple-500"
+                                                onClick={(e) => e.stopPropagation()}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Scrollable Content */}
+                                    <div className="flex-1 overflow-y-auto">
+                                        {/* Create New Playlist Option */}
+                                        <button
+                                            onClick={handleCreateNewPlaylist}
+                                            className="flex items-center w-full px-3 py-2 text-white hover:bg-purple-700/50 transition-colors text-sm border-b border-purple-700/50"
+                                        >
+                                            <Plus className="h-4 w-4 mr-3 text-green-400" />
+                                            <span>Create new playlist</span>
+                                        </button>
+
+                                        {/* Playlists List */}
+                                        {filteredPlaylists.length === 0 ? (
+                                            <div className="px-3 py-4 text-center text-purple-300 text-sm">
+                                                {playlistSearchQuery ? "No playlists match your search" : "No playlists found"}
+                                            </div>
+                                        ) : (
+                                            filteredPlaylists.map((playlist) => (
+                                                <button
+                                                    key={playlist.id}
+                                                    onClick={() =>
+                                                        handleAddToPlaylist(
+                                                            playlist.id,
+                                                        )
+                                                    }
+                                                    disabled={
+                                                        isAddingToPlaylist ===
+                                                        playlist.id
+                                                    }
+                                                    className="flex items-center w-full px-3 py-2 text-white hover:bg-purple-700/50 transition-colors text-sm disabled:opacity-50"
+                                                >
+                                                    <ListIcon className="h-4 w-4 mr-3 text-purple-300" />
+                                                    <div className="flex-1 text-left">
+                                                        <div className="font-medium truncate">
+                                                            {playlist.name}
+                                                        </div>
+                                                        <div className="text-xs text-purple-400">
+                                                            {playlist.track_count}{" "}
+                                                            tracks
+                                                        </div>
+                                                    </div>
+                                                    {isAddingToPlaylist ===
+                                                        playlist.id && (
+                                                        <div className="w-4 h-4 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />
+                                                    )}
+                                                </button>
+                                            ))
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Download Action */}
+                    {actions.download && onDownload && (
+                        <button
+                            onClick={handleDownload}
+                            className={buttonClass}
+                        >
+                            <Download
                                 className={`${isLightVariant || isPurpleVariant ? "h-4 w-4 mr-3" : "h-4 w-4 mr-2 inline-block"}`}
                             />
                             <span
@@ -333,151 +517,70 @@ export function TrackContextMenu({
                                         : ""
                                 }
                             >
-                                Add to Playlist
+                                Download
                             </span>
-                            <ChevronRight
-                                className={`${isLightVariant || isPurpleVariant ? "h-4 w-4 ml-2" : "h-4 w-4 ml-2 inline-block"}`}
-                            />
                         </button>
+                    )}
 
-                        {/* Playlist Submenu */}
-                        {showPlaylistSubmenu && (
-                            <div 
-                                className={`absolute ${submenuPosition === 'right' ? 'left-full ml-1' : 'right-full mr-1'} top-0 w-64 bg-purple-900 border border-purple-700 shadow-2xl rounded-lg z-[999999] max-h-80 overflow-y-auto`}
-                                onMouseEnter={() => setShowPlaylistSubmenu(true)}
-                                onMouseLeave={() => setShowPlaylistSubmenu(false)}
+                    {/* Like/Unlike Action */}
+                    {actions.like && onLikeToggle && (
+                        <button
+                            onClick={handleLikeToggle}
+                            className={buttonClass}
+                            disabled={likeStatus.isLoading}
+                        >
+                            <Heart
+                                className={`${isLightVariant || isPurpleVariant ? "h-4 w-4 mr-3" : "h-4 w-4 mr-2 inline-block"} ${likeStatus.isLiked ? "fill-current text-red-500" : ""}`}
+                            />
+                            <span
+                                className={
+                                    isLightVariant || isPurpleVariant
+                                        ? "text-sm"
+                                        : ""
+                                }
                             >
-                                {/* Prevent hover gap */}
-                                <div className="absolute -left-1 top-0 w-1 h-full bg-transparent" />
-                                <div className="absolute -right-1 top-0 w-1 h-full bg-transparent" />
+                                {likeStatus.isLiked ? "Unlike" : "Like"}
+                                {!isLightVariant &&
+                                    !isPurpleVariant &&
+                                    likeStatus.totalLikes !== undefined &&
+                                    likeStatus.totalLikes > 0 && (
+                                        <span className="ml-1">
+                                            ({likeStatus.totalLikes})
+                                        </span>
+                                    )}
+                            </span>
+                        </button>
+                    )}
 
-                                {/* Search/Filter Header */}
-                                <div className="px-3 py-2 border-b border-purple-700">
-                                    <div className="text-xs text-purple-300 font-medium">
-                                        Select Playlist
-                                    </div>
-                                </div>
-
-                                {/* Create New Playlist Option */}
-                                <button
-                                    onClick={handleCreateNewPlaylist}
-                                    className="flex items-center w-full px-3 py-2 text-white hover:bg-purple-700/50 transition-colors text-sm border-b border-purple-700/50"
-                                >
-                                    <Plus className="h-4 w-4 mr-3 text-green-400" />
-                                    <span>Create new playlist</span>
-                                </button>
-
-                                {/* Playlists List */}
-                                {playlists.length === 0 ? (
-                                    <div className="px-3 py-4 text-center text-purple-300 text-sm">
-                                        No playlists found
-                                    </div>
-                                ) : (
-                                    playlists.map((playlist) => (
-                                        <button
-                                            key={playlist.id}
-                                            onClick={() =>
-                                                handleAddToPlaylist(playlist.id)
-                                            }
-                                            disabled={
-                                                isAddingToPlaylist ===
-                                                playlist.id
-                                            }
-                                            className="flex items-center w-full px-3 py-2 text-white hover:bg-purple-700/50 transition-colors text-sm disabled:opacity-50"
-                                        >
-                                            <ListIcon className="h-4 w-4 mr-3 text-purple-300" />
-                                            <div className="flex-1 text-left">
-                                                <div className="font-medium truncate">
-                                                    {playlist.name}
-                                                </div>
-                                                <div className="text-xs text-purple-400">
-                                                    {playlist.track_count}{" "}
-                                                    tracks
-                                                </div>
-                                            </div>
-                                            {isAddingToPlaylist ===
-                                                playlist.id && (
-                                                <div className="w-4 h-4 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />
-                                            )}
-                                        </button>
-                                    ))
-                                )}
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {/* Download Action */}
-                {actions.download && onDownload && (
-                    <button onClick={handleDownload} className={buttonClass}>
-                        <Download
-                            className={`${isLightVariant || isPurpleVariant ? "h-4 w-4 mr-3" : "h-4 w-4 mr-2 inline-block"}`}
-                        />
-                        <span
-                            className={
-                                isLightVariant || isPurpleVariant
-                                    ? "text-sm"
-                                    : ""
-                            }
-                        >
-                            Download
-                        </span>
-                    </button>
-                )}
-
-                {/* Like/Unlike Action */}
-                {actions.like && onLikeToggle && (
-                    <button
-                        onClick={handleLikeToggle}
-                        className={buttonClass}
-                        disabled={likeStatus.isLoading}
-                    >
-                        <Heart
-                            className={`${isLightVariant || isPurpleVariant ? "h-4 w-4 mr-3" : "h-4 w-4 mr-2 inline-block"} ${likeStatus.isLiked ? "fill-current text-red-500" : ""}`}
-                        />
-                        <span
-                            className={
-                                isLightVariant || isPurpleVariant
-                                    ? "text-sm"
-                                    : ""
-                            }
-                        >
-                            {likeStatus.isLiked ? "Unlike" : "Like"}
-                            {!isLightVariant &&
-                                !isPurpleVariant &&
-                                likeStatus.totalLikes !== undefined &&
-                                likeStatus.totalLikes > 0 && (
-                                    <span className="ml-1">
-                                        ({likeStatus.totalLikes})
-                                    </span>
-                                )}
-                        </span>
-                    </button>
-                )}
-
-                {/* Share Action */}
-                {actions.share && (
-                    <button onClick={handleShare} className={buttonClass}>
-                        {isLightVariant || isPurpleVariant ? (
-                            <>
-                                <LinkIcon className="h-4 w-4 mr-3" />
-                                <span className="text-sm">Copy Link</span>
-                            </>
-                        ) : (
-                            <>
-                                <Share className="h-4 w-4 mr-2 inline-block" />
-                                Share
-                            </>
-                        )}
-                    </button>
-                )}
+                    {/* Share Action */}
+                    {actions.share && (
+                        <button onClick={handleShare} className={buttonClass}>
+                            {isLightVariant || isPurpleVariant ? (
+                                <>
+                                    <LinkIcon className="h-4 w-4 mr-3" />
+                                    <span className="text-sm">Copy Link</span>
+                                </>
+                            ) : (
+                                <>
+                                    <Share className="h-4 w-4 mr-2 inline-block" />
+                                    Share
+                                </>
+                            )}
+                        </button>
+                    )}
+                </div>
             </div>
-        </div>
 
             {/* Create Playlist Modal */}
             <CreatePlaylistModal
                 open={createPlaylistOpen}
-                onOpenChange={setCreatePlaylistOpen}
+                onOpenChange={(open) => {
+                    setCreatePlaylistOpen(open);
+                    if (!open) {
+                        // Modal closed, reset submenu state
+                        setShowPlaylistSubmenu(false);
+                    }
+                }}
                 onPlaylistCreated={handlePlaylistCreated}
             />
         </>
