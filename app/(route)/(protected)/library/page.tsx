@@ -129,12 +129,40 @@ export default function YourLibraryPage() {
       const playlistsData = await playlistsResponse.json();
       setPlaylists(playlistsData || []);
 
-      // Fetch followed artists
-      const artistsResponse = await fetch("/api/user/followed-artists");
-      if (artistsResponse.ok) {
-        const artistsData = await artistsResponse.json();
-        setFollowedArtists(artistsData || []);
+      // Fetch followed artists + user-owned artists
+      const [followedArtistsResponse, userArtistsResponse] = await Promise.all([
+        fetch("/api/user/followed-artists"),
+        fetch("/api/artists/user")
+      ]);
+
+      let allArtists: FollowedArtist[] = [];
+      
+      // Get followed artists
+      if (followedArtistsResponse.ok) {
+        const followedArtistsData = await followedArtistsResponse.json();
+        allArtists = [...(followedArtistsData || [])];
       }
+
+      // Get user-owned artists and merge
+      if (userArtistsResponse.ok) {
+        const userArtistsData = await userArtistsResponse.json();
+        const transformedUserArtists = (userArtistsData || []).map((artist: any) => ({
+          id: artist.id,
+          name: artist.name,
+          profile_image_url: artist.profile_image_url,
+          custom_url: artist.custom_url,
+          tracksCount: 0 // Will be updated if needed
+        }));
+        
+        // Merge and remove duplicates based on artist id
+        const artistMap = new Map();
+        [...allArtists, ...transformedUserArtists].forEach(artist => {
+          artistMap.set(artist.id, artist);
+        });
+        allArtists = Array.from(artistMap.values());
+      }
+
+      setFollowedArtists(allArtists);
 
       // Fetch liked tracks
       const tracksResponse = await fetch("/api/user/liked-tracks");
@@ -143,12 +171,41 @@ export default function YourLibraryPage() {
         setLikedTracks(tracksData || []);
       }
 
-      // Fetch liked albums
-      const albumsResponse = await fetch("/api/user/liked-albums");
-      if (albumsResponse.ok) {
-        const albumsData = await albumsResponse.json();
-        setLikedAlbums(albumsData || []);
+      // Fetch liked albums + user-owned albums
+      const [likedAlbumsResponse, userAlbumsResponse] = await Promise.all([
+        fetch("/api/user/liked-albums"),
+        fetch("/api/albums/user")
+      ]);
+
+      let allAlbums: LikedAlbum[] = [];
+
+      // Get liked albums
+      if (likedAlbumsResponse.ok) {
+        const likedAlbumsData = await likedAlbumsResponse.json();
+        allAlbums = [...(likedAlbumsData || [])];
       }
+
+      // Get user-owned albums and merge
+      if (userAlbumsResponse.ok) {
+        const userAlbumsData = await userAlbumsResponse.json();
+        const transformedUserAlbums = (userAlbumsData || []).map((album: any) => ({
+          id: album.id,
+          title: album.title,
+          cover_image_url: album.cover_image_url,
+          custom_url: album.custom_url,
+          release_date: album.release_date,
+          artist: album.artist
+        }));
+        
+        // Merge and remove duplicates based on album id
+        const albumMap = new Map();
+        [...allAlbums, ...transformedUserAlbums].forEach(album => {
+          albumMap.set(album.id, album);
+        });
+        allAlbums = Array.from(albumMap.values());
+      }
+
+      setLikedAlbums(allAlbums);
     } catch (error) {
       console.error("Error fetching library data:", error);
     } finally {
