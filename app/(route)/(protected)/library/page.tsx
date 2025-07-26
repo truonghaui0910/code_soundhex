@@ -389,7 +389,7 @@ export default function YourLibraryPage() {
               <h2 className="text-xl font-semibold">Liked Albums</h2>
               <AlbumIcon className="h-5 w-5 text-purple-300" />
             </div>
-            <Link href="/library/liked-albums">
+            {/* <Link href="/library/liked-albums">
               <Button
                 variant="ghost"
                 size="sm"
@@ -398,7 +398,7 @@ export default function YourLibraryPage() {
                 View All
                 <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
-            </Link>
+            </Link> */}
           </div>
 
           {likedAlbums.length === 0 ? (
