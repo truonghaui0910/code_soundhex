@@ -204,12 +204,12 @@ export default function LibraryArtistsPage() {
           <div className="text-center py-16">
             <UserPlus className="h-16 w-16 text-purple-400 mx-auto mb-4" />
             <h3 className="text-xl font-semibold mb-2">
-              {searchQuery ? "No artists found" : "No followed artists yet"}
+              {searchQuery ? "No artists found" : "No artists yet"}
             </h3>
             <p className="text-purple-300">
               {searchQuery 
                 ? "Try adjusting your search terms" 
-                : "Start following artists to see them here"
+                : "Follow artists or upload your music to see them here"
               }
             </p>
           </div>
@@ -239,4 +239,4 @@ export default function LibraryArtistsPage() {
       </div>
     </div>
   );
-} 
+}
