@@ -55,6 +55,10 @@ export function useLikesFollows() {
 
   // Batch fetch track likes status
   const fetchBatchTrackLikesStatus = useCallback(async (trackIds: number[]) => {
+    console.log("useLikesFollows - Function called with trackIds:", trackIds);
+    console.log("useLikesFollows - trackIds type:", typeof trackIds, Array.isArray(trackIds));
+    console.log("useLikesFollows - trackIds length:", trackIds.length);
+    
     if (!user || trackIds.length === 0) {
       console.log("useLikesFollows - Skipping batch fetch:", { user: !!user, trackIdsLength: trackIds.length });
       return;
