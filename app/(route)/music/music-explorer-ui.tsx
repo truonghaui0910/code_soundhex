@@ -49,8 +49,6 @@ const formatDuration = (seconds: number | null) => {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
 };
 
-
-
 interface FeaturedAlbum {
     id: number;
     title: string;
@@ -564,7 +562,7 @@ export function MusicExplorerUI({
                         {totalPages > 1 && (
                             <div className="mt-12 flex items-center justify-center gap-4">
                                 <Button
-                                    variant="outline"
+                                    variant="ghost_bg"
                                     size="sm"
                                     onClick={() =>
                                         setCurrentPage(
@@ -572,7 +570,7 @@ export function MusicExplorerUI({
                                         )
                                     }
                                     disabled={currentPage === 1}
-                                    className="flex items-center gap-2"
+                                    className="flex items-center gap-2 h-10"
                                 >
                                     <ChevronLeft className="h-4 w-4" />
                                     Previous
@@ -586,13 +584,13 @@ export function MusicExplorerUI({
                                                 variant={
                                                     1 === currentPage
                                                         ? "default"
-                                                        : "outline"
+                                                        : "ghost_bg"
                                                 }
                                                 size="sm"
                                                 onClick={() =>
                                                     setCurrentPage(1)
                                                 }
-                                                className="w-10 h-10"
+                                                className="w-10 h-10 "
                                             >
                                                 1
                                             </Button>
@@ -626,7 +624,7 @@ export function MusicExplorerUI({
                                                         pageNumber ===
                                                         currentPage
                                                             ? "default"
-                                                            : "outline"
+                                                            : "ghost_bg"
                                                     }
                                                     size="sm"
                                                     onClick={() =>
@@ -654,7 +652,7 @@ export function MusicExplorerUI({
                                                 variant={
                                                     totalPages === currentPage
                                                         ? "default"
-                                                        : "outline"
+                                                        : "ghost_bg"
                                                 }
                                                 size="sm"
                                                 onClick={() =>
@@ -669,7 +667,7 @@ export function MusicExplorerUI({
                                 </div>
 
                                 <Button
-                                    variant="outline"
+                                    variant="ghost_bg"
                                     size="sm"
                                     onClick={() =>
                                         setCurrentPage(
@@ -680,7 +678,7 @@ export function MusicExplorerUI({
                                         )
                                     }
                                     disabled={currentPage === totalPages}
-                                    className="flex items-center gap-2"
+                                    className="flex items-center gap-2 h-10"
                                 >
                                     Next
                                     <ChevronRight className="h-4 w-4" />

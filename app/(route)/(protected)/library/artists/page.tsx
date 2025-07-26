@@ -24,7 +24,7 @@ interface FollowedArtist {
   tracksCount: number;
 }
 
-const ITEMS_PER_PAGE = 50;
+const ITEMS_PER_PAGE = 5;
 
 export default function LibraryArtistsPage() {
   const { user } = useCurrentUser();
