@@ -72,7 +72,7 @@ export default function LibraryLikedAlbumsPage() {
       // Fetch liked albums + user-owned albums
       const [likedAlbumsResponse, userAlbumsResponse] = await Promise.all([
         fetch("/api/user/liked-albums"),
-        fetch("/api/albums/user")
+        fetch("/api/albums/user"),
       ]);
 
       let allAlbums: LikedAlbum[] = [];
@@ -86,18 +86,20 @@ export default function LibraryLikedAlbumsPage() {
       // Get user-owned albums and merge
       if (userAlbumsResponse.ok) {
         const userAlbumsData = await userAlbumsResponse.json();
-        const transformedUserAlbums = (userAlbumsData || []).map((album: any) => ({
-          id: album.id,
-          title: album.title,
-          cover_image_url: album.cover_image_url,
-          custom_url: album.custom_url,
-          release_date: album.release_date,
-          artist: album.artist
-        }));
-        
+        const transformedUserAlbums = (userAlbumsData || []).map(
+          (album: any) => ({
+            id: album.id,
+            title: album.title,
+            cover_image_url: album.cover_image_url,
+            custom_url: album.custom_url,
+            release_date: album.release_date,
+            artist: album.artist,
+          }),
+        );
+
         // Merge and remove duplicates based on album id
         const albumMap = new Map();
-        [...allAlbums, ...transformedUserAlbums].forEach(album => {
+        [...allAlbums, ...transformedUserAlbums].forEach((album) => {
           albumMap.set(album.id, album);
         });
         allAlbums = Array.from(albumMap.values());
@@ -293,6 +295,7 @@ export default function LibraryLikedAlbumsPage() {
           </>
         )}
       </div>
+      <div className="pb-32"></div>
     </div>
   );
 }

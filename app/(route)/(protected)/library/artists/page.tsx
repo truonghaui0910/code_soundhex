@@ -46,7 +46,7 @@ export default function LibraryArtistsPage() {
       setFilteredArtists(artists);
     } else {
       const filtered = artists.filter((artist) =>
-        artist.name.toLowerCase().includes(searchQuery.toLowerCase())
+        artist.name.toLowerCase().includes(searchQuery.toLowerCase()),
       );
       setFilteredArtists(filtered);
       setCurrentPage(1); // Reset to first page when searching
@@ -59,11 +59,11 @@ export default function LibraryArtistsPage() {
       // Fetch followed artists + user-owned artists
       const [followedArtistsResponse, userArtistsResponse] = await Promise.all([
         fetch("/api/user/followed-artists"),
-        fetch("/api/artists/user")
+        fetch("/api/artists/user"),
       ]);
 
       let allArtists: FollowedArtist[] = [];
-      
+
       // Get followed artists
       if (followedArtistsResponse.ok) {
         const followedArtistsData = await followedArtistsResponse.json();
@@ -73,17 +73,19 @@ export default function LibraryArtistsPage() {
       // Get user-owned artists and merge
       if (userArtistsResponse.ok) {
         const userArtistsData = await userArtistsResponse.json();
-        const transformedUserArtists = (userArtistsData || []).map((artist: any) => ({
-          id: artist.id,
-          name: artist.name,
-          profile_image_url: artist.profile_image_url,
-          custom_url: artist.custom_url,
-          tracksCount: 0 // Will be updated if needed
-        }));
-        
+        const transformedUserArtists = (userArtistsData || []).map(
+          (artist: any) => ({
+            id: artist.id,
+            name: artist.name,
+            profile_image_url: artist.profile_image_url,
+            custom_url: artist.custom_url,
+            tracksCount: 0, // Will be updated if needed
+          }),
+        );
+
         // Merge and remove duplicates based on artist id
         const artistMap = new Map();
-        [...allArtists, ...transformedUserArtists].forEach(artist => {
+        [...allArtists, ...transformedUserArtists].forEach((artist) => {
           artistMap.set(artist.id, artist);
         });
         allArtists = Array.from(artistMap.values());
@@ -137,15 +139,14 @@ export default function LibraryArtistsPage() {
               >
                 1
               </Button>
-              {currentPage > 4 && (
-                <span className="text-purple-300">...</span>
-              )}
+              {currentPage > 4 && <span className="text-purple-300">...</span>}
             </>
           )}
 
           {/* Page numbers around current page */}
           {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-            const pageNumber = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
+            const pageNumber =
+              Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
             if (pageNumber > totalPages) return null;
 
             return (
@@ -187,7 +188,9 @@ export default function LibraryArtistsPage() {
 
         <Button
           size="sm"
-          onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+          onClick={() =>
+            handlePageChange(Math.min(totalPages, currentPage + 1))
+          }
           disabled={currentPage === totalPages}
           className="flex items-center gap-2 bg-white/10 backdrop-blur-sm hover:bg-white/20 text-purple-300 hover:text-white transition-all duration-300 border-0"
         >
@@ -236,10 +239,9 @@ export default function LibraryArtistsPage() {
               {searchQuery ? "No artists found" : "No artists yet"}
             </h3>
             <p className="text-purple-300">
-              {searchQuery 
-                ? "Try adjusting your search terms" 
-                : "Follow artists or upload your music to see them here"
-              }
+              {searchQuery
+                ? "Try adjusting your search terms"
+                : "Follow artists or upload your music to see them here"}
             </p>
           </div>
         ) : (
@@ -259,13 +261,16 @@ export default function LibraryArtistsPage() {
             <div className="flex justify-center mt-8">
               <div className="bg-white/5 backdrop-blur-sm border border-purple-400/30 rounded-lg px-4 py-2">
                 <span className="text-sm text-purple-300">
-                  Showing {startIndex + 1}-{Math.min(endIndex, filteredArtists.length)} of {filteredArtists.length} artists
+                  Showing {startIndex + 1}-
+                  {Math.min(endIndex, filteredArtists.length)} of{" "}
+                  {filteredArtists.length} artists
                 </span>
               </div>
             </div>
           </>
         )}
       </div>
+      <div className="pb-32"></div>
     </div>
   );
 }
