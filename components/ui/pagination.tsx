@@ -16,8 +16,6 @@ interface PaginationProps {
   maxVisiblePages?: number;
   disabled?: boolean;
   showPrevNext?: boolean;
-  customWidth?: string;
-  customHeight?: string;
 }
 
 export function Pagination({
@@ -31,8 +29,6 @@ export function Pagination({
   maxVisiblePages = 5,
   disabled = false,
   showPrevNext = true,
-  customWidth,
-  customHeight,
 }: PaginationProps) {
   if (totalPages <= 1) return null;
 
@@ -43,22 +39,13 @@ export function Pagination({
     onPageChange(page);
   };
 
-  // Calculate button dimensions
+  // Calculate button dimensions based on size
   const buttonClass = cn(
-    customWidth && customHeight
-      ? ""
-      : buttonSize === "sm"
+    buttonSize === "sm"
       ? "w-10 h-10"
       : buttonSize === "lg"
       ? "w-12 h-12"
       : "w-11 h-11",
-    customWidth && `w-[${customWidth}]`,
-    customHeight && `h-[${customHeight}]`,
-    disabled && "opacity-50 cursor-not-allowed"
-  );
-
-  const prevNextButtonClass = cn(
-    customHeight && `h-[${customHeight}]`,
     disabled && "opacity-50 cursor-not-allowed"
   );
 
@@ -139,7 +126,7 @@ export function Pagination({
           size={buttonSize}
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={disabled || currentPage === 1}
-          className={cn("flex items-center gap-2", prevNextButtonClass)}
+          className={cn("flex items-center gap-2", disabled && "opacity-50 cursor-not-allowed")}
         >
           <ChevronLeft className="h-4 w-4" />
           Previous
@@ -182,7 +169,7 @@ export function Pagination({
           size={buttonSize}
           onClick={() => handlePageChange(currentPage + 1)}
           disabled={disabled || currentPage === totalPages}
-          className={cn("flex items-center gap-2", prevNextButtonClass)}
+          className={cn("flex items-center gap-2", disabled && "opacity-50 cursor-not-allowed")}
         >
           Next
           <ChevronRight className="h-4 w-4" />

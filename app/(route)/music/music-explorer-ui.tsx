@@ -567,7 +567,6 @@ export function MusicExplorerUI({
                             className="mt-12"
                             buttonVariant="ghost_bg"
                             buttonSize="sm"
-                            customHeight="10"
                         />
                     </div>
                 )}
@@ -659,8 +658,6 @@ export function MusicExplorerUI({
                             className="mt-12"
                             buttonVariant="ghost_bg"
                             buttonSize="sm"
-                            customWidth="10"
-                            customHeight="10"
                         />
                     </div>
                 )}
@@ -751,8 +748,6 @@ export function MusicExplorerUI({
                             className="mt-12"
                             buttonVariant="ghost_bg"
                             buttonSize="sm"
-                            customWidth="2.5rem"
-                            customHeight="2.5rem"
                         />
                     </div>
                 )}
