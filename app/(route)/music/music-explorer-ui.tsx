@@ -657,7 +657,7 @@ export function MusicExplorerUI({
                             totalPages={albumsTotalPages}
                             onPageChange={setAlbumsCurrentPage}
                             className="mt-12"
-                            buttonVariant="outline"
+                            buttonVariant="ghost_bg"
                             buttonSize="sm"
                             customWidth="10"
                             customHeight="10"
@@ -749,15 +749,13 @@ export function MusicExplorerUI({
                             totalPages={artistsTotalPages}
                             onPageChange={setArtistsCurrentPage}
                             className="mt-12"
-                            buttonVariant="outline"
+                            buttonVariant="ghost_bg"
                             buttonSize="sm"
-                            customWidth="10"
-                            customHeight="10"
+                            customWidth="2.5rem"
+                            customHeight="2.5rem"
                         />
                     </div>
                 )}
-
-                {currentView === "upload" && <UploadRedirect />}
             </div>
 
             {/* Mood Filter Modal */}
