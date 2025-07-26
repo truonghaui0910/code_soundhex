@@ -133,32 +133,30 @@ export function TrackContextMenu({
         }
     }, [isOpen]);
 
-    // Close submenu when modal opens and ensure submenu stays closed
+    // Reset search query when modal opens, but keep submenu open
     useEffect(() => {
         console.log("📍 Create Playlist Modal - State changed:", { createPlaylistOpen });
         if (createPlaylistOpen) {
-            console.log("📍 Create Playlist Modal - Closing submenu when modal opens");
-            setShowPlaylistSubmenu(false);
-            setPlaylistSearchQuery(""); // Reset search query
+            console.log("📍 Create Playlist Modal - Modal opened, keeping submenu open");
+            setPlaylistSearchQuery(""); // Reset search query but keep submenu open
         }
     }, [createPlaylistOpen]);
 
-    // Prevent submenu from opening when modal is open
+    // Allow submenu to open and stay open even when modal is open
     const handleMouseEnterPlaylist = () => {
         console.log("📍 Submenu - Mouse enter playlist item:", { createPlaylistOpen });
-        if (!createPlaylistOpen) {
-            console.log("📍 Submenu - Opening playlist submenu");
-            setShowPlaylistSubmenu(true);
-        } else {
-            console.log("📍 Submenu - Modal is open, preventing submenu");
-        }
+        console.log("📍 Submenu - Opening playlist submenu");
+        setShowPlaylistSubmenu(true);
     };
 
     const handleMouseLeavePlaylist = () => {
         console.log("📍 Submenu - Mouse leave playlist item:", { createPlaylistOpen });
+        // Only close submenu if modal is not open
         if (!createPlaylistOpen) {
             console.log("📍 Submenu - Closing playlist submenu");
             setShowPlaylistSubmenu(false);
+        } else {
+            console.log("📍 Submenu - Modal is open, keeping submenu open");
         }
     };
 
@@ -450,16 +448,16 @@ export function TrackContextMenu({
                                 />
                             </button>
 
-                            {/* Playlist Submenu - Hidden when modal is open */}
+                            {/* Playlist Submenu - Show even when modal is open */}
                             {(() => {
                                 console.log("📍 Submenu Render - States:", { 
                                     showPlaylistSubmenu, 
                                     createPlaylistOpen,
-                                    willRender: showPlaylistSubmenu && !createPlaylistOpen
+                                    willRender: showPlaylistSubmenu
                                 });
                                 return null;
                             })()}
-                            {showPlaylistSubmenu && !createPlaylistOpen && (
+                            {showPlaylistSubmenu && (
                                 <div
                                     className={`absolute right-full top-0 -left-64 w-64 bg-purple-900 border border-purple-700 shadow-2xl rounded-lg z-[999999] max-h-80 overflow-hidden flex flex-col`}
                                     onMouseEnter={() =>
