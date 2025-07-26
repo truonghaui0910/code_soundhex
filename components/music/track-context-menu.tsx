@@ -105,6 +105,7 @@ export function TrackContextMenu({
                 menuRef.current &&
                 !menuRef.current.contains(event.target as Node)
             ) {
+                console.log("📍 Context Menu - Closing due to outside click");
                 onClose();
                 setShowPlaylistSubmenu(false);
             }
@@ -118,7 +119,9 @@ export function TrackContextMenu({
 
     // Reset submenu state when main menu closes
     useEffect(() => {
+        console.log("📍 Context Menu - State changed:", { isOpen });
         if (!isOpen) {
+            console.log("📍 Context Menu - Closing submenu and resetting search");
             setShowPlaylistSubmenu(false);
             setPlaylistSearchQuery(""); // Reset search query
         }
@@ -126,7 +129,9 @@ export function TrackContextMenu({
 
     // Close submenu when modal opens and ensure submenu stays closed
     useEffect(() => {
+        console.log("📍 Create Playlist Modal - State changed:", { createPlaylistOpen });
         if (createPlaylistOpen) {
+            console.log("📍 Create Playlist Modal - Closing submenu when modal opens");
             setShowPlaylistSubmenu(false);
             setPlaylistSearchQuery(""); // Reset search query
         }
@@ -134,13 +139,19 @@ export function TrackContextMenu({
 
     // Prevent submenu from opening when modal is open
     const handleMouseEnterPlaylist = () => {
+        console.log("📍 Submenu - Mouse enter playlist item:", { createPlaylistOpen });
         if (!createPlaylistOpen) {
+            console.log("📍 Submenu - Opening playlist submenu");
             setShowPlaylistSubmenu(true);
+        } else {
+            console.log("📍 Submenu - Modal is open, preventing submenu");
         }
     };
 
     const handleMouseLeavePlaylist = () => {
+        console.log("📍 Submenu - Mouse leave playlist item:", { createPlaylistOpen });
         if (!createPlaylistOpen) {
+            console.log("📍 Submenu - Closing playlist submenu");
             setShowPlaylistSubmenu(false);
         }
     };
@@ -225,21 +236,33 @@ export function TrackContextMenu({
     };
 
     const handleCreateNewPlaylist = () => {
+        console.log("📍 Create Playlist Flow - Starting create new playlist");
         // Immediately hide submenu and close context menu
+        console.log("📍 Create Playlist Flow - Hiding submenu and closing context menu");
         setShowPlaylistSubmenu(false);
         setPlaylistSearchQuery(""); // Reset search query
         onClose();
         // Open modal after a short delay
+        console.log("📍 Create Playlist Flow - Opening modal after delay");
         setTimeout(() => {
+            console.log("📍 Create Playlist Flow - Modal opened");
             setCreatePlaylistOpen(true);
         }, 50);
     };
 
     const handlePlaylistCreated = async (newPlaylist?: any) => {
+        console.log("📍 Playlist Created - Callback triggered:", { newPlaylist: newPlaylist?.name });
+        console.log("📍 Playlist Created - Closing modal");
         setCreatePlaylistOpen(false);
         
         // If we have the new playlist, automatically add the track to it
         if (newPlaylist) {
+            console.log("📍 Playlist Created - Adding track to new playlist:", { 
+                playlistId: newPlaylist.id, 
+                playlistName: newPlaylist.name,
+                trackId: track.id,
+                trackTitle: track.title 
+            });
             try {
                 const response = await fetch(
                     `/api/playlists/${newPlaylist.id}/tracks`,
@@ -259,14 +282,16 @@ export function TrackContextMenu({
                     );
                 }
 
+                console.log("📍 Playlist Created - Track successfully added to playlist");
                 toast.success(`Created "${newPlaylist.name}" and added "${track.title}"`);
             } catch (error: any) {
-                console.error("Error adding track to new playlist:", error);
+                console.error("📍 Playlist Created - Error adding track to new playlist:", error);
                 toast.error(error.message || "Failed to add track to new playlist");
             }
         }
         
         // Reload playlists after creating new playlist
+        console.log("📍 Playlist Created - Refetching playlists");
         await refetchPlaylists();
     };
 
@@ -420,6 +445,14 @@ export function TrackContextMenu({
                             </button>
 
                             {/* Playlist Submenu - Hidden when modal is open */}
+                            {(() => {
+                                console.log("📍 Submenu Render - States:", { 
+                                    showPlaylistSubmenu, 
+                                    createPlaylistOpen,
+                                    willRender: showPlaylistSubmenu && !createPlaylistOpen
+                                });
+                                return null;
+                            })()}
                             {showPlaylistSubmenu && !createPlaylistOpen && (
                                 <div
                                     className={`absolute right-full top-0 -left-64 w-64 bg-purple-900 border border-purple-700 shadow-2xl rounded-lg z-[999999] max-h-80 overflow-hidden flex flex-col`}
