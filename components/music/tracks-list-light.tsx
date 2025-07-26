@@ -249,11 +249,13 @@ export default function TracksListLight({ tracks, className = "" }: TracksListLi
 
                 {/* Three Dots Menu (always visible) */}
                 <div className="relative">
-                  <TrackContextMenuTrigger
-                    isOpen={openMenuId === track.id}
-                    onToggle={() => toggleMenu(track.id)}
-                    className="p-1 h-8 w-8 text-purple-300 hover:text-white dark:hover:bg-white/10"
-                  />
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <TrackContextMenuTrigger
+                      isOpen={openMenuId === track.id}
+                      onToggle={() => toggleMenu(track.id)}
+                      className="p-1 h-8 w-8 text-purple-300 hover:text-white dark:hover:bg-white/10"
+                    />
+                  </div>
                   
                   <TrackContextMenu
                     track={{
