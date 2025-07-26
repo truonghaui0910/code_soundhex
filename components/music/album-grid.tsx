@@ -57,6 +57,23 @@ const AlbumGrid = memo(function AlbumGrid({
         }
     }, [albums, isLoading, fetchBatchAlbumLikesStatus, getAlbumLikeStatus]);
 
+    // Fetch album like status when albums change
+    useEffect(() => {
+        if (albums.length > 0) {
+            const albumIds = albums.map(album => album.id);
+            fetchBatchAlbumLikesStatus(albumIds);
+        }
+    }, [albums, fetchBatchAlbumLikesStatus]);
+
+    // Also fetch immediately on component mount
+    useEffect(() => {
+        if (albums.length > 0) {
+            const albumIds = albums.map(album => album.id);
+            console.log("AlbumGrid - Initial fetch for albums:", albumIds);
+            fetchBatchAlbumLikesStatus(albumIds);
+        }
+    }, [albums.length > 0 ? albums.map(a => a.id).join(',') : '', fetchBatchAlbumLikesStatus]);
+
     const handleAlbumPlay = useCallback(
         async (album: Album) => {
             console.log(

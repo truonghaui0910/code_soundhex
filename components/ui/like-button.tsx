@@ -71,8 +71,8 @@ export function LikeButton({
     };
 
     const status = getStatus();
-    const isLiked = status.isLiked || false;
-    const isLoading = status.isLoading;
+    const isLiked = status.isLiked === true; // Explicitly check for true
+    const isLoading = status.isLoading || false;
     const totalCount = status.totalLikes || 0;
 
     // Size classes

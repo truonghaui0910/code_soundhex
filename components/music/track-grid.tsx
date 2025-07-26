@@ -116,11 +116,10 @@ const TrackGrid = memo(function TrackGrid({
     };
 
     // OPTIMIZE batch fetch to prevent duplicate API calls - FIX THIS
+    // Fetch likes status for visible tracks
     useEffect(() => {
-        if (!isLoading && trackIds.length > 0) {
-            // PREVENT DUPLICATE API CALLS - ADD THIS CHECK
-            const currentTrackIdsString = trackIds.sort().join(",");
-            const prevTrackIdsString = prevTrackIdsRef.current.sort().join(",");
+        if (tracks.length > 0 && !isLoading) {
+            const trackIds = tracks.map(track => track.id);
 
             // Only call API if trackIds actually changed
             if (currentTrackIdsString !== prevTrackIdsString) {
@@ -130,6 +129,15 @@ const TrackGrid = memo(function TrackGrid({
             }
         }
     }, [trackIds, isLoading, fetchBatchTrackLikesStatus]);
+
+    // Also fetch likes immediately when tracks change (for initial load)
+    useEffect(() => {
+        if (tracks.length > 0) {
+            const trackIds = tracks.map(track => track.id);
+            console.log("TrackGrid - Initial fetch for tracks:", trackIds);
+            fetchBatchTrackLikesStatus(trackIds);
+        }
+    }, [tracks.length > 0 ? tracks.map(t => t.id).join(',') : '', fetchBatchTrackLikesStatus]);
 
     if (isLoading) {
         return (
