@@ -1,9 +1,11 @@
 "use client";
 
-import { memo } from "react";
+import { memo, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Users } from "lucide-react";
+import { useUser } from "@supabase/auth-helpers-react";
+// import { useArtistFollowStatus } from "@/hooks/artist";
 
 interface Artist {
     id: number;
@@ -26,6 +28,9 @@ const ArtistGrid = memo(function ArtistGrid({
     loadingCount = 5,
     className = "grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6",
 }: ArtistGridProps) {
+    const { user } = useUser();
+    const { getArtistFollowStatus, fetchArtistFollowStatus } = useArtistFollowStatus();
+
     if (isLoading) {
         return (
             <div className={className}>
@@ -44,6 +49,19 @@ const ArtistGrid = memo(function ArtistGrid({
             </div>
         );
     }
+
+    // Fetch follow status for all artists when component mounts
+    useEffect(() => {
+        if (artists.length > 0 && user) {
+            console.log("ArtistGrid - Fetching follow status for artists:", artists.map(a => a.id));
+            artists.forEach(artist => {
+                const followStatus = getArtistFollowStatus(artist.id);
+                if (followStatus.isFollowing === undefined && !followStatus.isLoading) {
+                    fetchArtistFollowStatus(artist.id);
+                }
+            });
+        }
+    }, [artists.length > 0 ? artists.map(a => a.id).join(',') : '', user]);
 
     return (
         <div className={className}>
