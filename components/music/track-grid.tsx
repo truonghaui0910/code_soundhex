@@ -120,27 +120,17 @@ const TrackGrid = memo(function TrackGrid({
     useEffect(() => {
         if (tracks.length > 0 && !isLoading) {
             const trackIds = tracks.map((track) => track.id);
+            const currentTrackIdsString = trackIds.sort().join(",");
+            const prevTrackIdsString = prevTrackIdsRef.current.sort().join(",");
 
             // Only call API if trackIds actually changed
-            // if (currentTrackIdsString !== prevTrackIdsString) {
-            console.log("TrackGrid - Fetching likes for tracks:", trackIds);
-            fetchBatchTrackLikesStatus(trackIds);
-            prevTrackIdsRef.current = [...trackIds];
-            // }
+            if (currentTrackIdsString !== prevTrackIdsString) {
+                console.log("TrackGrid - Fetching likes for tracks:", trackIds);
+                fetchBatchTrackLikesStatus(trackIds);
+                prevTrackIdsRef.current = [...trackIds];
+            }
         }
     }, [trackIds, isLoading, fetchBatchTrackLikesStatus]);
-
-    // Also fetch likes immediately when tracks change (for initial load)
-    useEffect(() => {
-        if (tracks.length > 0) {
-            const trackIds = tracks.map((track) => track.id);
-            console.log("TrackGrid - Initial fetch for tracks:", trackIds);
-            fetchBatchTrackLikesStatus(trackIds);
-        }
-    }, [
-        tracks.length > 0 ? tracks.map((t) => t.id).join(",") : "",
-        fetchBatchTrackLikesStatus,
-    ]);
 
     if (isLoading) {
         return (

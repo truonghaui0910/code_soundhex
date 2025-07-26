@@ -61,15 +61,7 @@ const AlbumGrid = memo(function AlbumGrid({
     useEffect(() => {
         if (albums.length > 0) {
             const albumIds = albums.map(album => album.id);
-            fetchBatchAlbumLikesStatus(albumIds);
-        }
-    }, [albums, fetchBatchAlbumLikesStatus]);
-
-    // Also fetch immediately on component mount
-    useEffect(() => {
-        if (albums.length > 0) {
-            const albumIds = albums.map(album => album.id);
-            console.log("AlbumGrid - Initial fetch for albums:", albumIds);
+            console.log("AlbumGrid - Fetching likes for albums:", albumIds);
             fetchBatchAlbumLikesStatus(albumIds);
         }
     }, [albums.length > 0 ? albums.map(a => a.id).join(',') : '', fetchBatchAlbumLikesStatus]);
