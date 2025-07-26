@@ -194,22 +194,22 @@ export function TrackDetailUI({ track, isLoading }: TrackDetailUIProps) {
     // Check if current user owns this track (through artist relationship)
     const userOwnsTrack = user && currentTrack?.user_id === user.id;
 
-    // Debug log
-    useEffect(() => {
-        console.log("Edit Track Debug:", {
-            hasUser: !!user,
-            userId: user?.id,
-            trackArtistUserId: currentTrack?.artist?.user_id,
-            userOwnsTrack,
-            artistData: currentTrack?.artist,
-        });
-        console.log("Track Detail - Current track mood:", {
-            trackId: currentTrack?.id,
-            mood: currentTrack?.mood,
-            moodType: typeof currentTrack?.mood,
-            moodLength: currentTrack?.mood?.length,
-        });
-    }, [user, currentTrack, userOwnsTrack]);
+    // // Debug log
+    // useEffect(() => {
+    //     console.log("Edit Track Debug:", {
+    //         hasUser: !!user,
+    //         userId: user?.id,
+    //         trackArtistUserId: currentTrack?.artist?.user_id,
+    //         userOwnsTrack,
+    //         artistData: currentTrack?.artist,
+    //     });
+    //     console.log("Track Detail - Current track mood:", {
+    //         trackId: currentTrack?.id,
+    //         mood: currentTrack?.mood,
+    //         moodType: typeof currentTrack?.mood,
+    //         moodLength: currentTrack?.mood?.length,
+    //     });
+    // }, [user, currentTrack, userOwnsTrack]);
 
     const handleTrackUpdate = (updatedTrack: Track) => {
         setCurrentTrack(updatedTrack);
