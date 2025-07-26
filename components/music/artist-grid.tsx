@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Users } from "lucide-react";
 import { useUser } from "@supabase/auth-helpers-react";
-import { useArtistFollowStatus } from "@/hooks/artist";
+// import { useArtistFollowStatus } from "@/hooks/artist";
 
 interface Artist {
     id: number;
