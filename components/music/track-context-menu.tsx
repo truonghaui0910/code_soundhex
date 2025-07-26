@@ -100,11 +100,20 @@ export function TrackContextMenu({
     // Handle click outside to close menu
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
+            // Don't close context menu if modal is open
+            if (createPlaylistOpen) {
+                console.log(
+                    "📍 Context Menu - Modal is open, ignoring outside click",
+                );
+                return;
+            }
+
             if (
                 isOpen &&
                 menuRef.current &&
                 !menuRef.current.contains(event.target as Node)
             ) {
+                console.log("📍 Context Menu - Closing due to outside click");
                 onClose();
                 setShowPlaylistSubmenu(false);
             }
@@ -114,34 +123,53 @@ export function TrackContextMenu({
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
         };
-    }, [isOpen, onClose]);
+    }, [isOpen, onClose, createPlaylistOpen]);
 
     // Reset submenu state when main menu closes
     useEffect(() => {
+        console.log("📍 Context Menu - State changed:", { isOpen });
         if (!isOpen) {
+            console.log(
+                "📍 Context Menu - Closing submenu and resetting search",
+            );
             setShowPlaylistSubmenu(false);
             setPlaylistSearchQuery(""); // Reset search query
         }
     }, [isOpen]);
 
-    // Close submenu when modal opens and ensure submenu stays closed
+    // Reset search query when modal opens, but keep submenu open
     useEffect(() => {
+        console.log("📍 Create Playlist Modal - State changed:", {
+            createPlaylistOpen,
+        });
         if (createPlaylistOpen) {
-            setShowPlaylistSubmenu(false);
-            setPlaylistSearchQuery(""); // Reset search query
+            console.log(
+                "📍 Create Playlist Modal - Modal opened, keeping submenu open",
+            );
+
+            setPlaylistSearchQuery(""); // Reset search query but keep submenu open
         }
     }, [createPlaylistOpen]);
 
-    // Prevent submenu from opening when modal is open
+    // Allow submenu to open and stay open even when modal is open
     const handleMouseEnterPlaylist = () => {
-        if (!createPlaylistOpen) {
-            setShowPlaylistSubmenu(true);
-        }
+        console.log("📍 Submenu - Mouse enter playlist item:", {
+            createPlaylistOpen,
+        });
+        console.log("📍 Submenu - Opening playlist submenu");
+        setShowPlaylistSubmenu(true);
     };
 
     const handleMouseLeavePlaylist = () => {
+        console.log("📍 Submenu - Mouse leave playlist item:", {
+            createPlaylistOpen,
+        });
+        // Only close submenu if modal is not open
         if (!createPlaylistOpen) {
+            console.log("📍 Submenu - Closing playlist submenu");
             setShowPlaylistSubmenu(false);
+        } else {
+            console.log("📍 Submenu - Modal is open, keeping submenu open");
         }
     };
 
@@ -225,21 +253,39 @@ export function TrackContextMenu({
     };
 
     const handleCreateNewPlaylist = () => {
+        console.log("📍 Create Playlist Flow - Starting create new playlist");
         // Immediately hide submenu and close context menu
-        setShowPlaylistSubmenu(false);
-        setPlaylistSearchQuery(""); // Reset search query
-        onClose();
+        console.log(
+            "📍 Create Playlist Flow - Hiding submenu and closing context menu",
+        );
+        // setShowPlaylistSubmenu(false);
+        // setPlaylistSearchQuery(""); // Reset search query
+        // onClose();
         // Open modal after a short delay
+        console.log("📍 Create Playlist Flow - Opening modal after delay");
         setTimeout(() => {
+            console.log("📍 Create Playlist Flow - Modal opened");
             setCreatePlaylistOpen(true);
         }, 50);
     };
 
     const handlePlaylistCreated = async (newPlaylist?: any) => {
+        console.log("📍 Playlist Created - Callback triggered:", {
+            newPlaylist: newPlaylist?.name,
+        });
+        console.log("📍 Playlist Created - Closing modal");
         setCreatePlaylistOpen(false);
-        
+        setShowPlaylistSubmenu(false);
+        setPlaylistSearchQuery(""); // Reset search query
+        onClose();
         // If we have the new playlist, automatically add the track to it
         if (newPlaylist) {
+            console.log("📍 Playlist Created - Adding track to new playlist:", {
+                playlistId: newPlaylist.id,
+                playlistName: newPlaylist.name,
+                trackId: track.id,
+                trackTitle: track.title,
+            });
             try {
                 const response = await fetch(
                     `/api/playlists/${newPlaylist.id}/tracks`,
@@ -259,20 +305,31 @@ export function TrackContextMenu({
                     );
                 }
 
-                toast.success(`Created "${newPlaylist.name}" and added "${track.title}"`);
+                console.log(
+                    "📍 Playlist Created - Track successfully added to playlist",
+                );
+                toast.success(
+                    `Created "${newPlaylist.name}" and added "${track.title}"`,
+                );
             } catch (error: any) {
-                console.error("Error adding track to new playlist:", error);
-                toast.error(error.message || "Failed to add track to new playlist");
+                console.error(
+                    "📍 Playlist Created - Error adding track to new playlist:",
+                    error,
+                );
+                toast.error(
+                    error.message || "Failed to add track to new playlist",
+                );
             }
         }
-        
+
         // Reload playlists after creating new playlist
+        console.log("📍 Playlist Created - Refetching playlists");
         await refetchPlaylists();
     };
 
     // Filter playlists based on search query
     const filteredPlaylists = playlists.filter((playlist) =>
-        playlist.name.toLowerCase().includes(playlistSearchQuery.toLowerCase())
+        playlist.name.toLowerCase().includes(playlistSearchQuery.toLowerCase()),
     );
 
     const positionClasses =
@@ -419,8 +476,16 @@ export function TrackContextMenu({
                                 />
                             </button>
 
-                            {/* Playlist Submenu - Hidden when modal is open */}
-                            {showPlaylistSubmenu && !createPlaylistOpen && (
+                            {/* Playlist Submenu - Show even when modal is open */}
+                            {(() => {
+                                console.log("📍 Submenu Render - States:", {
+                                    showPlaylistSubmenu,
+                                    createPlaylistOpen,
+                                    willRender: showPlaylistSubmenu,
+                                });
+                                return null;
+                            })()}
+                            {showPlaylistSubmenu && (
                                 <div
                                     className={`absolute right-full top-0 -left-64 w-64 bg-purple-900 border border-purple-700 shadow-2xl rounded-lg z-[999999] max-h-80 overflow-hidden flex flex-col`}
                                     onMouseEnter={() =>
@@ -440,9 +505,15 @@ export function TrackContextMenu({
                                                 type="text"
                                                 placeholder="Search playlists..."
                                                 value={playlistSearchQuery}
-                                                onChange={(e) => setPlaylistSearchQuery(e.target.value)}
+                                                onChange={(e) =>
+                                                    setPlaylistSearchQuery(
+                                                        e.target.value,
+                                                    )
+                                                }
                                                 className="w-full px-2 py-1 text-xs bg-purple-800 border border-purple-600 rounded text-white placeholder-purple-400 focus:outline-none focus:border-purple-500"
-                                                onClick={(e) => e.stopPropagation()}
+                                                onClick={(e) =>
+                                                    e.stopPropagation()
+                                                }
                                             />
                                         </div>
                                     </div>
@@ -461,39 +532,45 @@ export function TrackContextMenu({
                                         {/* Playlists List */}
                                         {filteredPlaylists.length === 0 ? (
                                             <div className="px-3 py-4 text-center text-purple-300 text-sm">
-                                                {playlistSearchQuery ? "No playlists match your search" : "No playlists found"}
+                                                {playlistSearchQuery
+                                                    ? "No playlists match your search"
+                                                    : "No playlists found"}
                                             </div>
                                         ) : (
-                                            filteredPlaylists.map((playlist) => (
-                                                <button
-                                                    key={playlist.id}
-                                                    onClick={() =>
-                                                        handleAddToPlaylist(
-                                                            playlist.id,
-                                                        )
-                                                    }
-                                                    disabled={
-                                                        isAddingToPlaylist ===
-                                                        playlist.id
-                                                    }
-                                                    className="flex items-center w-full px-3 py-2 text-white hover:bg-purple-700/50 transition-colors text-sm disabled:opacity-50"
-                                                >
-                                                    <ListIcon className="h-4 w-4 mr-3 text-purple-300" />
-                                                    <div className="flex-1 text-left">
-                                                        <div className="font-medium truncate">
-                                                            {playlist.name}
+                                            filteredPlaylists.map(
+                                                (playlist) => (
+                                                    <button
+                                                        key={playlist.id}
+                                                        onClick={() =>
+                                                            handleAddToPlaylist(
+                                                                playlist.id,
+                                                            )
+                                                        }
+                                                        disabled={
+                                                            isAddingToPlaylist ===
+                                                            playlist.id
+                                                        }
+                                                        className="flex items-center w-full px-3 py-2 text-white hover:bg-purple-700/50 transition-colors text-sm disabled:opacity-50"
+                                                    >
+                                                        <ListIcon className="h-4 w-4 mr-3 text-purple-300" />
+                                                        <div className="flex-1 text-left">
+                                                            <div className="font-medium truncate">
+                                                                {playlist.name}
+                                                            </div>
+                                                            <div className="text-xs text-purple-400">
+                                                                {
+                                                                    playlist.track_count
+                                                                }{" "}
+                                                                tracks
+                                                            </div>
                                                         </div>
-                                                        <div className="text-xs text-purple-400">
-                                                            {playlist.track_count}{" "}
-                                                            tracks
-                                                        </div>
-                                                    </div>
-                                                    {isAddingToPlaylist ===
-                                                        playlist.id && (
-                                                        <div className="w-4 h-4 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />
-                                                    )}
-                                                </button>
-                                            ))
+                                                        {isAddingToPlaylist ===
+                                                            playlist.id && (
+                                                            <div className="w-4 h-4 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />
+                                                        )}
+                                                    </button>
+                                                ),
+                                            )
                                         )}
                                     </div>
                                 </div>
