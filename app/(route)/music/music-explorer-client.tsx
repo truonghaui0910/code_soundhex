@@ -98,7 +98,7 @@ export function MusicExplorerClient({
 
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage] = useState(50);
+    const [itemsPerPage] = useState(20);
     const [totalPages, setTotalPages] = useState(0);
 
     // Albums view state
@@ -242,6 +242,7 @@ export function MusicExplorerClient({
     ); // SIMPLIFIED DEPENDENCIES
 
     // Function to fetch artists with pagination - ADD useCallback
+
     const fetchAllArtists = useCallback(
         async (page: number = 1, resetPage: boolean = false) => {
             if (currentView !== "artists") return;
