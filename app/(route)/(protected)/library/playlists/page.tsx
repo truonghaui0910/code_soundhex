@@ -44,7 +44,7 @@ interface Playlist {
   created_at: string;
 }
 
-const ITEMS_PER_PAGE = 50;
+const ITEMS_PER_PAGE = 20;
 
 export default function LibraryPlaylistsPage() {
   const { user } = useCurrentUser();

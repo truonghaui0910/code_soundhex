@@ -39,7 +39,7 @@ interface LikedTrack {
   created_at?: string;
 }
 
-const ITEMS_PER_PAGE = 50;
+const ITEMS_PER_PAGE = 30;
 
 export default function LibraryLikedSongsPage() {
   const { user } = useCurrentUser();
